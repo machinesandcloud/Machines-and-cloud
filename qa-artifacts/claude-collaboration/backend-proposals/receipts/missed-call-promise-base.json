@@ -2,9 +2,9 @@
   "summary": {
     "check": "missed-call-promise-check",
     "repo": "/private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/base",
-    "checks": 10,
-    "failed": 6,
-    "providerCalls": 12,
+    "checks": 11,
+    "failed": 7,
+    "providerCalls": 13,
     "physicalNetwork": 0,
     "result": "FAIL"
   },
@@ -101,6 +101,20 @@
           "to": "+12815550199",
           "body": "Promise HVAC front desk: missed call from +17135552207. No texting sender yet, so no text-back.",
           "mode": "fail"
+        }
+      ]
+    },
+    {
+      "name": "no caller ID: no text, no promise, owner note does not mention a voicemail",
+      "pass": false,
+      "error": "The input was expected to not match the regular expression /texting you|Le enviamos un mensaje/i. Input:",
+      "spoken": "Thanks for calling Promise HVAC. We are on a job right now. We are texting you this second so we can get you scheduled. Gracias por llamar. Le enviamos un mensaje de texto ahora mismo.",
+      "owner": "Promise HVAC front desk: missed call from unknown. No texting sender yet, so no text-back.",
+      "providerCalls": [
+        {
+          "to": "+12815550199",
+          "body": "Promise HVAC front desk: missed call from unknown. No texting sender yet, so no text-back.",
+          "mode": "ok"
         }
       ]
     },

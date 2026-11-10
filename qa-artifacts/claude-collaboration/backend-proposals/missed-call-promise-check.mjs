@@ -61,6 +61,8 @@ async function call(c, from) {
 }
 const spoken = (twiml) => twiml.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
 const PROMISE = /texting you|Le enviamos un mensaje/i;
+// Rev 2 (QA2): when texting cannot reach the caller, the line must not invite a text either.
+const INVITE = /send (?:us )?a text|text (?:us|this number)|mensaje de texto a este|env[ií]enos un mensaje/i;
 const toCaller = (from) => providerCalls.filter((p) => p.to === from);
 const ownerNote = (from) => providerCalls.filter((p) => p.to === "+12815550199" && p.body.includes("missed call from " + from)).at(-1)?.body || "";
 const results = [];
@@ -83,15 +85,15 @@ await check("new caller, Spanish shop: both promises spoken and kept", async (se
 });
 await check("opted-out caller: no text, no promise, owner told they opted out", async (seen) => {
   const c = await shop(), from = "+17135552203"; await send.recordOptOut(from, c.slug, "STOP"); const r = await call(c, from); seen.spoken = spoken(r.twiml); seen.owner = ownerNote(from);
-  assert.equal(toCaller(from).length, 0); assert.doesNotMatch(r.twiml, PROMISE, "promise spoken: " + seen.spoken); assert.match(seen.owner, /opted out/);
+  assert.equal(toCaller(from).length, 0); assert.doesNotMatch(r.twiml, PROMISE, "promise spoken: " + seen.spoken); assert.doesNotMatch(r.twiml, INVITE, "texting invited although it cannot work: " + seen.spoken); assert.match(seen.owner, /opted out/);
 });
 await check("opted-out caller, Spanish shop: no promise in either language", async (seen) => {
   const c = await shop((c) => { c.business.spanish = true; }), from = "+17135552204"; await send.recordOptOut(from, c.slug, "STOP"); const r = await call(c, from); seen.spoken = spoken(r.twiml);
-  assert.doesNotMatch(r.twiml, PROMISE, "promise spoken: " + seen.spoken);
+  assert.doesNotMatch(r.twiml, PROMISE, "promise spoken: " + seen.spoken); assert.doesNotMatch(r.twiml, INVITE, "texting invited although it cannot work: " + seen.spoken);
 });
 await check("text-back switched off: no text, no promise", async (seen) => {
   const c = await shop((c) => { c.phone.textBack = false; }), from = "+17135552205"; const r = await call(c, from); seen.spoken = spoken(r.twiml); seen.owner = ownerNote(from);
-  assert.equal(toCaller(from).length, 0); assert.doesNotMatch(r.twiml, PROMISE, "promise spoken: " + seen.spoken); assert.match(seen.owner, /Text-back is off/);
+  assert.equal(toCaller(from).length, 0); assert.doesNotMatch(r.twiml, PROMISE, "promise spoken: " + seen.spoken); assert.doesNotMatch(r.twiml, INVITE, "texting invited although it cannot work: " + seen.spoken); assert.match(seen.owner, /Text-back is off/);
 });
 await check("caller texted in the last 24 hours: second call sends nothing and promises nothing", async (seen) => {
   const c = await shop(), from = "+17135552206"; await call(c, from); const r = await call(c, from); seen.spoken = spoken(r.twiml); seen.owner = ownerNote(from);
@@ -99,7 +101,7 @@ await check("caller texted in the last 24 hours: second call sends nothing and p
 });
 await check("provider refuses the text: no promise, owner gets the real reason (not 'No texting sender yet')", async (seen) => {
   const c = await shop(), from = "+17135552207"; providerMode = "fail"; const r = await call(c, from); seen.spoken = spoken(r.twiml); seen.owner = ownerNote(from);
-  assert.equal(toCaller(from).length, 1, "the text was attempted"); assert.doesNotMatch(r.twiml, PROMISE, "promise spoken: " + seen.spoken);
+  assert.equal(toCaller(from).length, 1, "the text was attempted"); assert.doesNotMatch(r.twiml, PROMISE, "promise spoken: " + seen.spoken); assert.doesNotMatch(r.twiml, INVITE, "texting invited although it cannot work: " + seen.spoken);
   assert.doesNotMatch(seen.owner, /No texting sender yet|Text-back sent/, "wrong owner reason: " + seen.owner); assert.match(seen.owner, /could not be sent \(Synthetic provider refusal\)/);
 });
 } else {
@@ -107,10 +109,16 @@ await check("provider refuses the text: no promise, owner gets the real reason (
     const c = await shop(), from = "+17135552208"; const r = await call(c, from); seen.spoken = spoken(r.twiml); seen.owner = ownerNote(from);
     // Nothing reaches a provider here; the owner note is read from the logged sms_sent event preview.
     seen.owner = (await store.listJSON("events", c.slug + "/", Infinity)).map((e) => e.data || e).filter((e) => e.to === "+12815550199" && /missed call from/.test(e.preview || "")).at(-1)?.preview || "";
-    assert.equal(r.status, 200); assert.doesNotMatch(r.twiml, PROMISE, "promise spoken: " + seen.spoken);
+    assert.equal(r.status, 200); assert.doesNotMatch(r.twiml, PROMISE, "promise spoken: " + seen.spoken); assert.doesNotMatch(r.twiml, INVITE, "texting invited although it cannot work: " + seen.spoken);
     assert.doesNotMatch(seen.owner, /Text-back sent/, "owner told a text was sent: " + seen.owner); assert.match(seen.owner, /not set up/);
   });
 }
+if (!UNCONFIGURED) await check("no caller ID: no text, no promise, owner note does not mention a voicemail", async (seen) => {
+  const c = await shop(); const before = providerCalls.length; const r = await call(c, ""); seen.spoken = spoken(r.twiml);
+  seen.owner = providerCalls.slice(before).filter((p) => p.to === "+12815550199").at(-1)?.body || "";
+  assert.equal(r.status, 200); assert.doesNotMatch(r.twiml, PROMISE); assert.doesNotMatch(r.twiml, INVITE, "texting invited: " + seen.spoken);
+  assert.match(seen.owner, /missed call from unknown/); assert.doesNotMatch(seen.owner, /voicemail/i, "owner told to check a voicemail that is never recorded: " + seen.owner);
+});
 await check("no physical transport and no non-Twilio destination", async () => { assert.equal(physical, 0); assert.deepEqual(forbidden, []); });
 
 if (UNCONFIGURED) { process.stdout.write("\n" + JSON.stringify({ childResults: results, physical, forbidden }) + "\n"); process.exit(0); }

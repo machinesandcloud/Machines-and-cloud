@@ -1,0 +1,281 @@
+{
+  "output": "scratchpad/lead-ai-independent-check-bp2rg.json",
+  "ok": false,
+  "passed": 9,
+  "total": 54,
+  "sourceStable": true,
+  "physicalNetworkAttempts": 0,
+  "modelRequests": 0,
+  "failures": [
+    {
+      "name": "Ordinary scheduled recovery dispatches the existing keyed background job without waiting for any model turn",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n\n0 !== 1\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n0 !== 1\n\n    at file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:113:444\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:77:417)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:113:1"
+    },
+    {
+      "name": "One new customer turn consumes one shared logical turn, one terminal physical model request and exactly one accepted native reply",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ undefined\n- 'accepted'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ undefined\n- 'accepted'\n\n    at file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:116:355\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:77:417)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:116:1"
+    },
+    {
+      "name": "Six concurrent workers for the same durable customer turn claim one generation and send once",
+      "pass": false,
+      "error": "[{\"status\":200,\"body\":{\"ok\":true,\"processed\":false}},{\"status\":200,\"body\":{\"ok\":true,\"processed\":false}},{\"status\":200,\"body\":{\"ok\":true,\"processed\":false}},{\"status\":200,\"body\":{\"ok\":true,\"processed\":false}},{\"status\":200,\"body\":{\"ok\":true,\"processed\":false}},{\"status\":200,\"body\":{\"ok\":true,\"processed\":false}}]\n\n0 !== 1\n",
+      "stack": "AssertionError [ERR_ASSERTION]: [{\"status\":200,\"body\":{\"ok\":true,\"processed\":false}},{\"status\":200,\"body\":{\"ok\":true,\"processed\":false}},{\"status\":200,\"body\":{\"ok\":true,\"processed\":false}},{\"status\":200,\"body\":{\"ok\":true,\"processed\":false}},{\"status\":200,\"body\":{\"ok\":true,\"processed\":false}},{\"status\":200,\"body\":{\"ok\":true,\"processed\":false}}]\n\n0 !== 1\n\n    at file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:117:319\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:77:417)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:117:1"
+    },
+    {
+      "name": "Repeated webhook receipt while generation is in flight cannot restart that same turn",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n\n0 !== 1\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n0 !== 1\n\n    at file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:118:348\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:77:417)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:118:1"
+    },
+    {
+      "name": "A newer customer correction discovered during model preparation prevents the stale reply",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ 'automatic'\n- 'owner'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ 'automatic'\n- 'owner'\n\n    at file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:119:359\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:77:417)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:119:1"
+    },
+    {
+      "name": "Owner takeover during model preparation wins before any native send",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ 'automatic'\n- 'owner'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ 'automatic'\n- 'owner'\n\n    at file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:120:333\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:77:417)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:120:1"
+    },
+    {
+      "name": "Global pause during model preparation wins before any native send",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n\n'on' !== 'off'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n'on' !== 'off'\n\n    at file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:121:315\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:77:417)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:121:1"
+    },
+    {
+      "name": "Changed saved business rules invalidate an in-flight proposal without sending it",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n\nfalse !== true\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\nfalse !== true\n\n    at file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:122:386\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:77:417)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:122:1"
+    },
+    {
+      "name": "Workspace replacement during model preparation cannot send or write new-tenant automation records",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ {\n+   createdAt: '2026-11-10T20:43:25.241Z',\n+   deliveryMode: 'native',\n+   generation: 'bcbcc74cb8742547b707c98b280dd75e',\n+   integrationEmail: 'native-qa-41@example.test',\n+   lastOperationId: '578e62f1504e748b704843f9921e1831',\n+   lastReceivedAt: '2026-11-10T20:43:25.262Z',\n+   native: {\n+     automation: {\n+       lastOperationId: '5f608c28510d8f77ca50866b6e06c2d9',\n+       mode: 'on',\n+       operations: [\n+         {\n+           at: '2026-11-10T20:43:25.260Z',\n+           digest: 'ab893b949ffe3bd87cc822a4129aa64a819094c51d702107c5ad94107eca95c7',\n+           id: '5f608c28510d8f77ca50866b6e06c2d9',\n+           operation: 'enable'\n+         }\n+       ],\n+       revision: 1,\n+       rulesRevision: 'f7cc839e37e0c748007155a0314010ef9f12096a6e5b1ef7573fc0d476db77c9',\n+       since: '2026-11-10T20:43:25.260Z',\n+       threads: {\n+         b72b427f464b9ffb2c318c065a7f62aa2d5700fa: {\n+           lastCustomerMessageId: null,\n+           lastOperationId: null,\n+           lastReplyAt: null,\n+           mode: 'automatic',\n+           reason: 'Thumbtack’s latest conversation could not be verified. Review its history and reply yourself for now.',\n+           revision: 1,\n+           state: 'history_unverified',\n+           turns: []\n+         }\n+       },\n+       version: 1\n+     },\n+     businessVerifiedAt: '2026-11-10T20:43:25.247Z',\n+     cleanupOnly: false,\n+     codeHash: '685b5899bc650bb0e3f20b82b0a18dee3a5ace2bbc2c70c06ab731164767f09e',\n+     createAttempted: true,\n+     createAttemptedAt: '2026-11-10T20:43:25.248Z',\n+     createdAt: '2026-11-10T20:43:25.245Z',\n+     error: null,\n+     expiresAt: '2026-11-10T21:03:25.245Z',\n+     generation: 'bcbcc74cb8742547b707c98b280dd75e',\n+     password: '4fb0ac0a941da4f61cfda15dd8dd3e30bf0f024ed0c6397a7c873870fd80266d',\n+     pendingNegotiations: [],\n+     priorStatus: null,\n+     providerBinding: {\n+       clientIdHash: '7b8b926f2e9fec90481ea767255b999e87a226f67abb7993039d93fa35c9ffdb',\n+       environment: 'production'\n+     },\n+     redirectURI: 'https://machinesandcloud.com/api/thumbtack/connect',\n+     refreshAttemptId: null,\n+     refreshPending: false,\n+     replies: [],\n+     startOperationId: '578e62f1504e748b704843f9921e1831',\n+     stateHash: '07d6eb5fd0dc17057f680a590e29321c4b92f0eebe7faeb75ddb56754594871a',\n+     status: 'receiving',\n+     tokenExpiresAt: '2026-11-10T21:43:25.247Z',\n+     tokens: {\n+       clientIdHash: '7b8b926f2e9fec90481ea767255b999e87a226f67abb7993039d93fa35c9ffdb',\n+       data: 'zex+wuiMF56e+zxT9X9Q/Vf4KxONYkXQ5K25EXj1CHTc+Uz1o+cYnAzSshS+US7ZS/+vtvSo7bBIx5THX52eYqnUwuBLJ8HDidUPWU0Q0URI4P9qW61ZevEPFfSUqytfyoIx2J/bWhlGSnPNTqCKOrsXdz9gNm7CWFiJ+Y+Eowtpcogti4h/sdPx+pkiTg95+WKW1MGuassDY17DwD6kBVNQBWoVT/f82kKGb2L8uWDQ5dNnP8JmVTKjSvrtTcvrkFRUhlKBrifOVowlTzUEHhDZs5TyL1Rvlrs0+AY4kLzCekdh',\n+       environment: 'production',\n+       iv: '8908607b2318b89cf54faf81',\n+       tag: 'd22c6f1f189ea9620b4c968401f6fbc8',\n+       version: 2\n+     },\n+     username: '568c35d760d59c5ee64bccd3014c2fe8',\n+     webhookConfirmedAt: '2026-11-10T20:43:25.249Z',\n+     webhookID: 'webhook-11',\n+     webhookURL: 'https://machinesandcloud.com/api/thumbtack?c=native-qa-41&t=b8a95d72a91ead14c17983ca574bc9606bda640b306419c37348a08c6e5a290e&g=bcbcc74cb8742547b707c98b280dd75e'\n+   },\n+   operations: [\n+     {\n+       at: '2026-11-10T20:43:25.241Z',\n+       digest: 'd409f08e40248d5332bb9bfa33c8056959d05cd9bc5ba91f844928ce1d75b4eb',\n+       id: 'fe3f4f45360e2a6be417d969f9d74086',\n+       operation: 'prepare'\n+     }\n+   ],\n+   pending: [],\n+   providerBusinessId: '300041',\n+   receipts: [\n+     'b72b427f464b9ffb2c318c065a7f62aa2d5700fa'\n+   ],\n+   secret: null,\n+   slug: 'native-qa-41',\n+   source: 'thumbtack',\n+   state: 'receiving',\n+   tenantIdentity: 'b8a95d72a91ead14c17983ca574bc9606bda640b306419c37348a08c6e5a290e',\n+   updatedAt: '2026-11-10T20:43:25.262Z',\n+   version: 1\n+ }\n- null\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ {\n+   createdAt: '2026-11-10T20:43:25.241Z',\n+   deliveryMode: 'native',\n+   generation: 'bcbcc74cb8742547b707c98b280dd75e',\n+   integrationEmail: 'native-qa-41@example.test',\n+   lastOperationId: '578e62f1504e748b704843f9921e1831',\n+   lastReceivedAt: '2026-11-10T20:43:25.262Z',\n+   native: {\n+     automation: {\n+       lastOperationId: '5f608c28510d8f77ca50866b6e06c2d9',\n+       mode: 'on',\n+       operations: [\n+         {\n+           at: '2026-11-10T20:43:25.260Z',\n+           digest: 'ab893b949ffe3bd87cc822a4129aa64a819094c51d702107c5ad94107eca95c7',\n+           id: '5f608c28510d8f77ca50866b6e06c2d9',\n+           operation: 'enable'\n+         }\n+       ],\n+       revision: 1,\n+       rulesRevision: 'f7cc839e37e0c748007155a0314010ef9f12096a6e5b1ef7573fc0d476db77c9',\n+       since: '2026-11-10T20:43:25.260Z',\n+       threads: {\n+         b72b427f464b9ffb2c318c065a7f62aa2d5700fa: {\n+           lastCustomerMessageId: null,\n+           lastOperationId: null,\n+           lastReplyAt: null,\n+           mode: 'automatic',\n+           reason: 'Thumbtack’s latest conversation could not be verified. Review its history and reply yourself for now.',\n+           revision: 1,\n+           state: 'history_unverified',\n+           turns: []\n+         }\n+       },\n+       version: 1\n+     },\n+     businessVerifiedAt: '2026-11-10T20:43:25.247Z',\n+     cleanupOnly: false,\n+     codeHash: '685b5899bc650bb0e3f20b82b0a18dee3a5ace2bbc2c70c06ab731164767f09e',\n+     createAttempted: true,\n+     createAttemptedAt: '2026-11-10T20:43:25.248Z',\n+     createdAt: '2026-11-10T20:43:25.245Z',\n+     error: null,\n+     expiresAt: '2026-11-10T21:03:25.245Z',\n+     generation: 'bcbcc74cb8742547b707c98b280dd75e',\n+     password: '4fb0ac0a941da4f61cfda15dd8dd3e30bf0f024ed0c6397a7c873870fd80266d',\n+     pendingNegotiations: [],\n+     priorStatus: null,\n+     providerBinding: {\n+       clientIdHash: '7b8b926f2e9fec90481ea767255b999e87a226f67abb7993039d93fa35c9ffdb',\n+       environment: 'production'\n+     },\n+     redirectURI: 'https://machinesandcloud.com/api/thumbtack/connect',\n+     refreshAttemptId: null,\n+     refreshPending: false,\n+     replies: [],\n+     startOperationId: '578e62f1504e748b704843f9921e1831',\n+     stateHash: '07d6eb5fd0dc17057f680a590e29321c4b92f0eebe7faeb75ddb56754594871a',\n+     status: 'receiving',\n+     tokenExpiresAt: '2026-11-10T21:43:25.247Z',\n+     tokens: {\n+       clientIdHash: '7b8b926f2e9fec90481ea767255b999e87a226f67abb7993039d93fa35c9ffdb',\n+       data: 'zex+wuiMF56e+zxT9X9Q/Vf4KxONYkXQ5K25EXj1CHTc+Uz1o+cYnAzSshS+US7ZS/+vtvSo7bBIx5THX52eYqnUwuBLJ8HDidUPWU0Q0URI4P9qW61ZevEPFfSUqytfyoIx2J/bWhlGSnPNTqCKOrsXdz9gNm7CWFiJ+Y+Eowtpcogti4h/sdPx+pkiTg95+WKW1MGuassDY17DwD6kBVNQBWoVT/f82kKGb2L8uWDQ5dNnP8JmVTKjSvrtTcvrkFRUhlKBrifOVowlTzUEHhDZs5TyL1Rvlrs0+AY4kLzCekdh',\n+       environment: 'production',\n+       iv: '8908607b2318b89cf54faf81',\n+       tag: 'd22c6f1f189ea9620b4c968401f6fbc8',\n+       version: 2\n+     },\n+     username: '568c35d760d59c5ee64bccd3014c2fe8',\n+     webhookConfirmedAt: '2026-11-10T20:43:25.249Z',\n+     webhookID: 'webhook-11',\n+     webhookURL: 'https://machinesandcloud.com/api/thumbtack?c=native-qa-41&t=b8a95d72a91ead14c17983ca574bc9606bda640b306419c37348a08c6e5a290e&g=bcbcc74cb8742547b707c98b280dd75e'\n+   },\n+   operations: [\n+     {\n+       at: '2026-11-10T20:43:25.241Z',\n+       digest: 'd409f08e40248d5332bb9bfa33c8056959d05cd9bc5ba91f844928ce1d75b4eb',\n+       id: 'fe3f4f45360e2a6be417d969f9d74086',\n+       operation: 'prepare'\n+     }\n+   ],\n+   pending: [],\n+   providerBusinessId: '300041',\n+   receipts: [\n+     'b72b427f464b9ffb2c318c065a7f62aa2d5700fa'\n+   ],\n+   secret: null,\n+   slug: 'native-qa-41',\n+   source: 'thumbtack',\n+   state: 'receiving',\n+   tenantIdentity: 'b8a95d72a91ead14c17983ca574bc9606bda640b306419c37348a08c6e5a290e',\n+   updatedAt: '2026-11-10T20:43:25.262Z',\n+   version: 1\n+ }\n- null\n\n    at file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:123:459\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:77:417)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:123:1"
+    },
+    {
+      "name": "A person replying directly in Thumbtack during preparation prevents a second AI reply",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ 'automatic'\n- 'owner'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ 'automatic'\n- 'owner'\n\n    at file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:124:494\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:77:417)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:124:1"
+    },
+    {
+      "name": "A lost native acknowledgment stays unknown and repeated webhook or worker never sends again",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n\n0 !== 1\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n0 !== 1\n\n    at file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:125:332\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:77:417)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:125:1"
+    },
+    {
+      "name": "A definite native rejection requires owner review and is not labeled an accepted reply",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ undefined\n- 'rejected'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ undefined\n- 'rejected'\n\n    at file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:126:320\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:77:417)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:126:1"
+    },
+    {
+      "name": "The shared daily logical allowance blocks lead AI before model transport",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ 'history_unverified'\n- 'waiting_capacity'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ 'history_unverified'\n- 'waiting_capacity'\n\n    at file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:127:427\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:77:417)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:127:1"
+    },
+    {
+      "name": "The tenant physical ceiling includes unknown model attempts and never retries them",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n\n0 !== 1\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n0 !== 1\n\n    at file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:128:324\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:77:417)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:128:1"
+    },
+    {
+      "name": "No-reply decision preserves the message and produces no vendor write or customer contact claim",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ undefined\n- 'no_reply'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ undefined\n- 'no_reply'\n\n    at file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:130:342\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:77:417)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:130:1"
+    },
+    {
+      "name": "Handoff sends one honest acknowledgment and leaves the conversation with its owner",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n\n0 !== 1\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n0 !== 1\n\n    at file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:131:417\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:77:417)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:131:1"
+    },
+    {
+      "name": "A qualified visit request stays in this Inbox request without creating bookings, texts or tasks",
+      "pass": false,
+      "error": "{\"status\":200,\"body\":{\"ok\":true,\"processed\":false}}\n+ actual - expected\n\n+ undefined\n- 'accepted'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: {\"status\":200,\"body\":{\"ok\":true,\"processed\":false}}\n+ actual - expected\n\n+ undefined\n- 'accepted'\n\n    at file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:132:555\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:77:417)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:132:1"
+    },
+    {
+      "name": "A model-invented customer phone number is held instead of copied into a sent reply qualification",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ 'automatic'\n- 'owner'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ 'automatic'\n- 'owner'\n\n    at file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:133:308\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:77:417)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:133:1"
+    },
+    {
+      "name": "A promised confirmed booking is held before provider transport",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ 'automatic'\n- 'owner'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ 'automatic'\n- 'owner'\n\n    at file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:136:297\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:77:417)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:136:1"
+    },
+    {
+      "name": "Owner pause at the last provider-read boundary wins before the native POST",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ 'automatic'\n- 'owner'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ 'automatic'\n- 'owner'\n\n    at file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:137:495\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:77:417)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:137:1"
+    },
+    {
+      "name": "Concurrent recovery of one prepared proposal claims delivery once without another model call",
+      "pass": false,
+      "error": "[{\"status\":200,\"body\":{\"ok\":true,\"processed\":false}},{\"status\":200,\"body\":{\"ok\":true,\"processed\":false}},{\"status\":200,\"body\":{\"ok\":true,\"processed\":false}},{\"status\":200,\"body\":{\"ok\":true,\"processed\":false}},{\"status\":200,\"body\":{\"ok\":true,\"processed\":false}},{\"status\":200,\"body\":{\"ok\":true,\"processed\":false}}]\n\n0 !== 1\n",
+      "stack": "AssertionError [ERR_ASSERTION]: [{\"status\":200,\"body\":{\"ok\":true,\"processed\":false}},{\"status\":200,\"body\":{\"ok\":true,\"processed\":false}},{\"status\":200,\"body\":{\"ok\":true,\"processed\":false}},{\"status\":200,\"body\":{\"ok\":true,\"processed\":false}},{\"status\":200,\"body\":{\"ok\":true,\"processed\":false}},{\"status\":200,\"body\":{\"ok\":true,\"processed\":false}}]\n\n0 !== 1\n\n    at file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:142:373\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:77:417)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:142:1"
+    },
+    {
+      "name": "A stale generating checkpoint becomes owner work and never repeats a potentially consumed model call",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ 'automatic'\n- 'owner'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ 'automatic'\n- 'owner'\n\n    at file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:143:369\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:77:417)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:143:1"
+    },
+    {
+      "name": "A stale sending checkpoint becomes owner work without another native POST",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ 'automatic'\n- 'owner'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ 'automatic'\n- 'owner'\n\n    at file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:144:271\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:77:417)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:144:1"
+    },
+    {
+      "name": "Customer STOP is an authoritative no-reply and blocks later automatic conversation turns",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ 'automatic'\n- 'owner'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ 'automatic'\n- 'owner'\n\n    at file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:145:252\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:77:417)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:145:1"
+    },
+    {
+      "name": "An uncertain rotating token refresh blocks prepared delivery and is never repeated by worker replay",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n\n30 !== 31\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n30 !== 31\n\n    at file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:146:560\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:77:417)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:146:1"
+    },
+    {
+      "name": "Multiple proposal calls cannot send the first partial choice",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ 'automatic'\n- 'owner'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ 'automatic'\n- 'owner'\n\n    at file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:147:404\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:77:417)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:147:1"
+    },
+    {
+      "name": "A life-safety message cannot receive a routine visit reply or a safety script hidden after the identity prefix",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ 'automatic'\n- 'owner'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ 'automatic'\n- 'owner'\n\n    at file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:151:859\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:77:417)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:151:1"
+    },
+    {
+      "name": "An accepted life-safety handoff keeps the saved safety words first and does not promise dispatch",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n\n1 !== 2\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n1 !== 2\n\n    at file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:152:634\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:77:417)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:152:1"
+    },
+    {
+      "name": "Failed initial webhook fetch recovers on the ordinary schedule into Inbox, durable AI turn and keyed background delivery",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n\n0 !== 1\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n0 !== 1\n\n    at file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:156:656\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:77:417)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:156:1"
+    },
+    {
+      "name": "A lost scheduled background dispatch acknowledgment retains the same pending turn and the next wave sends exactly once",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ 'history_unverified'\n- 'pending'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ 'history_unverified'\n- 'pending'\n\n    at file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:157:482\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:77:417)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:157:1"
+    },
+    {
+      "name": "Known quota exhaustion before the first model call remains automatic and does not repeat during the same Houston day",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ undefined\n- 'waiting_capacity'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ undefined\n- 'waiting_capacity'\n\n    at exhaustBeforeModel (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:160:158)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:161:214\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:77:417)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:161:1"
+    },
+    {
+      "name": "After the daily reset the ordinary schedule resumes the exact waiting turn without another customer message",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ undefined\n- 'waiting_capacity'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ undefined\n- 'waiting_capacity'\n\n    at exhaustBeforeModel (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:160:158)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:162:159\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:77:417)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:162:1"
+    },
+    {
+      "name": "Quota exhaustion after one consumed model attempt stays owner review and never becomes an automatic reset retry",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n\n0 !== 1\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n0 !== 1\n\n    at file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:163:630\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:77:417)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:163:1"
+    },
+    {
+      "name": "An owner pause while a known-zero-attempt turn waits for capacity prevents automatic reset delivery",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ undefined\n- 'waiting_capacity'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ undefined\n- 'waiting_capacity'\n\n    at exhaustBeforeModel (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:160:158)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:164:151\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:77:417)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:164:1"
+    },
+    {
+      "name": "Accepted corrected contact facts drive the retained owner request without granting SMS consent",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ undefined\n- 'accepted'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ undefined\n- 'accepted'\n\n    at file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:166:589\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:77:417)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:166:1"
+    },
+    {
+      "name": "A complete final JSON proposal without a tool call is validated and delivered once",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ undefined\n- 'accepted'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ undefined\n- 'accepted'\n\n    at file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:168:282\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:77:417)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:168:1"
+    },
+    {
+      "name": "Availability followed by final structured output completes inside two admitted requests",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ undefined\n- 'accepted'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ undefined\n- 'accepted'\n\n    at file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:169:356\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:77:417)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:169:1"
+    },
+    {
+      "name": "Unstructured natural text cannot bypass the required validated proposal",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ 'automatic'\n- 'owner'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ 'automatic'\n- 'owner'\n\n    at file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:170:301\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:77:417)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:170:1"
+    },
+    {
+      "name": "Later accepted customer correction supersedes the owner contact in Inbox, native refresh and both exports",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ undefined\n- 'accepted'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ undefined\n- 'accepted'\n\n    at acceptedContact (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:172:234)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:174:185\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:77:417)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:174:1"
+    },
+    {
+      "name": "A local contact-projection storage failure after accepted delivery recovers on the ordinary schedule without another send or founder repair",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n\nfalse !== true\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\nfalse !== true\n\n    at failProjectionOnce (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:175:452)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:176:371\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:77:417)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:176:1"
+    },
+    {
+      "name": "A terminal visit request can complete through a server availability check without a model tool call",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n\n1 !== 2\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n1 !== 2\n\n    at file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:178:598\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:77:417)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:178:1"
+    },
+    {
+      "name": "An old contact value from earlier history cannot supersede the customer’s later explicit correction",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ undefined\n- 'accepted'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ undefined\n- 'accepted'\n\n    at acceptedContact (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:172:234)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:179:167\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:77:417)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:179:1"
+    },
+    {
+      "name": "A complete visit request for a blocked requested slot is held even when the model omits an availability tool call",
+      "pass": false,
+      "error": "Choose today or a future Houston date.",
+      "stack": "AvailabilityInputError: Choose today or a future Houston date.\n    at requestedDate (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/netlify/functions/lib/availability.mjs:142:50)\n    at Module.setAvailabilityBlock (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/netlify/functions/lib/store.mjs:527:15)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:184:165\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:77:417)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:184:1"
+    },
+    {
+      "name": "Faithfully normalized full visit facts pass the actual availability check and grounded proposal",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ undefined\n- 'accepted'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ undefined\n- 'accepted'\n\n    at file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:186:554\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:77:417)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:186:1"
+    },
+    {
+      "name": "An explicit owner takeover survives ordinary recovery of an already accepted reply’s customer facts",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n\nfalse !== true\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\nfalse !== true\n\n    at failProjectionOnce (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:175:452)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:188:331\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:77:417)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/all/scripts/lead-ai-independent-check.mjs:188:1"
+    }
+  ]
+}

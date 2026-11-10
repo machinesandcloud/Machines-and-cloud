@@ -3,11 +3,15 @@
 // is the model: a loader hook points lib/agent.mjs's "./fake-model.mjs" import at a scripted stub that
 // returns the case's reply as one end_turn message (MC_FAKE_MODEL=1 path, no network, no provider env).
 // The text actually handed to sendSMS (the "[sms:disabled] ... :: body" log line) and the stored
-// assistant turn are both compared with the expectation:
-//   keep: the whole reply is sent;
-//   trim: the first sentence is dropped exactly as before (the S1-21 planning-text cases still work).
+// assistant turn are both compared with the expectation. Revision 2 counts two numbers:
+//   safetyDropped:  a "keep" reply (customer instruction first) was not sent whole;
+//   planningLeaked: a "trim" reply still starts with its planning note(s). A trim case lists how many leading
+//                   sentences are planning (QA's "Have name, address. Next ask window." has two).
+// Trim cases carry a class: "note" (internal checklist, tool name, status: must never reach a customer) or
+// "narration" (a harmless first-person line such as "Got everything."). Both are counted and reported.
+// Cases: my 40 (revision 1) plus QA's 39 adversarial cases copied verbatim from qa2/qa2-sms-trim-probe.mjs.
 // Usage: node sms-trim-safety-check.mjs [--repo <repo root>] [--output <new json path>]
-// Expected: FAILS on dfb0ae78 (safety first sentences are dropped), PASSES with 03-sms-trim-safety.patch.
+// PASS requires safetyDropped === 0 and noteLeaked === 0. Expected: FAILS on dfb0ae78, PASSES with 03 rev 2.
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { existsSync, writeFileSync } from "node:fs";
@@ -58,59 +62,102 @@ for (const c of Object.values(clients)) await store.saveClient(c);
 
 // [client, expectation, reply, note]
 const CASES = [
+  // [client, expect, reply, note, planning sentences at the start, class, source]
   // Emergency first sentences that the base trim drops.
-  ["default", "keep", "Call 911 and get everyone outside now. I saved your request for Ray; what is the address?", "review R1 case"],
-  ["default", "keep", "Now leave the house and call 911. Then text us your address.", "review R1 case"],
-  ["default", "keep", "Call the gas company from outside right away. What is your address so Ray can follow up?", "call the gas company"],
-  ["default", "keep", "Call 911 from outside. Ray has your request and will see the address you sent.", "911"],
-  ["default", "keep", "Now get everyone out of the house. When you are safe, what is your address?", "get everyone out"],
-  ["default", "keep", "Call CenterPoint from outside. Then text me your address when you are safe.", "outside, utility"],
-  ["default", "keep", "Need you to leave the area now. What is the address so Ray can follow up?", "need + leave"],
-  ["default", "keep", "Have everyone step outside now. What is the address so Ray can follow up?", "have + outside"],
-  ["default", "keep", "Call 911 if anyone feels dizzy or sick. I will get Ray your details right away.", "911 + symptoms"],
-  ["default", "keep", "Now, the CO alarm means everyone should get out. Call 911 from the yard, then text me the address.", "CO"],
-  ["default", "keep", "Got it, carbon monoxide is dangerous. Please leave now and call 911 from outside.", "carbon monoxide"],
-  ["default", "keep", "Call the fire department now. Then let me know your address when everyone is safe.", "fire"],
-  ["default", "keep", "Now step away from the smoke. Once everyone is safe, what is the address?", "smoke"],
-  ["default", "keep", "Book nothing yet; evacuate the house first. Then send me the address.", "evacuate"],
-  ["default", "keep", "OK, I need everyone to leave right now. Call 911 from outside, then text me the address.", "ok, i + leave"],
-  ["default", "keep", "Let me be clear: this is an emergency. Leave now and call 911 from outside.", "let me + emergency"],
-  ["default", "keep", "Now leave the area, call 911 if there is any danger. Then call us back with the address.", "default script paraphrase"],
+  ["default", "keep", "Call 911 and get everyone outside now. I saved your request for Ray; what is the address?", "review R1 case", 0, "", "rev1"],
+  ["default", "keep", "Now leave the house and call 911. Then text us your address.", "review R1 case", 0, "", "rev1"],
+  ["default", "keep", "Call the gas company from outside right away. What is your address so Ray can follow up?", "call the gas company", 0, "", "rev1"],
+  ["default", "keep", "Call 911 from outside. Ray has your request and will see the address you sent.", "911", 0, "", "rev1"],
+  ["default", "keep", "Now get everyone out of the house. When you are safe, what is your address?", "get everyone out", 0, "", "rev1"],
+  ["default", "keep", "Call CenterPoint from outside. Then text me your address when you are safe.", "outside, utility", 0, "", "rev1"],
+  ["default", "keep", "Need you to leave the area now. What is the address so Ray can follow up?", "need + leave", 0, "", "rev1"],
+  ["default", "keep", "Have everyone step outside now. What is the address so Ray can follow up?", "have + outside", 0, "", "rev1"],
+  ["default", "keep", "Call 911 if anyone feels dizzy or sick. I will get Ray your details right away.", "911 + symptoms", 0, "", "rev1"],
+  ["default", "keep", "Now, the CO alarm means everyone should get out. Call 911 from the yard, then text me the address.", "CO", 0, "", "rev1"],
+  ["default", "keep", "Got it, carbon monoxide is dangerous. Please leave now and call 911 from outside.", "carbon monoxide", 0, "", "rev1"],
+  ["default", "keep", "Call the fire department now. Then let me know your address when everyone is safe.", "fire", 0, "", "rev1"],
+  ["default", "keep", "Now step away from the smoke. Once everyone is safe, what is the address?", "smoke", 0, "", "rev1"],
+  ["default", "keep", "Book nothing yet; evacuate the house first. Then send me the address.", "evacuate", 0, "", "rev1"],
+  ["default", "keep", "OK, I need everyone to leave right now. Call 911 from outside, then text me the address.", "ok, i + leave", 0, "", "rev1"],
+  ["default", "keep", "Let me be clear: this is an emergency. Leave now and call 911 from outside.", "let me + emergency", 0, "", "rev1"],
+  ["default", "keep", "Now leave the area, call 911 if there is any danger. Then call us back with the address.", "default script paraphrase", 0, "", "rev1"],
   // Owner-written safety scripts (configured in rules.emergencies.script) with no keyword.
-  ["ownerA", "keep", "Now walk away from the house and phone Atmos at 888-286-6700. We will follow up once you are safe. What is the address?", "owner script A, first sentence verbatim"],
-  ["ownerB", "keep", "Call Atmos at 888-286-6700 and stay off the property. We will follow up. What is the street address?", "owner script B, first sentence verbatim"],
-  ["ownerB", "keep", "Call Atmos at 888-286-6700 and stay off the property! Ray will see your request.", "owner script B, different punctuation"],
+  ["ownerA", "keep", "Now walk away from the house and phone Atmos at 888-286-6700. We will follow up once you are safe. What is the address?", "owner script A, first sentence verbatim", 0, "", "rev1"],
+  ["ownerB", "keep", "Call Atmos at 888-286-6700 and stay off the property. We will follow up. What is the street address?", "owner script B, first sentence verbatim", 0, "", "rev1"],
+  ["ownerB", "keep", "Call Atmos at 888-286-6700 and stay off the property! Ray will see your request.", "owner script B, different punctuation", 0, "", "rev1"],
   // Spanish and mixed-language safety text.
-  ["default", "keep", "Llame al 911 y salga de la casa ahora. ¿Cuál es su dirección?", "Spanish, not matched by the trim on either"],
-  ["default", "keep", "Call 911 ahora y salga de la casa. Luego envíeme su dirección, por favor.", "Spanglish 911"],
-  ["default", "keep", "Now salga de la casa y llame al 911. Luego envíeme su dirección, por favor.", "Spanglish salga"],
-  ["default", "keep", "OK, let me ser claro: es una emergencia. Salga ahora y llame al 911 desde afuera.", "Spanish emergencia"],
+  ["default", "keep", "Llame al 911 y salga de la casa ahora. ¿Cuál es su dirección?", "Spanish, not matched by the trim on either", 0, "", "rev1"],
+  ["default", "keep", "Call 911 ahora y salga de la casa. Luego envíeme su dirección, por favor.", "Spanglish 911", 0, "", "rev1"],
+  ["default", "keep", "Now salga de la casa y llame al 911. Luego envíeme su dirección, por favor.", "Spanglish salga", 0, "", "rev1"],
+  ["default", "keep", "OK, let me ser claro: es una emergencia. Salga ahora y llame al 911 desde afuera.", "Spanish emergencia", 0, "", "rev1"],
   // The default script itself (starts with Leave: never matched the trim) stays whole.
-  ["default", "keep", "Leave the area now, call 911 if there is any danger, then call us back. What is your address?", "default script verbatim"],
+  ["default", "keep", "Leave the area now, call 911 if there is any danger, then call us back. What is your address?", "default script verbatim", 0, "", "rev1"],
   // Ordinary customer replies the trim never touched.
-  ["default", "keep", "Thanks, Lee. You are booked for tomorrow 8 to 12 at 5 Pine St.", "normal reply"],
-  ["default", "keep", "Our diagnostic fee is $89. Want a window this week?", "normal reply"],
+  ["default", "keep", "Thanks, Lee. You are booked for tomorrow 8 to 12 at 5 Pine St.", "normal reply", 0, "", "rev1"],
+  ["default", "keep", "Our diagnostic fee is $89. Want a window this week?", "normal reply", 0, "", "rev1"],
   // Planning preambles: still trimmed exactly as at base (S1-21).
-  ["default", "trim", "Have name, address, issue, window. Thanks, Lee, you are booked for tomorrow 8 to 12.", "S1-21 original"],
-  ["default", "trim", "Phone filled automatically. You are all set for Tuesday 8 to 12 at 5 Pine St.", "S1-21 original"],
-  ["default", "trim", "Book it now. You're booked for tomorrow, 12 to 5, at 5 Pine St.", "book"],
-  ["default", "trim", "Need address before booking. What is the street address for the visit?", "need"],
-  ["default", "trim", "Got everything. Thanks, you're booked for tomorrow 8 to 12.", "got"],
-  ["default", "trim", "OK, I'll book that. You're booked for tomorrow 8 to 12 at 5 Pine St.", "ok, i"],
-  ["default", "trim", "Let me check availability. We have tomorrow 8 to 12 or 12 to 5 open.", "let me"],
-  ["default", "trim", "Now call book_visit. You're booked for tomorrow 8 to 12 at 5 Pine St.", "now + tool name"],
-  ["default", "trim", "Call notify_owner with urgency emergency. Please leave the house now and call 911 from outside.", "planning naming a tool wins over the emergency word; the safety text that follows is sent"],
-  ["default", "trim", "Have phone and address. Please leave the house now and call 911 from outside.", "planning first, safety second"],
-  ["ownerA", "trim", "Now book it. Thanks, you're booked for tomorrow 8 to 12 at 5 Pine St.", "owner script present but unrelated planning"],
+  ["default", "trim", "Have name, address, issue, window. Thanks, Lee, you are booked for tomorrow 8 to 12.", "S1-21 original", 1, "note", "rev1"],
+  ["default", "trim", "Phone filled automatically. You are all set for Tuesday 8 to 12 at 5 Pine St.", "S1-21 original", 1, "note", "rev1"],
+  ["default", "trim", "Book it now. You're booked for tomorrow, 12 to 5, at 5 Pine St.", "book", 1, "note", "rev1"],
+  ["default", "trim", "Need address before booking. What is the street address for the visit?", "need", 1, "narration", "rev1"],
+  ["default", "trim", "Got everything. Thanks, you're booked for tomorrow 8 to 12.", "got", 1, "narration", "rev1"],
+  ["default", "trim", "OK, I'll book that. You're booked for tomorrow 8 to 12 at 5 Pine St.", "ok, i", 1, "narration", "rev1"],
+  ["default", "trim", "Let me check availability. We have tomorrow 8 to 12 or 12 to 5 open.", "let me", 1, "narration", "rev1"],
+  ["default", "trim", "Now call book_visit. You're booked for tomorrow 8 to 12 at 5 Pine St.", "now + tool name", 1, "note", "rev1"],
+  ["default", "trim", "Call notify_owner with urgency emergency. Please leave the house now and call 911 from outside.", "planning naming a tool wins over the emergency word; the safety text that follows is sent", 1, "note", "rev1"],
+  ["default", "trim", "Have phone and address. Please leave the house now and call 911 from outside.", "planning first, safety second", 1, "note", "rev1"],
+  ["ownerA", "trim", "Now book it. Thanks, you're booked for tomorrow 8 to 12 at 5 Pine St.", "owner script present but unrelated planning", 1, "note", "rev1"],
   // Control: the owner-A sentence carries no safety keyword, so without that configured script it is trimmed.
   // This shows the owner-A/owner-B "keep" results come from the configured script, not from the word list.
-  ["default", "trim", "Now walk away from the house and phone Atmos at 888-286-6700. We will follow up once you are safe. What is the address?", "control: owner A text on a shop without that script"],
-  ["ownerB", "trim", "Call book_visit now. Thanks, you're booked for tomorrow 8 to 12.", "owner script starts with Call; tool planning still trimmed"],
+  ["default", "keep", "Now walk away from the house and phone Atmos at 888-286-6700. We will follow up once you are safe. What is the address?", "owner A sentence on a shop without that script: now kept (rev 2 has no word list)", 0, "", "rev1"],
+  ["ownerB", "trim", "Call book_visit now. Thanks, you're booked for tomorrow 8 to 12.", "owner script starts with Call; tool planning still trimmed", 1, "note", "rev1"],
+  // ---- QA2 adversarial cases (qa2/qa2-sms-trim-probe.mjs), labels kept; trim classes added ----
+  // Danger first sentences that do start with a trim trigger word but carry no keyword.
+  ["default", "keep", "Now don't touch any light switches. What is the address?", "now + switches", 0, "", "qa2"],
+  ["default", "keep", "Don't use any switches. What is the address?", "no trigger word (control)", 0, "", "qa2"],
+  ["default", "keep", "Get out now. Then text me the address.", "no trigger word (control)", 0, "", "qa2"],
+  ["default", "keep", "Now turn off the gas at the meter if safe. Then text me the address.", "gas keyword", 0, "", "qa2"],
+  ["default", "keep", "Now shut the main breaker off if it is dry. Then text me the address.", "electrical, no keyword", 0, "", "qa2"],
+  ["default", "keep", "Need you to stay away from the sparking panel. What is the address so Ray can follow up?", "sparks, no keyword", 0, "", "qa2"],
+  ["default", "keep", "Now stay clear of the downed line. What is the address so Ray can follow up?", "downed line", 0, "", "qa2"],
+  ["default", "keep", "Call the utility from a neighbor's phone. What is the address so Ray can follow up?", "utility, no keyword", 0, "", "qa2"],
+  ["default", "keep", "Have everyone go next door right now. What is the address so Ray can follow up?", "go next door", 0, "", "qa2"],
+  ["default", "keep", "Now open the windows and do not light anything. What is the address?", "ventilate, no keyword", 0, "", "qa2"],
+  ["default", "keep", "Now shut off the water main. Then text me the address so Ray can come.", "water main (flood)", 0, "", "qa2"],
+  ["default", "keep", "Need everyone away from the water heater now. What is the address?", "water heater", 0, "", "qa2"],
+  ["default", "keep", "Call 9-1-1 right away. What is the address?", "911 written with dashes", 0, "", "qa2"],
+  ["default", "keep", "Now get the family out. What is the address?", "get the family out", 0, "", "qa2"],
+  ["default", "keep", "Have everybody exit the house. What is the address?", "exit", 0, "", "qa2"],
+  ["default", "keep", "Now please go outdoors. What is the address?", "outdoors", 0, "", "qa2"],
+  ["default", "keep", "Call your doctor if anyone has a headache. Then text me the address.", "CO symptom", 0, "", "qa2"],
+  ["default", "keep", "Now, salga de la casa. ¿Cuál es su dirección?", "Spanish salga", 0, "", "qa2"],
+  ["default", "keep", "Now apague el gas si es seguro. ¿Cuál es su dirección?", "Spanish apague el gas", 0, "", "qa2"],
+  ["default", "keep", "Now no toque los interruptores. ¿Cuál es su dirección?", "Spanish switches", 0, "", "qa2"],
+  ["default", "keep", "Now váyanse de la casa ya. ¿Cuál es su dirección?", "Spanish vayanse", 0, "", "qa2"],
+  ["default", "keep", "Call al 911 ahora. ¿Cuál es su dirección?", "Spanish 911", 0, "", "qa2"],
+  ["ownerA", "keep", "Now walk away from the house. We will follow up once you are safe. What is the address?", "owner A partial (5 words)", 0, "", "qa2"],
+  ["ownerA", "keep", "Now walk away and phone Atmos. We will follow up once you are safe.", "owner A paraphrase", 0, "", "qa2"],
+  ["ownerB", "keep", "Call Atmos now and stay off the property. What is the address?", "owner B paraphrase", 0, "", "qa2"],
+  ["ownerB", "keep", "Call Atmos at 888-286-6700 right away. What is the address?", "owner B partial w/ phone", 0, "", "qa2"],
+  // Planning notes that should still be trimmed.
+  ["default", "trim", "Have name, address. Next ask window. Thanks, what window works for you?", "S1-21 style (2nd sentence leaks on base too)", 2, "note", "qa2"],
+  ["default", "trim", "Have address; emergency flagged. Ray has your request.", "planning + emergency", 1, "note", "qa2"],
+  ["default", "trim", "Now flag emergency. Ray has your request; please stay safe.", "planning + emergency", 1, "note", "qa2"],
+  ["default", "trim", "Need gas leak details before notifying. What do you smell and where?", "planning + gas", 1, "narration", "qa2"],
+  ["default", "trim", "Now notify owner as emergency. Ray has your request.", "planning + emergency, tool name without underscore", 1, "note", "qa2"],
+  ["default", "trim", "Got address, gas furnace. You're booked for tomorrow 8 to 12.", "planning + gas furnace", 1, "note", "qa2"],
+  ["default", "trim", "Have issue: water heater leaking outside. You're booked for tomorrow 8 to 12.", "planning + outside", 1, "note", "qa2"],
+  ["default", "trim", "Need to leave a note for Ray. Thanks, he will see your request.", "planning + leave (documented)", 1, "narration", "qa2"],
+  ["default", "trim", "Call us back. You're booked for tomorrow 8 to 12.", "3-word span of default script", 1, "narration", "qa2"],
+  ["default", "trim", "OK, I have the fire pit job. You're booked for tomorrow 8 to 12.", "planning + fire", 1, "narration", "qa2"],
+  ["default", "trim", "Booking smoke detector install now. You're booked for tomorrow 8 to 12.", "planning + smoke", 1, "narration", "qa2"],
+  ["default", "trim", "Now call book visit. You're booked for tomorrow 8 to 12.", "tool name with space", 1, "note", "qa2"],
+  ["default", "trim", "Have phone. Calling bookVisit next. You're booked for tomorrow 8 to 12.", "camelCase tool", 2, "note", "qa2"],
 ];
 
-const firstSentence = (r) => r.split(/(?<=[.!?])\s+/)[0] || "";
+const sentences = (r) => r.split(/(?<=[.!?])\s+/);
 const results = []; let n = 0;
-for (const [ck, expect, reply, note] of CASES) {
+for (const [ck, expect, reply, note, nPlan, cls, source] of CASES) {
   const c = clients[ck], from = "+1713555" + String(1000 + ++n).padStart(4, "0");
   const conv = await store.getConversation(c, "sms", from);
   conv.messages.push({ role: "user", content: "I smell gas, what do I do?", at: new Date().toISOString() });
@@ -118,15 +165,18 @@ for (const [ck, expect, reply, note] of CASES) {
   globalThis.__trimScript = [reply]; sent.length = 0;
   const res = await smsAgent(new Request("https://platform.example.test/.netlify/functions/sms-agent-background", { method: "POST", headers: { "x-admin-key": "trim-check-admin" }, body: JSON.stringify({ slug: c.slug, from }) }));
   const stored = (await store.getConversation(c, "sms", from)).messages.at(-1)?.content;
-  const want = expect === "keep" ? reply : reply.slice(firstSentence(reply).length).trim();
+  const want = expect === "keep" ? reply : sentences(reply).slice(nPlan).join(" ").trim();
   const body = sent.find((s) => s.to === from)?.body ?? null;
-  const pass = res.status === 200 && body === want && stored === want && globalThis.__trimScript.length === 0;
-  results.push({ client: ck, expect, note, reply, sentToCustomer: body, storedTurn: stored, pass, ...(pass ? {} : { wanted: want }) });
+  const ok = res.status === 200 && body === want && stored === want && globalThis.__trimScript.length === 0;
+  const outcome = ok ? "ok" : expect === "keep" ? "safetyDropped" : (body || "").startsWith(sentences(reply)[0]) ? cls + "Leaked" : "otherMismatch";
+  results.push({ source, client: ck, expect, class: cls || null, note, reply, sentToCustomer: body, storedTurn: stored, outcome, pass: ok || outcome === "narrationLeaked", ...(ok ? {} : { wanted: want }) });
 }
 console.log = origLog;
+const count = (o, src) => results.filter((r) => r.outcome === o && (!src || r.source === src)).length;
 const failed = results.filter((r) => !r.pass);
-const summary = { check: "sms-trim-safety-check", repo, cases: results.length, keep: results.filter((r) => r.expect === "keep").length, trim: results.filter((r) => r.expect === "trim").length, failed: failed.length, netAttempts, result: failed.length || netAttempts ? "FAIL" : "PASS" };
-for (const r of results) console.log(`${r.pass ? "ok  " : "FAIL"} [${r.expect}] ${r.client.padEnd(7)} ${JSON.stringify(r.reply.slice(0, 70))}${r.pass ? "" : `\n       sent: ${JSON.stringify(r.sentToCustomer)}`}`);
+const by = (src) => ({ cases: results.filter((r) => !src || r.source === src).length, safetyDropped: count("safetyDropped", src), noteLeaked: count("noteLeaked", src), narrationLeaked: count("narrationLeaked", src), otherMismatch: count("otherMismatch", src) });
+const summary = { check: "sms-trim-safety-check", rev: 2, repo, ...by(), rev1Cases: by("rev1"), qa2Cases: by("qa2"), netAttempts, result: failed.length || netAttempts ? "FAIL" : "PASS" };
+for (const r of results) console.log(`${r.outcome === "ok" ? "ok  " : r.pass ? "note" : "FAIL"} ${r.source} [${r.expect}${r.class ? "/" + r.class : ""}] ${r.client.padEnd(7)} ${JSON.stringify(r.reply.slice(0, 70))}${r.outcome === "ok" ? "" : `\n       ${r.outcome}; sent: ${JSON.stringify(r.sentToCustomer)}`}`);
 console.log(JSON.stringify(summary));
 if (output) writeFileSync(output, JSON.stringify({ summary, results }, null, 2));
 process.exit(summary.result === "PASS" ? 0 : 1);

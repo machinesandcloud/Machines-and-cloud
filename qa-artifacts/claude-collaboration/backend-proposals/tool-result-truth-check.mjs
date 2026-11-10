@@ -134,7 +134,7 @@ async function run(name, channel, sends, fn, expect) {
   const problems = [];
   if (error || typeof text !== "string") problems.push("no tool result: " + (error || text));
   else {
-    for (const [ok, msg] of expect(text, { ownerOk, custOk, seen })) if (!ok) problems.push(msg);
+    for (const [ok, msg] of await expect(text, { ownerOk, custOk, seen, shop: currentShop })) if (!ok) problems.push(msg);
   }
   results.push({ mode: childMode, channel, case: name, sends: { ...sends }, providerSaw: seen.map((s) => `${s.kind}:${s.to === "+17135550100" || s.to === "ray@example.test" ? "owner" : "customer"}:${s.ok ? "accepted" : "refused"}`), toolResult: text, pass: problems.length === 0, problems });
 }
@@ -149,9 +149,27 @@ const sentAlert = (what) => (t, s) => [
   [!/could not be alerted/.test(t), "says the alert failed although the provider accepted it"],
   [s.ownerOk.length > 0, "fixture: the provider double saw no accepted owner alert"],
 ];
-const custFailed = (t) => [[!CUSTOMER_CLAIM.test(t), "claims a customer text/reminder although the confirmation text was not accepted"], [/confirmation text was not sent/.test(t), "does not say the confirmation text was not sent"]];
-const custSent = (t, s) => [[/confirmation text was accepted for delivery/.test(t), "does not say the confirmation text was accepted"], [s.custOk, "fixture: no accepted customer text"]];
-const both = (...fs) => (t, s) => fs.flatMap((f) => f(t, s));
+// Rev 2 (QA consent gap): the saved booking and its scheduled reminder tasks must agree with the note.
+const bookingState = async (t, shop) => {
+  const id = (t.match(/(?:Ref|reference) (\w+)/) || [])[1];
+  const b = id ? await store.getRecord("bookings", shop.slug, id) : null;
+  const tasks = (await store.dueTasks("9999")).map((x) => x.task).filter((x) => x.slug === shop.slug && x.data?.bookingId === id && /^reminder_/.test(x.type)).map((x) => x.type).sort();
+  return { b, tasks };
+};
+const custFailed = async (t, s) => { const { b, tasks } = await bookingState(t, s.shop); return [
+  [!CUSTOMER_CLAIM.test(t), "claims a customer text/reminder although the confirmation text was not accepted"],
+  [/confirmation text was not sent/.test(t), "does not say the confirmation text was not sent"],
+  [!!b, "fixture: booking not found"],
+  [!b?.consent, "texting consent recorded although the disclosure (confirmation text) was not sent"],
+  [tasks.length === 0, "reminder texts still scheduled after the confirmation failed: " + tasks.join(",")],
+]; };
+const custSent = async (t, s) => { const { b, tasks } = await bookingState(t, s.shop); return [
+  [/confirmation text was accepted for delivery/.test(t), "does not say the confirmation text was accepted"], [s.custOk, "fixture: no accepted customer text"],
+  [!!b?.consent, "consent not recorded although the confirmation text was accepted"],
+  [tasks.length === 2 ? /24 hours and 1 hour/.test(t) : tasks.length === 1 ? /1 hour before/.test(t) && !/24 hours/.test(t) : /No reminder text is scheduled/.test(t), `reminder wording does not match the scheduled tasks (${tasks.join(",") || "none"})`],
+]; };
+const both = (...fs) => async (t, s) => (await Promise.all(fs.map((f) => f(t, s)))).flat();
+let currentShop = null;
 
 const ALL_FAIL = { sms: "refuse", email: "refuse" }, ALL_OK = { sms: "accept", email: "accept" }, SMS_FAIL = { sms: "refuse", email: "accept" };
 const ray = { phone: "+17135550100", email: "ray@example.test" };
@@ -159,7 +177,7 @@ const scenarios = childMode === "unconfigured" ? [["sends disabled (no provider 
   : [["provider refuses text and email", ALL_FAIL, failedAlert, custFailed], ["provider accepts text and email", ALL_OK, sentAlert("a text and an email"), custSent], ["text refused, email accepted", SMS_FAIL, sentAlert("an email"), custFailed]];
 
 for (const [label, sends, ownerExp, custExp] of scenarios) {
-  const c = await shop(ray);
+  const c = await shop(ray); currentShop = c;
   await run(`notify_owner: ${label}`, "web", sends, () => viaChat(c, { name: "notify_owner", input: leadInput(phone()) }), ownerExp);
   await run(`book_visit: ${label}`, "web", sends, () => viaChat(c, { name: "book_visit", input: bookInput(phone()) }), both(ownerExp, custExp));
   await run(`notify_owner: ${label}`, "voice", sends, () => { const p = phone(); return viaVapi(c, p, { name: "notify_owner", input: leadInput(p) }); }, ownerExp);
@@ -170,6 +188,11 @@ for (const [label, sends, ownerExp, custExp] of scenarios) {
   await run(`book_visit: ${label}`, "sms", sends, () => viaSms(c, q, { name: "book_visit", input: bookInput(q, 4) }), ownerExp);
   await run(`reschedule: ${label}`, "sms", sends, async () => { const [b] = await store.recordsFor("bookings", c, q); return viaSms(c, q, { name: "update_visit", input: { booking_id: b?.id || "", action: "reschedule", date: dayAhead(5), window: "12 to 5" } }); }, ownerExp);
   await run(`cancel_request: ${label}`, "sms", sends, async () => { const [b] = await store.recordsFor("bookings", c, q); return viaSms(c, q, { name: "update_visit", input: { booking_id: b?.id || "", action: "cancel_request", date: "", window: "" } }); }, ownerExp);
+}
+// A visit less than 24 hours away: only the reminders that were really scheduled may be mentioned.
+if (childMode === "provider") {
+  const c = await shop(ray); currentShop = c;
+  await run("book_visit tomorrow 8 to 12 (reminder wording)", "web", ALL_OK, () => viaChat(c, { name: "book_visit", input: { ...bookInput(phone()), date: "tomorrow", window: "8 to 12" } }), both(sentAlert("a text and an email"), custSent));
 }
 // A repeat notify_owner within 30 minutes with nothing new: no alert is sent at all.
 {

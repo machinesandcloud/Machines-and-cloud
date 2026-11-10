@@ -1,0 +1,40 @@
+
+Machines & Cloud setup check (2026-11-10)
+
+TODO    Anthropic key                      missing
+TODO    Twilio keys                        missing
+TODO    Vapi key                           missing
+TODO    Vapi webhook secret                missing
+TODO    Resend key and domain              missing
+TODO    Google OAuth client                missing
+TODO    Voice fallback bin                 missing
+TODO    SMS fallback bin                   missing
+WAIT    Debugger webhook and email alerts  check in console  (cannot be read by API)
+TODO    Steve's phone, email, admin key    missing  (STEVE_PHONE, STEVE_EMAIL, ADMIN_KEY)
+WAIT    Spanish texts reviewed             pending
+
+Next actions, in order:
+
+1. Anthropic key: Anthropic console, API keys: create a key; put it in .env (local tests) and confirm it is set at the Netlify team level.
+
+2. Twilio keys: Twilio console, Account, API keys and tokens: copy the Account SID and Auth Token into .env and into Netlify (site env vars, Functions scope).
+
+3. Vapi key: Vapi dashboard, Settings, API keys: create a private key; put it in .env as VAPI_API_KEY and in Netlify.
+
+4. Vapi webhook secret: Vapi dashboard, Settings, Server URL secret: set any long random string; put the same value in .env and Netlify as VAPI_WEBHOOK_SECRET.
+
+5. Resend key and domain: Resend dashboard, API keys: create a key; Domains: add machinesandcloud.com and set the DNS records it shows until it reads Verified.
+
+6. Google OAuth client: Google Cloud console, APIs and services, Credentials: an OAuth client (web) with redirect URI https://machinesandcloud.com/api/google/callback; copy the client id and secret. Then OAuth consent screen, Publishing status: press Publish app (Production); an app left in Testing has its refresh tokens expire after 7 days, so bookings would silently stop reaching owners' calendars.
+
+7. Voice fallback bin: Twilio console, Developer tools, TwiML Bins: create a bin named 'Front desk voice fallback' with exactly: <Response>{{#cell}}<Dial timeout="25">{{cell}}</Dial>{{/cell}}<Say voice="Polly.Joanna">We are having trouble connecting right now. Please call back in a few minutes.</Say></Response> and copy its URL (https://handler.twilio.com/twiml/EH...).
+
+8. SMS fallback bin: Twilio console, TwiML Bins: a second bin 'Front desk SMS fallback' with <Response><Message>We got your text and will reply shortly.</Message></Response>; copy its URL.
+
+9. Debugger webhook and email alerts: Twilio console, Monitor, Alerts: webhook https://machinesandcloud.com/api/twilio-alert and email alerts on.
+
+10. Steve's phone, email, admin key: In .env and Netlify: STEVE_PHONE (E.164) and STEVE_EMAIL; ADMIN_KEY (already in Netlify, copy it from there).
+
+11. Spanish texts reviewed: Have a Spanish speaker you trust read the Spanish texts in netlify/functions/lib/desk.mjs (TEMPLATES_ES and STRINGS.es); then set SPANISH_REVIEWED_ON=YYYY-MM-DD.
+
+Remember: every value here must also be set in Netlify for production; .env is only for local runs and this check.

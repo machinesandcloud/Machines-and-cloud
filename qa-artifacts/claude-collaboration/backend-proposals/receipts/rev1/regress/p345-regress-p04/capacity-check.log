@@ -1,0 +1,27 @@
+CAPACITY OK: memory (concurrency, aliases, history, capacity, moves, lifecycle)
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: The input did not match the regular expression /Blobs/. Input:
+
+'Error: Conditional storage write returned no ETag'
+
+    at async suite (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/p04/scripts/capacity-check.mjs:165:5)
+    at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/p04/scripts/capacity-check.mjs:206:30 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: Error: Conditional storage write returned no ETag
+      at atomicUpdate (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/p04/netlify/functions/lib/store.mjs:64:32)
+      at async addRecord (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/p04/netlify/functions/lib/store.mjs:371:55)
+      at async Module.bookVisit (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/p04/netlify/functions/lib/desk.mjs:307:13)
+      at async waitForActual (node:assert:646:5)
+      at async strict.rejects (node:assert:769:25)
+      at async suite (file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/p04/scripts/capacity-check.mjs:165:5)
+      at async file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/p04/scripts/capacity-check.mjs:206:30,
+  expected: /Blobs/,
+  operator: 'rejects',
+  diff: 'simple'
+}
+
+Node.js v24.13.0

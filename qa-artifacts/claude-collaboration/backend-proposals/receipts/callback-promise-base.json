@@ -2,8 +2,8 @@
   "summary": {
     "check": "callback-promise-check",
     "repo": "/private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/base",
-    "prompts": 23,
-    "failed": 22,
+    "prompts": 30,
+    "failed": 29,
     "result": "FAIL"
   },
   "results": [
@@ -166,6 +166,45 @@
       "prompt": "web/open",
       "pass": true,
       "handoff": "If the customer asks for a person, a human, the owner, or whether you are real: say you are the front desk assistant, say the callback request can be saved for the shop, but whether or when a person will respond is not confirmed, take their number, and call notify_owner with reason \"wants_call\". Never say \"someone will call you back\" without the window."
+    },
+    {
+      "shop": "audit",
+      "prompt": "rubric: compliant handoff (QA2)",
+      "pass": false
+    },
+    {
+      "shop": "audit",
+      "prompt": "rubric: timed promise",
+      "pass": false
+    },
+    {
+      "shop": "audit",
+      "prompt": "RUBRIC definition (source)",
+      "pass": false
+    },
+    {
+      "shop": "audit",
+      "prompt": "labelled set: timed promise only in no_callback_window rows",
+      "pass": false,
+      "timedPhrase": "id 4, id 5, id 7"
+    },
+    {
+      "shop": "audit",
+      "prompt": "fake rubric agrees with labels (48/50)",
+      "pass": false,
+      "timedPhrase": "disagree ids 34,35"
+    },
+    {
+      "shop": "fake-desk",
+      "prompt": "person request reply",
+      "pass": false,
+      "handoff": "I am the front desk assistant. Ray will call you within 15 minutes, take their number, and call notify_owner with reason \"wants_call\". "
+    },
+    {
+      "shop": "escalation",
+      "prompt": "fallback_window text en/es",
+      "pass": false,
+      "handoff": "Bayou Air: we have your request and Ray will call you within 30 minutes. | Bayou Air: recibimos su solicitud y Ray le llamará within 30 minutes."
     }
   ]
 }

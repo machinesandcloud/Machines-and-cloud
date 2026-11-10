@@ -1,0 +1,30 @@
+[email:disabled] to=owner1@example.test :: Blind Spot HVAC: Blind Spot HVAC front desk: missed call from +17135552101. T
+Blind Spot HVAC front desk: missed call from +17135552101. Text-back sent; I will take it from here and text you the lead.
+PASS A missed call from a new caller sends exactly one text-back from the shop number, records it, and tells the owner
+[email:disabled] to=owner2@example.test :: Blind Spot HVAC: Blind Spot HVAC front desk: missed call from +17135552102. T
+Blind Spot HVAC front desk: missed call from +17135552102. They opted out, so no text-back. Please call them back.
+PASS An opted-out caller gets no text-back; the skip is recorded and the owner is told why
+[email:disabled] to=owner3@example.test :: Blind Spot HVAC: Blind Spot HVAC front desk: missed call from +17135552103. T
+Blind Spot HVAC front desk: missed call from +17135552103. They opted out, so no text-back. Please call them back.
+PASS The caller is not told "we are texting you" when no text will be sent (opted out)
+[email:disabled] to=owner4@example.test :: Blind Spot HVAC: Blind Spot HVAC front desk: missed call from +17135552104. T
+Blind Spot HVAC front desk: missed call from +17135552104. Text-back sent; I will take it from here and text you the lead.
+[email:disabled] to=owner4@example.test :: Blind Spot HVAC: Blind Spot HVAC front desk: missed call from +17135552104. T
+Blind Spot HVAC front desk: missed call from +17135552104. They were already sent a text-back in the last 24 hours, so no new one.
+PASS A second missed call within 24 hours does not text the caller again
+[email:disabled] to=owner5@example.test :: Blind Spot HVAC: Blind Spot HVAC front desk: missed call from +17135552105. T
+Blind Spot HVAC front desk: missed call from +17135552105. Text-back is off for this line, so no text-back. Please call them back.
+PASS Text-back switched off for the shop sends nothing and records "not attempted"
+twilio send failed 400 Synthetic provider refusal
+twilio send failed 400 Synthetic provider refusal
+[email:disabled] to=owner6@example.test :: Blind Spot HVAC: Blind Spot HVAC front desk: missed call from +17135552106. T
+Blind Spot HVAC front desk: missed call from +17135552106. The text-back could not be sent (Synthetic provider refusal). Please call them back.
+PASS A provider refusal is recorded as failed, never as sent, and nothing is added to the conversation
+twilio send failed 400 Synthetic provider refusal
+twilio send failed 400 Synthetic provider refusal
+[email:disabled] to=owner7@example.test :: Blind Spot HVAC: Blind Spot HVAC front desk: missed call from +17135552108. T
+Blind Spot HVAC front desk: missed call from +17135552108. The text-back could not be sent (Synthetic provider refusal). Please call them back.
+PASS After a provider refusal the owner is not told the shop has no texting sender
+PASS A forged webhook (bad signature) is refused and texts nobody
+PASS No physical transport and no non-Twilio destination
+{"output":null,"passed":9,"failed":0,"total":9,"providerCalls":12,"physicalNetwork":0,"sourceStable":true,"failures":[]}
