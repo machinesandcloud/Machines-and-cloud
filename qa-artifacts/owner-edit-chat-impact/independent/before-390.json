@@ -1,0 +1,96 @@
+{
+  "at": "2026-11-10T04:32:29.067Z",
+  "browser": "/Users/stevengoumnai/Library/Caches/ms-playwright/chromium_headless_shell-1223/chrome-headless-shell-mac-arm64/chrome-headless-shell",
+  "deskSource": "desk.js",
+  "servedDeskSha256": [
+    "712c5c39a82d7c2161f8109b8fcafad658c13f32d33c7ea1ec684b31e4efa601"
+  ],
+  "qualifications": "Synthetic workspace and session; actual local /api/client and /api/access handlers and browser assets; memory storage; fake model. Lost responses are simulated with route.abort after (or before) the actual handler runs. No model/provider/email/OAuth/purchase/deployment performed.",
+  "sourceBefore": {
+    "desk.js": "712c5c39a82d7c2161f8109b8fcafad658c13f32d33c7ea1ec684b31e4efa601",
+    "netlify/functions/lib/connection-journey.mjs": "9e161d344f4f8ea4b7cbed28cddebea48426b2f96f1e4be356eaf98d3cef61de",
+    "netlify/functions/lib/setup.mjs": "0748a30291a6976ca080b754d1329fc30b2410ad54e63b64394de6d7fd5c890a",
+    "netlify/functions/lib/workspace-edit.mjs": "7f9503dee282d8b8261e873741d4dedcf90fe0c417b98b5107297ed12a294ec4",
+    "netlify/functions/chat.mjs": "ff6eeb89edc2ad0f5a05a96428aa05c523135e2d76ea1605d876068c92d291ab",
+    "netlify/functions/client.mjs": "eafa4e54aae9adcf7e882f09f7daf3797486791178b88ebc1c2e3954cf4a7391"
+  },
+  "checks": [
+    {
+      "name": "before actual PUT/chat/browser impact and direct recovery",
+      "pass": true,
+      "snapshot": {
+        "variant": "before",
+        "saveMessage": "All changes saved. Connections shows any review, practice or permission needed for each service.",
+        "saveState": "saved",
+        "nextActionCount": 0,
+        "chatFact": "Rules review needed",
+        "status": "Setup in progress",
+        "storedLiveFlagPreserved": true,
+        "handlerChat403": true,
+        "reviewAndTestInvalidated": true
+      }
+    }
+  ],
+  "requests": [
+    {
+      "slug": "details-save-1",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-1",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 1,
+      "status": 200
+    },
+    {
+      "slug": "details-save-1",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 2,
+      "status": 200
+    },
+    {
+      "slug": "details-save-1",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 3,
+      "status": 200
+    },
+    {
+      "slug": "details-save-1",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 4,
+      "status": 200
+    },
+    {
+      "slug": "details-save-1",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 5,
+      "status": 200
+    }
+  ],
+  "pageErrors": [],
+  "forbidden": [],
+  "physicalNetwork": 0,
+  "sourceAfter": {
+    "desk.js": "712c5c39a82d7c2161f8109b8fcafad658c13f32d33c7ea1ec684b31e4efa601",
+    "netlify/functions/lib/connection-journey.mjs": "9e161d344f4f8ea4b7cbed28cddebea48426b2f96f1e4be356eaf98d3cef61de",
+    "netlify/functions/lib/setup.mjs": "0748a30291a6976ca080b754d1329fc30b2410ad54e63b64394de6d7fd5c890a",
+    "netlify/functions/lib/workspace-edit.mjs": "7f9503dee282d8b8261e873741d4dedcf90fe0c417b98b5107297ed12a294ec4",
+    "netlify/functions/chat.mjs": "ff6eeb89edc2ad0f5a05a96428aa05c523135e2d76ea1605d876068c92d291ab",
+    "netlify/functions/client.mjs": "eafa4e54aae9adcf7e882f09f7daf3797486791178b88ebc1c2e3954cf4a7391"
+  },
+  "sourceStable": true,
+  "summary": {
+    "passed": 1,
+    "failed": 0,
+    "physicalNetwork": 0,
+    "pageErrors": []
+  }
+}

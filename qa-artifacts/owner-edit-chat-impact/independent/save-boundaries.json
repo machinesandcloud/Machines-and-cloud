@@ -1,0 +1,154 @@
+{
+  "at": "2026-11-10T04:34:28.956Z",
+  "browser": "/Users/stevengoumnai/Library/Caches/ms-playwright/chromium_headless_shell-1223/chrome-headless-shell-mac-arm64/chrome-headless-shell",
+  "deskSource": "desk.js",
+  "servedDeskSha256": [
+    "f4017bc4745bca629f36159c05973b6e7c76c4961fa49ea9cb21dd77bbf428ee"
+  ],
+  "qualifications": "Synthetic workspace and session; actual local /api/client and /api/access handlers and browser assets; memory storage; fake model. Lost responses are simulated with route.abort after (or before) the actual handler runs. No model/provider/email/OAuth/purchase/deployment performed.",
+  "sourceBefore": {
+    "desk.js": "f4017bc4745bca629f36159c05973b6e7c76c4961fa49ea9cb21dd77bbf428ee",
+    "netlify/functions/lib/connection-journey.mjs": "08edabfd76bb87ee16fe3578959fa6240ce147296ad71d2e701b05eeba5c9ce9",
+    "netlify/functions/lib/setup.mjs": "0748a30291a6976ca080b754d1329fc30b2410ad54e63b64394de6d7fd5c890a",
+    "netlify/functions/lib/workspace-edit.mjs": "7f9503dee282d8b8261e873741d4dedcf90fe0c417b98b5107297ed12a294ec4",
+    "netlify/functions/chat.mjs": "ff6eeb89edc2ad0f5a05a96428aa05c523135e2d76ea1605d876068c92d291ab",
+    "netlify/functions/client.mjs": "eafa4e54aae9adcf7e882f09f7daf3797486791178b88ebc1c2e3954cf4a7391"
+  },
+  "checks": [
+    {
+      "name": "lost_after",
+      "pass": true
+    },
+    {
+      "name": "lost_after_newer",
+      "pass": true
+    },
+    {
+      "name": "lost_before_newer",
+      "pass": true
+    }
+  ],
+  "requests": [
+    {
+      "slug": "details-save-1",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-1",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 1,
+      "status": 200
+    },
+    {
+      "slug": "details-save-1",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 2,
+      "status": 200,
+      "fixture": "lost-after-handler",
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "details-save-1",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 3,
+      "status": 200
+    },
+    {
+      "slug": "details-save-1",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 4,
+      "status": 200
+    },
+    {
+      "slug": "details-save-2",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-2",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 1,
+      "status": 200
+    },
+    {
+      "slug": "details-save-2",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 2,
+      "status": 200,
+      "fixture": "lost-after-handler",
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "details-save-2",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 3,
+      "status": 200
+    },
+    {
+      "slug": "details-save-2",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 4,
+      "status": 200
+    },
+    {
+      "slug": "details-save-3",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-3",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 1,
+      "status": 200
+    },
+    {
+      "slug": "details-save-3",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 2,
+      "fixture": "lost-before-handler",
+      "status": "aborted"
+    },
+    {
+      "slug": "details-save-3",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 3,
+      "status": 200
+    }
+  ],
+  "pageErrors": [],
+  "forbidden": [],
+  "physicalNetwork": 0,
+  "sourceAfter": {
+    "desk.js": "f4017bc4745bca629f36159c05973b6e7c76c4961fa49ea9cb21dd77bbf428ee",
+    "netlify/functions/lib/connection-journey.mjs": "08edabfd76bb87ee16fe3578959fa6240ce147296ad71d2e701b05eeba5c9ce9",
+    "netlify/functions/lib/setup.mjs": "0748a30291a6976ca080b754d1329fc30b2410ad54e63b64394de6d7fd5c890a",
+    "netlify/functions/lib/workspace-edit.mjs": "7f9503dee282d8b8261e873741d4dedcf90fe0c417b98b5107297ed12a294ec4",
+    "netlify/functions/chat.mjs": "ff6eeb89edc2ad0f5a05a96428aa05c523135e2d76ea1605d876068c92d291ab",
+    "netlify/functions/client.mjs": "eafa4e54aae9adcf7e882f09f7daf3797486791178b88ebc1c2e3954cf4a7391"
+  },
+  "sourceStable": true,
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "physicalNetwork": 0,
+    "pageErrors": []
+  }
+}

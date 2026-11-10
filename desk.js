@@ -526,7 +526,8 @@
     var select=$('websiteInstallOrigin'),selected=websiteOriginSelection||w?.selectedOrigin||link?.origin;select.replaceChildren();originChoices.forEach(function(value){var option=document.createElement('option');option.value=value;option.textContent=value;select.appendChild(option);});if(originChoices.includes(selected))select.value=selected;$('websiteInstallOriginGroup').hidden=legacy||editing||!link||originChoices.length<2;
     var primary=$('websiteInstallPrimary'),action=w?.nextAction?.id||'check_status',heading='Check your website setup',detail='Refresh the status to see the next step.',number='1';
     if(legacy){action='copy_code';heading='Add chat to your website';detail='Copy the code into your shared website footer, then publish your website.';}
-    if(w){var observation=w.observation||{},request=w.setupRequest||{},first=w.firstExternalRequest||{},chat=w.customerChat||{};
+    if(w){var observation=w.observation||{},request=w.setupRequest||{},first=w.firstExternalRequest||{},chat=w.customerChat||{},impact=cfgWebImpact(d.setup);
+      if(impact)chat=Object.assign({},chat,{available:false,state:impact.state});
       websiteFact('websiteInstallObserved',observation.state==='found'?'Found'+(observation.at?' · '+websiteTime(observation.at):''):observation.state==='stale'?'Found previously'+(observation.origin?' on '+observation.origin:''):observation.state==='waiting'?'Waiting for your website':'Not checked');
       var chatLabels={active:'Active now',paused:'Paused',closed:'Closed',needs_rules:'Business details needed',needs_review:'Rules review needed',needs_practice:'Practice needed',ready_to_activate:'Ready to activate',limit:'Daily limit reached',unavailable:'Temporarily unavailable'};websiteFact('websiteInstallChat',chatLabels[chat.state]||'Check status');
       websiteFact('websiteInstallRequest',request.state==='complete'?'Check completed'+(request.at?' · '+websiteTime(request.at):''):request.state==='saved_unconfirmed'?'Request saved; answer not confirmed':request.state==='stale'?'Previous check retained':'Not checked');
@@ -631,6 +632,7 @@
     $('reviewNeeds').hidden=!fields.length;
     $('reviewNeeds').innerHTML=fields.map(function(field){return '<li><button type="button" data-review-field="'+esc(field)+'">'+esc(required.fieldErrors[field])+'</button></li>';}).join('');
     $('reviewMessage').textContent=reviewBusy?(blocked?'Checking preparation…':'Saving your review…'):websiteBusy?'Wait for your website setup to finish updating.':cfgDirty||cfgBusy||acctBusy?'Save your edits before reviewing this version.':blocked?'Your saved draft is kept. Complete the required details before continuing.':reviewed?'Review saved for the current version.':'';
+    cfgWebNext();
     document.dispatchEvent(new CustomEvent('mc:guide-state-change'));
   }
   function renderSetup(d) {
@@ -1118,9 +1120,30 @@
   }
   // Fields the server re-derives from a submitted source field; their movement is explained by our own save.
   function cfgDerived(changed) {var out=[];if(changed.indexOf('business.hours')>=0)out.push('rules.hours');if(changed.some(function(name){return name.indexOf('rules.emergencies.')===0;}))$('cfg').querySelectorAll('[name^="rules.emergencies."]').forEach(function(field){out.push(field.name);});return out;}
-  function cfgStatus(kind,message) { $('cfg').dataset.saveState=kind;if($('saveMsg').textContent!==message)$('saveMsg').textContent=message;$('saveCfg').disabled=cfgBusy||acctBusy||websiteBusy||cfgClosed;$('cfg').setAttribute('aria-busy',String(cfgBusy));$('cfgCheckLatest').disabled=cfgBusy||acctBusy;$('cfgKeepEdits').disabled=cfgBusy||acctBusy;$('saveAcct').disabled=cfgBusy||acctBusy||websiteBusy||cfgClosed; }
+  function cfgStatus(kind,message) { $('cfg').dataset.saveState=kind;if($('saveMsg').textContent!==message)$('saveMsg').textContent=message;$('saveCfg').disabled=cfgBusy||acctBusy||websiteBusy||cfgClosed;$('cfg').setAttribute('aria-busy',String(cfgBusy));$('cfgCheckLatest').disabled=cfgBusy||acctBusy;$('cfgKeepEdits').disabled=cfgBusy||acctBusy;$('saveAcct').disabled=cfgBusy||acctBusy||websiteBusy||cfgClosed;cfgWebNext(); }
   function cfgIncomplete(setup) { return !!(setup&&setup.channels&&setup.channels.web&&setup.channels.web.blockers.some(function(row){return row.id==='rules'||row.id==='handoff';})); }
-  function cfgSavedMessage(setup) { return cfgIncomplete(setup)?'Saved as a draft. Complete your business rules and callback details before activation.':'All changes saved. Connections shows any review, practice or permission needed for each service.'; }
+  function cfgWebImpact(setup) {
+    var client=data&&data.client,web=setup&&setup.channels&&setup.channels.web,blockers=web&&web.blockers||[];
+    if(client?.onboarding?.version!==1||client.status!=='live'||web?.active!==true)return null;
+    var has=function(id){return blockers.some(function(row){return row.id===id;});};
+    if(web.ready===false){
+      if(has('rules')||has('handoff'))return {message:'Website chat is unavailable. Complete and review your business details before customers use these changes.',label:'Complete business details',tab:'know',target:'reviewRules',state:'needs_rules'};
+      if(has('review'))return {message:'Website chat is unavailable. Review these changes and complete a private test before customers can use them.',label:'Review business details',tab:'know',target:'reviewRules',state:'needs_review'};
+      if(has('model'))return {message:'Website chat is unavailable while the AI service needs attention. Your changes are saved.',label:'Check website chat',tab:'setup',target:'websiteInstallPrimary',state:'unavailable'};
+    }
+    if(data.aiAllowance?.available===false||has('test')&&data.aiAllowance?.private?.remaining===0)return {message:'Website chat is unavailable while its AI allowance needs attention. Your changes are saved.',label:'View AI allowance',tab:'account',state:'limit'};
+    if(web.ready!==false)return null;
+    if(has('test'))return {message:'Website chat is unavailable. Complete a private test of these changes next.',label:'Try your front desk',tab:'test',target:'chatIn',state:'needs_practice'};
+    return {message:'Website chat is unavailable until its current setup checks pass. Your changes are saved.',label:'Check website chat',tab:'setup',target:'websiteInstallPrimary',state:'unavailable'};
+  }
+  function cfgWebNext() {
+    var impact=cfgWebImpact(data&&data.setup),button=$('cfgWebNext');
+    if(!button){button=document.createElement('button');button.id='cfgWebNext';button.type='button';button.className='btn-pill btn-pill-dark btn-sm';$('saveMsg').after(button);button.addEventListener('click',function(){var next=cfgWebImpact(data&&data.setup);if(!next||button.disabled)return;routeTo(next.tab);var target=$(next.target)||$('pageTitle');target.scrollIntoView({block:'center'});target.focus({preventScroll:true});});}
+    button.hidden=!impact;button.disabled=leaving||cfgDirty||cfgBusy||acctBusy||websiteBusy||reviewBusy||cfgClosed;
+    if(impact)button.textContent=impact.label;
+    button.title=cfgDirty?'Save your newer edits before continuing.':'';
+  }
+  function cfgSavedMessage(setup) { var impact=cfgWebImpact(setup);return impact?(cfgIncomplete(setup)?'Saved as a draft. ':'All changes saved. ')+impact.message:cfgIncomplete(setup)?'Saved as a draft. Complete your business rules and callback details before activation.':'All changes saved. Connections shows any review, practice or permission needed for each service.'; }
   function cfgField(name) {if(name.indexOf('rules.appointmentHours')===0){var badAppointment=null;if($('cfgAppointmentHoursMode').value==='custom')cfgDays.some(function(day){var open=$('cfgAppointmentHoursRows').querySelector('[data-d="'+day+'"][data-k=open]'),close=$('cfgAppointmentHoursRows').querySelector('[data-d="'+day+'"][data-k=close]');if(!open.value&&!close.value)return false;if(!open.value){badAppointment=open;return true;}if(!close.value||(close.value==='00:00'?'24:00':close.value)<=open.value){badAppointment=close;return true;}return false;});return badAppointment||$('cfgAppointmentHoursMode');}if(name.indexOf('rules.hours')!==0){var path=name;while(path&&!$('cfg').elements[path])path=path.includes('.')?path.slice(0,path.lastIndexOf('.')):'';return path?$('cfg').elements[path]:null;}var parts=name.split('.'),match=cfgDays.indexOf(parts[2])>=0?$('hoursRows').querySelector('[data-d="'+parts[2]+'"][data-k="'+(parts[3]==='close'?'close':'open')+'"]'):null;if(match)return match;var bad=null;cfgDays.some(function(day){var open=$('hoursRows').querySelector('[data-d="'+day+'"][data-k="open"]'),close=$('hoursRows').querySelector('[data-d="'+day+'"][data-k="close"]');if(!open||!close||!open.value&&!close.value)return false;if(!/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(open.value)){bad=open;return true;}if(!/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(close.value)||(close.value==='00:00'?'24:00':close.value)<=open.value){bad=close;return true;}return false;});return bad||$('hoursRows').querySelector('input');}
   function cfgErrorElements() {
     $('cfg').querySelectorAll('[name]:not([type=hidden]),#hoursRows input,#cfgAppointmentHoursRows input').forEach(function(field,index){var name=field.closest('#cfgAppointmentHoursGroup')?'rules.appointmentHours':field.name||'rules.hours',id=name==='rules.appointmentHours'?'cfgAppointmentHoursError':name==='rules.hours'?'cfgHoursError':'cfgError-'+(field.id||(field.id='cfgField-'+index));var error=$(id);if(!error){error=document.createElement('p');error.id=id;error.className='cfg-field-error';if(name==='rules.appointmentHours')$('cfgAppointmentHoursSummary').after(error);else if(name==='rules.hours')$('hoursRows').after(error);else field.after(error);}var ids=(field.getAttribute('aria-describedby')||'').split(/\s+/).filter(Boolean);if(ids.indexOf(id)<0)ids.push(id);field.setAttribute('aria-describedby',ids.join(' '));field.dataset.cfgError=id;});
@@ -1156,7 +1179,7 @@
   function cfgResultValid(result) { return !!(result&&result.client&&!(data.client.onboarding&&data.client.onboarding.version===1&&(!/^[a-f0-9]{64}$/.test(result.configurationRevision||'')||!/^[a-f0-9]{64}$/.test(result.editRevision||'')))); }
   function cfgSaved(result,snapshot,note) {
     var current=cfgRead(),preserve={};Object.keys(current).forEach(function(name){if(current[name]!==snapshot[name])preserve[name]=current[name];});var saved=cfgFromClient(result.client);cfgFill(saved,preserve);cfgBaseline=saved;cfgRevision=result.configurationRevision;cfgEditRevision=result.editRevision;cfgFence++;data.client=result.client;if(result.setup)data.setup=result.setup;if(result.configurationRevision)data.configurationRevision=result.configurationRevision;if(result.editRevision)data.editRevision=result.editRevision;cfgDirty=cfgChanges(cfgRead(),cfgBaseline).length>0;cfgConflict=null;$('cfgConflictPanel').hidden=true;renderSetup(data);if(!leaving)document.dispatchEvent(new CustomEvent('mc:desk',{detail:data}));
-    acctObserve(result,true);cfgBusy=false;cfgStatus(cfgDirty?'dirty':cfgIncomplete(result.setup)?'incomplete':'saved',(note||'')+(cfgDirty?'Submitted changes saved. Your newer edits are still unsaved.':cfgSavedMessage(result.setup)));
+    acctObserve(result,true);cfgBusy=false;cfgStatus(cfgDirty?'dirty':cfgIncomplete(result.setup)?'incomplete':'saved',(note||'')+(cfgDirty?'Submitted changes saved. Your newer edits are still unsaved.'+(cfgWebImpact(result.setup)?' '+cfgWebImpact(result.setup).message:''):cfgSavedMessage(result.setup)));
   }
   async function saveCfg() {
     if(cfgBusy||acctBusy||websiteBusy||cfgClosed||leaving||!data||!cfgBaseline)return;

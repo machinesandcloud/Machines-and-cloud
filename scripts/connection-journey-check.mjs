@@ -21,6 +21,26 @@ check('Closed execution gates still allow ordinary business preparation without 
 check('Calendar permission starts without unrelated business review or AI rehearsal',()=>{for(const blockers of [[{id:'rules'}],[{id:'review'}],[{id:'model'},{id:'test'}]]){const row=rows(client,{...services,calendar:{available:true,connected:false}},null,{channels:{web:{blockers}}}).calendar;assert.equal(row.action.target,'start_calendar');assert.equal(row.activation.blockedBy,null);assert.deepEqual(row.guide.steps.map(step=>step.id),['select','permission','delivery']);assert(!row.guide.steps.some(step=>['business','practice'].includes(step.id)));}});
 check('An explicit platform policy blocker wins over an available-looking quote without granting customer authority',()=>{const view=rows(client,{...configuredServices,platformReadiness:{voice:{ready:false,reasonCode:'resource_allowance_required',requestSaved:false}}},{available:true,requestedChannels:['voice'],offer:{scopeChannels:['voice']}},{channels:{web:{blockers:[{id:'test'}]}}}).voice;assert.equal(view.action.kind,'wait');assert.equal(view.activation.reasonCode,'resource_allowance_required');assert.equal(view.activation.requestSaved,false);assert.equal(view.active,false);});
 check('Active web policy never claims an installed physical widget',()=>{const row=rows(client,services,null,{channels:{web:{active:true,blockers:[]}}}).web;assert.equal(row.status,'ready_for_website');assert.equal(row.action.target,'setup');assert.doesNotMatch(row.detail,/is installed|installation verified/);});
+check('An enabled website shows unavailable Review then Test without changing its saved live flag',()=>{
+ const c={...client,status:'live',channels:{web:{active:true}}},before=JSON.stringify(c);
+ for(const [id,target]of [['review','know'],['test','test']]){
+  const readiness={channels:{web:{active:true,ready:false,blockers:[{id}]}}},original=JSON.stringify(readiness),row=rows(c,services,null,readiness).web;
+  assert.equal(row.active,false);assert.equal(row.status,'needs_action');assert.match(row.detail,/website chat is unavailable/i);assert.equal(row.action.kind,'route');assert.equal(row.action.target,target);assert.equal(JSON.stringify(readiness),original);
+ }
+ assert.equal(JSON.stringify(c),before);
+});
+check('Unready retained chat cannot claim switched-on while model-only holds stay with the platform',()=>{
+ const c={...client,status:'live'},unknown=rows(c,services,null,{channels:{web:{active:true,ready:false,blockers:[]}}}).web;
+ assert.equal(unknown.active,false);assert.equal(unknown.status,'needs_action');assert.match(unknown.detail,/unavailable/);assert.doesNotMatch(unknown.detail,/switched on/i);
+ const model=rows(c,services,null,{channels:{web:{active:true,ready:false,blockers:[{id:'model'}]}}}).web;
+ assert.equal(model.active,false);assert.equal(model.status,'waiting_platform');assert.match(model.detail,/service availability/);assert.equal(model.action.target,'setup');
+});
+check('Fresh readiness reuses a retained active flag without requesting another activation',()=>{
+ const at=new Date(Date.now()-1000).toISOString(),c={...client,status:'live',channels:{web:{active:true}}},readiness={channels:{web:{active:true,ready:true,blockers:[]}}};
+ const website={originAllowed:true,observation:{state:'found',at},setupRequest:{state:'complete',at},customerChat:{state:'active',available:true}};
+ const row=buildConnectionJourney(c,services,null,readiness,website).channels.find(r=>r.id==='web');
+ assert.equal(row.active,true);assert.equal(row.status,'active');assert.equal(row.action.target,'leads');assert.equal(c.channels.web.active,true);
+});
 check('Partial phone offer never authorizes or starts deferred texting',()=>{const r=rows(client,services,{available:true,requestedChannels:['voice','sms'],offer:{scopeChannels:['voice']}});assert.equal(r.voice.action.target,'review_setup');assert.equal(r.sms.action.kind,'wait');assert.equal(r.sms.active,false);});
 for(const state of ['queued','awaiting_number','connecting','waiting_platform','uncertain'])check('Accepted '+state+' setup shows retained platform progress instead of the same still-reviewable quote',()=>{const p={available:true,requestedChannels:['voice','sms'],acceptedChannels:['voice'],offer:{scopeChannels:['voice','sms']},operation:{state,detail:'Saved setup receipt'}},r=rows(client,services,p);assert.equal(r.voice.retained,true);assert.equal(r.voice.active,false);assert.equal(r.voice.responsibility,'platform');assert.equal(r.voice.action.kind,'wait');assert.doesNotMatch(r.voice.action.label,/review|approve/i);assert.match(r.voice.nextStep,/Check saved status/);assert.equal(r.sms.action.target,'review_setup','A separate unapproved connection keeps its own authority review');const unselected=rows({...client,onboarding:{version:1,desiredChannels:['sms']}},services,p).voice;assert.equal(unselected.requested,false);assert.equal(unselected.retained,true);assert.notEqual(unselected.status,'not_selected');});
 check('Changed accepted service still requires current authority review rather than a false background wait',()=>{const r=rows(client,services,{available:true,requestedChannels:['voice'],acceptedChannels:['voice'],offer:{scopeChannels:['voice']},operation:{state:'needs_review'}});assert.equal(r.voice.action.target,'review_setup');assert.equal(r.voice.responsibility,'customer');});
