@@ -70,7 +70,7 @@ const SCENARIOS = [
   { line: 90, name: 'self-service session for a different account', async build() { const c = selfService('l90'); await store.saveClient(c); const token = await session('someone-else@example.invalid'), id = turnId(); return { client: c, contact: 'visitor90', origin: SITE, error: 'forbidden', request: recover => post(SITE, userTurn(c, 'visitor90', id, recover ? { recoverTurn: true } : {}), token) }; } },
   { line: 104, name: 'legacy test channel without the owner key', async build() { const c = legacy('l104'); await store.saveClient(c); const id = turnId(); return { client: c, contact: 'visitor104', origin: SHOP, error: 'forbidden', request: recover => post(SHOP, userTurn(c, 'visitor104', id, { channel: 'test', ...(recover ? { recoverTurn: true } : {}) })) }; } },
   { line: 108, name: 'self-service website chat paused', async build() { const c = selfService('l108', { status: 'paused' }); await store.saveClient(c); const id = turnId(); return { client: c, contact: 'visitor108', origin: SHOP, error: 'paused', request: recover => post(SHOP, userTurn(c, 'visitor108', id, recover ? { recoverTurn: true } : {})) }; } },
-  { line: 111, name: 'legacy widget on a non-allowed origin', async build() { const c = legacy('l111'); await store.saveClient(c); const id = turnId(); return { client: c, contact: 'visitor111', origin: EVIL, error: 'forbidden', request: recover => post(EVIL, userTurn(c, 'visitor111', id, recover ? { recoverTurn: true } : {})) }; } },
+  { line: 111, name: 'legacy widget on a non-allowed origin', async build() { const c = legacy('l111'); await store.saveClient(c); const id = turnId(); return { client: c, contact: 'visitor111', origin: EVIL, error: 'forbidden', message: 'Website chat is not available on this page. Please contact the shop directly.', request: recover => post(EVIL, userTurn(c, 'visitor111', id, recover ? { recoverTurn: true } : {})) }; } },
   { line: 112, name: 'legacy widget while the shop is paused', async build() { const c = legacy('l112', { status: 'paused' }); await store.saveClient(c); const id = turnId(); return { client: c, contact: 'visitor112', origin: SHOP, error: 'paused', request: recover => post(SHOP, userTurn(c, 'visitor112', id, recover ? { recoverTurn: true } : {})) }; } },
 ];
 
@@ -91,6 +91,7 @@ for (const backend of ['memory', 'blobs-double']) {
         assert.equal(response.status, 403, 'status');
         assert.equal(body.error, f.error, 'error code unchanged');
         assert.equal(typeof body.message, 'string', 'customer-facing message present'); assert.ok(body.message.length > 10);
+        if (f.message) assert.equal(body.message, f.message, 'exact refusal copy'); // :111 must not claim the page carries the shop's contact details
         assert.equal(body.turnNotProcessed, !recover, recover ? 'a refused recovery probe never claims the original turn was unprocessed' : 'a refused first send is definitely not processed');
         assert.equal(response.headers.get('access-control-allow-origin'), f.origin, 'cross-origin widget can read the refusal');
         if (backend === 'blobs-double') { assert.deepEqual(touchesConversation(during), [], 'no conversation read or write before the 403'); assert.deepEqual(touchesAllowance(during), [], 'no AI/sales allowance access before the 403'); }

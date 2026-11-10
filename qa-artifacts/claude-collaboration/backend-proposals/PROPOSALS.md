@@ -2,7 +2,7 @@
 
 Base: `dfb0ae7846e66871d849c67566bf9d3b475f46ae`. Backend owner: Codex.
 
-**Status: proposed, not applied.** None of the tracked files in this worktree were changed (`git status` shows only this untracked folder). Each patch was applied only to throwaway copies outside the worktree, and all tests ran there. Both patches apply cleanly to dfb0ae78 (`git apply --check`), each on its own or together. They touch separate files.
+**Status: proposed, not applied. Revision 2 addresses the independent QA notes in `qa/`.** None of the tracked files in this worktree were changed (`git status` shows only this untracked folder). Each patch was applied only to throwaway copies outside the worktree, and all tests ran there. Both patches apply cleanly to dfb0ae78 (`git apply --check`), each on its own or together. They touch separate files.
 
 Everything ran offline: memory store or an in-process Blobs double, `MC_FAKE_MODEL=1`, provider env removed, and outbound networking denied. The only network access was reading the CTIA PDF. Browser runs used the bundled `chrome-headless-shell-1223`.
 
@@ -20,65 +20,111 @@ Everything ran offline: memory store or an in-process Blobs double, `MC_FAKE_MOD
 
 ## Proposal 1: STOP/opt-out keyword normalization (CTIA 5.1.3)
 
+**Revision 2.** Independent QA (`qa/`) accepted the proposal with notes. This revision makes QA's required change and adds the recommended additions:
+- QUIT is now whole-message only.
+- The courtesy list is stricter.
+- New whole-message phrases.
+- CANCELAR and BAJA.
+- Signature stripping.
+- The campaign keyword list.
+- QA's 104 cases are now part of the check.
+
 ### Problem
 At dfb0ae78, a keyword is recognized only when the whole message is exactly that word:
 - `lib/platform-sms.mjs:35-41`. Line 36 is `const word = body.trim().toUpperCase();`, and the result is checked with `includes()` against the lists at `:7-10`.
-- `lib/managed-consent.mjs:7-9` uses anchored regexes `^(STOP|…)$`, applied at `:32` to the trimmed text. The shop list also lacks REVOKE and OPTOUT, which the platform list has (AUDIT.md row at line 34, gap G3).
+- `lib/managed-consent.mjs:7-9` uses anchored regexes, applied at `:32`. The shop list also lacks REVOKE and OPTOUT (AUDIT.md gap G3).
 
-As a result, "Stop.", "STOP!", "Stop please", "¡Alto!" and "please opt me out" are not treated as opt-outs. On the shop line they go to the AI conversation. On the platform line they get a guidance reply.
+As a result, "Stop.", "STOP!", "Stop please", "¡Alto!" and "please opt me out" are not opt-outs.
 
-CTIA Messaging Principles, May 2023, §5.1.3. This was read from the PDF text the audit cites; the local text dump had dropped this sentence, so I re-extracted it with PDFKit:
+CTIA Messaging Principles, May 2023, §5.1.3. I re-extracted this from the PDF with PDFKit, because the local text dump had dropped the sentence:
 > "Standardized "STOP" wording should be used for opt-out instructions, however opt-out requests with normal language (i.e., stop, end, unsubscribe, cancel, quit, "please opt me out") should also be read and acted upon by a Message Sender except where a specific word can result in unintentional opt-out. The validity of a Consumer opt-out should not be impacted by any de minimis variances in the Consumer opt-out response, such as capitalization, punctuation, or any letter-case sensitivities."
 
-The legacy `netlify/functions/sms.mjs:15-17` already tolerates `[\s.!]*` and some phrases. I did not change it.
-
-### Change
+### Change (`01-stop-keywords.patch`)
 - **New `lib/sms-keywords.mjs`.**
-  - It defines `SMS_KEYWORDS`, which is the same frozen lists as before:
+  - It defines `SMS_KEYWORDS`, which is the same published lists as before:
     - stop: STOP, STOPALL, UNSUBSCRIBE, CANCEL, END, QUIT, REVOKE, OPTOUT, ALTO, PARAR
     - start: START, UNSTOP, EMPEZAR
     - help: HELP, INFO, AYUDA
-  - It adds `normalizeSMSKeywordText()` and `classifySMSKeyword()`, which returns `'stop' | 'start' | 'help' | null`.
-- **`platform-sms.mjs`.** `PLATFORM_SMS_KEYWORDS` is now `SMS_KEYWORDS`, with the same value, so the deep-equality checks in `platform-sms-check.mjs:40` and `sms-policy-check.mjs:107` still pass. `keyword()` now calls the classifier. Twilio's `OptOutType` still applies exactly as before.
-- **`managed-consent.mjs`.** The three regexes are replaced by the shared classifier, which gives the shop line the same vocabulary as the platform line (REVOKE and OPTOUT are added). The precedence `stop > start > help` and the `providerOptOutType` handling are unchanged.
+  - It adds `normalizeSMSKeywordText()` and `classifySMSKeyword()`.
+- **`platform-sms.mjs`.** `PLATFORM_SMS_KEYWORDS` is now `SMS_KEYWORDS`, with the same value, so `platform-sms-check.mjs:40` and `sms-policy-check.mjs:107` still deep-equal. `keyword()` now uses the classifier. Twilio `OptOutType` is unchanged.
+- **`managed-consent.mjs`.** The three regexes are replaced by the shared classifier, so the shop line uses the same vocabulary as the platform line (REVOKE and OPTOUT are added). Precedence `stop > start > help` and the `providerOptOutType` handling are unchanged.
+- **`messaging-provider.mjs:47`.** The tiny optional change QA offered is **included**. The A2P campaign `OptOutKeywords` gains REVOKE and OPTOUT, so the Twilio registration matches the platform list and the public pages. This affects only campaigns registered or re-registered after the change; existing Twilio campaigns keep their current list. `messaging-activation-check` still passes (its check at line 59 is `includes("PARAR")`).
 
 ### Rule
-1. **Normalize the text.** Apply NFKD and remove accents. Uppercase it. Turn every character that is not a letter, digit or in-word apostrophe into a space; this removes punctuation and emoji and makes `¡¿` irrelevant. Collapse whitespace. Join `OPT OUT`, `OPT-OUT` and `OPT ME OUT` into `OPTOUT`.
-2. **Exact keyword match.** If the normalized text equals a keyword, it is that keyword. Examples: "Stop." and "stop " are STOP, "Cancel." is STOP, "Start!" is START, "¿Ayuda?" is HELP.
-3. **Exact opt-out phrases.** A short list of whole-message phrases also counts as STOP: REMOVE ME, DO NOT TEXT ME, DON'T TEXT ME, NO MORE TEXTS/MESSAGES, NO MAS MENSAJES, NO ME ESCRIBAN, NO ME MANDEN (MAS) MENSAJES.
-4. **Short polite STOP phrase.** A message is STOP when all of these hold:
-   - it has **at most 6 words**;
-   - it contains at least one *strong* opt-out word (STOP, STOPALL, UNSUBSCRIBE, OPTOUT, QUIT, ALTO, PARAR);
-   - **every other word** is on a small courtesy or object list (PLEASE, ME, MY, IT, THE, NOW, ALL, TEXT(S/ING), MESSAGE(S), SEND(ING), THANKS, OK, POR, FAVOR, YA, MENSAJES, GRACIAS, …).
+1. **Normalize the text.**
+   - Drop trailing lines that look like a signature ("Sent from my iPhone/Android/…", "Sent from Yahoo/Outlook/Gmail…", "Get Outlook for …", "Enviado desde mi …").
+   - Apply NFKD and remove accents. Uppercase.
+   - Turn every character that is not a letter, digit or in-word apostrophe into a space; this removes punctuation, emoji and zero-width characters.
+   - Collapse spaces.
+   - Join `OPT [ME] OUT` into `OPTOUT` and `STOP ALL` into `STOPALL`.
+   - If the message is only single letters, join them ("S.T.O.P." becomes STOP).
+2. **Whole-message keyword.**
+   - The normalized message equals one published STOP, START or HELP keyword, or one of the Spanish extras **CANCELAR** or **BAJA**.
+   - CANCELAR and BAJA are recognized but not added to the published list, so the campaign and public-page keyword checks stay exact.
+   - **CANCEL, END, QUIT, REVOKE and CANCELAR count only as the whole message.** So "It quit", "quit working", "cancel my appointment" and "end of the day works" stay conversations.
+3. **Whole-message opt-out phrases.** The phrase may start with PLEASE and may end with courtesy words (PLEASE, NOW, THANKS, THANK YOU, POR FAVOR, GRACIAS, YA) or AGAIN, ANYMORE or EVER. The phrases:
+   - DONT/DON'T/DO NOT TEXT/MESSAGE/CONTACT ME
+   - QUIT/STOP TEXTING/MESSAGING/CONTACTING ME
+   - REMOVE ME/MY NUMBER [FROM YOUR/THE/THIS LIST]
+   - TAKE ME/MY NUMBER OFF [YOUR/THE/THIS] LIST
+   - UNSUBSCRIBE [ME] FROM YOUR/THE/THIS LIST
+   - NO MORE TEXTS/MESSAGES
+   - NO [QUIERO] MAS MENSAJES
+   - NO ME ESCRIBAN/MANDEN/ENVIEN/TEXTEEN [MAS] [MENSAJES]
+   - DEJEN DE ESCRIBIRME/ESCRIBIR/MANDARME MENSAJES/…
+4. **Short polite opt-out.** A message is STOP when all of these hold:
+   - it has at most 6 words;
+   - it contains at least one *strong* word: STOP, STOPALL, UNSUBSCRIBE, OPTOUT, ALTO, PARAR or BAJA (not QUIT);
+   - every other word is on the strict courtesy list: PLEASE, PLS, PLZ, NOW, JUST, ME, TEXT(S/ING), MESSAGE(S/ING), SEND(ING), CONTACTING, THANKS, THANK, YOU, THX, TY, OK, OKAY, WRONG, NUMBER, POR, FAVOR, YA, GRACIAS, MENSAJES, TEXTOS.
 
-   For example, "please stop texting me", "Stop please", "stop the texts", "alto por favor" and "please opt me out" are all opt-outs.
-5. **Not phrase triggers.** CANCEL, END and REVOKE count only as exact single words. "Cancel my appointment" and "end of the day works" are ordinary service messages; this is the "unintentional opt-out" exception in CTIA.
-6. **START and HELP are exact only.** "Help me with my furnace", "I need help" and "When does the tech start?" stay conversations.
-7. **YES / SI / SÍ consent is unchanged and stays exact.** It grants recurring-message consent, so it should stay strict. It is also matched separately and exactly in `managed-sms.mjs:141-144`. Normalizing it in only one place would make the two paths disagree.
-
-**Not opt-outs (checked):** "the leak won't stop", "The leak won’t stop dripping", "Can you stop by tomorrow?", "My AC stopped working", "Please stop the water leak", "Don't stop the service", "The alarm won't stop, can you come?", "Stop! Water everywhere in the basement", "Stop the service visit", "stopwatch", "unstoppable", "Para mañana por favor", "No paren el servicio".
+   **IT, THE, MY, ALL, THIS, THEM and MAS are deliberately not courtesy words.** So "stop it", "please stop it", "the stop", "my stop", "stop the texts", "Mas alto" and "stop all the dripping" stay conversations.
+5. **START and HELP are whole-message only.** "help me" and "help, my pipe burst" are conversations.
+6. **YES / SI / SÍ consent is unchanged and exact.** It grants recurring-message consent, so it should stay strict. It is also matched separately and exactly in `managed-sms.mjs:141-144`.
 
 ### Trade-offs
-- **Accepted false negatives.** A longer opt-out with extra non-courtesy words is not caught: "please stop texting me, I already booked" is not an opt-out under the rule. It goes to the normal conversation, where the owner sees it. I chose this over a substring rule such as "contains STOP", which would opt out "the leak won't stop". Twilio Advanced Opt-Out (`OptOutType`) is still honoured as a second net. Twilio's own keyword set is in `messaging-provider.mjs:47` and is not changed here.
-- **New positives that change behavior.**
-  - "Help!", "Info." and "Start." now get the HELP or START handling. Before, they were AI conversations on shop numbers and guidance replies on the platform line.
-  - On a shop number, a customer who types just "Help!" now gets the HELP contact reply instead of an AI answer. HELP is still silent while the customer is suppressed (`managed-sms.mjs:66`).
-  - "Cancel." and "End." were already opt-outs as bare words. They now also are with punctuation.
-  - A bare "Stop!" was already an opt-out and stays one, even mid-conversation. CTIA requires this.
-- **Shop list widened** with REVOKE and OPTOUT. This only adds opt-outs, the safe direction. `policy.mjs:27` already says "standard carrier opt-out keywords are also honored".
-- **Not touched:**
-  - the legacy `sms.mjs` matcher;
-  - the Messaging Service `OptOutKeywords` (`messaging-provider.mjs:47`, which lacks REVOKE and OPTOUT);
-  - the public copy.
+- **Remaining misses (accepted, 5 of QA's 65 opt-outs):**
+  - "no more" is ambiguous on its own.
+  - "Stop, I already booked" has extra content words.
+  - "cancel all" could mean all appointments.
+  - "stopp" and "Sto p" are misspellings, and I did no fuzzy matching.
 
-  Spanish phrases outside the listed set, such as "dejen de escribirme", are not caught. The legacy matcher catches more of these.
+  These and longer sentences such as "stop texting me i already booked" reach the normal conversation and the owner. Twilio Advanced Opt-Out (`OptOutType`) is still the second net.
+- **New behavior on bare words.**
+  - "Help!", "Info." and "Start." now get the HELP or START handling. Before, they were AI conversations on shop numbers and guidance replies on the platform line.
+  - A bare "Stop!" or "Cancel." mid-conversation is an opt-out. CTIA requires this.
+- **QUIT made exact-only** loses polite variants such as "quit it now". "Quit texting me" is still caught by its explicit phrase.
+- **The shop line gains REVOKE, OPTOUT, CANCELAR and BAJA.** This only adds opt-outs, the safe direction.
+
+### Gaps outside this patch (not changed)
+- **Legacy `netlify/functions/sms.mjs:15-16`** has its own matcher, which is not aligned with this one.
+  - It catches more free text: `STOP_PHRASE` matches "stop texting" *anywhere*, plus "remove me", "don't text" and Spanish phrases.
+  - It misses others: fullwidth or zero-width STOP, "S.T.O.P.", emoji after STOP, BAJA.
+  - Its substring phrases also give false opt-outs that this patch avoids. QA's probe shows legacy=stop for "remove me from the schedule" and "don't text, call me instead".
+- **Legacy `sms.mjs:41-53`.** Owner commands (`:41-46`) and texts from VIP bypass numbers (`:48-53`) are handled **before** the STOP check at `:57`. So a STOP from the owner's phone or from a bypass-list number is never recorded as an opt-out.
+- **`lib/send.mjs`.** `force:true` skips the opt-out check (`:43`). It is used for owner alerts at `:101`, and for welcome, test and number-assigned texts in `client.mjs:486,511,522,549` and `provision-background.mjs:77`. These texts reach the owner's phone even if that number has opted out.
+- **`messaging-provider.mjs:47` OptOutKeywords** lacked REVOKE and OPTOUT. **This is now included in the patch**, as described above. Existing registered campaigns still need a re-registration or a Console update.
 
 ### Evidence
-- **`stop-keywords-check.mjs`.** It sends 91 cases through the **real** `/api/platform-sms` handler (signed Twilio form, intercepted receipt GET, reading the keyword recorded on the receipt) and through **real** `recordManagedInbound()`, with a fresh contact for each case.
-  - **Base: FAIL, 47/91.** 44 cases are misclassified on one or both lines. Receipts: `receipts/stop-keywords-base.{log,json}`.
-  - **Patched: PASS, 91/91.** Receipts: `receipts/stop-keywords-patched.{log,json}`.
-  - In both runs, 0 requests went anywhere other than the intercepted receipt read.
-- **Regressions.** Every SMS, consent or STOP script was run on base and on patched, and each one exits 0 on both. Logs are in `receipts/p1-regress-{base,patched}/`.
+- **`stop-keywords-check.mjs`** has 224 cases: 120 of my own plus QA's 104, copied verbatim from `qa/qa-stop-cases.mjs`. Each case runs through the **real** `/api/platform-sms` handler (signed form, intercepted receipt GET, reading the keyword on the receipt) and the **real** `recordManagedInbound()`.
+  - **Required:** all of my own cases, plus every QA row that expects anything other than STOP. That is 159 cases.
+  - **Recall only:** QA's STOP rows.
+
+  | | Base dfb0ae78 | Previous patch (QA's run) | **This revision** |
+  |---|---|---|---|
+  | Required cases failing | 61 of 159 (**FAIL**) | n/a | **0 of 159 (PASS)** |
+  | QA 98 stop/not-stop rows, platform (tp/fn/fp/tn) | 16/49/0/33 | 45/20/4/29 | **60/5/0/33** |
+  | Recall / precision, platform | 0.246 / 1.00 | 0.69 / 0.92 | **0.923 / 1.00** |
+  | Recall / precision, shop line | 0.215 / 1.00 | same as platform | **0.923 / 1.00** (identical to platform) |
+
+  Every false-positive guard passes on both lines, including:
+  - "please stop by tomorrow", "can you stop the leak", "cancel my appointment", "quit working", "help, my pipe burst";
+  - "It quit", "It just quit", "It quit now", "All quit", "quit it";
+  - "Mas alto", "stop it", "the stop", "my stop".
+
+  Receipts: `receipts/stop-keywords-{base,patched}.{log,json}`. Both runs made 0 requests other than the intercepted receipt read.
+- **QA's probe script, rerun on the final patch** (`receipts/qa-classifier-probes-after.log`). The listed false opt-outs are gone. "S.T.O.P.", "dont text me", "cancelar" and the "Sent from my iPhone" case are now caught.
+- **Patch check.** The patch was applied to a fresh copy of dfb0ae78 with `git apply`, and both checks passed there.
+- **Regressions.** These scripts were run on base and on patched, and each exits 0 on both. Logs are in `receipts/p1-regress-{base,patched}/`.
 
   | Script | Result (base and patched) |
   |---|---|
@@ -87,15 +133,17 @@ The legacy `netlify/functions/sms.mjs:15-17` already tolerates `[\s.!]*` and som
   | sms-policy-check | 20/20 |
   | managed-sms-qa-check | pass |
   | managed-sms-budget-check | 14/14 |
+  | launch-appointment-consent-qa-check | 5/5, sourceStable |
   | managed-delivery-qa-check | 18/18 |
   | messaging-activation-check | pass |
   | request-automation-check | 33/33 |
-  | tenant-isolation-check | 19 checks, ok |
-  | launch-appointment-consent-qa-check `--output` | 5/5, sourceStable |
+  | tenant-isolation-check | pass |
+  | service-onboarding-qa-check | pass (added this round, because it imports managed-consent) |
 
 ### Risks
-- These are behavior changes on live inbound SMS. Messages that used to reach the AI or the owner as conversation can now opt a customer out. The rule is deliberately narrow (see "Not opt-outs" above), but any courtesy-list word added later widens it. Reviewers should treat that list as policy.
-- The shared module creates one place that can break both lines. Both checks above import it through the real handlers.
+- These are behavior changes on live inbound SMS. Any word added to the courtesy or phrase lists later widens the rule, so reviewers should treat those lists as policy. The QA guards in the check protect them.
+- The shared module creates one place that can break both lines. Both lines are exercised through their real handlers.
+- The campaign keyword change applies only to new registrations.
 
 ---
 
@@ -121,7 +169,8 @@ The widget saves `pendingTurn` before it sends (`embed.js:164`) and clears it on
 
 | Line | `message` |
 |---|---|
-| `:108`, `:111`, `:112` (customer widget) | "Website chat is unavailable right now. Please use the shop’s contact details on this website." |
+| `:108`, `:112` (customer widget on an allowed page) | "Website chat is unavailable right now. Please use the shop’s contact details on this website." |
+| `:111` (page is not one of this shop's sites) | **Revision 2, per QA:** "Website chat is not available on this page. Please contact the shop directly." The page may not belong to the shop, so it must not point at "contact details on this website". The CORS origin echo is kept; QA judged it correct. |
 | `:63` | "Chat is unavailable on this page." The request is a GET with no body, so the flag is `true` because there is no turn. |
 | `:87` | "Workspace chat can only be opened from your Machines & Cloud workspace." |
 | `:90` | "This sign-in does not have access to this workspace's chat." |
@@ -142,7 +191,7 @@ I checked this by reading the code and by an access log.
 - **Why recovery stays `false`.** A `recoverTurn` probe is refused before the server reads the conversation. The refusal therefore says nothing about the original turn, which may have been saved before an interrupted reply. So the flag is `false` on a recovery probe, as RESULTS.md recommends.
 
 ### Evidence
-- **`chat-403-check.mjs`.** It calls the real handler in-process, with a fake model and no provider env. It covers all 7 lines, each as a first send and as a `recoverTurn` probe (`:63` is a GET and has only the first case), under two backends: `MC_MEMORY_STORE=1` and a logged Blobs double. It checks the status, the unchanged error code, the presence of `message`, `turnNotProcessed === !recover`, that the CORS header echoes the origin, that the conversation is still empty (memory mode), and that there was no conversation or allowance access (double mode).
+- **`chat-403-check.mjs`.** It calls the real handler in-process, with a fake model and no provider env. It covers all 7 lines, each as a first send and as a `recoverTurn` probe (`:63` is a GET and has only the first case), under two backends: `MC_MEMORY_STORE=1` and a logged Blobs double. It checks the status, the unchanged error code, the presence of `message` (and the exact `:111` copy), `turnNotProcessed === !recover`, that the CORS header echoes the origin, that the conversation is still empty (memory mode), and that there was no conversation or allowance access (double mode).
   - **Base: FAIL, 2/28.** Only the two control sends pass. Receipts: `receipts/chat-403-base.{log,json}`.
   - **Patched: PASS, 28/28.** Receipts: `receipts/chat-403-patched.{log,json}`.
   - The real 403 bodies captured from the handler are in `receipts/chat-403-real-bodies-{base,patched}.json`.

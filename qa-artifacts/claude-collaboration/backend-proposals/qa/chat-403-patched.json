@@ -1,0 +1,141 @@
+{
+  "repo": "/private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bpqa-copy/patched",
+  "mode": "Real chat.mjs handler; MC_MEMORY_STORE=1 and an in-process logged Blobs double; MC_FAKE_MODEL=1; no network",
+  "passed": 28,
+  "failed": 0,
+  "otherRequests": 0,
+  "checks": [
+    {
+      "name": "memory: chat.mjs:63 GET sales allowance from a non-site origin (first send)",
+      "pass": true
+    },
+    {
+      "name": "memory: chat.mjs:87 self-service owner token from a non-workspace origin (first send)",
+      "pass": true
+    },
+    {
+      "name": "memory: chat.mjs:87 self-service owner token from a non-workspace origin (recoverTurn probe)",
+      "pass": true
+    },
+    {
+      "name": "memory: chat.mjs:90 self-service session for a different account (first send)",
+      "pass": true
+    },
+    {
+      "name": "memory: chat.mjs:90 self-service session for a different account (recoverTurn probe)",
+      "pass": true
+    },
+    {
+      "name": "memory: chat.mjs:104 legacy test channel without the owner key (first send)",
+      "pass": true
+    },
+    {
+      "name": "memory: chat.mjs:104 legacy test channel without the owner key (recoverTurn probe)",
+      "pass": true
+    },
+    {
+      "name": "memory: chat.mjs:108 self-service website chat paused (first send)",
+      "pass": true
+    },
+    {
+      "name": "memory: chat.mjs:108 self-service website chat paused (recoverTurn probe)",
+      "pass": true
+    },
+    {
+      "name": "memory: chat.mjs:111 legacy widget on a non-allowed origin (first send)",
+      "pass": true
+    },
+    {
+      "name": "memory: chat.mjs:111 legacy widget on a non-allowed origin (recoverTurn probe)",
+      "pass": true
+    },
+    {
+      "name": "memory: chat.mjs:112 legacy widget while the shop is paused (first send)",
+      "pass": true
+    },
+    {
+      "name": "memory: chat.mjs:112 legacy widget while the shop is paused (recoverTurn probe)",
+      "pass": true
+    },
+    {
+      "name": "memory: control, an allowed legacy send is admitted and reads the conversation",
+      "pass": true
+    },
+    {
+      "name": "blobs-double: chat.mjs:63 GET sales allowance from a non-site origin (first send)",
+      "pass": true
+    },
+    {
+      "name": "blobs-double: chat.mjs:87 self-service owner token from a non-workspace origin (first send)",
+      "pass": true
+    },
+    {
+      "name": "blobs-double: chat.mjs:87 self-service owner token from a non-workspace origin (recoverTurn probe)",
+      "pass": true
+    },
+    {
+      "name": "blobs-double: chat.mjs:90 self-service session for a different account (first send)",
+      "pass": true
+    },
+    {
+      "name": "blobs-double: chat.mjs:90 self-service session for a different account (recoverTurn probe)",
+      "pass": true
+    },
+    {
+      "name": "blobs-double: chat.mjs:104 legacy test channel without the owner key (first send)",
+      "pass": true
+    },
+    {
+      "name": "blobs-double: chat.mjs:104 legacy test channel without the owner key (recoverTurn probe)",
+      "pass": true
+    },
+    {
+      "name": "blobs-double: chat.mjs:108 self-service website chat paused (first send)",
+      "pass": true
+    },
+    {
+      "name": "blobs-double: chat.mjs:108 self-service website chat paused (recoverTurn probe)",
+      "pass": true
+    },
+    {
+      "name": "blobs-double: chat.mjs:111 legacy widget on a non-allowed origin (first send)",
+      "pass": true
+    },
+    {
+      "name": "blobs-double: chat.mjs:111 legacy widget on a non-allowed origin (recoverTurn probe)",
+      "pass": true
+    },
+    {
+      "name": "blobs-double: chat.mjs:112 legacy widget while the shop is paused (first send)",
+      "pass": true
+    },
+    {
+      "name": "blobs-double: chat.mjs:112 legacy widget while the shop is paused (recoverTurn probe)",
+      "pass": true
+    },
+    {
+      "name": "blobs-double: control, an allowed legacy send is admitted and reads the conversation",
+      "pass": true
+    }
+  ],
+  "realBodies": {
+    "first": {
+      "status": 403,
+      "body": {
+        "error": "paused",
+        "message": "Website chat is unavailable right now. Please use the shop’s contact details on this website.",
+        "turnNotProcessed": true
+      },
+      "accessControlAllowOrigin": "https://shop.example.test"
+    },
+    "recover": {
+      "status": 403,
+      "body": {
+        "error": "paused",
+        "message": "Website chat is unavailable right now. Please use the shop’s contact details on this website.",
+        "turnNotProcessed": false
+      },
+      "accessControlAllowOrigin": "https://shop.example.test"
+    }
+  }
+}

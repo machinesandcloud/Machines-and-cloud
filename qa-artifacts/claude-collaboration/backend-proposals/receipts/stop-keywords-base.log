@@ -28,12 +28,26 @@ FAIL  "Stop please"                                expected=stop  platform=none 
 FAIL  "Please stop"                                expected=stop  platform=none  shop=none
 FAIL  "please stop texting me"                     expected=stop  platform=none  shop=none
 FAIL  "STOP NOW"                                   expected=stop  platform=none  shop=none
-FAIL  "stop it"                                    expected=stop  platform=none  shop=none
 FAIL  "Stop sending me messages"                   expected=stop  platform=none  shop=none
 FAIL  "Quit texting me"                            expected=stop  platform=none  shop=none
 FAIL  "Remove me"                                  expected=stop  platform=none  shop=none
 FAIL  "No more texts."                             expected=stop  platform=none  shop=none
-FAIL  "stop the texts"                             expected=stop  platform=none  shop=none
+FAIL  "stop all"                                   expected=stop  platform=none  shop=none
+FAIL  "dont text me"                               expected=stop  platform=none  shop=none
+FAIL  "Don't text me again"                        expected=stop  platform=none  shop=none
+FAIL  "Do not contact me"                          expected=stop  platform=none  shop=none
+FAIL  "Please remove my number"                    expected=stop  platform=none  shop=none
+FAIL  "Take me off the list"                       expected=stop  platform=none  shop=none
+FAIL  "Remove me from your list"                   expected=stop  platform=none  shop=none
+FAIL  "No more texts please"                       expected=stop  platform=none  shop=none
+FAIL  "CANCELAR"                                   expected=stop  platform=none  shop=none
+FAIL  "Baja."                                      expected=stop  platform=none  shop=none
+FAIL  "Baja por favor"                             expected=stop  platform=none  shop=none
+FAIL  "Dejen de escribirme"                        expected=stop  platform=none  shop=none
+FAIL  "Stop texting me.\n\nSent from my iPhone"    expected=stop  platform=none  shop=none
+FAIL  "STOP\nSent from my Android"                 expected=stop  platform=none  shop=none
+FAIL  "S.T.O.P."                                   expected=stop  platform=none  shop=none
+FAIL  "STOP!!! wrong number"                       expected=stop  platform=none  shop=none
 PASS  "ALTO"                                       expected=stop  platform=stop  shop=stop
 FAIL  "Alto."                                      expected=stop  platform=none  shop=none
 FAIL  "¡Alto!"                                     expected=stop  platform=none  shop=none
@@ -83,25 +97,144 @@ PASS  "Yes"                                        expected=none  platform=none 
 PASS  "Sí"                                         expected=none  platform=none  shop=none
 PASS  "APPOINTMENTS"                               expected=none  platform=none  shop=none
 PASS  "Quote abc123"                               expected=none  platform=none  shop=none
+PASS  "It quit"                                    expected=none  platform=none  shop=none
+PASS  "It just quit"                               expected=none  platform=none  shop=none
+PASS  "It quit now"                                expected=none  platform=none  shop=none
+PASS  "All quit"                                   expected=none  platform=none  shop=none
+PASS  "quit it"                                    expected=none  platform=none  shop=none
+PASS  "quit working"                               expected=none  platform=none  shop=none
+PASS  "Mas alto"                                   expected=none  platform=none  shop=none
+PASS  "stop it"                                    expected=none  platform=none  shop=none
+PASS  "the stop"                                   expected=none  platform=none  shop=none
+PASS  "my stop"                                    expected=none  platform=none  shop=none
+PASS  "stop the texts"                             expected=none  platform=none  shop=none
+PASS  "Temperatura baja"                           expected=none  platform=none  shop=none
+PASS  "don't text, call me instead"                expected=none  platform=none  shop=none
+PASS  "remove me from the schedule"                expected=none  platform=none  shop=none
+PASS  "stop all the dripping"                      expected=none  platform=none  shop=none
 PASS  "please stop texting me, I already booked"   expected=none  platform=none  shop=none
 PASS  "Stop the service visit"                     expected=none  platform=none  shop=none
 PASS  "Para mañana por favor"                      expected=none  platform=none  shop=none
 PASS  "Necesito ayuda con mi aire"                 expected=none  platform=none  shop=none
 PASS  "No paren el servicio"                       expected=none  platform=none  shop=none
 PASS  ""                                           expected=none  platform=none  shop=none
-{"repo":"/private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp-base","cases":91,"passed":47,"failed":44,"providerReads":91,"otherRequests":0}
+PASS  "STOP"                                       expected=stop  platform=stop  shop=stop
+PASS  "STOPALL"                                    expected=stop  platform=stop  shop=stop
+PASS  "UNSUBSCRIBE"                                expected=stop  platform=stop  shop=stop
+PASS  "CANCEL"                                     expected=stop  platform=stop  shop=stop
+PASS  "END"                                        expected=stop  platform=stop  shop=stop
+PASS  "QUIT"                                       expected=stop  platform=stop  shop=stop
+MISS  "OPTOUT"                                     expected=stop  platform=stop  shop=none
+MISS  "REVOKE"                                     expected=stop  platform=stop  shop=none
+PASS  "stop"                                       expected=stop  platform=stop  shop=stop
+MISS  "Revoke."                                    expected=stop  platform=none  shop=none
+MISS  "OPT-OUT"                                    expected=stop  platform=none  shop=none
+MISS  "opt out"                                    expected=stop  platform=none  shop=none
+MISS  "Optout!"                                    expected=stop  platform=none  shop=none
+MISS  "Stop texting me"                            expected=stop  platform=none  shop=none
+MISS  "stop pls"                                   expected=stop  platform=none  shop=none
+MISS  "STOP STOP"                                  expected=stop  platform=none  shop=none
+MISS  "Unsubscribe me"                             expected=stop  platform=none  shop=none
+MISS  "please remove my number"                    expected=stop  platform=none  shop=none
+MISS  "dont text me"                               expected=stop  platform=none  shop=none
+MISS  "no more"                                    expected=stop  platform=none  shop=none
+MISS  "BAJA"                                       expected=stop  platform=none  shop=none
+MISS  "CANCELAR"                                   expected=stop  platform=none  shop=none
+MISS  "Baja por favor"                             expected=stop  platform=none  shop=none
+MISS  "STOP 🛑"                                    expected=stop  platform=none  shop=none
+MISS  "🛑 stop"                                    expected=stop  platform=none  shop=none
+PASS  "  stop  "                                   expected=stop  platform=stop  shop=stop
+PASS  "\nSTOP\n"                                   expected=stop  platform=stop  shop=stop
+MISS  "stop\n\nthanks"                             expected=stop  platform=none  shop=none
+MISS  "S T O P"                                    expected=stop  platform=none  shop=none
+MISS  "Stop!!!"                                    expected=stop  platform=none  shop=none
+MISS  "STOP."                                      expected=stop  platform=none  shop=none
+MISS  "stop texting me please"                     expected=stop  platform=none  shop=none
+MISS  "Please stop sending me messages"            expected=stop  platform=none  shop=none
+MISS  "stop messaging me"                          expected=stop  platform=none  shop=none
+MISS  "Stop contacting me"                         expected=stop  platform=none  shop=none
+MISS  "unsubscribe please"                         expected=stop  platform=none  shop=none
+MISS  "UNSUBSCRIBE ME FROM THIS LIST"              expected=stop  platform=none  shop=none
+MISS  "Remove me from your list"                   expected=stop  platform=none  shop=none
+MISS  "take me off your list"                      expected=stop  platform=none  shop=none
+MISS  "do not contact me"                          expected=stop  platform=none  shop=none
+MISS  "don't text me again"                        expected=stop  platform=none  shop=none
+MISS  "Do not text me anymore"                     expected=stop  platform=none  shop=none
+MISS  "stop texting me!!! 😡"                      expected=stop  platform=none  shop=none
+MISS  "STOP!!! wrong number"                       expected=stop  platform=none  shop=none
+MISS  "wrong number stop"                          expected=stop  platform=none  shop=none
+MISS  "Stop, I already booked"                     expected=stop  platform=none  shop=none
+MISS  "Quit texting me"                            expected=stop  platform=none  shop=none
+MISS  "please opt me out"                          expected=stop  platform=none  shop=none
+MISS  "opt me out"                                 expected=stop  platform=none  shop=none
+MISS  "no more texts please"                       expected=stop  platform=none  shop=none
+MISS  "Cancel."                                    expected=stop  platform=none  shop=none
+PASS  "End"                                        expected=stop  platform=stop  shop=stop
+MISS  "cancel all"                                 expected=stop  platform=none  shop=none
+MISS  "stop all"                                   expected=stop  platform=none  shop=none
+MISS  "Unsubscribe."                               expected=stop  platform=none  shop=none
+MISS  "stopp"                                      expected=stop  platform=none  shop=none
+MISS  "Sto p"                                      expected=stop  platform=none  shop=none
+PASS  "ALTO"                                       expected=stop  platform=stop  shop=stop
+MISS  "Alto por favor"                             expected=stop  platform=none  shop=none
+PASS  "PARAR"                                      expected=stop  platform=stop  shop=stop
+MISS  "no me manden mas mensajes"                  expected=stop  platform=none  shop=none
+MISS  "No más mensajes"                            expected=stop  platform=none  shop=none
+MISS  "dejen de escribirme"                        expected=stop  platform=none  shop=none
+PASS  "please stop by tomorrow"                    expected=none  platform=none  shop=none
+PASS  "can you stop the leak"                      expected=none  platform=none  shop=none
+PASS  "end of the day works"                       expected=none  platform=none  shop=none
+PASS  "cancel my appointment"                      expected=none  platform=none  shop=none
+PASS  "help, my pipe burst"                        expected=none  platform=none  shop=none
+PASS  "quit working"                               expected=none  platform=none  shop=none
+PASS  "My heater quit working"                     expected=none  platform=none  shop=none
+PASS  "It quit"                                    expected=none  platform=none  shop=none
+PASS  "it quit on me"                              expected=none  platform=none  shop=none
+PASS  "The AC quit"                                expected=none  platform=none  shop=none
+PASS  "please stop it"                             expected=none  platform=none  shop=none
+PASS  "stop the leak please"                       expected=none  platform=none  shop=none
+PASS  "stop it"                                    expected=none  platform=none  shop=none
+PASS  "make it stop"                               expected=none  platform=none  shop=none
+PASS  "just stop it now please"                    expected=none  platform=none  shop=none
+PASS  "the water wont stop"                        expected=none  platform=none  shop=none
+PASS  "Stop by anytime"                            expected=none  platform=none  shop=none
+PASS  "Can you stop by"                            expected=none  platform=none  shop=none
+PASS  "cancel"                                     expected=stop  platform=stop  shop=stop
+PASS  "I need to cancel"                           expected=none  platform=none  shop=none
+PASS  "Cancel please"                              expected=none  platform=none  shop=none
+PASS  "cancel my visit please"                     expected=none  platform=none  shop=none
+PASS  "Please cancel"                              expected=none  platform=none  shop=none
+PASS  "end"                                        expected=stop  platform=stop  shop=stop
+PASS  "The end"                                    expected=none  platform=none  shop=none
+PASS  "stop the water"                             expected=none  platform=none  shop=none
+PASS  "stop the drip"                              expected=none  platform=none  shop=none
+PASS  "Stop sending the tech, I fixed it"          expected=none  platform=none  shop=none
+PASS  "Stop the appointment"                       expected=none  platform=none  shop=none
+PASS  "Para mañana"                                expected=none  platform=none  shop=none
+PASS  "Alto el agua"                               expected=none  platform=none  shop=none
+PASS  "dont stop"                                  expected=none  platform=none  shop=none
+PASS  "no stop"                                    expected=none  platform=none  shop=none
+PASS  "bus stop"                                   expected=none  platform=none  shop=none
+PASS  "HELP"                                       expected=help  platform=help  shop=help
+FAIL  "help!"                                      expected=help  platform=none  shop=none
+PASS  "help me"                                    expected=none  platform=none  shop=none
+FAIL  "Info?"                                      expected=help  platform=none  shop=none
+PASS  "START"                                      expected=start platform=start shop=start
+PASS  "start"                                      expected=start platform=start shop=start
+FAIL  "Start."                                     expected=start platform=none  shop=none
+{"repo":"/private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp-base","cases":224,"required":159,"requiredFailed":61,"recallMisses":51,"qaMetrics":{"platform":{"rows":98,"tp":16,"fn":49,"fp":0,"tn":33,"recall":0.246,"precision":1},"shop":{"rows":98,"tp":14,"fn":51,"fp":0,"tn":33,"recall":0.215,"precision":1}},"providerReads":224,"otherRequests":0}
 node:internal/modules/run_main:107
     triggerUncaughtException(
     ^
 
-AssertionError [ERR_ASSERTION]: 44 keyword case(s) misclassified
+AssertionError [ERR_ASSERTION]: 61 required keyword case(s) misclassified
 
-44 !== 0
+61 !== 0
 
-    at file:///private/tmp/mc-claude-backend-proposals-20261110/qa-artifacts/claude-collaboration/backend-proposals/stop-keywords-check.mjs:93:8 {
+    at file:///private/tmp/mc-claude-backend-proposals-20261110/qa-artifacts/claude-collaboration/backend-proposals/stop-keywords-check.mjs:138:8 {
   generatedMessage: false,
   code: 'ERR_ASSERTION',
-  actual: 44,
+  actual: 61,
   expected: 0,
   operator: 'strictEqual',
   diff: 'simple'
