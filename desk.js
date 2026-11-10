@@ -279,11 +279,14 @@
   function emptyState(title, detail, actionLabel, tab) {
     return '<div class="desk-empty"><div class="desk-empty-icon"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4zM4 13h4l2 3h4l2-3h4"/></svg></div><div><strong>' + esc(title) + '</strong><p>' + esc(detail) + '</p>' + (actionLabel ? '<button type="button" class="desk-empty-action" data-route="' + esc(tab) + '">' + esc(actionLabel) + ' →</button>' : '') + '</div></div>';
   }
+  // Self-service requests show their latest follow-up state; the outcome recorded at creation is context only until the owner acts.
+  function requestFollowLabel(l) {var follow=l.followthrough,state=follow.state||{};return follow.reviewRequired?'Review updated request':state.completedAt?'Follow-up complete':follow.due?'Follow-up due':({not_recorded:'Contact not recorded',attempted:'Contact attempted',reached:'Customer reached'})[state.contact]||'Needs follow-up';}
+  function requestOutcomeLabel(l,follow) {var outcome=l.outcome||l.reason||'',state=follow&&follow.state||{};if(follow&&(outcome==='needs_action'||state.completedAt||['attempted','reached'].includes(state.contact)))return '';return String(outcome).replace(/_/g,' ');}
   function requestList(rows,selfService) {
     return '<div class="desk-request-list" role="list" aria-label="Customer requests">'+rows.map(function(l){
-      var follow=selfService&&l.followthrough,state=follow&&follow.state||{},contact=({not_recorded:'Contact not recorded',attempted:'Contact attempted',reached:'Customer reached'})[state.contact]||'Needs follow-up';
-      var status=follow?(follow.reviewRequired?'Review updated request':state.completedAt?'Follow-up complete':follow.due?'Follow-up due':contact):String(l.status||'Saved').replace(/_/g,' ');
-      var source=platformLeadLabel(l),reason=String(l.outcome||l.reason||'').replace(/_/g,' '),phone=/^\+1\d{10}$/.test(l.phone||'')?'<a href="tel:'+esc(l.phone)+'">'+esc(l.phone)+'</a>':esc(l.phone||'No contact number');
+      var follow=selfService&&l.followthrough,state=follow&&follow.state||{};
+      var status=follow?requestFollowLabel(l):String(l.status||'Saved').replace(/_/g,' ');
+      var source=platformLeadLabel(l),reason=requestOutcomeLabel(l,follow),phone=/^\+1\d{10}$/.test(l.phone||'')?'<a href="tel:'+esc(l.phone)+'">'+esc(l.phone)+'</a>':esc(l.phone||'No contact number');
       var requested=l.wanted?'<span>'+esc(l.wanted)+'</span>':'';
       return '<article class="desk-request-row" role="listitem" data-record-kind="leads" data-record-id="'+esc(l.id)+'"><div class="desk-request-person"><strong>'+esc(l.customer_name||'Customer request')+'</strong><span class="muted">'+phone+'</span>'+(source?' <span class="tag brand-lockup" data-lead-source-badge>'+brandMark(l.platform&&l.platform.source)+esc(source)+'</span>':'')+(l.websiteSetupCheck?' <span class="tag">Setup check</span>':'')+'<div class="desk-request-ref">Ref '+esc(leadReference(l))+'</div></div><div class="desk-request-job"><p>'+esc(l.issue||'Details in the saved conversation')+'</p><div class="desk-request-context">'+[l.address?'<span>'+esc(l.address)+'</span>':'',requested].filter(Boolean).join('<br>')+'</div>'+(reason?'<p class="muted">'+esc(reason)+'</p>':'')+humanHandoffStatus(l)+(l.unsure?'<p class="muted">Needs checking: '+esc(l.unsure)+'</p>':'')+(l.urgency==='emergency'?'<strong>Emergency request</strong>':'')+(l.overdueAt&&l.status==='open'?'<span class="tag-overdue">Overdue callback</span>':'')+'</div><div class="desk-request-meta"><time>'+esc(recordTimeLabel(l.createdAt))+'</time><span class="desk-request-status">'+esc(status)+'</span>'+(follow?'<button type="button" class="btn-pill btn-pill-dark btn-sm" data-request-open="'+esc(l.id)+'">View request</button>':'')+(l.alertWaiting?'<button type="button" class="btn-pill btn-pill-blue btn-sm ack" data-id="'+esc(l.id)+'">Acknowledge</button>':'')+(follow&&state.nextAction?'<span class="muted">'+esc(state.nextAction)+'</span>':'')+'</div></article>';
     }).join('')+'</div>';
@@ -758,7 +761,7 @@
     { title: 'Find your customer requests', body: 'Inbox keeps customer requests and conversations together. Review what the customer needs, then confirm the next step directly. Saved visits are in Schedule.', action: 'View Requests', tab: 'leads', target: 'requestTourHeading', compact: 'requestTourHeading', tiny: 'requestTourHeading' }
   ];
   var defaultTour = tour.slice(), tourRevealedDetails = [];
-  var tourIndex = 0, returnFocus = null, tourActive = false, tourEpoch = 0, tourFrame = 0, tourGeneration = 0, tourAnchor = null, tourObserver = null, tourResize = null, tourAnimation = null, tourWebsiteOpen = null;
+  var tourIndex = 0, returnFocus = null, tourOrigin = null, tourActive = false, tourEpoch = 0, tourFrame = 0, tourGeneration = 0, tourAnchor = null, tourObserver = null, tourResize = null, tourAnimation = null, tourWebsiteOpen = null;
   var tourMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   function tourCurrent() { return tourActive && !leaving && tourGeneration === portalGeneration && $('guideDialog').open && !$('portalContent').hidden; }
   function tourVisible(node) { return !!node && node.isConnected && node.getClientRects().length > 0 && getComputedStyle(node).visibility !== 'hidden'; }
@@ -776,9 +779,11 @@
     ['tourStep','tourTarget','tourReady','tourPlacement','tourCompact','tourFallback'].forEach(function (name) { delete $('guideDialog').dataset[name]; }); tourAnchor = null;
   }
   function closeTour(remember, restore) {
-    var anchor = tourAnchor, opener = returnFocus; tourCleanup(); if ($('guideDialog').open) $('guideDialog').close();
+    var anchor = tourAnchor, opener = returnFocus, origin = tourOrigin; tourOrigin = null; tourCleanup(); if ($('guideDialog').open) $('guideDialog').close();
     if (remember !== false) try { localStorage.setItem('mc-walkthrough-v1:' + slug, 'seen'); } catch (error) { /* Preference only, never setup proof. */ }
     if (restore === false || leaving) return;
+    // An owner closing the tour (Close, Skip, Esc, Finish) returns to the page and route it was opened from. Navigation during the tour keeps the new page.
+    if (remember !== false && origin && pageCopy[origin.tab] && document.body.dataset.activePage !== origin.tab) { showTab(origin.tab); history.replaceState(history.state, '', location.pathname + location.search + (origin.hash || '#' + origin.tab)); window.scrollTo({ top: origin.scroll, behavior: 'instant' }); }
     var destination = tourVisible(opener) ? opener : tourVisible(anchor) ? anchor.querySelector('h2,h3,h4') || anchor.closest('.card2')?.querySelector('h2,h3,h4') || anchor : $('pageTitle');
     if (tourVisible(destination)) { destination.scrollIntoView({ block: 'nearest', behavior: 'instant' }); tourFocus(destination); }
   }
@@ -837,7 +842,7 @@
   function coachAnimationAvailable() { return typeof $('tourCoach').animate === 'function'; }
   function openTour() {
     if (leaving || !data || $('portalContent').hidden || document.querySelector('dialog[open]:not(#guideDialog)')) return;
-    if (tourActive) return; returnFocus = document.activeElement; tourActive = true; tourGeneration = portalGeneration;
+    if (tourActive) return; returnFocus = document.activeElement; tourOrigin = { tab: document.body.dataset.activePage, hash: location.hash, scroll: window.scrollY }; tourActive = true; tourGeneration = portalGeneration;
     document.body.classList.add('guide-tour-open'); $('guideDialog').dataset.tourReady = 'false'; $('guideDialog').showModal();
     window.addEventListener('resize', scheduleTour); window.addEventListener('scroll', scheduleTour, true); window.addEventListener('hashchange', tourNavigation); window.addEventListener('popstate', tourNavigation); tourMotion.addEventListener('change', tourReducedMotion);
     if (window.visualViewport) { visualViewport.addEventListener('resize', scheduleTour); visualViewport.addEventListener('scroll', scheduleTour); }
@@ -986,7 +991,7 @@
       if (!location.hash && !window.__tabPicked) { showTab('today'); window.__tabPicked = true; }
 
       var needsFollowup=homeFollowupRows(d);
-      $('needsYou').innerHTML = (function () { var rows = needsFollowup; return rows.length ? rows.slice(0, 10).map(function (l) { return '<div>' + esc(l.customer_name || l.phone) + (platformLeadLabel(l)?' <span class="tag brand-lockup">'+brandMark(l.platform.source)+esc(platformLeadLabel(l))+'</span>':'') + ' (' + esc((l.outcome || '').replace('_', ' ')) + (l.urgency === 'emergency' ? ', <b>EMERGENCY</b>' : '') + (l.overdueAt ? ', <span class="tag-overdue">overdue callback</span>' : '') + ') ref ' + esc(leadReference(l)) + humanHandoffStatus(l) + (selfService&&l.followthrough?' <button type="button" class="btn-pill btn-pill-dark btn-sm" data-request-open="'+esc(l.id)+'">View request</button>':'') + (l.alertWaiting ? ' <button type="button" class="btn-pill btn-pill-blue btn-sm ack" data-id="' + esc(l.id) + '">Acknowledge</button>' : '') + '</div>'; }).join('') : emptyState(workLimited ? 'No requests need attention in the records shown' : 'No requests need attention', workLimited ? 'Some history still needs checking. Contact support if you are looking for an earlier request.' : 'Requests that need a callback, an acknowledgment or urgent attention will appear here.', 'View customer requests', 'leads'); })();
+      $('needsYou').innerHTML = (function () { var rows = needsFollowup; return rows.length ? rows.slice(0, 10).map(function (l) { return '<div>' + esc(l.customer_name || l.phone) + (platformLeadLabel(l)?' <span class="tag brand-lockup">'+brandMark(l.platform.source)+esc(platformLeadLabel(l))+'</span>':'') + ' (' + esc(selfService && l.followthrough ? requestFollowLabel(l) : (l.outcome || '').replace('_', ' ')) + (l.urgency === 'emergency' ? ', <b>EMERGENCY</b>' : '') + (l.overdueAt ? ', <span class="tag-overdue">overdue callback</span>' : '') + ') ref ' + esc(leadReference(l)) + humanHandoffStatus(l) + (selfService&&l.followthrough?' <button type="button" class="btn-pill btn-pill-dark btn-sm" data-request-open="'+esc(l.id)+'">View request</button>':'') + (l.alertWaiting ? ' <button type="button" class="btn-pill btn-pill-blue btn-sm ack" data-id="' + esc(l.id) + '">Acknowledge</button>' : '') + '</div>'; }).join('') : emptyState(workLimited ? 'No requests need attention in the records shown' : 'No requests need attention', workLimited ? 'Some history still needs checking. Contact support if you are looking for an earlier request.' : 'Requests that need a callback, an acknowledgment or urgent attention will appear here.', 'View customer requests', 'leads'); })();
       $('todayEvents').innerHTML = (d.events || []).filter(function (e) { return Date.now() - new Date(e.at).getTime() < 86400000; }).slice(0, 15).map(function (e) { return '<div>' + esc((e.at || '').slice(11, 16)) + ' ' + esc(e.type.replace(/_/g, ' ')) + (e.data && e.data.id ? ' ref ' + esc(e.data.id) : '') + '</div>'; }).join('') || emptyState('No activity in the last 24 hours', 'Customer activity appears here after it happens. Private practice is kept separate.');
       if(selfService){
         var visitsToday=d.bookings.filter(function(b){return b.date===houstonToday&&b.status!=='cancelled'&&!b.websiteSetupCheck&&!b.simulation&&!b.ownerVisitCreationAborted;}).length;
@@ -1325,7 +1330,7 @@
     event.preventDefault(); var text = $('chatIn').value.trim(); if (!text || chatBusy || !data || leaving) return;
     var practiceRevision=data.setup?.revision,practiceGeneration=portalGeneration,proofRecorded=false;
     practiceControls(true);document.dispatchEvent(new CustomEvent('mc:guide-state-change'));$('chatIn').value = '';
-    transcript.push({ role: 'user', content: text }); add('user', text); var bubble = null, full = '', finished = false;
+    var turn = { role: 'user', content: text }, question = add('user', text), bubble = null, full = '', finished = false; transcript.push(turn);
     var controller = new AbortController(), timeout = setTimeout(function () { controller.abort(); }, 60000);
     chatController = controller; showPracticePending();
     function current() { return !leaving && practiceGeneration === portalGeneration && chatController === controller; }
@@ -1334,7 +1339,7 @@
       if (!line.trim()) return;
       var out = JSON.parse(line);
       if (out.t === 'delta' && typeof out.text === 'string' && out.text) { full += out.text; if (!full.trim()) return; if (!bubble) { clearPracticePending(); bubble = add('a', ''); practiceStatus('Your front desk is replying.'); $('testPreview').textContent = 'Your reply is arriving…'; } bubble.textContent = full; msgs.scrollTop = msgs.scrollHeight; }
-      if (out.t === 'error') throw new Error(out.error === 'offline' ? 'AI service is unavailable. Your setup is saved; retry later.' : 'The practice reply could not be completed. Try a new conversation.');
+      if (out.t === 'error') throw new Error(out.error === 'offline' ? 'The AI service is unavailable right now. Your settings are saved.' : 'The practice reply could not be completed.');
       if (out.t === 'done') {
         clearPracticePending(); msgs.setAttribute('aria-busy', 'false'); practiceStatus('Reply received.'); $('chatForm').querySelector('button').textContent = 'Updating…';
         proofRecorded=out.test?.proofRecorded===true;
@@ -1350,16 +1355,24 @@
       if (!current()) return;
       if (!response.ok) {
         var failure = await response.json().catch(function () { return {}; });
+        if (response.status === 401 || response.status === 403) { document.dispatchEvent(new CustomEvent('mc:session-expired')); throw new Error('Your session expired. Sign in by email to continue.'); }
         if (response.status === 429) { await load(); throw new Error(failure.message || 'The daily practice allowance has been used. Try again after midnight Houston time.'); }
-        throw new Error(response.status === 503 ? 'AI service is unavailable. Your settings are saved.' : 'Could not start the private test. Refresh or sign in again.');
+        throw new Error(response.status === 503 ? 'The AI service is unavailable right now. Your settings are saved.' : 'The practice reply could not be started.');
       }
       var reader = response.body.getReader(), decoder = new TextDecoder(), buffer = '';
       for (;;) { var part = await reader.read(); if (part.done) break; buffer += decoder.decode(part.value, { stream: true }); var lines = buffer.split('\n'); buffer = lines.pop(); lines.forEach(receive); }
       buffer += decoder.decode(); if (buffer.trim()) receive(buffer);
-      if (!finished) throw new Error('The practice reply was interrupted. Try a new conversation.');
+      if (!finished) throw new Error('The reply did not arrive.');
       if (current()) await latestWorkspaceRead(); // Use the latest canonical revision before offering a connector continuation.
-    } catch (error) { if (current()) { var message = error.name === 'AbortError' ? 'The practice reply timed out. Try a new conversation.' : error.message; add('sys', message); practiceStatus(message); $('testPreview').textContent = message; } }
-    finally { clearTimeout(timeout); if (chatController === controller) { clearPracticePending(); chatController = null; practiceControls(false); if (!leaving && $('chatIn')) $('chatIn').focus(); if(!leaving){document.dispatchEvent(new CustomEvent('mc:guide-state-change'));if(proofRecorded&&practiceGeneration===portalGeneration&&data?.setup?.revision===practiceRevision&&data.client.setupProof?.testedRevision===practiceRevision&&data.client.setupProof?.testMode==='live'&&!cfgDirty&&!cfgBusy)document.dispatchEvent(new CustomEvent('mc:guide-step-complete',{detail:{step:'practice',revision:practiceRevision,slug:slug}}));} } }
+    } catch (error) {
+      if (current()) {
+        // An unanswered question leaves the conversation and returns to the input, so the next send stays a normal user/assistant exchange.
+        var message = error.name === 'AbortError' ? 'The reply took too long and did not arrive.' : error instanceof TypeError ? 'The reply did not arrive.' : error.message;
+        if (!finished) { if (question.isConnected) question.remove(); if (bubble && bubble.isConnected) bubble.remove(); if (!$('chatIn').value.trim()) $('chatIn').value = text; message += ' Your question is back in the message box; send it again' + (/allowance|unavailable/.test(message) ? ' when replies are available.' : '.'); }
+        add('sys', message); practiceStatus(message); $('testPreview').textContent = message;
+      }
+    }
+    finally { if (!finished) { var unanswered = transcript.indexOf(turn); if (unanswered >= 0) transcript.splice(unanswered, 1); } clearTimeout(timeout); if (chatController === controller) { clearPracticePending(); chatController = null; practiceControls(false); if (!leaving && $('chatIn')) $('chatIn').focus(); if(!leaving){document.dispatchEvent(new CustomEvent('mc:guide-state-change'));if(proofRecorded&&practiceGeneration===portalGeneration&&data?.setup?.revision===practiceRevision&&data.client.setupProof?.testedRevision===practiceRevision&&data.client.setupProof?.testMode==='live'&&!cfgDirty&&!cfgBusy)document.dispatchEvent(new CustomEvent('mc:guide-step-complete',{detail:{step:'practice',revision:practiceRevision,slug:slug}}));} } }
   });
   load().then(greet);
 })();

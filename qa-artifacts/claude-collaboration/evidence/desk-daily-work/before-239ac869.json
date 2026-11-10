@@ -1,0 +1,422 @@
+{
+  "at": "2026-11-10T03:53:25.326Z",
+  "browser": "/Users/stevengoumnai/Library/Caches/ms-playwright/chromium_headless_shell-1223/chrome-headless-shell-mac-arm64/chrome-headless-shell",
+  "deskSource": "/private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/desk-239ac869.js",
+  "servedDeskSha256": [
+    "77d7d27f4d19b914e23d507a786a2695164007c3aff61e67c11e8111dae9ba51"
+  ],
+  "qualifications": "Synthetic workspace, session and requests; actual local /api/client, /api/access and /api/chat handlers with the fake model; memory storage. Lost replies are simulated with route.abort after the actual handler ran. No model/provider/email/OAuth/purchase/deployment performed.",
+  "sourceBefore": {
+    "qa-artifacts/claude-collaboration/desk-daily-work-ui-check.mjs": "f165ac14e42c6adaa2acce35ba7a7ec3108f075d6632109969c67e7d999115ff"
+  },
+  "checks": [
+    {
+      "name": "1440px a practice reply lost after the server answers returns the question and the conversation continues",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: raw transport text\n    at failedReplyRecovers (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-daily-work-ui-check.mjs:97:10)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-daily-work-ui-check.mjs:136:50\n    at async check (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-daily-work-ui-check.mjs:72:72)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-daily-work-ui-check.mjs:135:5"
+    },
+    {
+      "name": "1440px request labels follow the follow-up state, and a completed request leaves Needs your attention",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: reached request card still says needs action: Jordan Needs\n+17135550142\nRef d65fef29bd\n\nDrain clog in kitchen\n\n12 Oak St\n\nneeds action\n\nNov 9, 2026, 9:53 PM CT\nCustomer reached\nView request\n    at file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-daily-work-ui-check.mjs:143:14\n    at async check (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-daily-work-ui-check.mjs:72:72)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-daily-work-ui-check.mjs:138:5"
+    },
+    {
+      "name": "1440px Quick tour opened from Front desk and closed with Esc returns to Front desk and the tour button",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: page after Esc {\"page\":\"today\",\"hash\":\"#today\",\"focus\":\"openGuide\"}\n\n'today' !== 'setup'\n\n    at file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-daily-work-ui-check.mjs:160:14\n    at async check (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-daily-work-ui-check.mjs:72:72)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-daily-work-ui-check.mjs:153:5"
+    },
+    {
+      "name": "390px a practice reply lost after the server answers returns the question and the conversation continues",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: raw transport text\n    at failedReplyRecovers (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-daily-work-ui-check.mjs:97:10)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-daily-work-ui-check.mjs:136:50\n    at async check (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-daily-work-ui-check.mjs:72:72)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-daily-work-ui-check.mjs:135:5"
+    },
+    {
+      "name": "390px request labels follow the follow-up state, and a completed request leaves Needs your attention",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: reached request card still says needs action: Jordan Needs\n+17135550142\nRef 9c4b0a0d74\n\nDrain clog in kitchen\n\n12 Oak St\n\nneeds action\n\nNov 9, 2026, 9:53 PM CT\nCustomer reached\nView request\n    at file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-daily-work-ui-check.mjs:143:14\n    at async check (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-daily-work-ui-check.mjs:72:72)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-daily-work-ui-check.mjs:138:5"
+    },
+    {
+      "name": "390px Quick tour opened from Front desk and closed with Esc returns to Front desk and the tour button",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: page after Esc {\"page\":\"today\",\"hash\":\"#today\",\"focus\":\"openGuide\"}\n\n'today' !== 'setup'\n\n    at file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-daily-work-ui-check.mjs:160:14\n    at async check (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-daily-work-ui-check.mjs:72:72)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-daily-work-ui-check.mjs:153:5"
+    },
+    {
+      "name": "1440px a practice reply refused with 503 returns the question without a sign-in prompt",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: the unanswered question is back in the input\n+ actual - expected\n\n+ ''\n- 'How much is drain cleaning?'\n\n    at failedReplyRecovers (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-daily-work-ui-check.mjs:99:10)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-daily-work-ui-check.mjs:166:42\n    at async check (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-daily-work-ui-check.mjs:72:72)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-daily-work-ui-check.mjs:165:36"
+    },
+    {
+      "name": "1440px a practice reply refused with 429 returns the question without a sign-in prompt",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: the unanswered question is back in the input\n+ actual - expected\n\n+ ''\n- 'How much is drain cleaning?'\n\n    at failedReplyRecovers (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-daily-work-ui-check.mjs:99:10)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-daily-work-ui-check.mjs:166:42\n    at async check (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-daily-work-ui-check.mjs:72:72)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-daily-work-ui-check.mjs:165:36"
+    },
+    {
+      "name": "1440px Quick tour closed after moving ahead returns to the page it was opened from",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n'know' !== 'leads'\n\n    at file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-daily-work-ui-check.mjs:173:12\n    at async check (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-daily-work-ui-check.mjs:72:72)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-daily-work-ui-check.mjs:168:3"
+    },
+    {
+      "name": "No physical transport, forbidden destinations or page errors",
+      "pass": true
+    }
+  ],
+  "requests": [
+    {
+      "slug": "daily-work-1",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-1",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-1",
+      "path": "/api/chat",
+      "method": "POST",
+      "roles": [
+        "user"
+      ],
+      "status": 200,
+      "fixture": "chat-lost-after-handler",
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "daily-work-2",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-2",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-2",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-2",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-2",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-2",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-2",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-2",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-2",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-2",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "request_followthrough",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-2",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-2",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-2",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-2",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-2",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-2",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-3",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-3",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-4",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-4",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-4",
+      "path": "/api/chat",
+      "method": "POST",
+      "roles": [
+        "user"
+      ],
+      "status": 200,
+      "fixture": "chat-lost-after-handler",
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "daily-work-5",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-5",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-5",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-5",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-5",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-5",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-5",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-5",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-5",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-5",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "request_followthrough",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-5",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-5",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-5",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-5",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-5",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-5",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-6",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-6",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-7",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-7",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-7",
+      "path": "/api/chat",
+      "method": "POST",
+      "roles": [
+        "user"
+      ],
+      "status": 503,
+      "fixture": "chat-503"
+    },
+    {
+      "slug": "daily-work-8",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-8",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-8",
+      "path": "/api/chat",
+      "method": "POST",
+      "roles": [
+        "user"
+      ],
+      "status": 429,
+      "fixture": "chat-429"
+    },
+    {
+      "slug": "daily-work-8",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-8",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-9",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-9",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    }
+  ],
+  "pageErrors": [],
+  "forbidden": [],
+  "physicalNetwork": 0,
+  "screenshots": [
+    "scratchpad/claude-daily-before-239ac869-failure-1.png",
+    "scratchpad/claude-daily-before-239ac869-failure-2.png",
+    "scratchpad/claude-daily-before-239ac869-failure-3.png",
+    "scratchpad/claude-daily-before-239ac869-failure-4.png",
+    "scratchpad/claude-daily-before-239ac869-failure-5.png",
+    "scratchpad/claude-daily-before-239ac869-failure-6.png",
+    "scratchpad/claude-daily-before-239ac869-failure-7.png",
+    "scratchpad/claude-daily-before-239ac869-failure-8.png",
+    "scratchpad/claude-daily-before-239ac869-failure-9.png"
+  ],
+  "sourceAfter": {
+    "qa-artifacts/claude-collaboration/desk-daily-work-ui-check.mjs": "f165ac14e42c6adaa2acce35ba7a7ec3108f075d6632109969c67e7d999115ff"
+  },
+  "sourceStable": true,
+  "summary": {
+    "passed": 1,
+    "failed": 9,
+    "total": 10,
+    "physicalNetwork": 0,
+    "pageErrors": 0
+  }
+}
