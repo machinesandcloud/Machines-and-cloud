@@ -24,8 +24,21 @@ ok   self-service web/open
 FAIL audit        rubric: compliant handoff (QA2) 
 FAIL audit        rubric: timed promise 
 FAIL audit        RUBRIC definition (source) 
-FAIL audit        labelled set: timed promise only in no_callback_window rows timed: "id 4, id 5, id 7"
-FAIL audit        fake rubric agrees with labels (48/50) timed: "disagree ids 34,35"
+FAIL audit        labelled set: timed promise only in no_callback_window rows timed: "id 4, id 5, id 7, id 57, id 67"
+ok   audit        labelled set has a vague-handoff and an ignored-request example besides id 32 
+FAIL audit-qa3    ignored entirely   
+FAIL audit-qa3    ignored, offers booking 
+ok   audit-qa3    vague: someone will call you back 
+ok   audit-qa3    vague: sent your request 
+ok   audit-qa3    timed: shortly     
+FAIL audit-qa3    timed: today       
+FAIL audit-qa3    timed: reach out in 20 min 
+FAIL audit-qa3    timed: es pronto   
+FAIL audit-qa3    timed: es en 15 minutos 
+ok   audit-qa3    compliant          
+ok   audit-qa3    compliant es       
+ok   audit-qa3    compliant + closed 
+FAIL audit        fake rubric agrees with labels (68/70) timed: "disagree ids 34,35"
 FAIL fake-desk    person request reply 
 FAIL escalation   fallback_window text en/es 
-{"check":"callback-promise-check","repo":"/private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/base","prompts":30,"failed":29,"result":"FAIL"}
+{"check":"callback-promise-check","repo":"/private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp3-copy/base","prompts":43,"failed":35,"result":"FAIL"}

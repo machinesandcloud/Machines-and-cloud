@@ -36,10 +36,10 @@ index 2aaa6aa..1acd6a5 100644
  - Never invent prices, discounts, availability, or guarantees. Never say anything negative about other companies.`;
  }
 diff --git a/netlify/functions/lib/desk.mjs b/netlify/functions/lib/desk.mjs
-index b2f0aeb..5be20b8 100644
+index b2f0aeb..75e853e 100644
 --- a/netlify/functions/lib/desk.mjs
 +++ b/netlify/functions/lib/desk.mjs
-@@ -15,6 +15,31 @@ import { queueCalendarBooking, dispatchCalendarDeliveryWave } from "./calendar-d
+@@ -15,6 +15,35 @@ import { queueCalendarBooking, dispatchCalendarDeliveryWave } from "./calendar-d
  import { strictRead } from "./accounts.mjs";
  import { atomicUpdate } from './store.mjs';
  
@@ -48,6 +48,10 @@ index b2f0aeb..5be20b8 100644
 +// calls, so `ok` means the provider accepted the message; handset delivery is not confirmed.
 +const sendResults = new WeakMap();
 +const noteSends = (record, outcome) => { if (record && typeof record === "object") sendResults.set(record, outcome); };
++// A provider call that throws (network error) after the record is saved counts as "not sent", so the rest of the
++// tool still runs (the owner alert, the consent and reminder clean-up) instead of aborting the turn.
++const sentOrThrown = async (send) => { try { return await send(); } catch (e) { return { ok: false, reason: "send_error", error: String(e?.message || e).slice(0, 120) }; } };
++const alertOwner = async (c, text, opts) => { try { return await notifyOwner(c, text, opts); } catch (e) { return [{ ok: false, reason: "send_error", error: String(e?.message || e).slice(0, 120) }]; } };
 +export function deliveryNote(c, record) {
 +  const owner = c.owner?.name || "the owner", Owner = c.owner?.name || "The owner";
 +  const o = sendResults.get(record);
@@ -71,7 +75,7 @@ index b2f0aeb..5be20b8 100644
  async function queueSavedDelivery(c, record, kind) {
    if (!isSelfServiceClient(c) || record.websiteSetupCheck || record.simulation) return;
    // Provider work is recoverable from source records; a queue outage cannot roll back a booking.
-@@ -215,11 +240,13 @@ async function scheduleReminders(c, b) {
+@@ -215,11 +244,13 @@ async function scheduleReminders(c, b) {
    if (!b.date) return;
    const day = bookingDay(b); const { start } = windowHours(b.window);
    const startAt = new Date(houstonISO(day, start)).getTime();
@@ -87,7 +91,7 @@ index b2f0aeb..5be20b8 100644
  }
  export async function runVisitCheck(c, task) {
    const b = await getRecord("bookings", c.slug, task.data?.bookingId);
-@@ -296,12 +323,12 @@ export async function bookVisit(c, input, ctx = {}) {
+@@ -296,12 +327,12 @@ export async function bookVisit(c, input, ctx = {}) {
      await finishBookingWindow(c, bookingId, { ...taken, slot: taken.previous[0] || '', release: !taken.previous.length });
      return { full: true, reason: error.code, message: 'Nothing was booked. ' + error.message };
    }
@@ -102,14 +106,14 @@ index b2f0aeb..5be20b8 100644
        // consent: told at booking, recorded on the booking
        const { consentLine } = await import("./config.mjs");
        b.consent = { at: new Date().toISOString(), channel: ctx.channel || "web", phone: b.phone, wording: consentLine(c) };
-@@ -311,10 +338,16 @@ export async function bookVisit(c, input, ctx = {}) {
+@@ -311,10 +342,16 @@ export async function bookVisit(c, input, ctx = {}) {
    } finally { if (canFinish) { if (stable) await finishStableBookingWindow(c, bookingId, ctx.managedActionId); else await finishBookingWindow(c, bookingId, taken); } }
    await savedRecordEvidence(ctx, 'bookings', b);
    await queueSavedDelivery(c, b, "bookings");
 -  if (!portalOnly && b.phone && ctx.channel !== "sms") {
 -    await sendSMS({ to: b.phone, client: c, type: "confirmation", body: str("confirmation", b)(c, b) });
 +  let customerText;
-+  if (!portalOnly && ctx.channel !== "sms") customerText = b.phone ? await sendSMS({ to: b.phone, client: c, type: "confirmation", body: str("confirmation", b)(c, b) }) : { ok: false, reason: "missing" };
++  if (!portalOnly && ctx.channel !== "sms") customerText = b.phone ? await sentOrThrown(() => sendSMS({ to: b.phone, client: c, type: "confirmation", body: str("confirmation", b)(c, b) })) : { ok: false, reason: "missing" };
 +  if (customerText && !customerText.ok) {
 +    // The texting disclosure travels with the confirmation text (and the model now skips the spoken line when
 +    // it fails), so nothing was disclosed: do not keep a consent record or send reminder texts on it.
@@ -118,41 +122,49 @@ index b2f0aeb..5be20b8 100644
 +    reminders = [];
    }
 -  if (!portalOnly) await notifyOwner(c, ownerSummary(c, "booking", b), { type: "owner_alert" });
-+  if (!portalOnly) noteSends(b, { ownerAlert: await notifyOwner(c, ownerSummary(c, "booking", b), { type: "owner_alert" }), ...(customerText ? { customerText, reminders } : {}) });
++  if (!portalOnly) noteSends(b, { ownerAlert: await alertOwner(c, ownerSummary(c, "booking", b), { type: "owner_alert" }), ...(customerText ? { customerText, reminders } : {}) });
    await logEvent(c, "booking", { id: b.id, channel: ctx.channel, ...(ctx.websiteSetupCheck ? { setupCheck: true } : {}) });
    // A customer who books no longer needs a callback: close their open leads from the last 24 hours.
    const since = Date.now() - D;
-@@ -413,7 +446,7 @@ export async function flagLead(c, input, ctx = {}) {
+@@ -413,7 +450,7 @@ export async function flagLead(c, input, ctx = {}) {
      await savedRecordEvidence(ctx, 'leads', prior);
      await queueSavedDelivery(c, prior, "leads");
      if (!portalOnly) {
 -      if (changed.length) await notifyOwner(c, `UPDATE ref ${prior.id} (${changed.join(", ")}):\n` + ownerSummary(c, prior.reason, prior), { type: "owner_alert" });
-+      noteSends(prior, changed.length ? { ownerAlert: await notifyOwner(c, `UPDATE ref ${prior.id} (${changed.join(", ")}):\n` + ownerSummary(c, prior.reason, prior), { type: "owner_alert" }) } : { merged: true });
++      noteSends(prior, changed.length ? { ownerAlert: await alertOwner(c, `UPDATE ref ${prior.id} (${changed.join(", ")}):\n` + ownerSummary(c, prior.reason, prior), { type: "owner_alert" }) } : { merged: true });
        const waiting = (await workspaceRows(c,"alerts",100)).some((a) => a.leadId === prior.id && a.status === "waiting");
        if (reason !== "status_check" && !waiting && (prior.urgency === "emergency" || prior.reason === "wants_call")) await openAlert(c, prior, prior.reason === "wants_call" ? "wants_call" : "emergency");
      }
-@@ -434,7 +467,7 @@ export async function flagLead(c, input, ctx = {}) {
+@@ -434,7 +471,7 @@ export async function flagLead(c, input, ctx = {}) {
    await queueSavedDelivery(c, l, "leads");
    if (!portalOnly && reason !== "spam") {
      if (reason === "wants_call" || reason === "handoff") { await trackCallback(c, l); await saveRecord("leads", l); }
 -    await notifyOwner(c, ownerSummary(c, reason, l), { type: "owner_alert" });
-+    noteSends(l, { ownerAlert: await notifyOwner(c, ownerSummary(c, reason, l), { type: "owner_alert" }) });
++    noteSends(l, { ownerAlert: await alertOwner(c, ownerSummary(c, reason, l), { type: "owner_alert" }) });
      const urgent = reason !== "status_check" && (reason === "emergency" || reason === "wants_call" || input.urgency === "emergency");
      if (urgent) await openAlert(c, l, reason === "wants_call" ? "wants_call" : "emergency");
      if (PLANS[c.plan]?.followUp && l.phone && reason === "lead") {
-@@ -650,13 +683,13 @@ export async function rescheduleVisit(c, b, date, window) {
+@@ -643,20 +680,20 @@ export async function rescheduleVisit(c, b, date, window) {
+   try {
+     await cancelTasks(c.slug, (t) => ["reminder_24h", "reminder_1h", "visit_check"].includes(t.type) && t.data?.bookingId === b.id);
+     if (!portalOnly) {
+-      await scheduleReminders(c, b);
++      if (!b.textsHeld) await scheduleReminders(c, b); // no consent was recorded at booking (04): keep reminders off
+       try { if (b.calendarEventId) await updateEvent(c, b); } catch (e) { await calendarFailed(c, b, e, "update"); }
+     }
+     try { await saveRecord("bookings", b, { capacityClaim: claim }); }
      catch (err) { canFinish = false; throw err; }
    } finally { if (canFinish) await finishBookingWindow(c, b.id, claim); }
    await queueSavedDelivery(c, b, "bookings");
 -  if (!portalOnly) await notifyOwner(c, `${c.business.name} front desk: RESCHEDULED ref ${b.id} to ${when(b)} (was ${old}).\nCustomer: ${b.customer_name} ${b.phone}\nWhere: ${b.address}\nIssue: ${b.issue}`, { type: "owner_alert" });
-+  if (!portalOnly) noteSends(b, { ownerAlert: await notifyOwner(c, `${c.business.name} front desk: RESCHEDULED ref ${b.id} to ${when(b)} (was ${old}).\nCustomer: ${b.customer_name} ${b.phone}\nWhere: ${b.address}\nIssue: ${b.issue}`, { type: "owner_alert" }) });
++  if (!portalOnly) noteSends(b, { ownerAlert: await alertOwner(c, `${c.business.name} front desk: RESCHEDULED ref ${b.id} to ${when(b)} (was ${old}).\nCustomer: ${b.customer_name} ${b.phone}\nWhere: ${b.address}\nIssue: ${b.issue}`, { type: "owner_alert" }) });
    await logEvent(c, "rescheduled", { id: b.id, from: old, to: `${b.date} ${b.window}` });
    return b;
  }
  
  export async function cancelRequest(c, b) {
 -  await notifyOwner(c, `${c.business.name} front desk: NEEDS ACTION. ${b.customer_name || b.phone} wants to cancel ref ${b.id} (${when(b)}, ${b.issue}). Reply "cancel ${b.id}" to cancel it.`, { type: "owner_alert" });
-+  noteSends(b, { ownerAlert: await notifyOwner(c, `${c.business.name} front desk: NEEDS ACTION. ${b.customer_name || b.phone} wants to cancel ref ${b.id} (${when(b)}, ${b.issue}). Reply "cancel ${b.id}" to cancel it.`, { type: "owner_alert" }) });
++  noteSends(b, { ownerAlert: await alertOwner(c, `${c.business.name} front desk: NEEDS ACTION. ${b.customer_name || b.phone} wants to cancel ref ${b.id} (${when(b)}, ${b.issue}). Reply "cancel ${b.id}" to cancel it.`, { type: "owner_alert" }) });
    await logEvent(c, "cancel_requested", { id: b.id });
    return b;
  }

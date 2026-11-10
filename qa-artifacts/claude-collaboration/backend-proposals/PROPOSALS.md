@@ -24,7 +24,19 @@ None of their hunks overlap.
 | 04, 05, 07 | Accepted with notes | Reworked: consent gap, audit rubric, escalation text, texting offer |
 | 03 | Rejected | Rewritten: word-list trim removed, structural filter only |
 
-Revision 1 receipts are in `receipts/rev1/`, and QA2's probes rerun on revision 2 are in `receipts/qa2-probes-rev2/`. **04 and 05 must ship together, and voice needs an `updateVoicePrompt` re-sync after deploy** (see proposal 4).
+Revision 1 receipts are in `receipts/rev1/`, and QA2's probes rerun on revision 2 are in `receipts/qa2-probes-rev2/`.
+
+**Revision 3** follows the QA3 verdicts in `qa3/VERDICTS.txt`:
+
+| Proposal | QA3 verdict | Revision 3 |
+|---|---|---|
+| 03 | Rejected (close) | QA3's experiment adopted (labelled-note and field-value rules removed, prefix required before a spaced tool name, newline ends a sentence). Clause-level drop for "Call 911; notify_owner done." |
+| 04 | Accept with notes | A network error counts as not sent and the owner is still alerted. An SMS reschedule keeps held reminders off. PROPOSALS.md corrected. |
+| 05 | Accept with notes | Labelled ids 71 (vague) and 72 (ignored) added. The fake classifier handles today, shortly, reach out and pronto. |
+| 07 | Accept with notes | Unchanged. The low "reply to our earlier text" case is documented. |
+| 06 | — | Unchanged. |
+
+Acceptance receipts at their usual names are now revision 3 runs. QA3's probes rerun on revision 3 are in `receipts/qa3-probes-rev3/`, and the revision 3 regressions are in `receipts/rev3-regress-*`. **04 and 05 must ship together, and voice needs an `updateVoicePrompt` re-sync after deploy** (see proposal 4).
 
 Everything ran offline: memory store or an in-process Blobs double, `MC_FAKE_MODEL=1`, provider env removed, and outbound networking denied. The only network access was reading the CTIA PDF. Browser runs used the bundled `chrome-headless-shell-1223`.
 
@@ -260,7 +272,15 @@ I checked this by reading the code and by an access log.
 
 ---
 
-## Proposal 3: never drop safety text when trimming SMS replies (revision 2)
+## Proposal 3: never drop safety text when trimming SMS replies (revision 3)
+
+**Revision 3 (QA3 verdict: REJECTED, close; `qa3/VERDICTS.txt`).** QA3's new probe showed that revision 2 still dropped 11 safety instructions. All of them came from the labelled-note and field-value rules ("Have address: get outside first.", "Got address, head next door."), from an unprefixed spaced tool name ("Notify owner of the building and leave the unit now."), or from a label that swallowed the next line when no period ended it. Revision 3 adopts QA3's experiment (`qa3/experiment-p03b-*.log`) and goes one step further:
+- the **labelled-note and field-value rules are removed**;
+- a spaced tool name counts only after a **now, next, then or call/use/run prefix**;
+- **a newline also ends a sentence**, so a dropped first line can never take the next line with it;
+- **beyond QA3's experiment:** inside a tool-naming sentence, only the `;` clauses that name the tool are removed. So "Call 911; notify_owner done. Ray has your request." now arrives as "Call 911. Ray has your request." instead of losing "Call 911".
+
+The sections below describe revision 2. Where revision 3 differs, it says so.
 
 Source: review finding R1. **Revision 1 was REJECTED by QA2** (`qa2/sms-trim-probe-p03.log`). Its safety guard was a word list, so it still dropped 19 of 24 dangerous first sentences ("Now don't touch any light switches.", "Call 9-1-1 right away."). It also let 10 of 13 planning notes leak. Revision 2 replaces the approach: it removes the word-list trim instead of guarding it. Revision 1 receipts are in `receipts/rev1/`.
 
@@ -290,11 +310,11 @@ So the content trim only ever acts on the **final** turn, where the model is ans
 - **A structural last-resort filter replaces it.** It drops leading sentences, one after another, only when a sentence has a shape that no customer instruction can have:
   - **it names an internal tool:**
     - an identifier: `book_visit`, `notify_owner`, `update_visit`, `get_availability`, `bookVisit`, `notifyOwner`, `updateVisit`, `getAvailability`, `flagLead`;
-    - or a sentence that *starts* with a spaced tool name ("Now notify owner…", "Now call book visit.");
+    - or a sentence that starts with now, next, then or call/use/run followed by a spaced tool name ("Now notify owner…", "Now call book visit."). **Revision 3:** the prefix is required, so "Notify owner of the building and leave the unit now." is kept. In a tool-naming sentence, only the `;` clauses that name the tool are dropped;
   - **it is a bare field checklist:** optional now/next/ok, then optional have/got/need/missing/ask/collect, then only field words (name, phone, number, address, issue, problem, window, date, time, email, zip, urgency) joined by `, ; / & and`, optionally followed by a status word. Examples: "Have name, address, issue, window.", "Phone filled automatically.", "Next ask window.", "Have phone and address.", "Have address; emergency flagged.";
-  - **it is a labelled note:** "Have issue: water heater leaking outside.";
-  - **it is a field-value note:** "Got address, gas furnace." The value segments are at most 3 words each, the sentence is at most 7 words, and **no segment contains a word that could start an instruction** (get, leave, call, go, stay, open, turn, shut, don't, please, out, outside, away, you, everyone…). Any such word keeps the sentence;
+  - ~~a labelled note ("Have issue: water heater leaking outside.")~~ and ~~a field-value note ("Got address, gas furnace.")~~: **removed in revision 3**, because QA3 showed both shapes can carry an instruction ("Have address: get outside first.", "Got address, head next door.");
   - **it is one of two exact notes:** "(Now) flag emergency/urgent/lead/spam" and "(Now) book it (now)".
+- **Sentences end at `. ! ?` followed by whitespace, or at a newline** (revision 3).
 - **A question is never dropped.** If dropping would leave 10 characters or fewer, nothing is dropped. The `reply_trimmed` event is kept and now lists every dropped sentence.
 
 ### Evidence
@@ -325,12 +345,39 @@ PASS requires safetyDropped = 0 **and** noteLeaked = 0.
   - planning leaked: **5 of 13** (revision 1: 10 of 13);
   - "Next ask window.": no longer leaks (it leaked on base and on revision 1).
 
+### Revision 3 evidence
+`sms-trim-safety-check.mjs` (revision 3) now has **108 cases**: my 40, QA2's 39 and **QA3's 29, all required**. In QA3's set, 22 must be sent unchanged. Five start with a genuine checklist note, which is dropped while the safety text after it must arrive intact: "Have address⏎Leave the house…", "Need address and phone. Leave the house first…", "Have address. Now get out.", "Ok, address and phone confirmed. Please stay outside…" and "Then notify owner of the property right away. Get outside first." The last case, "Call 911; notify_owner done. …", must arrive exactly as "Call 911. Ray has your request.".
+
+Two internal notes that revision 2 caught now reach the customer, because the rules that caught them were removed. They are counted separately as **labelNoteLeaked**: "Got address, gas furnace." and "Have issue: water heater leaking outside.".
+
+| Copy | safetyDropped | noteLeaked | labelNoteLeaked | narrationLeaked | Result | Receipt |
+|---|---|---|---|---|---|---|
+| Base | **64 of 83** required cases (my 24, QA2 24, QA3 16) | 2 | 0 | 0 | **FAIL** | `receipts/sms-trim-safety-base.{log,json}` |
+| `03` rev 3 alone | **0** (QA3 rows: 0 of 29) | **0** | 2 (accepted) | 9 | **PASS** | `receipts/sms-trim-safety-patched.{log,json}` |
+| All seven | **0** | **0** | 2 | 9 | **PASS** | `receipts/sms-trim-safety-all-seven.{log,json}` |
+
+**QA3's probe, rerun unchanged** (`receipts/qa3-probes-rev3/qa3-sms-trim-probe-{p03,all}.log`): `safetyAltered` is 6 of 29. Revision 2 had 17. QA3's experiment had 6, of which 1 really lost safety text. All 6 changes are drops of a leading note, and **every safety sentence arrives verbatim**:
+- 5 are the checklist cases above;
+- the sixth is "Call 911; notify_owner done.", which is now sent as "Call 911. Ray has your request.".
+
+**QA2's probe, rerun unchanged:** 26 of 26 keep rows pass. 9 trim rows "fail" by its first-sentence-only rule:
+- 5 narration lines;
+- the 2 accepted label notes;
+- the 2 two-note cases, where both notes are dropped.
+
+**Residual risk in `runAgent` (`qa3/qa3-pretool-leak-probe.log`, rerun in `receipts/qa3-probes-rev3/qa3-pretool-leak-probe-p03.log`).** `runAgent` withholds a turn's text only when `stop_reason === "tool_use"`. If the model writes the S1-21 note and the turn is cut off by **max_tokens**, or ends in a **refusal**, the note is delivered:
+- **base** sends 2 of its 3 sentences;
+- **revision 3** sends all of it under max_tokens, because the remainder would be under 10 characters, and "Book." under a refusal.
+
+This needs the model to write a planning note *and* hit max_tokens or a refusal in the same turn, so it is rare. The fix belongs in `runAgent`: also withhold a turn's text when its content holds a `tool_use` block. `runAgent` is shared by every channel, including managed SMS and self-service, so I did **not** change it here. It is listed for Codex as a one-line follow-up.
+
 ### Why not 0 narration leaks
 The 9 narration lines are first-person sentences a customer can read without harm or confusion. Trimming them needs a meaning-based rule. "Booking smoke detector install now." versus "Now get the family out." is the same problem that sank revision 1, so I did not add one. The S1-21 note itself (pre-tool text) never reaches the customer, because of `dropToolPreamble`.
 
 ### Risks
 - **The shape rules are policy.** Adding a field word or a status word widens the trim. Any new rule must not be able to match an instruction.
-- **A mixed sentence would be dropped.** If the model wrote a safety instruction and a tool identifier in the *same* sentence ("Call 911; notify_owner done."), the whole sentence would be dropped. None of the 79 cases does this, and the model never sees tool identifiers as customer vocabulary. Removing the identifier rule would avoid this risk at the cost of leaking "Now call book_visit."
+- **A mixed sentence.** Revision 3 keeps the `;` clauses that do not name a tool ("Call 911; notify_owner done." becomes "Call 911."). A sentence that joins safety text and a tool name **without** a `;` ("Call 911, notify_owner done." or "Call 911 then notify_owner.") is still dropped whole. No case in QA2 or QA3 has this shape. Splitting on commas would leak note fragments.
+- **"Then notify owner of the property…"** is dropped as a tool note when it is the first sentence (QA3 accepted this). A renter told to notify the property owner loses that sentence, but not any safety text that follows it.
 
 ---
 
@@ -391,7 +438,19 @@ For legacy tenants, `sendSMS` and `sendEmail` are **synchronous, awaited provide
   - "No reminder text is scheduled because the visit is too soon."
 
   Before, it said "reminder texts are scheduled" even for a visit an hour away. On a failed confirmation the note says: "…was not sent, so no reminder texts will be sent and texting consent was not recorded."
-- **Not changed:** if the provider call *throws* (a network error), `bookVisit` still throws after saving. QA2's probe shows the consent record is already not kept in that case, but the reminders stay scheduled. Fixing that needs a try/catch around the send. Owner decision: whether to treat a thrown send as "not sent".
+- ~~Not changed: a thrown send~~. **Corrected in revision 3.** Revision 2 said "QA2's probe shows the consent record is already not kept". That was wrong: the probe read the booking from a call that threw. QA3 checked the stored record. On a network error, revision 2 (and base) **kept** the consent record and **both** reminders, and **never alerted the owner**, because the throw skipped `notifyOwner`.
+
+### Revision 3 (QA3 notes)
+- **A thrown send counts as "not sent".** In `desk.mjs`:
+  - `sentOrThrown()` wraps the confirmation send;
+  - `alertOwner()` wraps every owner alert behind a tool result (booking, new or updated lead, reschedule, cancel request).
+
+  A network error therefore becomes `{ ok:false, reason:"send_error" }`. The booking then drops its consent, records `textsHeld: { reason: "send_error" }`, cancels its reminders, **still sends the owner alert**, and the tool result tells the truth. Before, a throw made `runAgent` report "outcome unconfirmed" and the owner heard nothing.
+- **SMS reschedule of a held booking.** `rescheduleVisit` used to call `scheduleReminders` again, which brought the reminders back with no consent. It now skips them while `b.textsHeld` is set. One line.
+- **Evidence:**
+  - `tool-result-truth-check.mjs` now has **45 checks**. The new ones: the customer text throws, on web and on voice, while the owner alert is accepted; every send throws, for both `book_visit` and `notify_owner`; and an SMS reschedule of a held booking must leave no reminder tasks. Base fails 45 of 45 (22 false claims), `04` rev 3 passes 45 of 45, and all seven pass 45 of 45.
+  - **QA3's consent probe, rerun** (`receipts/qa3-probes-rev3/qa3-consent-reminder-probe-p04.log`): case D (network error on the customer text) now shows `storedConsent:false`, `textsHeld:"send_error"`, no reminder tasks and `ownerAlerted:true`. Cases A, B, C, E and F are unchanged.
+- **Still open (owner decision):** a held booking stays held. If the customer later opts in by text, nothing reinstates its reminders.
 
 ### Evidence
 `tool-result-truth-check.mjs` calls the real handlers in-process:
@@ -430,7 +489,7 @@ It also adds a booking less than 24 hours away (tomorrow 8 to 12), for 40 checks
 - **The tool-result text is longer.** With a real model, the "Do not tell the customer…" line is an instruction. The fake model cannot show that the real model obeys it.
 - **Fewer reassurances when texting is not set up.** In a legacy shop with no Twilio or Resend configuration, the model will now say "saved for Ray to review" instead of "Ray has been texted". That is the point of the change, but the owner will see it.
 - **The WeakMap depends on object identity.** The note is attached to the exact object that `bookVisit`, `flagLead`, `rescheduleVisit` or `cancelRequest` returns. A future caller that clones the record before calling `deliveryNote` gets the "not confirmed" wording. That is fail-safe.
-- **A thrown provider call still propagates.** If the provider POST throws (a network error rather than an HTTP error), `notifyOwner` throws after the record is saved, just as at base. `runAgent` then gives the model its existing "outcome is unconfirmed" text (`lib/agent.mjs:10`). I did not change that path.
+- **A thrown provider call (revision 3).** A network error on the confirmation text or on an owner alert is caught and reported as not sent (`send_error`). The tool result stays truthful and the owner alert still runs. Other throws (for example in the store) still propagate to `runAgent`'s existing "outcome unconfirmed" text (`lib/agent.mjs:10`).
 - **Twilio acceptance is not delivery.** The wording says so. Delivery receipts (status callbacks) are not read anywhere for legacy tenants.
 
 ---
@@ -462,6 +521,18 @@ Source: review finding R3. This was easy and isolated: two files and prompt word
 - **Fake classifier (`lib/fake-model.mjs` audit branch).** It flags a timed call promise, or a vague handoff that never says follow-up. It agrees with all 50 labels. The Spanish accent bug ("llamará" with `\b`) is handled.
 - **Fake desk.** It no longer falls back to "within 30 minutes". It mirrors the prompt: "Ray will get your details and follow up", or "Ray recibirá sus datos y le dará seguimiento".
 - **Escalation text (`desk.mjs:85`, `:90`, sent at `:574-576` when the owner has not acknowledged an alert).** It now reads "we have your request and Ray has your details and will follow up", or "recibimos su solicitud; Ray tiene sus datos y le dará seguimiento". `callbackPromise` is still computed for the owner-side overdue tracking.
+
+### Revision 3 (QA3 notes)
+- **New labelled examples.** These are appended to `LABELLED_2` as new ids; the timed-promise rewrites are kept.
+  - **id 71:** a vague handoff ("Someone will reach out. What is your number?").
+  - **id 72:** a request for a person that is ignored ("I need to talk to a person, not a bot." answered only with booking questions).
+- **Fake classifier.** It now also flags:
+  - "will call you today", "shortly", "reach out in 20 minutes" and "le llamará pronto";
+  - a vague "someone will reach out";
+  - a request for a person that gets no handoff at all.
+
+  It agrees with `no_callback_window` on all 70 labelled examples in both sets.
+- **Evidence.** `callback-promise-check.mjs` now has **43 rows**. The new ones: QA3's 12 audit phrasings, verbatim; agreement over both labelled sets; and a row requiring vague and ignored examples besides id 32. Base fails 35 of 43, `05` rev 3 passes 43 of 43, and all seven pass 43 of 43. QA3's audit probe, rerun, gives **12 of 12** on p05 and on all seven (it was 7 of 12; `receipts/qa3-probes-rev3/qa3-audit-rubric-probe-*.log`).
 
 ### Evidence
 `callback-promise-check.mjs` assembles the real prompts:
@@ -634,6 +705,9 @@ The **reference check itself**, copied unmodified into the throwaway copies, giv
 
 Receipts: `receipts/ref-missed-call-textback-{p07,all}.log`.
 
+### Note (QA3, low, not changed)
+"Please reply to our earlier text" is also said when the earlier text-back was only **logged**, which happens when no sender is configured. In that case no text ever reached the caller. In production that needs a shop with no sender, or a global SMS outage. A Twilio "accepted" is also not proof of delivery (for example, to a landline). The line still says "or call back", so the harm is low. The fix would be to store the text-back only when `r.ok`, which changes the 24-hour rule for development shops, so I left it for the owner.
+
 ### Risks
 - **Callers hear the promise less often.** They now hear it only when Twilio accepted the text. With texting not set up (dev or test shops), no caller hears it.
 - **The provider error goes to the owner.** The note includes Twilio's error message (up to 120 characters). It goes only to the owner's own phone or email.
@@ -653,23 +727,31 @@ Receipts: `receipts/ref-missed-call-textback-{p07,all}.log`.
 - **How each script ran.** From the copy root, under `env -i` (PATH and HOME only), with a 300 s alarm. The egress preload `receipts/p345-block-egress.mjs` refused every non-loopback connection. Each script got a fresh `--output scratchpad/<name>-bp2rg.json`, or a positional path for the four scripts that read `argv[2]`. Browser scripts also got `--playwright` pointing at the installed npx Playwright, using the bundled chromium-1223. Runners: `receipts/p345-regress-runner.sh` and `receipts/p345-regress-runner-browser.sh`.
 - **What counted as "the same as base".** For each script: the same exit code, and the same multiset of verdict tokens in its log (`"pass":true/false`, `passed`/`failed` counts, `ok`/`PASS`/`FAIL` lines). The only remaining log differences are timestamps, source hashes of the patched files, random refs, and `smoke`'s module count (137 vs 138; `01` adds a module).
 
-### Results (revision 2; revision 1 runs are in `receipts/rev1/regress/`)
+### Results (revision 3; earlier runs are in `receipts/rev2-regress-*` and `receipts/rev1/regress/`)
 
 | Copy | Non-browser (74) | Browser (43) | Same as base? |
 |---|---|---|---|
 | Base dfb0ae78 | 68 pass, 6 fail | 17 pass, 26 fail | n/a |
-| `03` rev 2, `04` rev 2, `05` rev 2 and `07` rev 2, each alone | 68 / 6 | not run alone | **yes**, 0 exit-code and 0 verdict differences |
-| `06` alone (unchanged since revision 1) | 68 / 6 | not run alone | **yes** (`receipts/p67-regress-p06/`) |
-| All seven (revision 2) | 68 / 6 | 17 / 26 | **yes**, browser included |
+| `03` rev 3, `04` rev 3 and `05` rev 3, each alone | 68 / 6 | not run alone | **yes**, 0 exit-code and 0 verdict differences |
+| `06` and `07` alone (unchanged since revision 1 and revision 2) | 68 / 6 | not run alone | **yes** (`receipts/p67-regress-p06/`, `receipts/rev2-regress-p07/`) |
+| All seven (revision 3) | 68 / 6 | 17 / 26 | **yes**: the same exit codes for all 117 scripts. One browser verdict differed once; see below. |
+
+**The one verdict difference.** `complete-connections-ui-qa-check` (a portal connections UI check, which loads none of the changed backend code paths) exits 1 on every copy. In the all-seven run, one of its 46 sub-checks, "390px handoff outcomes…", passed where base failed it (37 failures became 36). I reran the script on base and on all seven. Both now fail the same 37 sub-checks, so this is a timing flake (6-second locator waits), not an effect of the patches. Receipts: `receipts/rev3-regress-browser-all/complete-connections-ui-qa-check-rerun-{base,all}.log`.
 
 Receipts:
 - base: `receipts/p345-regress-base/` and `receipts/regress-browser-base/`;
-- revision 2: `receipts/rev2-regress-{p03,p04,p05,p07,all}/` and `receipts/rev2-regress-browser-all/`.
+- revision 3: `receipts/rev3-regress-{p03,p04,p05,all}/` and `receipts/rev3-regress-browser-all/`.
 
 Each folder has one log per script and a `SUMMARY.tsv`.
 
+The acceptance checks for proposals 1 and 2 also pass on the revision-3 all-seven copy:
+- `stop-keywords-check`: 0 of 159 required cases failing;
+- `chat-403-check`: 28 of 28.
+
+Receipts: `receipts/{stop-keywords,chat-403}-all-seven.*`.
+
 ### Voice and export scripts (asked for 06 and 07)
-These all exit 0 on base, on `06`, on `07` rev 2 and on all seven (revision 2):
+These all exit 0 on base, on `06`, on `07` and on all seven (revision 3):
 - `smoke` (it runs the missed-call path; on `07` its owner line now reads "Texting is not set up yet, so no text-back was sent", where base said "Text-back sent" for a send that was only logged);
 - `voice-activation-check`, `voice-delivery-independent-check`, `managed-voice-handoff-check`;
 - `account-setup-check`, `customer-account-qa-check` (exports);

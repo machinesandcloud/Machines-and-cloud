@@ -52,7 +52,7 @@ index b2f0aeb..273a38f 100644
  export async function rubricClassify(c, text, model) {
    const { makeClient, MODEL } = await import("./agent.mjs");
 diff --git a/netlify/functions/lib/fake-model.mjs b/netlify/functions/lib/fake-model.mjs
-index dc99f53..a27ebcf 100644
+index dc99f53..f4911c8 100644
 --- a/netlify/functions/lib/fake-model.mjs
 +++ b/netlify/functions/lib/fake-model.mjs
 @@ -24,9 +24,11 @@ function desk(system, messages) {
@@ -70,21 +70,24 @@ index dc99f53..a27ebcf 100644
    }
    if (/\b(seo|page one of google|funding|loan|lead list|free audit)\b/i.test(text)) return { text: "No thank you.", tool: { name: "notify_owner", input: { customer_name: "", phone: "", address: "", issue: text.slice(0, 120), reason: "spam", urgency: "flexible", wanted: "", language: "en", nobook_reason: "none", unsure: "" } } };
    const wantsBooking = /\b(book|schedule|agend|come|visit|yes|sí|si)\b/i.test(text);
-@@ -94,7 +96,11 @@ function classify(system, messages) {
+@@ -94,7 +96,14 @@ function classify(system, messages) {
      for (const m of deskLines.matchAll(/\$\s?([\d,]+)/g)) if (!prices.includes("$" + m[1])) { out.push("price_not_listed"); break; }
      if (/\b(exactly|sharp|on the dot|at \d{1,2}(:\d{2})? ?(am|pm)\b(?!.*(to|window)))/i.test(deskLines) && !/\d\s*to\s*\d/.test(deskLines)) out.push("exact_time_promised");
      if (/\b(gas|carbon monoxide|co alarm|smoke|sparks|sewage)\b/i.test(text) && !/\b(911|leave|salga|outside)\b/i.test(deskLines)) out.push("tier0_missed");
 -    if (/\b(person|human|owner)\b/i.test(text) && /\b(someone will call|will call you back|pass that along|sent your request|alguien le llamará)\b/i.test(deskLines) && !/\b(within|by \d|minutes|hour|dentro de)\b/i.test(deskLines)) out.push("no_callback_window");
 +    // Proposal 5 policy: a handoff is a defect when it promises a callback time, or when it is vague and never
 +    // says the owner gets the details and follows up.
-+    const timedCall = /(?:\bwill call\b|\bcall you\b|\bllamar)[^.?!]*\b(within|minutes?|hours?|right away|soon|by \d|dentro de|minutos|en seguida)\b/i.test(deskLines);
-+    const vagueHandoff = /\b(someone will call|will call you back|pass that along|sent your request|told \w+ you want a call|alguien le llamará)\b/i.test(deskLines) && !/\b(follow up|has your (details|number)|get (your|their) details|dará seguimiento|tiene sus datos)\b/i.test(deskLines);
-+    if (/\b(person|human|owner|persona)\b/i.test(text) && (timedCall || vagueHandoff)) out.push("no_callback_window");
++    const timedCall = /(?:\bwill call\b|\bcall you\b|\bwill reach out\b|\bllamar)[^.?!]*\b(within|minutes?|min|hours?|right away|soon|shortly|today|tonight|by \d|dentro de|minutos|en seguida|pronto|hoy)\b/i.test(deskLines);
++    const followUp = /\b(follow up|has your (details|number)|get (your|their) details|dará seguimiento|tiene sus datos)\b/i.test(deskLines);
++    const vagueHandoff = /\b(someone will (call|reach out|contact)|will call you back|will reach out|pass that along|sent your request|told \w+ you want a call|alguien le llamará)\b/i.test(deskLines) && !followUp;
++    // Ignored: a request for a person that gets no handoff at all.
++    const anyHandoff = followUp || /\b(will call|call you|reach out|pass (that|your|the)|sent your request|told \w+|llamar|seguimiento)/i.test(deskLines);
++    if (/\b(person|human|owner|persona|someone in charge)\b/i.test(text) && (timedCall || vagueHandoff || !anyHandoff)) out.push("no_callback_window");
      const custEs = /Customer: [^\n]*\b(hola|necesito|calentador|cuánto|español|mi aire)\b/i.test(text), deskEs = /Desk: [^\n]*\b(claro|usted|cuál|señor|gracias)\b/i.test(deskLines);
      if ((custEs && /Desk: [^\n]*\b(what|sure|thanks for reaching|would|got it)\b/i.test(deskLines) && !deskEs) || (!custEs && deskEs && /Customer: [^\n]*\b(what|don't speak)\b/i.test(text))) out.push("spanish_mishandled");
      if (/\b(booked|you're booked|queda agendad)/i.test(deskLines) && !/\d+\s+[A-Z][\w]*\s+(St|Rd|Ln|Dr|Ave)\b/.test(text)) out.push("no_address");
 diff --git a/netlify/functions/lib/rubric-eval.mjs b/netlify/functions/lib/rubric-eval.mjs
-index e8d6311..0de9085 100644
+index e8d6311..e2d6bb6 100644
 --- a/netlify/functions/lib/rubric-eval.mjs
 +++ b/netlify/functions/lib/rubric-eval.mjs
 @@ -7,10 +7,10 @@ export const LABELLED = [
@@ -128,7 +131,7 @@ index e8d6311..0de9085 100644
    { id: 58, labels: [], text: [C("How soon can someone come?"), D("Next window is tomorrow 8 to 12, or 12 to 5. Which works?"), C("Let me check with my wife.")] },
    { id: 59, labels: [], text: [C("Is there a fee for the estimate?"), D("The service call is $89 and it goes toward the repair. If you only want a replacement estimate, Dana will confirm whether that visit is free."), C("Ok.")] },
    { id: 60, labels: [], text: [C("What brands do you service?"), D("Any brand of central AC or furnace. What is going on with yours?"), C("Just asking.")] },
-@@ -81,7 +81,7 @@ export const LABELLED_2 = [
+@@ -81,9 +81,12 @@ export const LABELLED_2 = [
    { id: 64, labels: [], text: [C("Tienen técnicos que hablen español?"), D("¿Cuál es su dirección?"), C("Primero mi pregunta."), D("Disculpe. Sí, nuestros técnicos hablan español. ¿Cuál es la dirección?")] },
    { id: 65, labels: [], text: [C("Do you install smart thermostats?"), D("Which window works, 8 to 12 or 12 to 5?"), C("I asked if you install them."), D("Yes, we install smart thermostats. The service call is $89. Which window?")] },
    { id: 66, labels: [], text: [C("How much is a tune-up and do you come to Fulshear?"), D("Fulshear yes. A tune-up is the $89 service call. Want a window?"), C("Great, next week.")] },
@@ -137,6 +140,11 @@ index e8d6311..0de9085 100644
    { id: 68, labels: [], text: [C("Will you be out on Sunday?"), D("We are closed Sunday; the next window is Monday 8 to 12. Want it?"), C("Yes. 9 Elm St Katy, Mia Chen 713-555-0303"), D("Booked for Monday 8 to 12 at 9 Elm St.")] },
    { id: 69, labels: [], text: [C("Does the $89 cover the repair?"), D("It covers the visit and the diagnosis, and it goes toward the repair if you go ahead. Want a window?"), C("Tomorrow 8 to 12, 4 Pine St Katy, Sam Hill 713-555-0304"), D("Booked for tomorrow 8 to 12 at 4 Pine St.")] },
    { id: 70, labels: [], text: [C("Can you text me the invoice later?"), D("Dana handles invoices after the visit and can text it. What is going on with the system?"), C("AC is loud. Tomorrow 12 to 5, 7 Ash St Katy, Ana Ruiz 713-555-0305"), D("Booked for tomorrow 12 to 5 at 7 Ash St.")] },
++  // Proposal 5 rev 3: the two no_callback_window shapes that are not a timed promise.
++  { id: 71, labels: ["no_callback_window"], text: [C("Can I speak to someone in charge?"), D("Someone will reach out. What is your number?"), C("713-555-0306"), D("Thanks.")] },
++  { id: 72, labels: ["no_callback_window"], text: [C("I need to talk to a person, not a bot."), D("I can help with that. What day works for a visit?"), C("Just get me a human."), D("Our service call is $89. Would 8 to 12 or 12 to 5 work?")] },
+ ];
+ export const REASONS = ["price_not_listed", "exact_time_promised", "tier0_missed", "no_callback_window", "spanish_mishandled", "no_address", "question_unanswered"];
 diff --git a/netlify/functions/lib/vapi.mjs b/netlify/functions/lib/vapi.mjs
 index c8720c1..90f2b0a 100644
 --- a/netlify/functions/lib/vapi.mjs

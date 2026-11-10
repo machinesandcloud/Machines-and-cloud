@@ -9,8 +9,12 @@
 //                   sentences are planning (QA's "Have name, address. Next ask window." has two).
 // Trim cases carry a class: "note" (internal checklist, tool name, status: must never reach a customer) or
 // "narration" (a harmless first-person line such as "Got everything."). Both are counted and reported.
-// Cases: my 40 (revision 1) plus QA's 39 adversarial cases copied verbatim from qa2/qa2-sms-trim-probe.mjs.
+// Cases: my 40 (revision 1), QA2's 39 (qa2/qa2-sms-trim-probe.mjs) and QA3's 29 (qa3/qa3-sms-trim-probe.mjs), verbatim.
+// QA3 rows are required keep cases, except 5 that start with a genuine checklist note (the note is dropped, the safety
+// text after it must be sent unchanged) and "Call 911; notify_owner done.", which must arrive as "Call 911. ...".
 // Usage: node sms-trim-safety-check.mjs [--repo <repo root>] [--output <new json path>]
+// "labelNote" (rev 3): "Got address, gas furnace." and "Have issue: water heater leaking outside." are internal notes that
+// now reach the customer, because the rules that caught them also swallowed safety text (QA3); counted, accepted.
 // PASS requires safetyDropped === 0 and noteLeaked === 0. Expected: FAILS on dfb0ae78, PASSES with 03 rev 2.
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -145,17 +149,50 @@ const CASES = [
   ["default", "trim", "Now flag emergency. Ray has your request; please stay safe.", "planning + emergency", 1, "note", "qa2"],
   ["default", "trim", "Need gas leak details before notifying. What do you smell and where?", "planning + gas", 1, "narration", "qa2"],
   ["default", "trim", "Now notify owner as emergency. Ray has your request.", "planning + emergency, tool name without underscore", 1, "note", "qa2"],
-  ["default", "trim", "Got address, gas furnace. You're booked for tomorrow 8 to 12.", "planning + gas furnace", 1, "note", "qa2"],
-  ["default", "trim", "Have issue: water heater leaking outside. You're booked for tomorrow 8 to 12.", "planning + outside", 1, "note", "qa2"],
+  ["default", "trim", "Got address, gas furnace. You're booked for tomorrow 8 to 12.", "planning + gas furnace", 1, "labelNote", "qa2"],
+  ["default", "trim", "Have issue: water heater leaking outside. You're booked for tomorrow 8 to 12.", "planning + outside", 1, "labelNote", "qa2"],
   ["default", "trim", "Need to leave a note for Ray. Thanks, he will see your request.", "planning + leave (documented)", 1, "narration", "qa2"],
   ["default", "trim", "Call us back. You're booked for tomorrow 8 to 12.", "3-word span of default script", 1, "narration", "qa2"],
   ["default", "trim", "OK, I have the fire pit job. You're booked for tomorrow 8 to 12.", "planning + fire", 1, "narration", "qa2"],
   ["default", "trim", "Booking smoke detector install now. You're booked for tomorrow 8 to 12.", "planning + smoke", 1, "narration", "qa2"],
   ["default", "trim", "Now call book visit. You're booked for tomorrow 8 to 12.", "tool name with space", 1, "note", "qa2"],
   ["default", "trim", "Have phone. Calling bookVisit next. You're booked for tomorrow 8 to 12.", "camelCase tool", 2, "note", "qa2"],
+  // ---- QA3 phrasings (qa3/qa3-sms-trim-probe.mjs), all required: safety text must survive ----
+  ["default", "keep", "Have everyone leave now. What is the address?", "have + everyone (prompt)", 0, "", "qa3"],
+  ["default", "keep", "Address: get outside first. Then text me the street.", "label w/o have", 0, "", "qa3"],
+  ["default", "keep", "Gas: leave immediately. What is the address?", "label gas", 0, "", "qa3"],
+  ["default", "keep", "Have address: get outside first. Ray is on it.", "LABEL_NOTE + safety", 0, "", "qa3"],
+  ["default", "keep", "Got issue: gas leak, leave the house now. Ray has your request.", "LABEL_NOTE recap + safety", 0, "", "qa3"],
+  ["default", "keep", "Have issue: gas smell. Leave now and call 911 from outside. Ray has it.", "label then safety (2nd sentence must stay)", 0, "", "qa3"],
+  ["default", "keep", "Got address: 12 Oak St\nGet everyone out now and call 911 from outside. Ray has your request.", "newline, no period after label", 0, "", "qa3"],
+  ["default", "trim", "Have address\nLeave the house now and call 911 from outside. What is your name?", "newline after field", 1, "note", "qa3"],
+  ["default", "keep", "Got address, head next door. Ray has your request.", "field-value: head next door", 0, "", "qa3"],
+  ["default", "keep", "Got address, avoid the basement. Ray has your request.", "field-value: avoid basement", 0, "", "qa3"],
+  ["default", "keep", "Have name, vacate the house. Ray has your request.", "field-value: vacate", 0, "", "qa3"],
+  ["default", "keep", "Got address, walk next door. Ray is notified.", "field-value: walk", 0, "", "qa3"],
+  ["default", "keep", "Have address, unplug nothing. Ray has your request.", "field-value: unplug nothing", 0, "", "qa3"],
+  ["default", "keep", "Got phone, head across the street. Ray will follow up.", "field-value: across street", 0, "", "qa3"],
+  ["default", "keep", "Got address, wait across the street. Ray will follow up.", "field-value: wait", 0, "", "qa3"],
+  ["default", "keep", "Have address, flee the smoke. Ray will follow up.", "field-value: flee", 0, "", "qa3"],
+  ["default", "keep", "Notify owner of the building and leave the unit now. What is the address?", "TOOL_PHRASE: notify owner (renter)", 0, "", "qa3"],
+  ["default", "trim", "Then notify owner of the property right away. Get outside first. What is the address?", "TOOL_PHRASE then safety", 1, "note", "qa3"],
+  ["default", "exact", "Call 911; notify_owner done. Ray has your request.", "documented mixed-sentence risk", "Call 911. Ray has your request.", "", "qa3"],
+  ["default", "keep", "Gas leak noted. Leave now and call 911 from outside. What is the address?", "status segment then safety", 0, "", "qa3"],
+  ["default", "keep", "Address noted, leave now. Ray has your request.", "status + leave", 0, "", "qa3"],
+  ["default", "trim", "Need address and phone. Leave the house first though. What is the address?", "checklist then safety", 1, "note", "qa3"],
+  ["default", "trim", "Have address. Now get out. Ray has it.", "checklist then short safety", 1, "note", "qa3"],
+  ["default", "keep", "Have everyone out. Ray has it.", "have everyone out", 0, "", "qa3"],
+  ["default", "keep", "Got everyone outside? Good, Ray has it.", "question", 0, "", "qa3"],
+  ["default", "trim", "Ok, address and phone confirmed. Please stay outside until the fire department clears it.", "checklist then safety", 1, "note", "qa3"],
+  ["default", "keep", "Phone: 911. Then text me the address.", "label phone 911", 0, "", "qa3"],
+  ["default", "keep", "Tengo dirección: salga de la casa ya. Ray tiene su solicitud.", "spanish label", 0, "", "qa3"],
+  ["default", "keep", "Have phone: call 911 from outside now. Ray has your request.", "LABEL_NOTE phone instruction", 0, "", "qa3"],
 ];
 
-const sentences = (r) => r.split(/(?<=[.!?])\s+/);
+// Leading sentence: up to . ! ? followed by whitespace, or up to a newline (same rule as the patch, rev 3).
+const lead = (t) => (t.match(/^[^\n]*?[.!?](?=\s)|^[^\n]+(?=\n)/) || [t])[0];
+const dropLead = (t, n) => { let r = t; for (let i = 0; i < n; i++) r = r.slice(lead(r).length).trimStart(); return r; };
+const sentences = (r) => [lead(r)];
 const results = []; let n = 0;
 for (const [ck, expect, reply, note, nPlan, cls, source] of CASES) {
   const c = clients[ck], from = "+1713555" + String(1000 + ++n).padStart(4, "0");
@@ -165,17 +202,17 @@ for (const [ck, expect, reply, note, nPlan, cls, source] of CASES) {
   globalThis.__trimScript = [reply]; sent.length = 0;
   const res = await smsAgent(new Request("https://platform.example.test/.netlify/functions/sms-agent-background", { method: "POST", headers: { "x-admin-key": "trim-check-admin" }, body: JSON.stringify({ slug: c.slug, from }) }));
   const stored = (await store.getConversation(c, "sms", from)).messages.at(-1)?.content;
-  const want = expect === "keep" ? reply : sentences(reply).slice(nPlan).join(" ").trim();
+  const want = expect === "keep" ? reply : expect === "exact" ? nPlan : dropLead(reply, nPlan);
   const body = sent.find((s) => s.to === from)?.body ?? null;
   const ok = res.status === 200 && body === want && stored === want && globalThis.__trimScript.length === 0;
-  const outcome = ok ? "ok" : expect === "keep" ? "safetyDropped" : (body || "").startsWith(sentences(reply)[0]) ? cls + "Leaked" : "otherMismatch";
-  results.push({ source, client: ck, expect, class: cls || null, note, reply, sentToCustomer: body, storedTurn: stored, outcome, pass: ok || outcome === "narrationLeaked", ...(ok ? {} : { wanted: want }) });
+  const outcome = ok ? "ok" : expect === "keep" || expect === "exact" ? "safetyDropped" : (body || "").startsWith(sentences(reply)[0]) ? cls + "Leaked" : "otherMismatch";
+  results.push({ source, client: ck, expect, class: cls || null, note, reply, sentToCustomer: body, storedTurn: stored, outcome, pass: ok || outcome === "narrationLeaked" || outcome === "labelNoteLeaked", ...(ok ? {} : { wanted: want }) });
 }
 console.log = origLog;
 const count = (o, src) => results.filter((r) => r.outcome === o && (!src || r.source === src)).length;
 const failed = results.filter((r) => !r.pass);
-const by = (src) => ({ cases: results.filter((r) => !src || r.source === src).length, safetyDropped: count("safetyDropped", src), noteLeaked: count("noteLeaked", src), narrationLeaked: count("narrationLeaked", src), otherMismatch: count("otherMismatch", src) });
-const summary = { check: "sms-trim-safety-check", rev: 2, repo, ...by(), rev1Cases: by("rev1"), qa2Cases: by("qa2"), netAttempts, result: failed.length || netAttempts ? "FAIL" : "PASS" };
+const by = (src) => ({ cases: results.filter((r) => !src || r.source === src).length, safetyDropped: count("safetyDropped", src), noteLeaked: count("noteLeaked", src), narrationLeaked: count("narrationLeaked", src), labelNoteLeaked: count("labelNoteLeaked", src), otherMismatch: count("otherMismatch", src) });
+const summary = { check: "sms-trim-safety-check", rev: 3, repo, ...by(), rev1Cases: by("rev1"), qa2Cases: by("qa2"), qa3Cases: by("qa3"), netAttempts, result: failed.length || netAttempts ? "FAIL" : "PASS" };
 for (const r of results) console.log(`${r.outcome === "ok" ? "ok  " : r.pass ? "note" : "FAIL"} ${r.source} [${r.expect}${r.class ? "/" + r.class : ""}] ${r.client.padEnd(7)} ${JSON.stringify(r.reply.slice(0, 70))}${r.outcome === "ok" ? "" : `\n       ${r.outcome}; sent: ${JSON.stringify(r.sentToCustomer)}`}`);
 console.log(JSON.stringify(summary));
 if (output) writeFileSync(output, JSON.stringify({ summary, results }, null, 2));

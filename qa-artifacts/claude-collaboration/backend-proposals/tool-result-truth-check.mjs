@@ -57,11 +57,14 @@ const plan = { sms: "accept", email: "accept" }; const seen = []; let otherReque
 globalThis.fetch = async (input, init = {}) => {
   const url = new URL(typeof input === "string" || input instanceof URL ? input : input.url);
   if (url.hostname === "api.twilio.com" && url.pathname.endsWith("/Messages.json")) {
-    const to = new URLSearchParams(String(init.body)).get("To"); const ok = plan.sms === "accept"; seen.push({ kind: "sms", to, ok });
+    const to = new URLSearchParams(String(init.body)).get("To"); const ok = plan.sms === "accept" || (plan.sms === "throwCustomer" && to === "+17135550100"); seen.push({ kind: "sms", to, ok });
+    // Rev 3: a network error (fetch rejects) instead of an HTTP refusal, for every text or only for the customer's.
+    if (plan.sms === "throw" || (plan.sms === "throwCustomer" && to !== "+17135550100")) { seen.at(-1).threw = true; throw new TypeError("fetch failed"); }
     return ok ? Response.json({ sid: "SM" + "0".repeat(32), status: "queued" }, { status: 201 }) : Response.json({ code: 21610, message: "Attempt to send to unsubscribed recipient" }, { status: 400 });
   }
   if (url.hostname === "api.resend.com") {
     const to = JSON.parse(String(init.body)).to?.[0]; const ok = plan.email === "accept"; seen.push({ kind: "email", to, ok });
+    if (plan.email === "throw") { seen.at(-1).threw = true; throw new TypeError("fetch failed"); }
     return ok ? Response.json({ id: "offline-email" }, { status: 200 }) : Response.json({ message: "domain not verified" }, { status: 422 });
   }
   otherRequests++; deny();
@@ -193,6 +196,23 @@ for (const [label, sends, ownerExp, custExp] of scenarios) {
 if (childMode === "provider") {
   const c = await shop(ray); currentShop = c;
   await run("book_visit tomorrow 8 to 12 (reminder wording)", "web", ALL_OK, () => viaChat(c, { name: "book_visit", input: { ...bookInput(phone()), date: "tomorrow", window: "8 to 12" } }), both(sentAlert("a text and an email"), custSent));
+}
+// Rev 3 (QA3): a network error on the confirmation text counts as "not sent": no consent, no reminders, and the
+// owner alert still runs. A network error on every send still yields a saved booking and an honest note.
+if (childMode === "provider") {
+  const c = await shop(ray); currentShop = c;
+  await run("book_visit: customer text throws, owner alert accepted", "web", { sms: "throwCustomer", email: "accept" }, () => viaChat(c, { name: "book_visit", input: bookInput(phone()) }), both(sentAlert("a text and an email"), custFailed));
+  await run("book_visit: customer text throws (voice)", "voice", { sms: "throwCustomer", email: "accept" }, () => { const p = phone(); return viaVapi(c, p, { name: "book_visit", input: bookInput(p) }); }, both(sentAlert("a text and an email"), custFailed));
+  await run("book_visit: every send throws", "web", { sms: "throw", email: "throw" }, () => viaChat(c, { name: "book_visit", input: bookInput(phone()) }), both(failedAlert, custFailed));
+  await run("notify_owner: every send throws", "web", { sms: "throw", email: "throw" }, () => viaChat(c, { name: "notify_owner", input: leadInput(phone()) }), failedAlert);
+  // An SMS reschedule of a booking whose confirmation failed must not bring the reminders back (texts held, no consent).
+  const q = phone();
+  await viaChat(c, { name: "book_visit", input: { ...bookInput(q), phone: q } }).catch(() => null);
+  await run("reschedule by SMS of a held booking: no reminders return", "sms", { sms: "refuse", email: "accept" }, async () => { const [b] = await store.recordsFor("bookings", c, q); return viaSms(c, q, { name: "update_visit", input: { booking_id: b?.id || "", action: "reschedule", date: dayAhead(6), window: "12 to 5" } }); }, async (t) => {
+    const [b] = await store.recordsFor("bookings", c, q);
+    const tasks = (await store.dueTasks("9999")).map((x) => x.task).filter((x) => x.slug === c.slug && x.data?.bookingId === b?.id && /^reminder_/.test(x.type));
+    return [[!!b?.textsHeld, "fixture: booking was not held"], [/^Moved ref/.test(t), "reschedule did not run: " + t.slice(0, 80)], [tasks.length === 0, "reminders re-scheduled for a booking with texts held: " + tasks.map((x) => x.type).join(",")]];
+  });
 }
 // A repeat notify_owner within 30 minutes with nothing new: no alert is sent at all.
 {
