@@ -1,0 +1,832 @@
+{
+  "at": "2026-11-10T09:06:07.008Z",
+  "browser": "channel:chrome",
+  "deskSource": "desk.js",
+  "servedDeskSha256": [
+    "f4017bc4745bca629f36159c05973b6e7c76c4961fa49ea9cb21dd77bbf428ee"
+  ],
+  "qualifications": "Synthetic workspace, session and requests; actual local /api/client, /api/access and /api/chat handlers with the fake model; memory storage. Lost replies are simulated with route.abort after the actual handler ran. No model/provider/email/OAuth/purchase/deployment performed.",
+  "sourceBefore": {
+    "qa-artifacts/claude-collaboration/desk-daily-work-ui-check.mjs": "b0d7b4b2f8e2eb93cf026364dab733a2e8c3ff25e02685f2f2a9a49816319d9c"
+  },
+  "checks": [
+    {
+      "name": "1440px a practice reply lost after the server answers returns the question and the conversation continues",
+      "pass": true
+    },
+    {
+      "name": "1440px a reply refused after the owner typed a newer question keeps that text and names the unanswered question",
+      "pass": true
+    },
+    {
+      "name": "1440px request labels follow the follow-up state, and a completed request leaves Needs your attention",
+      "pass": true
+    },
+    {
+      "name": "1440px Quick tour opened from Front desk and closed with Esc returns to Front desk and the tour button",
+      "pass": true
+    },
+    {
+      "name": "390px a practice reply lost after the server answers returns the question and the conversation continues",
+      "pass": true
+    },
+    {
+      "name": "390px a reply refused after the owner typed a newer question keeps that text and names the unanswered question",
+      "pass": true
+    },
+    {
+      "name": "390px request labels follow the follow-up state, and a completed request leaves Needs your attention",
+      "pass": true
+    },
+    {
+      "name": "390px Quick tour opened from Front desk and closed with Esc returns to Front desk and the tour button",
+      "pass": true
+    },
+    {
+      "name": "1440px a practice reply refused with 503 returns the question without a sign-in prompt",
+      "pass": true
+    },
+    {
+      "name": "1440px a practice reply refused with 429 returns the question without a sign-in prompt",
+      "pass": true
+    },
+    {
+      "name": "1440px Quick tour closed after moving ahead returns to the page it was opened from",
+      "pass": true
+    },
+    {
+      "name": "No physical transport, forbidden destinations or page errors",
+      "pass": true
+    }
+  ],
+  "requests": [
+    {
+      "slug": "daily-work-1",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-1",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-1",
+      "path": "/api/chat",
+      "method": "POST",
+      "roles": [
+        "user"
+      ],
+      "status": 200,
+      "fixture": "chat-lost-after-handler",
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "daily-work-1",
+      "path": "/api/chat",
+      "method": "POST",
+      "roles": [
+        "user"
+      ],
+      "status": 200
+    },
+    {
+      "slug": "daily-work-1",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-1",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-1",
+      "path": "/api/chat",
+      "method": "POST",
+      "roles": [
+        "user",
+        "assistant",
+        "user"
+      ],
+      "status": 200
+    },
+    {
+      "slug": "daily-work-1",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-1",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-2",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-2",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-2",
+      "path": "/api/chat",
+      "method": "POST",
+      "roles": [
+        "user"
+      ],
+      "fixture": "chat-held-503",
+      "status": 503
+    },
+    {
+      "slug": "daily-work-2",
+      "path": "/api/chat",
+      "method": "POST",
+      "roles": [
+        "user"
+      ],
+      "status": 200
+    },
+    {
+      "slug": "daily-work-2",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-2",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-3",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-3",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-3",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-3",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-3",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-3",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-3",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-3",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-3",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-3",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "request_followthrough",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-3",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-3",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-3",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-3",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-3",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-3",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-3",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-3",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-3",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-3",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "request_followthrough",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-3",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-3",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-3",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-3",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-3",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-3",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-4",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-4",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-4",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-4",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-5",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-5",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-5",
+      "path": "/api/chat",
+      "method": "POST",
+      "roles": [
+        "user"
+      ],
+      "status": 200,
+      "fixture": "chat-lost-after-handler",
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "daily-work-5",
+      "path": "/api/chat",
+      "method": "POST",
+      "roles": [
+        "user"
+      ],
+      "status": 200
+    },
+    {
+      "slug": "daily-work-5",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-5",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-5",
+      "path": "/api/chat",
+      "method": "POST",
+      "roles": [
+        "user",
+        "assistant",
+        "user"
+      ],
+      "status": 200
+    },
+    {
+      "slug": "daily-work-5",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-5",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-6",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-6",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-6",
+      "path": "/api/chat",
+      "method": "POST",
+      "roles": [
+        "user"
+      ],
+      "fixture": "chat-held-503",
+      "status": 503
+    },
+    {
+      "slug": "daily-work-6",
+      "path": "/api/chat",
+      "method": "POST",
+      "roles": [
+        "user"
+      ],
+      "status": 200
+    },
+    {
+      "slug": "daily-work-6",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-6",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-7",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-7",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-7",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-7",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-7",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-7",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-7",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-7",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-7",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-7",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "request_followthrough",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-7",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-7",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-7",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-7",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-7",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-7",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-7",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-7",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-7",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-7",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "request_followthrough",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-7",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-7",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-7",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-7",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-7",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-7",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-8",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-8",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-8",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-8",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-9",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-9",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-9",
+      "path": "/api/chat",
+      "method": "POST",
+      "roles": [
+        "user"
+      ],
+      "status": 503,
+      "fixture": "chat-503"
+    },
+    {
+      "slug": "daily-work-9",
+      "path": "/api/chat",
+      "method": "POST",
+      "roles": [
+        "user"
+      ],
+      "status": 200
+    },
+    {
+      "slug": "daily-work-9",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-9",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-9",
+      "path": "/api/chat",
+      "method": "POST",
+      "roles": [
+        "user",
+        "assistant",
+        "user"
+      ],
+      "status": 200
+    },
+    {
+      "slug": "daily-work-9",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-9",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-10",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-10",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-10",
+      "path": "/api/chat",
+      "method": "POST",
+      "roles": [
+        "user"
+      ],
+      "status": 429,
+      "fixture": "chat-429"
+    },
+    {
+      "slug": "daily-work-10",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-10",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-10",
+      "path": "/api/chat",
+      "method": "POST",
+      "roles": [
+        "user"
+      ],
+      "status": 200
+    },
+    {
+      "slug": "daily-work-10",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-10",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-10",
+      "path": "/api/chat",
+      "method": "POST",
+      "roles": [
+        "user",
+        "assistant",
+        "user"
+      ],
+      "status": 200
+    },
+    {
+      "slug": "daily-work-10",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-10",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-11",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "daily-work-11",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    }
+  ],
+  "pageErrors": [],
+  "forbidden": [],
+  "physicalNetwork": 0,
+  "screenshots": [
+    "scratchpad/claude-daily-qa2-inbox-practice-lost-1440.png",
+    "scratchpad/claude-daily-qa2-inbox-practice-continued-1440.png",
+    "scratchpad/claude-daily-qa2-inbox-practice-newer-text-1440.png",
+    "scratchpad/claude-daily-qa2-inbox-request-complete-card-1440.png",
+    "scratchpad/claude-daily-qa2-inbox-request-complete-home-1440.png",
+    "scratchpad/claude-daily-qa2-inbox-tour-closed-1440.png",
+    "scratchpad/claude-daily-qa2-inbox-practice-lost-390.png",
+    "scratchpad/claude-daily-qa2-inbox-practice-continued-390.png",
+    "scratchpad/claude-daily-qa2-inbox-practice-newer-text-390.png",
+    "scratchpad/claude-daily-qa2-inbox-request-complete-card-390.png",
+    "scratchpad/claude-daily-qa2-inbox-request-complete-home-390.png",
+    "scratchpad/claude-daily-qa2-inbox-tour-closed-390.png"
+  ],
+  "sourceAfter": {
+    "qa-artifacts/claude-collaboration/desk-daily-work-ui-check.mjs": "b0d7b4b2f8e2eb93cf026364dab733a2e8c3ff25e02685f2f2a9a49816319d9c"
+  },
+  "sourceStable": true,
+  "summary": {
+    "passed": 12,
+    "failed": 0,
+    "total": 12,
+    "physicalNetwork": 0,
+    "pageErrors": 0
+  }
+}

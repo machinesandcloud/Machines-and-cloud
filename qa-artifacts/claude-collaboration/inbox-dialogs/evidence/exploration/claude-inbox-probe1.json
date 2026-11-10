@@ -1,0 +1,633 @@
+{
+  "at": "2026-11-10T08:35:34.516Z",
+  "browser": "/Users/stevengoumnai/Library/Caches/ms-playwright/chromium_headless_shell-1223/chrome-headless-shell-mac-arm64/chrome-headless-shell",
+  "sourceDir": ".",
+  "servedSha256": {
+    "desk-requests.js": [
+      "392b7bd34defb652dc4e7bd7eeee3e3c93e53a34a2fa49793d16078547335281"
+    ],
+    "desk-conversations.js": [
+      "cdd96f99a65c23d28e1e6de5a49a9bff452df1ca7f96c63c82120f67a9eb0012"
+    ]
+  },
+  "qualifications": "Synthetic workspace, session, conversations and requests; actual local /api/client and /api/access handlers; memory storage; fake model. Thumbtack and Angi leads are stored records with no connection: no provider call is possible. Lost responses are route.abort after the actual handler ran. Keyboard only for navigation, opening, choosing and closing.",
+  "sourceBefore": {
+    "qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs": "9693a90d81db81e54234091cd0acd6d0dd5a0c6076a6887ec2bc290965cc1da7",
+    "desk-requests.js": "392b7bd34defb652dc4e7bd7eeee3e3c93e53a34a2fa49793d16078547335281",
+    "desk-conversations.js": "cdd96f99a65c23d28e1e6de5a49a9bff452df1ca7f96c63c82120f67a9eb0012",
+    "desk.js": "f4017bc4745bca629f36159c05973b6e7c76c4961fa49ea9cb21dd77bbf428ee",
+    "desk.html": "5fb1a9be91dc46a0f16ead29691ca693329244b8d624de9ae82db7af4da8ad13",
+    "desk.css": "40bc6c92580591703346f97449d926b0c275245ba8c040cc86968a3f40988502"
+  },
+  "checks": [
+    {
+      "name": "1440px website conversation: keyboard open, Tab stays, names, pages, fits, Esc returns focus",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: Tab #4 left the dialog: {\"id\":\"\",\"tag\":\"BODY\",\"text\":\"Skip to workspace\\n\\nFixture Inbox ShopHomeInboxSche\",\"inDialog\":false,\"body\":true,\"disabled\":false}\n    at tabStays (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:110:151)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:160:7\n    at async check (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:100:9)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:153:5"
+    },
+    {
+      "name": "1440px website conversation: a lost page read is announced, keeps focus on a usable control, and retries by keyboard",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: after the lost read: focus {\"id\":\"\",\"tag\":\"BODY\",\"text\":\"Skip to workspace\\n\\nFixture Inbox ShopHomeInboxSche\",\"inDialog\":false,\"body\":true,\"disabled\":false}\n    at focusUsable (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:108:81)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:179:7\n    at async check (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:100:9)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:170:5"
+    },
+    {
+      "name": "1440px web request: keyboard open, add a note, lost save keeps the draft and focus, check confirms, Esc returns focus",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: controls covered\n+ actual - expected\n\n+ [\n+   'SUMMARY:Texting program deta under nothing',\n+   'SUMMARY:What this program co under nothing',\n+   'SUMMARY:How customers choose under nothing',\n+   'SUMMARY:Message examples under nothing'\n+ ]\n- []\n\n    at nothingCovers (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:124:10)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:190:44\n    at async check (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:100:9)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:186:5"
+    },
+    {
+      "name": "1440px web request: a refused save (503) keeps the note, announces the error and retries by keyboard",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: after the refused save: focus {\"id\":\"\",\"tag\":\"BODY\",\"text\":\"Skip to workspace\\n\\nFixture Inbox ShopHomeInboxSche\",\"inDialog\":false,\"body\":true,\"disabled\":false}\n    at focusUsable (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:108:81)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:219:7\n    at async check (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:100:9)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:210:5"
+    },
+    {
+      "name": "1440px Thumbtack request: reply draft lost then confirmed is never called sent, draft kept, live text once",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: controls covered\n+ actual - expected\n\n+ [\n+   'SUMMARY:Texting program deta under nothing',\n+   'SUMMARY:What this program co under nothing',\n+   'SUMMARY:How customers choose under nothing',\n+   'SUMMARY:Message examples under nothing'\n+ ]\n- []\n\n    at nothingCovers (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:124:10)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:230:44\n    at async check (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:100:9)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:227:5"
+    },
+    {
+      "name": "1440px Angi request: reply draft saved is not sent, Open Angi is named, fits, Esc returns focus",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: controls covered\n+ actual - expected\n\n+ [\n+   'SUMMARY:Texting program deta under nothing',\n+   'SUMMARY:What this program co under nothing',\n+   'SUMMARY:How customers choose under nothing',\n+   'SUMMARY:Message examples under nothing'\n+ ]\n- []\n\n    at nothingCovers (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:124:10)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:257:44\n    at async check (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:100:9)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:253:5"
+    },
+    {
+      "name": "390px website conversation: keyboard open, Tab stays, names, pages, fits, Esc returns focus",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: Tab #4 left the dialog: {\"id\":\"\",\"tag\":\"BODY\",\"text\":\"Skip to workspace\\n\\nFixture Inbox ShopHomeInboxSche\",\"inDialog\":false,\"body\":true,\"disabled\":false}\n    at tabStays (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:110:151)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:160:7\n    at async check (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:100:9)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:153:5"
+    },
+    {
+      "name": "390px website conversation: a lost page read is announced, keeps focus on a usable control, and retries by keyboard",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: after the lost read: focus {\"id\":\"\",\"tag\":\"BODY\",\"text\":\"Skip to workspace\\n\\nFixture Inbox ShopHomeInboxSche\",\"inDialog\":false,\"body\":true,\"disabled\":false}\n    at focusUsable (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:108:81)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:179:7\n    at async check (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:100:9)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:170:5"
+    },
+    {
+      "name": "390px web request: keyboard open, add a note, lost save keeps the draft and focus, check confirms, Esc returns focus",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: controls covered\n+ actual - expected\n\n+ [\n+   'SUMMARY:Texting program deta under nothing',\n+   'SUMMARY:What this program co under nothing',\n+   'SUMMARY:How customers choose under nothing',\n+   'SUMMARY:Message examples under nothing'\n+ ]\n- []\n\n    at nothingCovers (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:124:10)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:190:44\n    at async check (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:100:9)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:186:5"
+    },
+    {
+      "name": "390px web request: a refused save (503) keeps the note, announces the error and retries by keyboard",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: after the refused save: focus {\"id\":\"\",\"tag\":\"BODY\",\"text\":\"Skip to workspace\\n\\nFixture Inbox ShopHomeInboxSche\",\"inDialog\":false,\"body\":true,\"disabled\":false}\n    at focusUsable (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:108:81)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:219:7\n    at async check (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:100:9)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:210:5"
+    },
+    {
+      "name": "390px Thumbtack request: reply draft lost then confirmed is never called sent, draft kept, live text once",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: controls covered\n+ actual - expected\n\n+ [\n+   'SUMMARY:Texting program deta under nothing',\n+   'SUMMARY:What this program co under nothing',\n+   'SUMMARY:How customers choose under nothing',\n+   'SUMMARY:Message examples under nothing'\n+ ]\n- []\n\n    at nothingCovers (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:124:10)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:230:44\n    at async check (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:100:9)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:227:5"
+    },
+    {
+      "name": "390px Angi request: reply draft saved is not sent, Open Angi is named, fits, Esc returns focus",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: controls covered\n+ actual - expected\n\n+ [\n+   'SUMMARY:Texting program deta under nothing',\n+   'SUMMARY:What this program co under nothing',\n+   'SUMMARY:How customers choose under nothing',\n+   'SUMMARY:Message examples under nothing'\n+ ]\n- []\n\n    at nothingCovers (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:124:10)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:257:44\n    at async check (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:100:9)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:253:5"
+    },
+    {
+      "name": "1440px request -> Read saved conversation -> Esc returns focus to the request opener",
+      "pass": true
+    },
+    {
+      "name": "1440px Thumbtack request left open: the background refresh does not re-announce unchanged statuses",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: background refresh: live region re-announced identical text\n+ actual - expected\n\n+ [\n+   'requestAIReason: You review and send replies yourself.',\n+   'requestPlatformReplyStatus: Authorize the Thumbtack connection before sending a reply here. You can keep a d'\n+ ]\n- []\n\n    at noRepeats (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:130:10)\n    at file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:287:5\n    at async check (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:100:9)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:279:3"
+    },
+    {
+      "name": "No physical transport, forbidden destinations or page errors",
+      "pass": true
+    }
+  ],
+  "requests": [
+    {
+      "slug": "inbox-dialogs-1",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-1",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-1",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "conversation",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-2",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-2",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-2",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "conversation",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-2",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "conversation",
+      "status": 200,
+      "fixture": "conversation-lost-after-handler"
+    },
+    {
+      "slug": "inbox-dialogs-3",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-3",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-3",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-3",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-3",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-4",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-4",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-4",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-4",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-4",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-4",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "request_followthrough",
+      "kind": "post:seen",
+      "status": 503,
+      "fixture": "post:seen-503"
+    },
+    {
+      "slug": "inbox-dialogs-5",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-5",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-5",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-5",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-5",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-6",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-6",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-6",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-6",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-6",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-7",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-7",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-7",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "conversation",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-8",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-8",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-8",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "conversation",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-8",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "conversation",
+      "status": 200,
+      "fixture": "conversation-lost-after-handler"
+    },
+    {
+      "slug": "inbox-dialogs-9",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-9",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-9",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-9",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-9",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-10",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-10",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-10",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-10",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-10",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-10",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "request_followthrough",
+      "kind": "post:seen",
+      "status": 503,
+      "fixture": "post:seen-503"
+    },
+    {
+      "slug": "inbox-dialogs-11",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-11",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-11",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-11",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-11",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-12",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-12",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-12",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-12",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-12",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-13",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-13",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-13",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-13",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-13",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-13",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "conversation",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-14",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-14",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-14",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-14",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-14",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-14",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    }
+  ],
+  "pageErrors": [],
+  "forbidden": [],
+  "physicalNetwork": 0,
+  "browserVersion": "148.0.7778.96",
+  "screenshots": [
+    "scratchpad/claude-inbox-probe1-failure-1.png",
+    "scratchpad/claude-inbox-probe1-failure-2.png",
+    "scratchpad/claude-inbox-probe1-failure-3.png",
+    "scratchpad/claude-inbox-probe1-failure-4.png",
+    "scratchpad/claude-inbox-probe1-failure-5.png",
+    "scratchpad/claude-inbox-probe1-failure-6.png",
+    "scratchpad/claude-inbox-probe1-failure-7.png",
+    "scratchpad/claude-inbox-probe1-failure-8.png",
+    "scratchpad/claude-inbox-probe1-failure-9.png",
+    "scratchpad/claude-inbox-probe1-failure-10.png",
+    "scratchpad/claude-inbox-probe1-failure-11.png",
+    "scratchpad/claude-inbox-probe1-failure-12.png",
+    "scratchpad/claude-inbox-probe1-failure-14.png"
+  ],
+  "liveRefresh": {
+    "readsDuring": 1,
+    "events": [
+      {
+        "id": "requestAIReason",
+        "text": "You review and send replies yourself."
+      },
+      {
+        "id": "requestPlatformReplyStatus",
+        "text": "Authorize the Thumbtack connection before sending a reply here. You can keep a draft in the meantime."
+      },
+      {
+        "id": "requestAutoStatus",
+        "text": "No customer text prepared"
+      }
+    ]
+  },
+  "sourceAfter": {
+    "qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs": "9693a90d81db81e54234091cd0acd6d0dd5a0c6076a6887ec2bc290965cc1da7",
+    "desk-requests.js": "392b7bd34defb652dc4e7bd7eeee3e3c93e53a34a2fa49793d16078547335281",
+    "desk-conversations.js": "cdd96f99a65c23d28e1e6de5a49a9bff452df1ca7f96c63c82120f67a9eb0012",
+    "desk.js": "f4017bc4745bca629f36159c05973b6e7c76c4961fa49ea9cb21dd77bbf428ee",
+    "desk.html": "5fb1a9be91dc46a0f16ead29691ca693329244b8d624de9ae82db7af4da8ad13",
+    "desk.css": "40bc6c92580591703346f97449d926b0c275245ba8c040cc86968a3f40988502"
+  },
+  "sourceStable": true,
+  "summary": {
+    "passed": 2,
+    "failed": 13,
+    "total": 15,
+    "physicalNetwork": 0,
+    "pageErrors": 0
+  }
+}

@@ -1,0 +1,958 @@
+{
+  "at": "2026-11-10T08:37:34.985Z",
+  "browser": "/Users/stevengoumnai/Library/Caches/ms-playwright/chromium_headless_shell-1223/chrome-headless-shell-mac-arm64/chrome-headless-shell",
+  "sourceDir": ".",
+  "servedSha256": {
+    "desk-requests.js": [
+      "1e8e2e77f2215916f83cd1fddd0e7266547c6b1c7900201f1f86f6171c5a4fa7"
+    ],
+    "desk-conversations.js": [
+      "b3de532d88a00ff23812e65c6fc84e1dffe0ddbce430beb4fba46540f5e5d32e"
+    ]
+  },
+  "qualifications": "Synthetic workspace, session, conversations and requests; actual local /api/client and /api/access handlers; memory storage; fake model. Thumbtack and Angi leads are stored records with no connection: no provider call is possible. Lost responses are route.abort after the actual handler ran. Keyboard only for navigation, opening, choosing and closing.",
+  "sourceBefore": {
+    "qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs": "44112cb23e77dda3b0930a8ac4468a9ef126da609fd1c55e12d53399e897522b",
+    "desk-requests.js": "1e8e2e77f2215916f83cd1fddd0e7266547c6b1c7900201f1f86f6171c5a4fa7",
+    "desk-conversations.js": "b3de532d88a00ff23812e65c6fc84e1dffe0ddbce430beb4fba46540f5e5d32e",
+    "desk.js": "f4017bc4745bca629f36159c05973b6e7c76c4961fa49ea9cb21dd77bbf428ee",
+    "desk.html": "5fb1a9be91dc46a0f16ead29691ca693329244b8d624de9ae82db7af4da8ad13",
+    "desk.css": "40bc6c92580591703346f97449d926b0c275245ba8c040cc86968a3f40988502"
+  },
+  "checks": [
+    {
+      "name": "1440px website conversation: keyboard open, Tab stays, names, pages, fits, Esc returns focus",
+      "pass": true
+    },
+    {
+      "name": "1440px website conversation: a lost page read is announced, keeps focus on a usable control, and retries by keyboard",
+      "pass": true
+    },
+    {
+      "name": "1440px web request: keyboard open, add a note, lost save keeps the draft and focus, check confirms, Esc returns focus",
+      "pass": true
+    },
+    {
+      "name": "1440px web request: a refused save (503) keeps the note, announces the error and retries by keyboard",
+      "pass": true
+    },
+    {
+      "name": "1440px web request: a save refused for one field focuses that field once it is usable again",
+      "pass": true
+    },
+    {
+      "name": "1440px Thumbtack request: reply draft lost then confirmed is never called sent, draft kept, live text once",
+      "pass": true
+    },
+    {
+      "name": "1440px Angi request: reply draft saved is not sent, Open Angi is named, fits, Esc returns focus",
+      "pass": true
+    },
+    {
+      "name": "390px website conversation: keyboard open, Tab stays, names, pages, fits, Esc returns focus",
+      "pass": true
+    },
+    {
+      "name": "390px website conversation: a lost page read is announced, keeps focus on a usable control, and retries by keyboard",
+      "pass": true
+    },
+    {
+      "name": "390px web request: keyboard open, add a note, lost save keeps the draft and focus, check confirms, Esc returns focus",
+      "pass": true
+    },
+    {
+      "name": "390px web request: a refused save (503) keeps the note, announces the error and retries by keyboard",
+      "pass": true
+    },
+    {
+      "name": "390px web request: a save refused for one field focuses that field once it is usable again",
+      "pass": true
+    },
+    {
+      "name": "390px Thumbtack request: reply draft lost then confirmed is never called sent, draft kept, live text once",
+      "pass": true
+    },
+    {
+      "name": "390px Angi request: reply draft saved is not sent, Open Angi is named, fits, Esc returns focus",
+      "pass": true
+    },
+    {
+      "name": "1440px request -> Read saved conversation -> Esc returns focus to the request opener",
+      "pass": true
+    },
+    {
+      "name": "1440px Thumbtack request left open: the background refresh does not re-announce unchanged statuses",
+      "pass": true
+    },
+    {
+      "name": "No physical transport, forbidden destinations or page errors",
+      "pass": true
+    }
+  ],
+  "requests": [
+    {
+      "slug": "inbox-dialogs-1",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-1",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-1",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "conversation",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-1",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "conversation",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-2",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-2",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-2",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "conversation",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-2",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "conversation",
+      "status": 200,
+      "fixture": "conversation-lost-after-handler"
+    },
+    {
+      "slug": "inbox-dialogs-2",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "conversation",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-3",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-3",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-3",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-3",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-3",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-3",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "request_followthrough",
+      "kind": "post:attempt",
+      "status": 200,
+      "fixture": "post:attempt-lost-after-handler"
+    },
+    {
+      "slug": "inbox-dialogs-3",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-3",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-3",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-4",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-4",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-4",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-4",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-4",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-4",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "request_followthrough",
+      "kind": "post:seen",
+      "status": 503,
+      "fixture": "post:seen-503"
+    },
+    {
+      "slug": "inbox-dialogs-4",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-4",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "request_followthrough",
+      "kind": "post:seen",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-4",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-4",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-5",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-5",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-5",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-5",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-5",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-5",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "request_followthrough",
+      "kind": "post:seen",
+      "status": 400,
+      "fixture": "post:seen-400"
+    },
+    {
+      "slug": "inbox-dialogs-6",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-6",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-6",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-6",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-6",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-6",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "request_followthrough",
+      "kind": "post:draft_reply",
+      "status": 200,
+      "fixture": "post:draft_reply-lost-after-handler"
+    },
+    {
+      "slug": "inbox-dialogs-6",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-6",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-6",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-7",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-7",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-7",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-7",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-7",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-7",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "request_followthrough",
+      "kind": "post:draft_reply",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-7",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-7",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-8",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-8",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-8",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "conversation",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-8",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "conversation",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-9",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-9",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-9",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "conversation",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-9",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "conversation",
+      "status": 200,
+      "fixture": "conversation-lost-after-handler"
+    },
+    {
+      "slug": "inbox-dialogs-9",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "conversation",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-10",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-10",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-10",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-10",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-10",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-10",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "request_followthrough",
+      "kind": "post:attempt",
+      "status": 200,
+      "fixture": "post:attempt-lost-after-handler"
+    },
+    {
+      "slug": "inbox-dialogs-10",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-10",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-10",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-11",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-11",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-11",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-11",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-11",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-11",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "request_followthrough",
+      "kind": "post:seen",
+      "status": 503,
+      "fixture": "post:seen-503"
+    },
+    {
+      "slug": "inbox-dialogs-11",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-11",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "request_followthrough",
+      "kind": "post:seen",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-11",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-11",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-12",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-12",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-12",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-12",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-12",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-12",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "request_followthrough",
+      "kind": "post:seen",
+      "status": 400,
+      "fixture": "post:seen-400"
+    },
+    {
+      "slug": "inbox-dialogs-13",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-13",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-13",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-13",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-13",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-13",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "request_followthrough",
+      "kind": "post:draft_reply",
+      "status": 200,
+      "fixture": "post:draft_reply-lost-after-handler"
+    },
+    {
+      "slug": "inbox-dialogs-13",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-13",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-13",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-14",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-14",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-14",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-14",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-14",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-14",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "request_followthrough",
+      "kind": "post:draft_reply",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-14",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-14",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-15",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-15",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-15",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-15",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-15",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-15",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "conversation",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-16",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-16",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-16",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-16",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-16",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-16",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    }
+  ],
+  "pageErrors": [],
+  "forbidden": [],
+  "physicalNetwork": 0,
+  "browserVersion": "148.0.7778.96",
+  "browserUiHops": [
+    "Tab #4, Tab #8, Tab #12, Shift+Tab #2, Shift+Tab #6, Shift+Tab #10, Shift+Tab #14",
+    "",
+    "",
+    "Tab #4, Tab #8, Tab #12, Shift+Tab #2, Shift+Tab #6, Shift+Tab #10, Shift+Tab #14",
+    "",
+    ""
+  ],
+  "screenshots": [
+    "scratchpad/claude-inbox-probe2-fix-conversation-1440.png",
+    "scratchpad/claude-inbox-probe2-fix-conversation-lost-1440.png",
+    "scratchpad/claude-inbox-probe2-fix-request-lost-1440.png",
+    "scratchpad/claude-inbox-probe2-fix-thumbtack-lost-1440.png",
+    "scratchpad/claude-inbox-probe2-fix-angi-saved-1440.png",
+    "scratchpad/claude-inbox-probe2-fix-conversation-390.png",
+    "scratchpad/claude-inbox-probe2-fix-conversation-lost-390.png",
+    "scratchpad/claude-inbox-probe2-fix-request-lost-390.png",
+    "scratchpad/claude-inbox-probe2-fix-thumbtack-lost-390.png",
+    "scratchpad/claude-inbox-probe2-fix-angi-saved-390.png"
+  ],
+  "liveRefresh": {
+    "readsDuring": 1,
+    "events": []
+  },
+  "sourceAfter": {
+    "qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs": "44112cb23e77dda3b0930a8ac4468a9ef126da609fd1c55e12d53399e897522b",
+    "desk-requests.js": "1e8e2e77f2215916f83cd1fddd0e7266547c6b1c7900201f1f86f6171c5a4fa7",
+    "desk-conversations.js": "b3de532d88a00ff23812e65c6fc84e1dffe0ddbce430beb4fba46540f5e5d32e",
+    "desk.js": "f4017bc4745bca629f36159c05973b6e7c76c4961fa49ea9cb21dd77bbf428ee",
+    "desk.html": "5fb1a9be91dc46a0f16ead29691ca693329244b8d624de9ae82db7af4da8ad13",
+    "desk.css": "40bc6c92580591703346f97449d926b0c275245ba8c040cc86968a3f40988502"
+  },
+  "sourceStable": true,
+  "summary": {
+    "passed": 17,
+    "failed": 0,
+    "total": 17,
+    "physicalNetwork": 0,
+    "pageErrors": 0
+  }
+}
