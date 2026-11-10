@@ -1,0 +1,45 @@
+{
+  "at": "2026-11-10T09:36:05.564Z",
+  "checks": [
+    {
+      "name": "sequential resubmit with identical fields (hold released, owner submits again) is the same intent/generation",
+      "pass": true,
+      "detail": {
+        "id": "qa-voice-1/2e9902599b6c151d409a5ffc9ac0925459dd25e9a8fc203369f55a176ac0ffc1",
+        "rows": 1,
+        "generation": 1,
+        "queue": 1
+      }
+    },
+    {
+      "name": "concurrent duplicate (original still in flight while the resubmit lands) leaves one intent, generation 1",
+      "pass": true,
+      "detail": {
+        "rows": 1,
+        "generation": 1,
+        "queue": 1
+      }
+    },
+    {
+      "name": "resubmit after the owner edits the kept form (forwarding mode) replaces the same intent (generation 2), never a second operation",
+      "pass": true,
+      "detail": {
+        "rows": 1,
+        "generation": 2,
+        "forwardingMode": "forward_business_line"
+      }
+    },
+    {
+      "name": "existing waiting_platform intent: identical resubmit returns it unchanged (no observable change for mutationEvidence to see)",
+      "pass": true,
+      "detail": {
+        "state": "waiting_platform",
+        "generation": 1,
+        "updatedAtUnchanged": true
+      }
+    }
+  ],
+  "physical": 0,
+  "passed": 4,
+  "total": 4
+}

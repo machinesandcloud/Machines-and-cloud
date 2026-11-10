@@ -216,6 +216,8 @@
     dialog.innerHTML = '<form id="connectionForm"><h2 id="connectionTitle">' + esc(title) + '</h2>' + content + '<p id="connectionDialogMessage" role="status" aria-live="polite"></p><div class="walkthrough-actions"><button type="submit" class="btn-pill btn-pill-blue btn-sm">' + esc(submitLabel) + '</button><button type="button" class="btn-pill btn-pill-dark btn-sm" id="connectionBack">Back</button></div></form>';
     $('connectionBack').onclick = function () { if (!busy) dialog.close(); };
     $('connectionForm').onsubmit = function (event) { event.preventDefault(); if (!busy && event.target.reportValidity()) onSubmit(new FormData(event.target)); }; dialog.showModal();
+    // A change is still held as unconfirmed: show that, and offer only the read-only check instead of a silent one.
+    if (mutationReadback?.unknown && mutationReadback.generation === generation) { dialogStatus(UNKNOWN_SAVE + ' Check saved status before making another change; nothing will be submitted again.', true, true); var held = dialog.querySelector('button[type=submit]'); if (held) held.disabled = true; focusVisible($('connectionStatusCheck')); }
   }
   dialog.addEventListener('cancel', function (event) { if (busy) event.preventDefault(); });
   dialog.addEventListener('close', function () { dialog.innerHTML = ''; });
@@ -279,8 +281,10 @@
     var held=mutationReadback;
     if(!held||busy&&alreadyBusy!==true||held.generation!==generation||!currentSession())return;
     busy=true;connectionRefreshStop();
-    mutationReadbackNotice('checking','Your change is saved. Checking the latest connection status…');
-    if(dialog.open)dialog.close();
+    // An unknown outcome keeps the owner's open form in place; the check is a read-only GET.
+    var inDialog=held.unknown===true&&dialog.open&&!!$('connectionStatusCheck');
+    if(inDialog)dialogStatus(UNKNOWN_SAVE+' Checking the latest saved status…',false,true);
+    else{mutationReadbackNotice('checking',held.unknown?UNKNOWN_SAVE+' Checking the latest saved status…':'Your change is saved. Checking the latest connection status…');if(dialog.open)dialog.close();}
     var controller=new AbortController(),timeout=setTimeout(function(){controller.abort();},15000);
     try {
       var response=await fetch(base+'/api/client?c='+encodeURIComponent(slug),{headers:{Authorization:'Bearer '+session},cache:'no-store',signal:controller.signal});
@@ -301,19 +305,71 @@
         document.dispatchEvent(new CustomEvent('mc:desk-snapshot',{detail:{snapshot:latest,session:session}}));
       });
       if(held!==mutationReadback||held.generation!==generation||!currentSession())return;
-      mutationReadback=null;mutationReadbackNotice('complete','Connection status updated.');
+      mutationReadback=null;
+      if(held.unknown&&mutationEvidence(held,latest)!==true){
+        // The saved status does not prove this change. Release the hold so the owner may decide to try again.
+        var calendarOff=latest.connections?.calendar?.connected!==true,unconfirmed=held.action==='start_calendar_connection'&&calendarOff?'Google Calendar is not connected yet. Choose Continue to Google to start the sign-in again; the earlier sign-in will not be used.':held.action==='complete_calendar_connection'&&calendarOff?UNKNOWN_SAVE+' The latest saved status shows Google Calendar is not connected. Connect Google Calendar again to continue.':UNKNOWN_SAVE+' The latest saved status is shown and doesn’t confirm it. '+(dialog.open&&inDialog?'Your details are kept here; submit again only if the change is still needed.':'Review it before trying again.');
+        if(inDialog&&dialog.open){dialogStatus(unconfirmed,true,false);message.textContent=unconfirmed;var check=$('connectionStatusCheck');if(check)check.remove();focusVisible($('connectionDialogMessage'));}
+        else{mutationReadbackNotice('complete','Connection status updated.');message.textContent=unconfirmed;focusVisible(null);}
+        return;
+      }
+      if(dialog.open)dialog.close();
+      mutationReadbackNotice('complete','Connection status updated.');
       if(held.serviceReturn)document.dispatchEvent(new CustomEvent('mc:connector-return',{detail:{service:held.serviceReturn}}));
-      message.textContent=held.successMessage;
+      message.textContent=held.successMessage;focusVisible(null);
     } catch(error) {
-      if(held===mutationReadback&&held.generation===generation&&currentSession())mutationReadbackNotice('failed','Your change is saved, but the updated status could not be checked. Check status again; your change will not be submitted again.');
+      if(held===mutationReadback&&held.generation===generation&&currentSession()){
+        if(held.unknown&&inDialog&&dialog.open){dialogStatus(UNKNOWN_SAVE+' The latest status couldn’t be checked either. Your details are kept here. Check saved status again; nothing will be submitted again.',true,true);focusVisible($('connectionStatusCheck'));}
+        else mutationReadbackNotice('failed',held.unknown?UNKNOWN_SAVE+' The latest status couldn’t be checked either. Check status again; your change will not be submitted again.':'Your change is saved, but the updated status could not be checked. Check status again; your change will not be submitted again.');
+        if(!(held.unknown&&inDialog&&dialog.open))focusVisible($('connectorReadbackRetry'));
+      }
     } finally {
       clearTimeout(timeout);
-      if(held.generation===generation&&currentSession()){busy=false;scheduleConnectionRefresh();}
+      if(held.generation===generation&&currentSession()){busy=false;if(inDialog&&dialog.open){dialog.querySelectorAll('button').forEach(function(b){b.disabled=false;});var submit=dialog.querySelector('button[type=submit]');if(submit&&mutationReadback===held)submit.disabled=true;}scheduleConnectionRefresh();}
+    }
+  }
+  var UNKNOWN_SAVE='We couldn’t confirm whether your change was saved.';
+  function definiteError(text){var error=new Error(text);error.definite=true;return error;}
+  async function replyJson(response){try{return await response.json();}catch(error){return null;}}
+  // Focus stays on a visible control or status; it never falls back to <body> after a control is disabled or replaced.
+  function focusVisible(preferred){requestAnimationFrame(function(){
+    var shown=function(node){return !!node&&node.isConnected&&node.getClientRects().length>0&&getComputedStyle(node).visibility!=='hidden';};
+    var active=document.activeElement;if(active&&active!==document.body&&active!==document.documentElement&&shown(active)&&!active.disabled&&(!preferred||active===preferred))return;
+    var node=[preferred,dialog.open&&$('connectionDialogMessage'),$('connectorReadbackRetry'),message,$('setupGuideStageTitle'),$('setupGuideTitle')].find(function(item){return shown(item)&&(item!==message||message.textContent);});
+    if(!node)return;if(!/^(BUTTON|A|INPUT|SELECT|TEXTAREA)$/.test(node.tagName)&&!node.hasAttribute('tabindex'))node.tabIndex=-1;node.focus({preventScroll:false});
+  });}
+  function dialogStatus(text,failed,offerCheck){
+    var note=$('connectionDialogMessage');if(!note)return;note.textContent=text;note.dataset.error=String(!!failed);
+    var check=$('connectionStatusCheck'),actions=dialog.querySelector('.walkthrough-actions');
+    if(offerCheck&&!check&&actions){check=document.createElement('button');check.type='button';check.id='connectionStatusCheck';check.className='btn-pill btn-pill-blue btn-sm';check.textContent='Check saved status';check.onclick=function(){readMutationStatus();};actions.prepend(check);}
+    if(check)check.disabled=busy;
+  }
+  // Positive server evidence that the held change is in the saved status. Anything else stays unconfirmed.
+  function mutationEvidence(held,latest){
+    var c=latest.connections||{},fields=held.fields||{},voice=c.voice?.operation,sms=c.messaging?.operation;
+    switch(held.action){
+      case 'cancel_voice_activation':return !!voice&&['cleanup_pending','cleanup_uncertain','cancelled'].includes(voice.state);
+      case 'cancel_messaging_activation':return !!sms&&sms.id===fields.operationId&&(sms.cancellationRequested===true||sms.state==='cancelled');
+      case 'disconnect_calendar':return c.calendar?.status==='disconnected';
+      case 'complete_calendar_connection':return !fields.error&&c.calendar?.connected===true;
+      // A re-request rewrites the existing intent (new updatedAt) with the submitted forwarding mode; an unchanged
+      // intent is not evidence that this request arrived.
+      case 'request_voice_activation':return !!voice&&voice.forwardingMode===fields.forwardingMode&&(!held.before.voice||!!voice.updatedAt&&voice.updatedAt!==held.before.voiceUpdatedAt);
+      case 'request_messaging_activation':return !!sms&&(!held.before.sms||!!sms.updatedAt&&sms.updatedAt!==held.before.smsUpdatedAt);
+      case 'correct_messaging_activation':return !!sms&&Number.isInteger(sms.submissionRevision)&&sms.submissionRevision!==fields.expectedSubmissionRevision;
+      case 'renew_messaging_probe':return !!sms?.probe?.nonce&&sms.probe.nonce!==fields.expectedProbeNonce;
+      case 'pause':return latest.client?.status==='paused';
+      case 'resume_services':return held.before.status==='paused'&&!!latest.client?.status&&latest.client.status!=='paused';
+      case 'cancel_service_onboarding':return latest.serviceOnboarding?.operation?.id===fields.operationId&&latest.serviceOnboarding.operation.cancellationRequested===true;
+      default:return false;
     }
   }
   document.addEventListener('mc:connection-readback-retry',function(){readMutationStatus();});
   async function request(action, fields) {
-    if (busy || !data) return; if (mutationReadback) { readMutationStatus(); return; } if (savedSetupReadback) { readSavedSetup(); return; } busy = true; var expectedGeneration = generation, approvalDispatched = false;
+    if (busy || !data) return; if (mutationReadback) { readMutationStatus(); return; } if (savedSetupReadback) { readSavedSetup(); return; } busy = true; var expectedGeneration = generation, approvalDispatched = false, sent = false, opener = document.activeElement;
+    // Snapshot what the GET exposes before the write, so a re-request of an existing intent can be confirmed by change.
+    var voiceBefore=data.connections?.voice?.operation,smsBefore=data.connections?.messaging?.operation;
+    var before={voice:!!voiceBefore,voiceUpdatedAt:voiceBefore?.updatedAt||null,sms:!!smsBefore,smsUpdatedAt:smsBefore?.updatedAt||null,status:data.client?.status};
     var controller=new AbortController(),timeout=setTimeout(function(){controller.abort();},20000);
     message.textContent = action === 'complete_calendar_connection' ? (fields.error ? 'Confirming your calendar choice…' : 'Connecting your Google Calendar…') : 'Saving your connection…'; dialog.querySelectorAll('button').forEach(function (b) { b.disabled = true; });
     try {
@@ -325,16 +381,19 @@
         savedSetupReadback = { generation: expectedGeneration, submissionId: fields.submissionId.toLowerCase(), confirmed: false, service: accepted.includes(selectedService) ? selectedService : accepted.find(function (id) { return ['voice','sms'].includes(id); }) || null, restored: false, resumeAttempted: true };
         if (!await rememberApproval()) return;
       }
-      approvalDispatched = action === 'request_service_onboarding';
+      approvalDispatched = action === 'request_service_onboarding'; sent = true;
       var response = await fetch(base + '/api/client?c=' + encodeURIComponent(slug), { method:'POST', headers:{ 'Content-Type':'application/json', Authorization:'Bearer ' + session }, body:JSON.stringify(Object.assign({ action:action }, fields || {})),signal:controller.signal });
       if (generation !== expectedGeneration) return;
       if (response.status===401 || response.status===403) { document.dispatchEvent(new CustomEvent('mc:session-expired')); return; }
-      var result = await response.json(); if (generation !== expectedGeneration) return;
-      if (!response.ok || !result.ok) throw new Error(result.message || 'The connection could not be confirmed. Refresh its status before retrying.');
+      var result = await replyJson(response); if (generation !== expectedGeneration) return;
+      // A 4xx is a definite refusal: show the server's own words. A 5xx, a reply that isn't JSON, or a 2xx without
+      // ok:true leaves the outcome unknown, because the handler may already have saved the change.
+      if (response.status >= 400 && response.status < 500) throw definiteError(typeof result?.message === 'string' && result.message ? result.message : 'This change wasn’t accepted. Check the current status before trying again.');
+      if (!response.ok || !result || result.ok !== true) throw new Error('Connection outcome unknown');
       if (action === 'start_calendar_connection') {
-        var destination = new URL(result.result.authorizationUrl); if (destination.protocol !== 'https:' || destination.hostname !== 'accounts.google.com') throw new Error('Google connection address could not be verified.');
+        var destination = new URL(result.result.authorizationUrl); if (destination.protocol !== 'https:' || destination.hostname !== 'accounts.google.com') throw definiteError('Google connection address could not be verified.');
         var state = destination.searchParams.get('state'), expiresAt = result.result.expiresAt, binding = await sessionBinding();
-        if (!/^[a-f0-9]{64}$/.test(state || '') || !Number.isFinite(Date.parse(expiresAt)) || Date.parse(expiresAt) <= Date.now()) throw new Error('Google connection expired before it could start. Try again.');
+        if (!/^[a-f0-9]{64}$/.test(state || '') || !Number.isFinite(Date.parse(expiresAt)) || Date.parse(expiresAt) <= Date.now()) throw definiteError('Google connection expired before it could start. Try again.');
         if (generation !== expectedGeneration || !currentSession()) return;
         sessionStorage.setItem('mc-calendar-pending-v1', JSON.stringify({ slug:slug, state:state, expiresAt:expiresAt, sessionBinding:binding })); location.assign(destination.href); return;
       }
@@ -347,16 +406,32 @@
       clearTimeout(timeout);await readMutationStatus(true);
     } catch (error) {
       if (expectedGeneration === generation) {
+        // Unknown means the request may have reached the handler: a dropped connection, the client timeout, a 5xx or
+        // an unreadable reply. A definite error is a 4xx or a check made after a confirmed reply.
+        var definite = error?.definite === true || !sent;
         if (action === 'request_service_onboarding' && savedSetupReadback) {
-          if (approvalDispatched && !(response?.status >= 400 && response.status < 500)) { clearTimeout(timeout); await readSavedSetup(true); return; }
+          if (approvalDispatched && !definite) { clearTimeout(timeout); await readSavedSetup(true); return; }
           clearApproval();
         }
-        if (action === 'complete_calendar_connection') { clearCalendarReturn(); if (data) render(data); document.dispatchEvent(new CustomEvent('mc:desk-refresh')); }
-        if (action === 'renew_messaging_probe') {if(dialog.open)dialog.close();var next=$('setupGuideContinue');if(next)next.disabled=true;document.dispatchEvent(new CustomEvent('mc:desk-refresh'));}
-        (dialog.open ? $('connectionDialogMessage') : message).textContent = action==='renew_messaging_probe'&&(!response||response.ok)?'We could not confirm the renewal response. Checking your saved texting setup.':error.name==='AbortError'?'The request timed out. Your change may be saved; refresh its status before retrying.':error.message;
+        if (action === 'complete_calendar_connection') { clearCalendarReturn(); if (data) render(data); document.dispatchEvent(new CustomEvent('mc:desk-refresh', { detail: { soft: true } })); } // Soft: a failed read keeps the workspace on screen.
+        if (definite) {
+          if (action === 'renew_messaging_probe' && sent) {if(dialog.open)dialog.close();var next=$('setupGuideContinue');if(next)next.disabled=true;document.dispatchEvent(new CustomEvent('mc:desk-refresh'));}
+          message.textContent = sent ? error.message : 'Your change wasn’t sent. Try again.';
+          if (dialog.open) $('connectionDialogMessage').textContent = message.textContent;
+          if (dialog.open) $('connectionDialogMessage').dataset.error = 'true';
+          focusVisible(dialog.open ? (opener && dialog.contains(opener) ? opener : $('connectionDialogMessage')) : null);
+        } else {
+          // Hold the change: no automatic resubmission. Only the read-only status check is offered.
+          mutationReadback = { generation: expectedGeneration, unknown: true, action: action, fields: fields || {}, before: before, serviceReturn: action === 'complete_calendar_connection' ? 'calendar' : null, successMessage: action === 'complete_calendar_connection' ? 'Google account access is saved. Next, check a saved visit’s Calendar delivery.' : 'Your change is saved. Its current status is shown above.' };
+          if (dialog.open && dialog.querySelector('#connectionForm')) {
+            dialogStatus(UNKNOWN_SAVE + ' Your details are kept here. Check saved status before trying again; nothing will be submitted again.', true, true);
+            message.textContent = UNKNOWN_SAVE;
+            focusVisible($('connectionStatusCheck'));
+          } else { clearTimeout(timeout); await readMutationStatus(true); }
+        }
       }
     }
-    finally { clearTimeout(timeout); if(generation===expectedGeneration){busy = false; dialog.querySelectorAll('button').forEach(function (b) { b.disabled = false; });scheduleConnectionRefresh();} }
+    finally { clearTimeout(timeout); if(generation===expectedGeneration){busy = false; dialog.querySelectorAll('button').forEach(function (b) { b.disabled = false; }); var held = mutationReadback?.unknown && dialog.open && $('connectionStatusCheck') && dialog.querySelector('button[type=submit]'); if (held) held.disabled = true; scheduleConnectionRefresh();} }
   }
   function calendarDisclosure() {
     return '<section id="calendarAccessDisclosure" aria-label="Google Calendar access" data-disclosure-version="2026-10-24-busy-v1"><p>Keep saved visits in your primary Google Calendar. You choose whether to grant access on Google’s next screen.</p><p><strong>Access and use.</strong> Google asks for calendar details and access to events on calendars you own. We use your primary calendar identifier to create, check, update and delete the visit events this workspace manages. We read busy intervals on that calendar to avoid offering a window that conflicts with another appointment. Appointment titles, descriptions and other attendees’ identities are not imported. Saved workspace reservations and their matching Google copies count once.</p><p><strong>Storage and sharing.</strong> Google receives the visit details you sync. Netlify stores the calendar identifier, an encrypted refresh token, connection history and sync records, including visit details, with no automatic deletion. A short-lived availability cache stores event references, start and end times and workspace ownership tags; it is reused for up to 60 seconds. Booking and calendar changes check Google again. Google API responses and tokens aren’t sent to our AI provider; separately supplied customer conversations and visit details may be.</p><p><strong>Your control.</strong> Disconnect removes the stored refresh token and stops new sync; a request already sent may finish. It keeps Google’s permission, existing events, saved visits and history. Remove the app’s access in your Google Account if needed. For retained-record deletion help, email <a href="mailto:support@machinesandcloud.com">support@machinesandcloud.com</a>.</p><p><a href="privacy-policy.html#google-calendar" target="_blank" rel="noopener">Google Calendar privacy and data controls</a></p></section>';
@@ -374,7 +449,7 @@
     var forward=canForward&&client.onboarding.phoneSetupMode!=='use_new_number';
     return '<label class="form-label">Customers reach your front desk<select class="form-input" name="forwardingMode"><option value="forward_business_line"'+(canForward?'':' disabled')+(forward?' selected':'')+'>Through my existing business number</option><option value="use_new_number"'+(!forward?' selected':'')+'>On the new front desk number</option></select></label><p>'+(canForward?'Existing business line: '+esc(phone.businessNumber)+'. Your contact cell stays separate.':'To forward an existing line, first save a business number that is different from your contact cell. You can use a new front desk number without forwarding your existing line.')+'</p><button type="button" class="connection-guide-link" data-connection="review_phone_details">'+(canForward?'Edit phone details':'Add or review phone details')+'</button>';
   }
-  async function loadPrivateReview(action){if(busy)return;busy=true;var run=generation,revision=data.configurationRevision;message.textContent='Loading your saved registration details…';try{var response=await fetch(base+'/api/client?c='+encodeURIComponent(slug)+'&service_intake=1',{headers:{Authorization:'Bearer '+session},cache:'no-store'});if(run!==generation||!currentSession())return;if(response.status===401||response.status===403){document.dispatchEvent(new CustomEvent('mc:session-expired'));return;}var result=await response.json();if(!response.ok||!result.serviceIntake||result.serviceIntake.available!==true||result.configurationRevision!==revision)throw new Error('Your saved setup changed. Check its status before reviewing.');data.serviceIntake=result.serviceIntake;privateReviewAction=action;busy=false;var button=document.createElement('button');button.dataset.connection=action;handleConnectionClick({target:button});}catch(error){if(run===generation)message.textContent=error.message||'Saved registration details could not be loaded. Try again.';}finally{if(run===generation)busy=false;}}
+  async function loadPrivateReview(action){if(busy)return;busy=true;var run=generation,revision=data.configurationRevision;message.textContent='Loading your saved registration details…';try{var response=await fetch(base+'/api/client?c='+encodeURIComponent(slug)+'&service_intake=1',{headers:{Authorization:'Bearer '+session},cache:'no-store'});if(run!==generation||!currentSession())return;if(response.status===401||response.status===403){document.dispatchEvent(new CustomEvent('mc:session-expired'));return;}var result=await replyJson(response);if(response.status>=400&&response.status<500&&typeof result?.message==='string'&&result.message)throw definiteError(result.message);if(!response.ok||!result)throw new Error('Saved registration details unavailable');if(!result.serviceIntake||result.serviceIntake.available!==true||result.configurationRevision!==revision)throw definiteError('Your saved setup changed. Check its status before reviewing.');data.serviceIntake=result.serviceIntake;privateReviewAction=action;busy=false;var button=document.createElement('button');button.dataset.connection=action;handleConnectionClick({target:button});}catch(error){if(run===generation)message.textContent=error?.definite?error.message:'Your saved registration details couldn’t be loaded. Nothing was changed. Try again.';}finally{if(run===generation)busy=false;}}
   function handleConnectionClick(event) {
     var target = event.target.closest('[data-connection],[data-journey-route],[data-journey-jump],[data-journey-detail],[data-journey-choose]'); if (!target || busy || !data) return;
     if(target.dataset.journeyDetail){var selected=target.dataset.journeyDetail,open=target.getAttribute('aria-expanded')!=='true';$('connectionJourney').querySelectorAll('[data-journey-detail]').forEach(function(button){var expanded=open&&button.dataset.journeyDetail===selected;button.setAttribute('aria-expanded',String(expanded));button.querySelector('span').textContent=expanded?'−':'+';$('connection-guide-flow-'+button.dataset.journeyDetail).hidden=!expanded;});return;}
