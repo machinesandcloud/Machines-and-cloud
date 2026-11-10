@@ -1,0 +1,837 @@
+{
+  "at": "2026-11-10T08:39:55.992Z",
+  "browser": "/Users/stevengoumnai/Library/Caches/ms-playwright/chromium_headless_shell-1223/chrome-headless-shell-mac-arm64/chrome-headless-shell",
+  "sourceDir": "/private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/inbox-base",
+  "servedSha256": {
+    "desk-requests.js": [
+      "392b7bd34defb652dc4e7bd7eeee3e3c93e53a34a2fa49793d16078547335281"
+    ],
+    "desk-conversations.js": [
+      "cdd96f99a65c23d28e1e6de5a49a9bff452df1ca7f96c63c82120f67a9eb0012"
+    ]
+  },
+  "pinnedSha256": {
+    "desk-requests.js": "392b7bd34defb652dc4e7bd7eeee3e3c93e53a34a2fa49793d16078547335281",
+    "desk-conversations.js": "cdd96f99a65c23d28e1e6de5a49a9bff452df1ca7f96c63c82120f67a9eb0012"
+  },
+  "qualifications": "Synthetic workspace, session, conversations and requests; actual local /api/client and /api/access handlers; memory storage; fake model. Thumbtack and Angi leads are stored records with no connection: no provider call is possible. Lost responses are route.abort after the actual handler ran. Keyboard only for navigation, opening, choosing and closing.",
+  "sourceBefore": {
+    "qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs": "401c26de92c5fbc382c53e1a84b50c17adda6b7849d468c76cd694aa24a56cf7",
+    "desk-requests.js": "1e8e2e77f2215916f83cd1fddd0e7266547c6b1c7900201f1f86f6171c5a4fa7",
+    "desk-conversations.js": "b3de532d88a00ff23812e65c6fc84e1dffe0ddbce430beb4fba46540f5e5d32e",
+    "desk.js": "f4017bc4745bca629f36159c05973b6e7c76c4961fa49ea9cb21dd77bbf428ee",
+    "desk.html": "5fb1a9be91dc46a0f16ead29691ca693329244b8d624de9ae82db7af4da8ad13",
+    "desk.css": "40bc6c92580591703346f97449d926b0c275245ba8c040cc86968a3f40988502"
+  },
+  "checks": [
+    {
+      "name": "1440px website conversation: keyboard open, Tab stays, names, pages, fits, Esc returns focus",
+      "pass": true
+    },
+    {
+      "name": "1440px website conversation: a lost page read is announced, keeps focus on a usable control, and retries by keyboard",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: after the lost read: focus {\"id\":\"\",\"tag\":\"BODY\",\"text\":\"Skip to workspace\\n\\nFixture Inbox ShopHomeInboxSche\",\"inDialog\":false,\"body\":true,\"disabled\":false}\n    at focusUsable (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:109:81)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:184:7\n    at async check (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:101:9)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:175:5"
+    },
+    {
+      "name": "1440px web request: keyboard open, add a note, lost save keeps the draft and focus, check confirms, Esc returns focus",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: after the lost save: focus {\"id\":\"\",\"tag\":\"BODY\",\"text\":\"Skip to workspace\\n\\nFixture Inbox ShopHomeInboxSche\",\"inDialog\":false,\"body\":true,\"disabled\":false}\n    at focusUsable (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:109:81)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:204:7\n    at async check (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:101:9)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:191:5"
+    },
+    {
+      "name": "1440px web request: a refused save (503) keeps the note, announces the error and retries by keyboard",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: after the refused save: focus {\"id\":\"\",\"tag\":\"BODY\",\"text\":\"Skip to workspace\\n\\nFixture Inbox ShopHomeInboxSche\",\"inDialog\":false,\"body\":true,\"disabled\":false}\n    at focusUsable (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:109:81)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:224:21\n    at async check (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:101:9)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:215:5"
+    },
+    {
+      "name": "1440px web request: a save refused for one field focuses that field once it is usable again",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: after the field refusal: focus {\"id\":\"\",\"tag\":\"BODY\",\"text\":\"Skip to workspace\\n\\nFixture Inbox ShopHomeInboxSche\",\"inDialog\":false,\"body\":true,\"disabled\":false}\n    at focusUsable (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:109:81)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:241:17\n    at async check (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:101:9)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:234:5"
+    },
+    {
+      "name": "1440px Thumbtack request: reply draft lost then confirmed is never called sent, draft kept, live text once",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: after the lost draft save: focus {\"id\":\"\",\"tag\":\"BODY\",\"text\":\"Skip to workspace\\n\\nFixture Inbox ShopHomeInboxSche\",\"inDialog\":false,\"body\":true,\"disabled\":false}\n    at focusUsable (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:109:81)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:261:7\n    at async check (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:101:9)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:248:5"
+    },
+    {
+      "name": "1440px Angi request: reply draft saved is not sent, Open Angi is named, fits, Esc returns focus",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: after saving the draft: focus {\"id\":\"\",\"tag\":\"BODY\",\"text\":\"Skip to workspace\\n\\nFixture Inbox ShopHomeInboxSche\",\"inDialog\":false,\"body\":true,\"disabled\":false}\n    at focusUsable (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:109:81)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:284:7\n    at async check (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:101:9)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:274:5"
+    },
+    {
+      "name": "390px website conversation: keyboard open, Tab stays, names, pages, fits, Esc returns focus",
+      "pass": true
+    },
+    {
+      "name": "390px website conversation: a lost page read is announced, keeps focus on a usable control, and retries by keyboard",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: after the lost read: focus {\"id\":\"\",\"tag\":\"BODY\",\"text\":\"Skip to workspace\\n\\nFixture Inbox ShopHomeInboxSche\",\"inDialog\":false,\"body\":true,\"disabled\":false}\n    at focusUsable (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:109:81)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:184:7\n    at async check (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:101:9)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:175:5"
+    },
+    {
+      "name": "390px web request: keyboard open, add a note, lost save keeps the draft and focus, check confirms, Esc returns focus",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: after the lost save: focus {\"id\":\"\",\"tag\":\"BODY\",\"text\":\"Skip to workspace\\n\\nFixture Inbox ShopHomeInboxSche\",\"inDialog\":false,\"body\":true,\"disabled\":false}\n    at focusUsable (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:109:81)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:204:7\n    at async check (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:101:9)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:191:5"
+    },
+    {
+      "name": "390px web request: a refused save (503) keeps the note, announces the error and retries by keyboard",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: after the refused save: focus {\"id\":\"\",\"tag\":\"BODY\",\"text\":\"Skip to workspace\\n\\nFixture Inbox ShopHomeInboxSche\",\"inDialog\":false,\"body\":true,\"disabled\":false}\n    at focusUsable (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:109:81)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:224:21\n    at async check (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:101:9)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:215:5"
+    },
+    {
+      "name": "390px web request: a save refused for one field focuses that field once it is usable again",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: after the field refusal: focus {\"id\":\"\",\"tag\":\"BODY\",\"text\":\"Skip to workspace\\n\\nFixture Inbox ShopHomeInboxSche\",\"inDialog\":false,\"body\":true,\"disabled\":false}\n    at focusUsable (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:109:81)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:241:17\n    at async check (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:101:9)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:234:5"
+    },
+    {
+      "name": "390px Thumbtack request: reply draft lost then confirmed is never called sent, draft kept, live text once",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: after the lost draft save: focus {\"id\":\"\",\"tag\":\"BODY\",\"text\":\"Skip to workspace\\n\\nFixture Inbox ShopHomeInboxSche\",\"inDialog\":false,\"body\":true,\"disabled\":false}\n    at focusUsable (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:109:81)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:261:7\n    at async check (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:101:9)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:248:5"
+    },
+    {
+      "name": "390px Angi request: reply draft saved is not sent, Open Angi is named, fits, Esc returns focus",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: after saving the draft: focus {\"id\":\"\",\"tag\":\"BODY\",\"text\":\"Skip to workspace\\n\\nFixture Inbox ShopHomeInboxSche\",\"inDialog\":false,\"body\":true,\"disabled\":false}\n    at focusUsable (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:109:81)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:284:7\n    at async check (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:101:9)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:274:5"
+    },
+    {
+      "name": "1440px request -> Read saved conversation -> Esc returns focus to the request opener",
+      "pass": true
+    },
+    {
+      "name": "1440px Thumbtack request left open: the background refresh does not re-announce unchanged statuses",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: background refresh: live region re-announced identical text\n+ actual - expected\n\n+ [\n+   'requestAIReason: You review and send replies yourself.',\n+   'requestPlatformReplyStatus: Authorize the Thumbtack connection before sending a reply here. You can keep a d'\n+ ]\n- []\n\n    at noRepeats (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:135:10)\n    at file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:308:5\n    at async check (file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:101:9)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs:300:3"
+    },
+    {
+      "name": "No physical transport, forbidden destinations or page errors",
+      "pass": true
+    }
+  ],
+  "requests": [
+    {
+      "slug": "inbox-dialogs-1",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-1",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-1",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "conversation",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-1",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "conversation",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-2",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-2",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-2",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "conversation",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-2",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "conversation",
+      "status": 200,
+      "fixture": "conversation-lost-after-handler"
+    },
+    {
+      "slug": "inbox-dialogs-3",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-3",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-3",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-3",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-3",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-3",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "request_followthrough",
+      "kind": "post:attempt",
+      "status": 200,
+      "fixture": "post:attempt-lost-after-handler"
+    },
+    {
+      "slug": "inbox-dialogs-4",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-4",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-4",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-4",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-4",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-4",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "request_followthrough",
+      "kind": "post:seen",
+      "status": 503,
+      "fixture": "post:seen-503"
+    },
+    {
+      "slug": "inbox-dialogs-5",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-5",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-5",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-5",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-5",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-5",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "request_followthrough",
+      "kind": "post:seen",
+      "status": 400,
+      "fixture": "post:seen-400"
+    },
+    {
+      "slug": "inbox-dialogs-6",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-6",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-6",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-6",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-6",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-6",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "request_followthrough",
+      "kind": "post:draft_reply",
+      "status": 200,
+      "fixture": "post:draft_reply-lost-after-handler"
+    },
+    {
+      "slug": "inbox-dialogs-7",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-7",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-7",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-7",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-7",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-7",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "request_followthrough",
+      "kind": "post:draft_reply",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-7",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-7",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-8",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-8",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-8",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "conversation",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-8",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "conversation",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-9",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-9",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-9",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "conversation",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-9",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "conversation",
+      "status": 200,
+      "fixture": "conversation-lost-after-handler"
+    },
+    {
+      "slug": "inbox-dialogs-10",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-10",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-10",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-10",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-10",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-10",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "request_followthrough",
+      "kind": "post:attempt",
+      "status": 200,
+      "fixture": "post:attempt-lost-after-handler"
+    },
+    {
+      "slug": "inbox-dialogs-11",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-11",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-11",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-11",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-11",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-11",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "request_followthrough",
+      "kind": "post:seen",
+      "status": 503,
+      "fixture": "post:seen-503"
+    },
+    {
+      "slug": "inbox-dialogs-12",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-12",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-12",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-12",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-12",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-12",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "request_followthrough",
+      "kind": "post:seen",
+      "status": 400,
+      "fixture": "post:seen-400"
+    },
+    {
+      "slug": "inbox-dialogs-13",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-13",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-13",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-13",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-13",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-13",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "request_followthrough",
+      "kind": "post:draft_reply",
+      "status": 200,
+      "fixture": "post:draft_reply-lost-after-handler"
+    },
+    {
+      "slug": "inbox-dialogs-14",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-14",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-14",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-14",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-14",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-14",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "request_followthrough",
+      "kind": "post:draft_reply",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-14",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-14",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-15",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-15",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-15",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-15",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-15",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-15",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "conversation",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-16",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-16",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-16",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-16",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-16",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-16",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    }
+  ],
+  "pageErrors": [],
+  "forbidden": [],
+  "physicalNetwork": 0,
+  "browserVersion": "148.0.7778.96",
+  "browserUiHops": [
+    "Tab #4, Tab #8, Tab #12, Shift+Tab #2, Shift+Tab #6, Shift+Tab #10, Shift+Tab #14",
+    "",
+    "",
+    "Tab #4, Tab #8, Tab #12, Shift+Tab #2, Shift+Tab #6, Shift+Tab #10, Shift+Tab #14",
+    "",
+    ""
+  ],
+  "screenshots": [
+    "scratchpad/claude-inbox-final-base-conversation-1440.png",
+    "scratchpad/claude-inbox-final-base-failure-2.png",
+    "scratchpad/claude-inbox-final-base-failure-3.png",
+    "scratchpad/claude-inbox-final-base-failure-4.png",
+    "scratchpad/claude-inbox-final-base-failure-5.png",
+    "scratchpad/claude-inbox-final-base-failure-6.png",
+    "scratchpad/claude-inbox-final-base-failure-7.png",
+    "scratchpad/claude-inbox-final-base-conversation-390.png",
+    "scratchpad/claude-inbox-final-base-failure-9.png",
+    "scratchpad/claude-inbox-final-base-failure-10.png",
+    "scratchpad/claude-inbox-final-base-failure-11.png",
+    "scratchpad/claude-inbox-final-base-failure-12.png",
+    "scratchpad/claude-inbox-final-base-failure-13.png",
+    "scratchpad/claude-inbox-final-base-failure-14.png",
+    "scratchpad/claude-inbox-final-base-failure-16.png"
+  ],
+  "liveRefresh": {
+    "readsDuring": 1,
+    "events": [
+      {
+        "id": "requestAIReason",
+        "text": "You review and send replies yourself."
+      },
+      {
+        "id": "requestPlatformReplyStatus",
+        "text": "Authorize the Thumbtack connection before sending a reply here. You can keep a draft in the meantime."
+      },
+      {
+        "id": "requestAutoStatus",
+        "text": "No customer text prepared"
+      }
+    ]
+  },
+  "sourceAfter": {
+    "qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs": "401c26de92c5fbc382c53e1a84b50c17adda6b7849d468c76cd694aa24a56cf7",
+    "desk-requests.js": "1e8e2e77f2215916f83cd1fddd0e7266547c6b1c7900201f1f86f6171c5a4fa7",
+    "desk-conversations.js": "b3de532d88a00ff23812e65c6fc84e1dffe0ddbce430beb4fba46540f5e5d32e",
+    "desk.js": "f4017bc4745bca629f36159c05973b6e7c76c4961fa49ea9cb21dd77bbf428ee",
+    "desk.html": "5fb1a9be91dc46a0f16ead29691ca693329244b8d624de9ae82db7af4da8ad13",
+    "desk.css": "40bc6c92580591703346f97449d926b0c275245ba8c040cc86968a3f40988502"
+  },
+  "sourceStable": true,
+  "summary": {
+    "passed": 4,
+    "failed": 13,
+    "total": 17,
+    "physicalNetwork": 0,
+    "pageErrors": 0
+  }
+}

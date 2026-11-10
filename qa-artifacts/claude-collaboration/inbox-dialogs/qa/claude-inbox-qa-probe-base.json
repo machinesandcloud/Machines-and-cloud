@@ -1,0 +1,437 @@
+{
+  "at": "2026-11-10T08:44:30.008Z",
+  "browser": "/Users/stevengoumnai/Library/Caches/ms-playwright/chromium_headless_shell-1223/chrome-headless-shell-mac-arm64/chrome-headless-shell",
+  "sourceDir": "/private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/qa-base",
+  "servedSha256": {
+    "desk-requests.js": [
+      "392b7bd34defb652dc4e7bd7eeee3e3c93e53a34a2fa49793d16078547335281"
+    ],
+    "desk-conversations.js": [
+      "cdd96f99a65c23d28e1e6de5a49a9bff452df1ca7f96c63c82120f67a9eb0012"
+    ]
+  },
+  "pinnedSha256": {
+    "desk-requests.js": "392b7bd34defb652dc4e7bd7eeee3e3c93e53a34a2fa49793d16078547335281",
+    "desk-conversations.js": "cdd96f99a65c23d28e1e6de5a49a9bff452df1ca7f96c63c82120f67a9eb0012"
+  },
+  "qualifications": "Synthetic workspace, session, conversations and requests; actual local /api/client and /api/access handlers; memory storage; fake model. Thumbtack and Angi leads are stored records with no connection: no provider call is possible. Lost responses are route.abort after the actual handler ran. Keyboard only for navigation, opening, choosing and closing.",
+  "sourceBefore": {
+    "qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs": "401c26de92c5fbc382c53e1a84b50c17adda6b7849d468c76cd694aa24a56cf7",
+    "desk-requests.js": "1e8e2e77f2215916f83cd1fddd0e7266547c6b1c7900201f1f86f6171c5a4fa7",
+    "desk-conversations.js": "b3de532d88a00ff23812e65c6fc84e1dffe0ddbce430beb4fba46540f5e5d32e",
+    "desk.js": "f4017bc4745bca629f36159c05973b6e7c76c4961fa49ea9cb21dd77bbf428ee",
+    "desk.html": "5fb1a9be91dc46a0f16ead29691ca693329244b8d624de9ae82db7af4da8ad13",
+    "desk.css": "40bc6c92580591703346f97449d926b0c275245ba8c040cc86968a3f40988502"
+  },
+  "checks": [
+    {
+      "name": "P1 field refusal: owner moved focus to Close during the save; is focus pulled to the field?",
+      "pass": true
+    },
+    {
+      "name": "P2 lost save: owner moved focus to Close during the save; focus stays",
+      "pass": true
+    },
+    {
+      "name": "P3 two consecutive 503 saves: identical error text is announced each time",
+      "pass": false,
+      "error": "page.waitForFunction: Timeout 10000ms exceeded.\n    at /private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/qa/qa-focus-probe.mjs:194:56\n    at async check (/private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/qa/qa-focus-probe.mjs:101:9)\n    at async file:///private/tmp/mc-claude-inbox-dialogs-20261110/qa-artifacts/claude-collaboration/inbox-dialogs/qa/qa-focus-probe.mjs:185:3"
+    },
+    {
+      "name": "P4 conversation lost read: owner moved focus to Close during the read; settle leaves it",
+      "pass": true
+    },
+    {
+      "name": "P5 close the request dialog during a slow field-refused save, reopen: no stale focus or field state",
+      "pass": true
+    },
+    {
+      "name": "P6 field refusal with the owner already on the refused field: stays there",
+      "pass": true
+    }
+  ],
+  "requests": [
+    {
+      "slug": "inbox-dialogs-1",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-1",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-1",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-1",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-1",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-1",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "request_followthrough",
+      "kind": "post:seen",
+      "status": 400,
+      "fixture": "post:seen-400"
+    },
+    {
+      "slug": "inbox-dialogs-2",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-2",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-2",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-2",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-2",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-2",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "request_followthrough",
+      "kind": "post:seen",
+      "status": 200,
+      "fixture": "post:seen-lost-after-handler"
+    },
+    {
+      "slug": "inbox-dialogs-3",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-3",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-3",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-3",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-3",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-3",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "request_followthrough",
+      "kind": "post:seen",
+      "status": 503,
+      "fixture": "post:seen-503"
+    },
+    {
+      "slug": "inbox-dialogs-4",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-4",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-4",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "conversation",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-4",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "conversation",
+      "status": 200,
+      "fixture": "conversation-lost-after-handler"
+    },
+    {
+      "slug": "inbox-dialogs-5",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-5",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-5",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-5",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-5",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-5",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "request_followthrough",
+      "kind": "post:seen",
+      "status": 400,
+      "fixture": "post:seen-400"
+    },
+    {
+      "slug": "inbox-dialogs-5",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-5",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-5",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-6",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-6",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-6",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-6",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "kind": "other",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-6",
+      "path": "/api/client",
+      "method": "GET",
+      "kind": "request-read",
+      "status": 200
+    },
+    {
+      "slug": "inbox-dialogs-6",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "request_followthrough",
+      "kind": "post:seen",
+      "status": 400,
+      "fixture": "post:seen-400"
+    }
+  ],
+  "pageErrors": [],
+  "forbidden": [],
+  "physicalNetwork": 0,
+  "browserVersion": "148.0.7778.96",
+  "probe": {
+    "P1": {
+      "during": {
+        "id": "requestClose",
+        "tag": "BUTTON",
+        "text": "Close",
+        "inDialog": true,
+        "body": false,
+        "disabled": false
+      },
+      "after": {
+        "id": "requestClose",
+        "tag": "BUTTON",
+        "text": "Close",
+        "inDialog": true,
+        "body": false,
+        "disabled": false
+      }
+    },
+    "P2": {
+      "lostDuring": {
+        "id": "",
+        "tag": "BODY",
+        "text": "Skip to workspace\n\nFixture Inbox ShopHomeInboxSche",
+        "inDialog": false,
+        "body": true,
+        "disabled": false
+      },
+      "after": {
+        "id": "requestClose",
+        "tag": "BUTTON",
+        "text": "Close",
+        "inDialog": true,
+        "body": false,
+        "disabled": false
+      }
+    },
+    "P4": {
+      "during": {
+        "id": "",
+        "tag": "BODY",
+        "text": "Skip to workspace\n\nFixture Inbox ShopHomeInboxSche",
+        "inDialog": false,
+        "body": true,
+        "disabled": false
+      },
+      "after": {
+        "id": "conversationClose",
+        "tag": "BUTTON",
+        "text": "Close",
+        "inDialog": true,
+        "body": false,
+        "disabled": false
+      }
+    },
+    "P5": {
+      "afterClose": {
+        "id": "",
+        "tag": "BUTTON",
+        "text": "View request",
+        "inDialog": false,
+        "body": false,
+        "disabled": false
+      },
+      "reopenable": false,
+      "reopened": {
+        "open": true,
+        "msg": "No receipt is saved for this action yet. Retry the same action to confirm it; another action stays on hold.",
+        "invalid": null,
+        "pendingNotice": true
+      },
+      "focus": {
+        "id": "requestClose",
+        "tag": "BUTTON",
+        "text": "Close",
+        "inDialog": true,
+        "body": false,
+        "disabled": false
+      }
+    },
+    "P6": {
+      "id": "",
+      "tag": "BODY",
+      "text": "Skip to workspace\n\nFixture Inbox ShopHomeInboxSche",
+      "inDialog": false,
+      "body": true,
+      "disabled": false
+    }
+  },
+  "screenshots": [
+    "scratchpad/claude-inbox-qa-probe-base-failure-3.png"
+  ],
+  "sourceAfter": {
+    "qa-artifacts/claude-collaboration/inbox-dialogs/inbox-dialogs-ui-check.mjs": "401c26de92c5fbc382c53e1a84b50c17adda6b7849d468c76cd694aa24a56cf7",
+    "desk-requests.js": "1e8e2e77f2215916f83cd1fddd0e7266547c6b1c7900201f1f86f6171c5a4fa7",
+    "desk-conversations.js": "b3de532d88a00ff23812e65c6fc84e1dffe0ddbce430beb4fba46540f5e5d32e",
+    "desk.js": "f4017bc4745bca629f36159c05973b6e7c76c4961fa49ea9cb21dd77bbf428ee",
+    "desk.html": "5fb1a9be91dc46a0f16ead29691ca693329244b8d624de9ae82db7af4da8ad13",
+    "desk.css": "40bc6c92580591703346f97449d926b0c275245ba8c040cc86968a3f40988502"
+  },
+  "sourceStable": true,
+  "summary": {
+    "passed": 5,
+    "failed": 1,
+    "total": 6,
+    "physicalNetwork": 0,
+    "pageErrors": 0
+  }
+}

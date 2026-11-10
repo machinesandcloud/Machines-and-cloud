@@ -1,0 +1,15 @@
+PASS 1440 Q1 slow Check saved action, owner Shift+Tabs to Close: read ends with No receipt; focus stays on Close
+PASS 1440 Q2 slow failing Check (503), owner Shift+Tabs to Close: focus stays on Close; error announced
+PASS 1440 Q3 Retry (startedFrom is stale: Check) refused for a field, owner Shift+Tabs to Close: focus stays; field marked
+PASS 1440 Q4 Retry refused for a field, owner idle (focus lost from disabled Retry): focus goes to the refused field
+PASS 390 Q1 slow Check saved action, owner Shift+Tabs to Close: read ends with No receipt; focus stays on Close
+PASS 390 Q2 slow failing Check (503), owner Shift+Tabs to Close: focus stays on Close; error announced
+PASS 390 Q3 Retry (startedFrom is stale: Check) refused for a field, owner Shift+Tabs to Close: focus stays; field marked
+PASS 390 Q4 Retry refused for a field, owner idle (focus lost from disabled Retry): focus goes to the refused field
+PASS Q5 owner focuses a control that is then removed (detached node) during a refused save: focus recovers to the refused field
+PASS Q6 owner focuses a control that becomes hidden during a refused save: focus recovers to the refused field
+PASS Q7 close mid refused save, open a different request (blocked by pending), reopen same, Retry refused: message and field focus delivered
+PASS Q8 storage failure on save: no submit, message announced, focus on a usable control (Save)
+PASS Q9 reload with a held pending action, open it: where does focus land after the initial read (informational)
+PASS Q10 normal open: focus stays on Close after the initial read; owner refusal-free save leaves focus usable
+{"output":"scratchpad/claude-inbox-qa2-newprobe-fix.json","passed":14,"failed":0,"total":14,"physicalNetwork":0,"pageErrors":0,"servedSha256":{"desk-requests.js":["582ef5fd96a96de80601366c1f4ca12ee7706e1f2ad522ac3eecae409feeae5e"],"desk-conversations.js":["b3de532d88a00ff23812e65c6fc84e1dffe0ddbce430beb4fba46540f5e5d32e"]},"sourceStable":true,"failures":[]}
