@@ -1,0 +1,226 @@
+{
+  "at": "2026-11-10T23:28:05.374820+00:00",
+  "stage": "ENGINEERING_COMPLETE_PENDING_INDEPENDENT_REVIEW",
+  "author": "Codex /root/lead_connection_review",
+  "baseCommit": "b54122a846c5513b732ade8aa638c8a037a56bf0",
+  "branch": "work/root-connection-evidence-20261110",
+  "worktree": "/tmp/mc-root-lead-connection-review-20261110-sms",
+  "productChanges": [
+    "desk-connections.js"
+  ],
+  "productSourceSHA256": "f710b9c16c25b70abe341857bb5103499b25c01fcb259d3c04e7e50c5e1d7072",
+  "sourceDelta": {
+    "added": 7,
+    "removed": 8
+  },
+  "findings": [
+    {
+      "severity": "required",
+      "id": "connection-unrelated-maintenance",
+      "description": "An aborted voice POST was called saved when background maintenance changed updatedAt on the same retained row and forwarding mode."
+    },
+    {
+      "severity": "required",
+      "id": "connection-other-correction",
+      "description": "An aborted SMS correction was called saved after another actual engine correction committed different legal details and advanced submissionRevision."
+    },
+    {
+      "severity": "required",
+      "id": "connection-other-initial-request",
+      "description": "An aborted initial SMS POST was called saved after another request created the row with different legal details."
+    }
+  ],
+  "repair": "The three activation request/correction actions retain unknown after a lost reply because the exposed DTOs have no submission-bound receipt. Received ok:true replies still confirm their own request. No handler, provider, settings, purchase or deployment changes.",
+  "receipts": {
+    "claude-connerr-root-unrelated.json": {
+      "sha256": "a7b1d10c1194e1022dcf677d8f6a79075a40d26300242fb16c6c703ee26c2f0d",
+      "passed": 3,
+      "total": 5,
+      "failed": 2,
+      "physicalTransportAttemptsBlocked": 0,
+      "forbiddenDestinations": 0,
+      "pageErrors": 0,
+      "sourceStable": true
+    },
+    "claude-connerr-root-conservative.json": {
+      "sha256": "d07ebe31d1cbca28db17959ee711deb66a8c39474243d1051f537ab7acb96407",
+      "passed": 5,
+      "total": 5,
+      "failed": 0,
+      "physicalTransportAttemptsBlocked": 0,
+      "forbiddenDestinations": 0,
+      "pageErrors": 0,
+      "sourceStable": true
+    },
+    "claude-connerr-root-child.json": {
+      "sha256": "6686e3624d63680a34083053b6dfd3b115c38ba0883f7d23d7ea58d49d0a91dd",
+      "passed": 5,
+      "total": 5,
+      "failed": 0,
+      "physicalTransportAttemptsBlocked": 0,
+      "forbiddenDestinations": 0,
+      "pageErrors": 0,
+      "sourceStable": true
+    },
+    "claude-smsfix-root-evidence-before.json": {
+      "sha256": "6b2b5c4773dba9e4995700eaa95e436142c73bec4700aba894ccc8f616d2be8a",
+      "passed": 3,
+      "total": 5,
+      "failed": 2,
+      "physicalTransportAttemptsBlocked": 0,
+      "forbiddenDestinations": 0,
+      "pageErrors": 0,
+      "sourceStable": true
+    },
+    "claude-smsfix-root-evidence-child.json": {
+      "sha256": "d8d31dba1624e8d292a98af18081a0823c80ed9b08d30b5e1a8529658ae87e02",
+      "passed": 5,
+      "total": 5,
+      "failed": 0,
+      "physicalTransportAttemptsBlocked": 0,
+      "forbiddenDestinations": 0,
+      "pageErrors": 0,
+      "sourceStable": true
+    },
+    "claude-smsfix-root-ack-final.json": {
+      "sha256": "4420ecae025ee3629f111d7bd2ec40a9f79b567a2627848c6bc15f5e639eb135",
+      "passed": 8,
+      "total": 9,
+      "failed": 1,
+      "physicalTransportAttemptsBlocked": 4,
+      "forbiddenDestinations": 0,
+      "pageErrors": 0,
+      "sourceStable": true
+    },
+    "claude-smsfix-root-ack-weaker.json": {
+      "sha256": "d099c82b2f0edefa9fbbfb4ac3b8105592e464cb1957c348c82ecd9a4a25194c",
+      "passed": 6,
+      "total": 9,
+      "failed": 3,
+      "physicalTransportAttemptsBlocked": 4,
+      "forbiddenDestinations": 0,
+      "pageErrors": 0,
+      "sourceStable": true
+    },
+    "claude-smsfix-root-ack-final-r2.json": {
+      "sha256": "719f9dca8cee99fe7f2d3f18bc529d9b21a793eb3b082549073d120e48434b4f",
+      "passed": 9,
+      "total": 9,
+      "failed": 0,
+      "physicalTransportAttemptsBlocked": 0,
+      "forbiddenDestinations": 0,
+      "pageErrors": 0,
+      "sourceStable": true
+    },
+    "claude-smsfix-root-ack-weaker-r2.json": {
+      "sha256": "705e757870de702bb3a5f3f0999441ec4ad591653a0b960d3922ddd24154a6e1",
+      "passed": 7,
+      "total": 9,
+      "failed": 2,
+      "physicalTransportAttemptsBlocked": 0,
+      "forbiddenDestinations": 0,
+      "pageErrors": 0,
+      "sourceStable": true
+    },
+    "claude-smsfix-root-initial-child.json": {
+      "sha256": "1347c6e7758d71c35261c85de1896b7b4c76a28ea06d893f0b40ac3e2faa86a2",
+      "passed": 7,
+      "total": 7,
+      "failed": 0,
+      "physicalTransportAttemptsBlocked": 0,
+      "forbiddenDestinations": 0,
+      "pageErrors": 0,
+      "sourceStable": true
+    },
+    "claude-smsfix-root-initial-original.json": {
+      "sha256": "a807750d7ee1c7d50fbb314ef6f949d2f06f7036c40247c9e746c102da3e6312",
+      "passed": 3,
+      "total": 7,
+      "failed": 4,
+      "physicalTransportAttemptsBlocked": 0,
+      "forbiddenDestinations": 0,
+      "pageErrors": 0,
+      "sourceStable": true
+    },
+    "claude-smsfix-root-child-regression.json": {
+      "sha256": "cee8eaec031274bf3b89d282f0847f0c59cae9c2831a74fa0452277c608cb9e2",
+      "passed": 27,
+      "total": 27,
+      "failed": 0,
+      "physicalTransportAttemptsBlocked": 0,
+      "forbiddenDestinations": 0,
+      "pageErrors": 0,
+      "sourceStable": true
+    },
+    "claude-connerr-root-child-regression.json": {
+      "sha256": "0d89d870585ec9a4b4066728182339f3b21a1d5b03c2fc23e51c17dbd4a4a891",
+      "passed": 69,
+      "total": 71,
+      "failed": 2,
+      "physicalTransportAttemptsBlocked": 0,
+      "forbiddenDestinations": 0,
+      "pageErrors": 0,
+      "sourceStable": true
+    },
+    "claude-connerr-root-corrected-expectations.json": {
+      "sha256": "c0c8f35184d013f2467753f40f3dd52833d2725bd14004731596fa1d4cd07b85",
+      "passed": 7,
+      "total": 7,
+      "failed": 0,
+      "physicalTransportAttemptsBlocked": 0,
+      "forbiddenDestinations": 0,
+      "pageErrors": 0,
+      "sourceStable": true
+    },
+    "claude-smsfix-root-baseline.json": {
+      "sha256": "6a418bac3afd1af5b620509582ecff4d1f2ec17703618eadb654ddf2b7e2122a",
+      "passed": 13,
+      "total": 27,
+      "failed": 14,
+      "physicalTransportAttemptsBlocked": 0,
+      "forbiddenDestinations": 0,
+      "pageErrors": 0,
+      "sourceStable": true
+    },
+    "claude-smsfix-root-final-r2.json": {
+      "sha256": "d14380141c62ba5e8a693a1d9602e350e180111614a3e2fead98f03f40d5c0ef",
+      "passed": 27,
+      "total": 27,
+      "failed": 0,
+      "physicalTransportAttemptsBlocked": 0,
+      "forbiddenDestinations": 0,
+      "pageErrors": 0,
+      "sourceStable": true
+    }
+  },
+  "checks": {
+    "node_syntax": "desk-connections.js and four owned probe scripts pass node --check",
+    "diff_check": "git diff --check passes",
+    "full_required_gate": "not rerun; frontend-only child pending independent scoped review"
+  },
+  "regressionDisposition": {
+    "originalConnectionSuite": "69/71 on repaired source; exactly two old assertions demand false saved certainty from a lost voice reply plus updatedAt. Preserved without editing original.",
+    "replacement": "connection-recovery-check.mjs changes exactly those two expectations; targeted4behavior+3hygiene=7/7. Combined effective coverage retains original69 successful checks plus2 corrected expectations; this is not a new full71 run.",
+    "smsOriginal": "27/27 unchanged; includes actual-handler successful correction with confirmed ack, storage, validation, input retention and carrier issue UI.",
+    "positiveAcknowledgment": "Actual voice handler acknowledgments pass at390/1440 in ack-final-r2; actual initial SMS acknowledgments pass at390/1440 in initial-child.",
+    "weakerVariant": "Only the voice predicate is fixed; SMS concurrency remains false saved, so ack-weaker-r2 is7/9.",
+    "fixtureCorrection": "First ack runs recorded4 denied loopback background-dispatch attempts and zero physical egress. Exact /api/voice-activation-background POST was then intercepted with202 in test-only code; final9/9 and weaker7/9 have zero denied or physical requests. Original failed receipts preserved."
+  },
+  "limits": [
+    "No publication or provider delivery acceptance.",
+    "Genuine lost replies stay unknown when no request-specific receipt is exposed; owner draft and GET-only reconciliation remain available.",
+    "Worker/provider I/O blocked; actual voice handler background dispatch is intercepted202 and does not execute a worker.",
+    "No full64 gate or full integrated UI acceptance.",
+    "Reopened SMS form draft recovery remains outside these checks; no claim made."
+  ],
+  "authoredSourcePreserved": [
+    "161cf80e",
+    "b54122a8"
+  ],
+  "testScripts": {
+    "sms-evidence-probe.mjs": "f03aa51349bf1bb89d895e62228721b4455beb4fd419feae98319bd446f91194",
+    "connection-unrelated-update-probe.mjs": "3138b4161b93bc7c513c30a5274422b24b64c4a70c340ab7a6708b94f2fa7133",
+    "connection-recovery-check.mjs": "ba58ba5500f29db5590e6acf65ad830cfcb9eca0d894a188fdb963f85b069d23",
+    "sms-initial-request-probe.mjs": "c0918332ecee49b620bb2e316a8068f5ac5609064312ac2ac3365204b412e594"
+  }
+}

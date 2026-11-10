@@ -39,21 +39,23 @@
     var token; try { token = sessionStorage.getItem('mc-onboarding-session-v1'); } catch (error) { token = null; }
     if (!token) { document.dispatchEvent(new CustomEvent('mc:session-expired')); return; }
     var sequence = ++generation, days = Number($('activityReportDays').value); controller = new AbortController(); var current = controller;
-    var timeout = setTimeout(function () { current.abort(); }, 25000);
+    var timeout = setTimeout(function () { current.abort(); }, 25000), refocus = document.activeElement === $('activityReportLoad');
     $('activityReportLoad').disabled = true; card.setAttribute('aria-busy', 'true'); $('activityReportStatus').textContent = 'Checking your saved activity and follow-ups…'; $('activityReportResults').hidden = true;
     try {
       var response = await fetch(API_BASE + '/api/client?c=' + encodeURIComponent(slug) + '&report=activity&days=' + days, { headers: { Authorization: 'Bearer ' + token }, signal: current.signal, cache: 'no-store' });
       if (!isCurrent(sequence)) return;
       if (response.status === 401 || response.status === 403) { document.dispatchEvent(new CustomEvent('mc:session-expired')); return; }
-      var result = await response.json(); if (!isCurrent(sequence)) return;
-      if (!response.ok || !result.ok || !valid(result.report) || result.report.period.days !== days) throw new Error(result.message || 'The complete report could not be checked. Please try again.');
+      var result = null; try { result = await response.json(); } catch (error) { result = null; } if (!isCurrent(sequence)) return;
+      // Show the server's own words for a definite 4xx; never a raw network or JSON parse error.
+      if (response.status >= 400 && response.status < 500 && typeof result?.message === 'string' && result.message) throw Object.assign(new Error(result.message), { definite: true });
+      if (!response.ok || !result?.ok || !valid(result.report) || result.report.period.days !== days) throw Object.assign(new Error('The complete report could not be checked. Please try again.'), { definite: true });
       report = result.report; page = 0;
       $('activityReportPeriod').textContent = date(report.period.from) + '–' + date(report.period.until) + ' · Central time'; $('activityReportMetrics').replaceChildren();
       [['New inquiries','inquiries'],['Visit requests','visitRequests'],['Follow-ups completed','followupsCompleted'],['New inquiries marked reached','contactsMarkedReached']].forEach(function (metric) { var group = document.createElement('div'), label = document.createElement('dt'), value = document.createElement('dd'); label.textContent = metric[0]; value.textContent = report.activity[metric[1]]; group.append(label, value); $('activityReportMetrics').append(group); });
       $('activityReportExplanation').textContent = 'Visit requests are not confirmed arrivals. Contact and completion reflect actions recorded by your team. Follow-ups needing attention include older requests, outside this period.';
       $('activityReportResults').hidden = false; $('activityReportStatus').textContent = 'Updated ' + new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', hour: 'numeric', minute: '2-digit' }).format(new Date(report.generatedAt)) + ' CT. Setup checks and spam are excluded.'; work();
-    } catch (error) { if (isCurrent(sequence)) $('activityReportStatus').textContent = error.name === 'AbortError' ? 'The report took too long to check. Please try again.' : error.message; }
-    finally { clearTimeout(timeout); if (sequence === generation) { controller = null; if (card.isConnected && $('activityReportLoad')) { $('activityReportLoad').disabled = false; card.setAttribute('aria-busy', 'false'); } } }
+    } catch (error) { if (isCurrent(sequence)) $('activityReportStatus').textContent = error.name === 'AbortError' ? 'The report took too long to check. Please try again.' : error.definite ? error.message : 'The report couldn’t be checked. Check your connection and try again.'; }
+    finally { clearTimeout(timeout); if (sequence === generation) { controller = null; if (card.isConnected && $('activityReportLoad')) { $('activityReportLoad').disabled = false; card.setAttribute('aria-busy', 'false'); if (refocus && (document.activeElement === document.body || !document.activeElement) && !$('activityReportLoad').hidden) $('activityReportLoad').focus(); } } }
   }
   $('activityReportLoad').addEventListener('click', load);
   $('activityReportDays').addEventListener('change', reset);

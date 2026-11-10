@@ -1,0 +1,23 @@
+PASS 390: A carrier correction opens the editable registration form, prefilled from the saved registration, with fresh unchecked approvals
+PASS 1440: A carrier correction opens the editable registration form, prefilled from the saved registration, with fresh unchecked approvals
+PASS The correction form identifies the detail the carrier flagged
+PASS Validation: an emptied required field blocks submit in the browser and focuses that field
+PASS Validation: a server-refused EIN keeps the dialog and input, announces the server reason, and stores nothing
+PASS Validation: after a server refusal keyboard focus stays in the dialog on a visible control
+PASS Validation: an unsupported state is refused with the server reason
+PASS Editing and submitting sends one correction with the edited, normalized registration and the operation fence
+PASS The server stores the correction sealed and normalized, once, and the private registration read returns it
+PASS Lost response: the owner is told the correction may be saved, not "Failed to fetch"
+PASS Lost response: the edited input and approvals are kept in the open form
+PASS Lost response: the form holds the submit until the saved status is checked
+PASS Lost response: a second submit never stores a second correction
+PASS 390: C1 follow-up: the flagged EIN is marked invalid, described by the carrier reason, and the summary opens focused with the one-correction notice
+PASS 1440: C1 follow-up: the flagged EIN is marked invalid, described by the carrier reason, and the summary opens focused with the one-correction notice
+PASS 390: C1 follow-up: keyboard from the summary link moves focus to the flagged field without changing the route
+PASS 1440: C1 follow-up: keyboard from the summary link moves focus to the flagged field without changing the route
+PASS 390: C1 follow-up: several issues mark each named field once, merge reasons per field, and each summary link reaches its field
+PASS 1440: C1 follow-up: several issues mark each named field once, merge reasons per field, and each summary link reaches its field
+PASS 390: C1 follow-up: issue fields that match no form field are listed as reported, with no field guessed
+PASS 1440: C1 follow-up: issue fields that match no form field are listed as reported, with no field guessed
+PASS No physical transport, forbidden destinations or page errors; served bytes are the worktree bytes; only desk-connections.js differs from 161cf80e
+{"output":null,"passed":22,"failed":0,"total":22,"physicalNetwork":0,"pageErrors":0,"servedAllBase":false,"servedChangedFromBase":[{"file":"desk-connections.js","sha256":"a125b54a743993891976af32e15737f7941d262f95d4d52d668469335e69f4b1"}],"sourceStable":true,"failures":[]}

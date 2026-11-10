@@ -1,0 +1,895 @@
+{
+  "check": "smsfix-correct",
+  "at": "2026-11-10T23:26:56.231Z",
+  "head": "b54122a846c5513b732ade8aa638c8a037a56bf0",
+  "base": "161cf80e",
+  "serveRev": null,
+  "serveFile": {
+    "rel": "desk-connections.js",
+    "path": "/tmp/mc-root-lead-connection-review-20261110-sms/scratchpad/root-connections-original-b541.js",
+    "sha256": "2c692c607aa6ce8f4d6af6fcea9b86538a3c038f1d838ad2b11cfc4f95ff9f27"
+  },
+  "browser": "/Users/stevengoumnai/Library/Caches/ms-playwright/chromium_headless_shell-1223/chrome-headless-shell-mac-arm64/chrome-headless-shell",
+  "qualifications": "Self-service workspace with a synthetic acquired number and a real texting registration row moved to needs_action (carrier correction requested, issue on the EIN). Actual /api/client handler, memory store, fake model, synthetic open gates, no provider transport. Lost responses: route.abort after the handler committed.",
+  "sourceBefore": {
+    "desk.html": "5fb1a9be91dc46a0f16ead29691ca693329244b8d624de9ae82db7af4da8ad13",
+    "desk.js": "f4017bc4745bca629f36159c05973b6e7c76c4961fa49ea9cb21dd77bbf428ee",
+    "desk-connections.js": "f710b9c16c25b70abe341857bb5103499b25c01fcb259d3c04e7e50c5e1d7072",
+    "desk-service-intake.js": "f8005c3ce72202e28d6436c3f9e140e57cccdbb7129548f3115df4ee4540cdd7",
+    "desk-setup-guide.js": "bc6c0a20089093dda1f79b0b325a7f6bcfb534c57b43a2e12ee14ff999fa62c7",
+    "netlify/functions/client.mjs": "eafa4e54aae9adcf7e882f09f7daf3797486791178b88ebc1c2e3954cf4a7391",
+    "netlify/functions/lib/service-intake.mjs": "648756c7228c3daa07bad0eaa03a6a4e2f5ebad770ddd9195e7e3337e6037b6d",
+    "netlify/functions/lib/messaging-activation.mjs": "f93701fd56ae611e10ddbce65d568ed95ee44c89e334e7222a85153b632818cd",
+    "netlify/functions/lib/connection-journey.mjs": "d0f1fc710875864e61c313674d9c6353c4c54af91e69a2c78398199fd12ba37c",
+    "qa-artifacts/claude-collaboration/root-lead-connection-review-20261110-resume/sms-initial-request-probe.mjs": "c0918332ecee49b620bb2e316a8068f5ac5609064312ac2ac3365204b412e594",
+    "qa-artifacts/claude-collaboration/sms-correction-followup/sms-harness.mjs": "5bcf4bb8b662ec7a5cb3071e00d475849bd6ce5ca2a3c62a5d7b4728625857b7"
+  },
+  "served": {
+    "desk.html": "5fb1a9be91dc46a0f16ead29691ca693329244b8d624de9ae82db7af4da8ad13",
+    "styles.css": "e8ac1b30d0205f99c9499dab7cf3d51e4970f8f69295e9c66f963a12033bd56b",
+    "desk-connections.css": "7d71db802dfe27002da0034a14ef625fe67f8eb0b252c069a2b79109eeceaf41",
+    "desk-billing.css": "f6d66178bb2b19dfdff4b9b09a9c637b3b4bb14b39813f572f3c3eca817fdd11",
+    "desk-lead-sources.css": "5b290deb61d8777f51daff8941c7769ff78bc8e8795bfbca3edcee048d26379a",
+    "desk-setup-guide.css": "fa9c98b9d38f3909a779524461085639e9547e6cb20d77ec831383732bf3e663",
+    "desk-guide-visuals.css": "9fbde03b2113789d00930ef862ab37162ecdad461dba459a1917da5d56e0a293",
+    "product-ui.css": "e120e163a8e73f5c776b4ee9361382d3204dfb07f549b75f561c975bfcae54cb",
+    "desk.css": "40bc6c92580591703346f97449d926b0c275245ba8c040cc86968a3f40988502",
+    "desk-calendar.css": "fa3b4383ba86b9fe0f5556a9db063f7a96989a19cb25f95360f73dfeada075e4",
+    "desk-service-intake.css": "5f72fd9a462719190bc7f33bd39c99b869c89058db94a855e547712f03e50494",
+    "brand-marks.js": "0ad46b72e9f5a42174df67cff8e361ce47adf414a01dde615feb0ddc4d60b8aa",
+    "desk-connections.js": "2c692c607aa6ce8f4d6af6fcea9b86538a3c038f1d838ad2b11cfc4f95ff9f27",
+    "desk-billing.js": "a2e3a33c7ae0ad4808ed8a403b7785207817bf4f5481d82fe9c0becd1b77732f",
+    "desk.js": "f4017bc4745bca629f36159c05973b6e7c76c4961fa49ea9cb21dd77bbf428ee",
+    "desk-visits.js": "95c718fa8cb251c8e36b794d1bccb52e2db5b36098b6120a0040a10125b3139b",
+    "desk-calendar.js": "fadc233f1f8df7603cf88a0d506dbcd214679cbcb64f1fbec0ab4fe7ebaf3bd6",
+    "desk-requests.js": "392b7bd34defb652dc4e7bd7eeee3e3c93e53a34a2fa49793d16078547335281",
+    "desk-activity.js": "392726f8270f77a61ece66401f08586e6bb6a8860a91eac8e564af2d9850db15",
+    "desk-conversations.js": "cdd96f99a65c23d28e1e6de5a49a9bff452df1ca7f96c63c82120f67a9eb0012",
+    "desk-manual-guide.js": "c8cf8f6f3e03ccdad6d1427672289d5307220c615e6893dd35e8d3c51bc63dc4",
+    "desk-website-install.js": "cd4212527b7cd33d630cb06fcd474d41da9da1beaccc220277c4976359a6631f",
+    "desk-lead-sources.js": "d9c09539110f5b58aba041bb8e3fe53af10aadbd4dbfd7b9a6dda3902aabdc0f",
+    "desk-guide-visuals.js": "c4fe4a632aa15501050c8a52391a2358db2b2856137d2a4e2a542fa2eea576d0",
+    "desk-service-intake.js": "f8005c3ce72202e28d6436c3f9e140e57cccdbb7129548f3115df4ee4540cdd7",
+    "desk-setup-guide.js": "bc6c0a20089093dda1f79b0b325a7f6bcfb534c57b43a2e12ee14ff999fa62c7",
+    "design-system.css": "7f4c532dc9c52e03f0dc8a01ab88e03a6d708b75308fdc9bc1a53e0766129c8a"
+  },
+  "servedVsBase": {
+    "desk.html": true,
+    "styles.css": true,
+    "desk-connections.css": true,
+    "desk-billing.css": true,
+    "desk-lead-sources.css": true,
+    "desk-setup-guide.css": true,
+    "desk-guide-visuals.css": true,
+    "product-ui.css": true,
+    "desk.css": true,
+    "desk-calendar.css": true,
+    "desk-service-intake.css": true,
+    "brand-marks.js": true,
+    "desk-connections.js": false,
+    "desk-billing.js": true,
+    "desk.js": true,
+    "desk-visits.js": true,
+    "desk-calendar.js": true,
+    "desk-requests.js": true,
+    "desk-activity.js": true,
+    "desk-conversations.js": true,
+    "desk-manual-guide.js": true,
+    "desk-website-install.js": true,
+    "desk-lead-sources.js": true,
+    "desk-guide-visuals.js": true,
+    "desk-service-intake.js": true,
+    "desk-setup-guide.js": true,
+    "design-system.css": true
+  },
+  "checks": [
+    {
+      "name": "root initial SMS request ack 390",
+      "pass": true,
+      "expectedChange": null
+    },
+    {
+      "name": "root initial SMS request lost 390",
+      "pass": false,
+      "expectedChange": null,
+      "error": "AssertionError [ERR_ASSERTION]: unreceipted initial request remains unknown\n    at file:///private/tmp/mc-root-lead-connection-review-20261110-sms/qa-artifacts/claude-collaboration/root-lead-connection-review-20261110-resume/sms-initial-request-probe.mjs:94:10\n    at async check (file:///private/tmp/mc-root-lead-connection-review-20261110-sms/qa-artifacts/claude-collaboration/sms-correction-followup/sms-harness.mjs:140:11)\n    at async file:///private/tmp/mc-root-lead-connection-review-20261110-sms/qa-artifacts/claude-collaboration/root-lead-connection-review-20261110-resume/sms-initial-request-probe.mjs:69:74"
+    },
+    {
+      "name": "root initial SMS request other 390",
+      "pass": false,
+      "expectedChange": null,
+      "error": "AssertionError [ERR_ASSERTION]: unreceipted initial request remains unknown\n    at file:///private/tmp/mc-root-lead-connection-review-20261110-sms/qa-artifacts/claude-collaboration/root-lead-connection-review-20261110-resume/sms-initial-request-probe.mjs:94:10\n    at async check (file:///private/tmp/mc-root-lead-connection-review-20261110-sms/qa-artifacts/claude-collaboration/sms-correction-followup/sms-harness.mjs:140:11)\n    at async file:///private/tmp/mc-root-lead-connection-review-20261110-sms/qa-artifacts/claude-collaboration/root-lead-connection-review-20261110-resume/sms-initial-request-probe.mjs:69:74"
+    },
+    {
+      "name": "root initial SMS request ack 1440",
+      "pass": true,
+      "expectedChange": null
+    },
+    {
+      "name": "root initial SMS request lost 1440",
+      "pass": false,
+      "expectedChange": null,
+      "error": "AssertionError [ERR_ASSERTION]: unreceipted initial request remains unknown\n    at file:///private/tmp/mc-root-lead-connection-review-20261110-sms/qa-artifacts/claude-collaboration/root-lead-connection-review-20261110-resume/sms-initial-request-probe.mjs:94:10\n    at async check (file:///private/tmp/mc-root-lead-connection-review-20261110-sms/qa-artifacts/claude-collaboration/sms-correction-followup/sms-harness.mjs:140:11)\n    at async file:///private/tmp/mc-root-lead-connection-review-20261110-sms/qa-artifacts/claude-collaboration/root-lead-connection-review-20261110-resume/sms-initial-request-probe.mjs:69:74"
+    },
+    {
+      "name": "root initial SMS request other 1440",
+      "pass": false,
+      "expectedChange": null,
+      "error": "AssertionError [ERR_ASSERTION]: unreceipted initial request remains unknown\n    at file:///private/tmp/mc-root-lead-connection-review-20261110-sms/qa-artifacts/claude-collaboration/root-lead-connection-review-20261110-resume/sms-initial-request-probe.mjs:94:10\n    at async check (file:///private/tmp/mc-root-lead-connection-review-20261110-sms/qa-artifacts/claude-collaboration/sms-correction-followup/sms-harness.mjs:140:11)\n    at async file:///private/tmp/mc-root-lead-connection-review-20261110-sms/qa-artifacts/claude-collaboration/root-lead-connection-review-20261110-resume/sms-initial-request-probe.mjs:69:74"
+    },
+    {
+      "name": "No physical transport, forbidden destinations or page errors; served bytes are the worktree bytes; only desk-connections.js differs from 161cf80e",
+      "pass": true,
+      "expectedChange": null
+    }
+  ],
+  "observations": [
+    {
+      "mode": "lost",
+      "width": 390,
+      "shown": "Your change is saved. Its current status is shown above.",
+      "originalPostStatus": 202
+    },
+    {
+      "mode": "other",
+      "width": 390,
+      "shown": "Your change is saved. Its current status is shown above.",
+      "originalPostStatus": "aborted"
+    },
+    {
+      "mode": "lost",
+      "width": 1440,
+      "shown": "Your change is saved. Its current status is shown above.",
+      "originalPostStatus": 202
+    },
+    {
+      "mode": "other",
+      "width": 1440,
+      "shown": "Your change is saved. Its current status is shown above.",
+      "originalPostStatus": "aborted"
+    }
+  ],
+  "requests": [
+    {
+      "slug": "smsfix-correct-1",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-1",
+      "method": "GET",
+      "at": 1794353217488,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-1",
+      "path": "/api/workspace-billing",
+      "query": "?c=smsfix-correct-1",
+      "method": "GET",
+      "at": 1794353217551,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-1",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-1",
+      "method": "GET",
+      "at": 1794353217619,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-1",
+      "path": "/api/workspace-billing",
+      "query": "?c=smsfix-correct-1",
+      "method": "GET",
+      "at": 1794353217647,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-1",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-1",
+      "method": "GET",
+      "at": 1794353217707,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-1",
+      "path": "/api/workspace-billing",
+      "query": "?c=smsfix-correct-1",
+      "method": "GET",
+      "at": 1794353217731,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-1",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-1&service_intake=1",
+      "method": "GET",
+      "at": 1794353217758,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-1",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-1",
+      "method": "POST",
+      "action": "request_messaging_activation",
+      "at": 1794353218073,
+      "body": {
+        "action": "request_messaging_activation",
+        "expectedRevision": "0b028491083ab0bf4857a81dace78c9f86b977722bea6930925dbe08c8c6b4db",
+        "submissionId": "18f0cbb069c0f8666f07ea04b38c607f",
+        "offerVersion": "qa_sms_v1",
+        "offerDigest": "c79ffe14ef2b469cc269e6563b9e604158c7d587f6b570316b1721ef8263321c",
+        "programDigest": "db9bf2e1b4e110f4d017f1e150d1d00cae090719f0247524c10a59dff552b6a5",
+        "acceptedCosts": true,
+        "authority": true,
+        "attestLegalAccuracy": true,
+        "attestConsent": true,
+        "testPhoneConsent": true,
+        "legal": {
+          "legalName": "Fixture Plumbing LLC",
+          "ein": "92-1234567",
+          "businessType": "llc",
+          "businessIndustry": "CONSTRUCTION",
+          "street": "700 Intended Initial Road",
+          "street2": "",
+          "city": "Houston",
+          "state": "TX",
+          "zip": "77057",
+          "website": "https://shop.example.com",
+          "representative": {
+            "firstName": "Alex",
+            "lastName": "Fixture",
+            "email": "alex.rep@example.com",
+            "phone": "+17135550198",
+            "title": "Owner",
+            "jobPosition": "CEO"
+          }
+        }
+      },
+      "status": 202,
+      "response": {}
+    },
+    {
+      "slug": "smsfix-correct-1",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-1",
+      "method": "GET",
+      "at": 1794353218081,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-1",
+      "path": "/api/workspace-billing",
+      "query": "?c=smsfix-correct-1",
+      "method": "GET",
+      "at": 1794353218099,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-2",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-2",
+      "method": "GET",
+      "at": 1794353218232,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-2",
+      "path": "/api/workspace-billing",
+      "query": "?c=smsfix-correct-2",
+      "method": "GET",
+      "at": 1794353218279,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-2",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-2",
+      "method": "GET",
+      "at": 1794353218344,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-2",
+      "path": "/api/workspace-billing",
+      "query": "?c=smsfix-correct-2",
+      "method": "GET",
+      "at": 1794353218363,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-2",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-2",
+      "method": "GET",
+      "at": 1794353218419,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-2",
+      "path": "/api/workspace-billing",
+      "query": "?c=smsfix-correct-2",
+      "method": "GET",
+      "at": 1794353218438,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-2",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-2&service_intake=1",
+      "method": "GET",
+      "at": 1794353218460,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-2",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-2",
+      "method": "POST",
+      "action": "request_messaging_activation",
+      "at": 1794353218740,
+      "body": {
+        "action": "request_messaging_activation",
+        "expectedRevision": "0b028491083ab0bf4857a81dace78c9f86b977722bea6930925dbe08c8c6b4db",
+        "submissionId": "813d757c8bc0e6e1f1b2eaad16b23dcb",
+        "offerVersion": "qa_sms_v1",
+        "offerDigest": "c79ffe14ef2b469cc269e6563b9e604158c7d587f6b570316b1721ef8263321c",
+        "programDigest": "eae2ac2a0ada0cf09106e9a1865f1635389f675a294298a954f31dd041974691",
+        "acceptedCosts": true,
+        "authority": true,
+        "attestLegalAccuracy": true,
+        "attestConsent": true,
+        "testPhoneConsent": true,
+        "legal": {
+          "legalName": "Fixture Plumbing LLC",
+          "ein": "92-1234567",
+          "businessType": "llc",
+          "businessIndustry": "CONSTRUCTION",
+          "street": "700 Intended Initial Road",
+          "street2": "",
+          "city": "Houston",
+          "state": "TX",
+          "zip": "77057",
+          "website": "https://shop.example.com",
+          "representative": {
+            "firstName": "Alex",
+            "lastName": "Fixture",
+            "email": "alex.rep@example.com",
+            "phone": "+17135550198",
+            "title": "Owner",
+            "jobPosition": "CEO"
+          }
+        }
+      },
+      "status": 202,
+      "response": {},
+      "fixture": "lost-after-handler",
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "smsfix-correct-2",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-2",
+      "method": "GET",
+      "at": 1794353218781,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-2",
+      "path": "/api/workspace-billing",
+      "query": "?c=smsfix-correct-2",
+      "method": "GET",
+      "at": 1794353218801,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-3",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-3",
+      "method": "GET",
+      "at": 1794353218943,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-3",
+      "path": "/api/workspace-billing",
+      "query": "?c=smsfix-correct-3",
+      "method": "GET",
+      "at": 1794353218989,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-3",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-3",
+      "method": "GET",
+      "at": 1794353219045,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-3",
+      "path": "/api/workspace-billing",
+      "query": "?c=smsfix-correct-3",
+      "method": "GET",
+      "at": 1794353219070,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-3",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-3",
+      "method": "GET",
+      "at": 1794353219138,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-3",
+      "path": "/api/workspace-billing",
+      "query": "?c=smsfix-correct-3",
+      "method": "GET",
+      "at": 1794353219160,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-3",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-3&service_intake=1",
+      "method": "GET",
+      "at": 1794353219182,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-3",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-3",
+      "method": "POST",
+      "action": "request_messaging_activation",
+      "at": 1794353219473,
+      "body": {
+        "action": "request_messaging_activation",
+        "expectedRevision": "0b028491083ab0bf4857a81dace78c9f86b977722bea6930925dbe08c8c6b4db",
+        "submissionId": "c9d98fc3286d832bf26b98df64636e38",
+        "offerVersion": "qa_sms_v1",
+        "offerDigest": "c79ffe14ef2b469cc269e6563b9e604158c7d587f6b570316b1721ef8263321c",
+        "programDigest": "dd1efe1c35984bfdd422bfcc55fd44bb8d57817046102b1e5cd9885ff73c4945",
+        "acceptedCosts": true,
+        "authority": true,
+        "attestLegalAccuracy": true,
+        "attestConsent": true,
+        "testPhoneConsent": true,
+        "legal": {
+          "legalName": "Fixture Plumbing LLC",
+          "ein": "92-1234567",
+          "businessType": "llc",
+          "businessIndustry": "CONSTRUCTION",
+          "street": "700 Intended Initial Road",
+          "street2": "",
+          "city": "Houston",
+          "state": "TX",
+          "zip": "77057",
+          "website": "https://shop.example.com",
+          "representative": {
+            "firstName": "Alex",
+            "lastName": "Fixture",
+            "email": "alex.rep@example.com",
+            "phone": "+17135550198",
+            "title": "Owner",
+            "jobPosition": "CEO"
+          }
+        }
+      },
+      "fixture": "aborted-before-handler",
+      "status": "aborted"
+    },
+    {
+      "slug": "smsfix-correct-3",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-3",
+      "method": "GET",
+      "at": 1794353219514,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-3",
+      "path": "/api/workspace-billing",
+      "query": "?c=smsfix-correct-3",
+      "method": "GET",
+      "at": 1794353219532,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-4",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-4",
+      "method": "GET",
+      "at": 1794353219686,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-4",
+      "path": "/api/workspace-billing",
+      "query": "?c=smsfix-correct-4",
+      "method": "GET",
+      "at": 1794353219734,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-4",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-4",
+      "method": "GET",
+      "at": 1794353219790,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-4",
+      "path": "/api/workspace-billing",
+      "query": "?c=smsfix-correct-4",
+      "method": "GET",
+      "at": 1794353219814,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-4",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-4",
+      "method": "GET",
+      "at": 1794353219871,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-4",
+      "path": "/api/workspace-billing",
+      "query": "?c=smsfix-correct-4",
+      "method": "GET",
+      "at": 1794353219893,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-4",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-4&service_intake=1",
+      "method": "GET",
+      "at": 1794353219924,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-4",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-4",
+      "method": "POST",
+      "action": "request_messaging_activation",
+      "at": 1794353220223,
+      "body": {
+        "action": "request_messaging_activation",
+        "expectedRevision": "0b028491083ab0bf4857a81dace78c9f86b977722bea6930925dbe08c8c6b4db",
+        "submissionId": "fd2bb952728ef669f53036b32d87b9a8",
+        "offerVersion": "qa_sms_v1",
+        "offerDigest": "c79ffe14ef2b469cc269e6563b9e604158c7d587f6b570316b1721ef8263321c",
+        "programDigest": "351d9eda9988eb247536374937a387f1880a9115d4214f3f2460c4e95a314504",
+        "acceptedCosts": true,
+        "authority": true,
+        "attestLegalAccuracy": true,
+        "attestConsent": true,
+        "testPhoneConsent": true,
+        "legal": {
+          "legalName": "Fixture Plumbing LLC",
+          "ein": "92-1234567",
+          "businessType": "llc",
+          "businessIndustry": "CONSTRUCTION",
+          "street": "700 Intended Initial Road",
+          "street2": "",
+          "city": "Houston",
+          "state": "TX",
+          "zip": "77057",
+          "website": "https://shop.example.com",
+          "representative": {
+            "firstName": "Alex",
+            "lastName": "Fixture",
+            "email": "alex.rep@example.com",
+            "phone": "+17135550198",
+            "title": "Owner",
+            "jobPosition": "CEO"
+          }
+        }
+      },
+      "status": 202,
+      "response": {}
+    },
+    {
+      "slug": "smsfix-correct-4",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-4",
+      "method": "GET",
+      "at": 1794353220231,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-4",
+      "path": "/api/workspace-billing",
+      "query": "?c=smsfix-correct-4",
+      "method": "GET",
+      "at": 1794353220249,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-5",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-5",
+      "method": "GET",
+      "at": 1794353220396,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-5",
+      "path": "/api/workspace-billing",
+      "query": "?c=smsfix-correct-5",
+      "method": "GET",
+      "at": 1794353220441,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-5",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-5",
+      "method": "GET",
+      "at": 1794353220506,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-5",
+      "path": "/api/workspace-billing",
+      "query": "?c=smsfix-correct-5",
+      "method": "GET",
+      "at": 1794353220526,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-5",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-5",
+      "method": "GET",
+      "at": 1794353220581,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-5",
+      "path": "/api/workspace-billing",
+      "query": "?c=smsfix-correct-5",
+      "method": "GET",
+      "at": 1794353220602,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-5",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-5&service_intake=1",
+      "method": "GET",
+      "at": 1794353220624,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-5",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-5",
+      "method": "POST",
+      "action": "request_messaging_activation",
+      "at": 1794353220897,
+      "body": {
+        "action": "request_messaging_activation",
+        "expectedRevision": "0b028491083ab0bf4857a81dace78c9f86b977722bea6930925dbe08c8c6b4db",
+        "submissionId": "7302f27dd4f5269f5f22b6eb1cdc4a2f",
+        "offerVersion": "qa_sms_v1",
+        "offerDigest": "c79ffe14ef2b469cc269e6563b9e604158c7d587f6b570316b1721ef8263321c",
+        "programDigest": "72c1ca9e4b19228113b7368f2927247bbff0af73922b440e54b5bb75832efa97",
+        "acceptedCosts": true,
+        "authority": true,
+        "attestLegalAccuracy": true,
+        "attestConsent": true,
+        "testPhoneConsent": true,
+        "legal": {
+          "legalName": "Fixture Plumbing LLC",
+          "ein": "92-1234567",
+          "businessType": "llc",
+          "businessIndustry": "CONSTRUCTION",
+          "street": "700 Intended Initial Road",
+          "street2": "",
+          "city": "Houston",
+          "state": "TX",
+          "zip": "77057",
+          "website": "https://shop.example.com",
+          "representative": {
+            "firstName": "Alex",
+            "lastName": "Fixture",
+            "email": "alex.rep@example.com",
+            "phone": "+17135550198",
+            "title": "Owner",
+            "jobPosition": "CEO"
+          }
+        }
+      },
+      "status": 202,
+      "response": {},
+      "fixture": "lost-after-handler",
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "smsfix-correct-5",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-5",
+      "method": "GET",
+      "at": 1794353220939,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-5",
+      "path": "/api/workspace-billing",
+      "query": "?c=smsfix-correct-5",
+      "method": "GET",
+      "at": 1794353220956,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-6",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-6",
+      "method": "GET",
+      "at": 1794353221107,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-6",
+      "path": "/api/workspace-billing",
+      "query": "?c=smsfix-correct-6",
+      "method": "GET",
+      "at": 1794353221153,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-6",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-6",
+      "method": "GET",
+      "at": 1794353221208,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-6",
+      "path": "/api/workspace-billing",
+      "query": "?c=smsfix-correct-6",
+      "method": "GET",
+      "at": 1794353221232,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-6",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-6",
+      "method": "GET",
+      "at": 1794353221294,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-6",
+      "path": "/api/workspace-billing",
+      "query": "?c=smsfix-correct-6",
+      "method": "GET",
+      "at": 1794353221318,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-6",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-6&service_intake=1",
+      "method": "GET",
+      "at": 1794353221342,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-6",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-6",
+      "method": "POST",
+      "action": "request_messaging_activation",
+      "at": 1794353221623,
+      "body": {
+        "action": "request_messaging_activation",
+        "expectedRevision": "0b028491083ab0bf4857a81dace78c9f86b977722bea6930925dbe08c8c6b4db",
+        "submissionId": "9cfa8967a92b858e4bd8b8498013a035",
+        "offerVersion": "qa_sms_v1",
+        "offerDigest": "c79ffe14ef2b469cc269e6563b9e604158c7d587f6b570316b1721ef8263321c",
+        "programDigest": "ffddaa3807b85a6ac6475909bd0057a983d0a599b3488dec2a0c4e66903b06ab",
+        "acceptedCosts": true,
+        "authority": true,
+        "attestLegalAccuracy": true,
+        "attestConsent": true,
+        "testPhoneConsent": true,
+        "legal": {
+          "legalName": "Fixture Plumbing LLC",
+          "ein": "92-1234567",
+          "businessType": "llc",
+          "businessIndustry": "CONSTRUCTION",
+          "street": "700 Intended Initial Road",
+          "street2": "",
+          "city": "Houston",
+          "state": "TX",
+          "zip": "77057",
+          "website": "https://shop.example.com",
+          "representative": {
+            "firstName": "Alex",
+            "lastName": "Fixture",
+            "email": "alex.rep@example.com",
+            "phone": "+17135550198",
+            "title": "Owner",
+            "jobPosition": "CEO"
+          }
+        }
+      },
+      "fixture": "aborted-before-handler",
+      "status": "aborted"
+    },
+    {
+      "slug": "smsfix-correct-6",
+      "path": "/api/client",
+      "query": "?c=smsfix-correct-6",
+      "method": "GET",
+      "at": 1794353221664,
+      "status": 200
+    },
+    {
+      "slug": "smsfix-correct-6",
+      "path": "/api/workspace-billing",
+      "query": "?c=smsfix-correct-6",
+      "method": "GET",
+      "at": 1794353221681,
+      "status": 200
+    }
+  ],
+  "pageErrors": [],
+  "forbidden": [],
+  "physicalNetwork": 0,
+  "physicalAttempts": [],
+  "screenshots": [
+    "scratchpad/claude-smsfix-root-initial-original-root-initial-ack-390.png",
+    "scratchpad/claude-smsfix-root-initial-original-failure-2.png",
+    "scratchpad/claude-smsfix-root-initial-original-failure-3.png",
+    "scratchpad/claude-smsfix-root-initial-original-root-initial-ack-1440.png",
+    "scratchpad/claude-smsfix-root-initial-original-failure-5.png",
+    "scratchpad/claude-smsfix-root-initial-original-failure-6.png"
+  ],
+  "sourceAfter": {
+    "desk.html": "5fb1a9be91dc46a0f16ead29691ca693329244b8d624de9ae82db7af4da8ad13",
+    "desk.js": "f4017bc4745bca629f36159c05973b6e7c76c4961fa49ea9cb21dd77bbf428ee",
+    "desk-connections.js": "f710b9c16c25b70abe341857bb5103499b25c01fcb259d3c04e7e50c5e1d7072",
+    "desk-service-intake.js": "f8005c3ce72202e28d6436c3f9e140e57cccdbb7129548f3115df4ee4540cdd7",
+    "desk-setup-guide.js": "bc6c0a20089093dda1f79b0b325a7f6bcfb534c57b43a2e12ee14ff999fa62c7",
+    "netlify/functions/client.mjs": "eafa4e54aae9adcf7e882f09f7daf3797486791178b88ebc1c2e3954cf4a7391",
+    "netlify/functions/lib/service-intake.mjs": "648756c7228c3daa07bad0eaa03a6a4e2f5ebad770ddd9195e7e3337e6037b6d",
+    "netlify/functions/lib/messaging-activation.mjs": "f93701fd56ae611e10ddbce65d568ed95ee44c89e334e7222a85153b632818cd",
+    "netlify/functions/lib/connection-journey.mjs": "d0f1fc710875864e61c313674d9c6353c4c54af91e69a2c78398199fd12ba37c",
+    "qa-artifacts/claude-collaboration/root-lead-connection-review-20261110-resume/sms-initial-request-probe.mjs": "c0918332ecee49b620bb2e316a8068f5ac5609064312ac2ac3365204b412e594",
+    "qa-artifacts/claude-collaboration/sms-correction-followup/sms-harness.mjs": "5bcf4bb8b662ec7a5cb3071e00d475849bd6ce5ca2a3c62a5d7b4728625857b7"
+  },
+  "sourceStable": true,
+  "servedAllBase": false,
+  "servedChangedFromBase": [
+    {
+      "file": "desk-connections.js",
+      "sha256": "2c692c607aa6ce8f4d6af6fcea9b86538a3c038f1d838ad2b11cfc4f95ff9f27"
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 4,
+    "total": 7,
+    "physicalNetwork": 0,
+    "pageErrors": 0,
+    "servedAllBase": false,
+    "servedChangedFromBase": [
+      {
+        "file": "desk-connections.js",
+        "sha256": "2c692c607aa6ce8f4d6af6fcea9b86538a3c038f1d838ad2b11cfc4f95ff9f27"
+      }
+    ]
+  }
+}

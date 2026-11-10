@@ -1,0 +1,525 @@
+{
+  "at": "2026-11-10T21:09:11.697Z",
+  "mode": "Actual owner handlers in-process, memory store, fake model, Playwright-served worktree files; provider env deleted; physical transport denied",
+  "serveBase": false,
+  "baseCommit": "dfb0ae7846e66871d849c67566bf9d3b475f46ae",
+  "served": {
+    "desk-connections.js": "a125b54a743993891976af32e15737f7941d262f95d4d52d668469335e69f4b1",
+    "desk-activity.js": "392726f8270f77a61ece66401f08586e6bb6a8860a91eac8e564af2d9850db15"
+  },
+  "sourceBefore": {
+    "desk.html": "5fb1a9be91dc46a0f16ead29691ca693329244b8d624de9ae82db7af4da8ad13",
+    "desk.js": "f4017bc4745bca629f36159c05973b6e7c76c4961fa49ea9cb21dd77bbf428ee",
+    "desk-setup-guide.js": "bc6c0a20089093dda1f79b0b325a7f6bcfb534c57b43a2e12ee14ff999fa62c7",
+    "desk-connections.js": "a125b54a743993891976af32e15737f7941d262f95d4d52d668469335e69f4b1",
+    "desk-activity.js": "392726f8270f77a61ece66401f08586e6bb6a8860a91eac8e564af2d9850db15",
+    "desk-visits.js": "95c718fa8cb251c8e36b794d1bccb52e2db5b36098b6120a0040a10125b3139b",
+    "netlify/functions/client.mjs": "eafa4e54aae9adcf7e882f09f7daf3797486791178b88ebc1c2e3954cf4a7391",
+    "netlify/functions/lib/calendar-connection.mjs": "fa4b008639fdc132be2fcc73c1d72d92bc0c04cbff15fb139bf7963d72af6ce1",
+    "netlify/functions/lib/voice-activation.mjs": "920060e89f56786edebfa0132b4b4afc62a60bb4e0ac1cc76910326ce7b5325f",
+    "netlify/functions/lib/messaging-activation.mjs": "f93701fd56ae611e10ddbce65d568ed95ee44c89e334e7222a85153b632818cd",
+    "qa-artifacts/claude-collaboration/connection-errors/connection-errors-ui-check.mjs": "210b40901ac72a4230f4fb0b75b076476ba59f839d10034687314e06e169c6fe"
+  },
+  "checks": [
+    {
+      "name": "QA request_voice_activation · original still in flight at the check, hold released, owner resubmits (1440)",
+      "pass": true,
+      "ms": 4759
+    },
+    {
+      "name": "QA request_voice_activation · existing waiting_platform intent, re-request committed but reply lost (1440)",
+      "pass": true,
+      "ms": 10547
+    },
+    {
+      "name": "QA request_voice_activation · original still in flight at the check, hold released, owner resubmits (390)",
+      "pass": true,
+      "ms": 4516
+    },
+    {
+      "name": "QA request_voice_activation · existing waiting_platform intent, re-request committed but reply lost (390)",
+      "pass": true,
+      "ms": 10400
+    },
+    {
+      "name": "hygiene",
+      "pass": true,
+      "detail": {
+        "physical": 0,
+        "forbidden": [],
+        "pageErrors": []
+      }
+    },
+    {
+      "name": "source unchanged",
+      "pass": true
+    }
+  ],
+  "screenshots": [
+    "scratchpad/claude-connerr-qa-smsqa-voiceui-voice-inflight-resubmit-1440.png",
+    "scratchpad/claude-connerr-qa-smsqa-voiceui-voice-existing-intent-lost-after-1440.png",
+    "scratchpad/claude-connerr-qa-smsqa-voiceui-voice-inflight-resubmit-390.png",
+    "scratchpad/claude-connerr-qa-smsqa-voiceui-voice-existing-intent-lost-after-390.png"
+  ],
+  "requests": [
+    {
+      "slug": "connerr-1-1440",
+      "path": "/api/client",
+      "query": "?c=connerr-1-1440",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "connerr-1-1440",
+      "path": "/api/workspace-billing",
+      "query": "?c=connerr-1-1440",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "connerr-1-1440",
+      "path": "/api/client",
+      "query": "?c=connerr-1-1440",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "connerr-1-1440",
+      "path": "/api/workspace-billing",
+      "query": "?c=connerr-1-1440",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "connerr-1-1440",
+      "path": "/api/client",
+      "query": "?c=connerr-1-1440",
+      "method": "POST",
+      "action": "request_voice_activation",
+      "body": {
+        "action": "request_voice_activation",
+        "expectedRevision": "e741e406785b6cf771de432e9ba1f55fa15844bf1ffe5ef3ca61703dddf51c56",
+        "acceptedAuthority": true,
+        "policyVersion": "qa_voice_v1",
+        "policyDigest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "forwardingMode": "use_new_number"
+      },
+      "fault": "held-in-flight",
+      "lateCommit": true
+    },
+    {
+      "slug": "connerr-1-1440",
+      "path": "/api/client",
+      "query": "?c=connerr-1-1440",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "connerr-1-1440",
+      "path": "/api/workspace-billing",
+      "query": "?c=connerr-1-1440",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "connerr-1-1440",
+      "path": "/api/client",
+      "query": "?c=connerr-1-1440",
+      "method": "POST",
+      "action": "request_voice_activation",
+      "body": {
+        "action": "request_voice_activation",
+        "expectedRevision": "e741e406785b6cf771de432e9ba1f55fa15844bf1ffe5ef3ca61703dddf51c56",
+        "acceptedAuthority": true,
+        "policyVersion": "qa_voice_v1",
+        "policyDigest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "forwardingMode": "use_new_number"
+      },
+      "committed": true
+    },
+    {
+      "slug": "connerr-1-1440",
+      "path": "/api/client",
+      "query": "?c=connerr-1-1440",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "connerr-1-1440",
+      "path": "/api/workspace-billing",
+      "query": "?c=connerr-1-1440",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "connerr-2-1440",
+      "path": "/api/client",
+      "query": "?c=connerr-2-1440",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "connerr-2-1440",
+      "path": "/api/workspace-billing",
+      "query": "?c=connerr-2-1440",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "connerr-2-1440",
+      "path": "/api/client",
+      "query": "?c=connerr-2-1440",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "connerr-2-1440",
+      "path": "/api/workspace-billing",
+      "query": "?c=connerr-2-1440",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "connerr-2-1440",
+      "path": "/api/client",
+      "query": "?c=connerr-2-1440",
+      "method": "POST",
+      "action": "request_voice_activation",
+      "body": {
+        "action": "request_voice_activation",
+        "expectedRevision": "e741e406785b6cf771de432e9ba1f55fa15844bf1ffe5ef3ca61703dddf51c56",
+        "acceptedAuthority": true,
+        "policyVersion": "qa_voice_v1",
+        "policyDigest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "forwardingMode": "use_new_number"
+      },
+      "committed": true
+    },
+    {
+      "slug": "connerr-2-1440",
+      "path": "/api/client",
+      "query": "?c=connerr-2-1440",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "connerr-2-1440",
+      "path": "/api/workspace-billing",
+      "query": "?c=connerr-2-1440",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "connerr-3-390",
+      "path": "/api/client",
+      "query": "?c=connerr-3-390",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "connerr-3-390",
+      "path": "/api/workspace-billing",
+      "query": "?c=connerr-3-390",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "connerr-3-390",
+      "path": "/api/client",
+      "query": "?c=connerr-3-390",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "connerr-3-390",
+      "path": "/api/workspace-billing",
+      "query": "?c=connerr-3-390",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "connerr-3-390",
+      "path": "/api/client",
+      "query": "?c=connerr-3-390",
+      "method": "POST",
+      "action": "request_voice_activation",
+      "body": {
+        "action": "request_voice_activation",
+        "expectedRevision": "e741e406785b6cf771de432e9ba1f55fa15844bf1ffe5ef3ca61703dddf51c56",
+        "acceptedAuthority": true,
+        "policyVersion": "qa_voice_v1",
+        "policyDigest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "forwardingMode": "use_new_number"
+      },
+      "fault": "held-in-flight",
+      "lateCommit": true
+    },
+    {
+      "slug": "connerr-3-390",
+      "path": "/api/client",
+      "query": "?c=connerr-3-390",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "connerr-3-390",
+      "path": "/api/workspace-billing",
+      "query": "?c=connerr-3-390",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "connerr-3-390",
+      "path": "/api/client",
+      "query": "?c=connerr-3-390",
+      "method": "POST",
+      "action": "request_voice_activation",
+      "body": {
+        "action": "request_voice_activation",
+        "expectedRevision": "e741e406785b6cf771de432e9ba1f55fa15844bf1ffe5ef3ca61703dddf51c56",
+        "acceptedAuthority": true,
+        "policyVersion": "qa_voice_v1",
+        "policyDigest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "forwardingMode": "use_new_number"
+      },
+      "committed": true
+    },
+    {
+      "slug": "connerr-3-390",
+      "path": "/api/client",
+      "query": "?c=connerr-3-390",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "connerr-3-390",
+      "path": "/api/workspace-billing",
+      "query": "?c=connerr-3-390",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "connerr-4-390",
+      "path": "/api/client",
+      "query": "?c=connerr-4-390",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "connerr-4-390",
+      "path": "/api/workspace-billing",
+      "query": "?c=connerr-4-390",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "connerr-4-390",
+      "path": "/api/client",
+      "query": "?c=connerr-4-390",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "connerr-4-390",
+      "path": "/api/workspace-billing",
+      "query": "?c=connerr-4-390",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "connerr-4-390",
+      "path": "/api/client",
+      "query": "?c=connerr-4-390",
+      "method": "POST",
+      "action": "request_voice_activation",
+      "body": {
+        "action": "request_voice_activation",
+        "expectedRevision": "e741e406785b6cf771de432e9ba1f55fa15844bf1ffe5ef3ca61703dddf51c56",
+        "acceptedAuthority": true,
+        "policyVersion": "qa_voice_v1",
+        "policyDigest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "forwardingMode": "use_new_number"
+      },
+      "committed": true
+    },
+    {
+      "slug": "connerr-4-390",
+      "path": "/api/client",
+      "query": "?c=connerr-4-390",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "connerr-4-390",
+      "path": "/api/workspace-billing",
+      "query": "?c=connerr-4-390",
+      "method": "GET",
+      "status": 200
+    }
+  ],
+  "pageErrors": [],
+  "forbidden": [],
+  "physicalNetwork": 0,
+  "handlers": [
+    "/api/client",
+    "/api/access",
+    "/api/onboard",
+    "/api/workspace-billing",
+    "/api/angi",
+    "/api/thumbtack",
+    "/api/thumbtack/self-serve",
+    "/api/thumbtack/connect",
+    "/api/google/auth",
+    "/api/google/callback",
+    "/api/chat",
+    "/api/website-installation"
+  ],
+  "browser": "/Users/stevengoumnai/Library/Caches/ms-playwright/chromium_headless_shell-1223/chrome-headless-shell-mac-arm64/chrome-headless-shell",
+  "servedSeen": {
+    "desk-connections.js": "a125b54a743993891976af32e15737f7941d262f95d4d52d668469335e69f4b1",
+    "desk-activity.js": "392726f8270f77a61ece66401f08586e6bb6a8860a91eac8e564af2d9850db15"
+  },
+  "observations": [
+    {
+      "width": 1440,
+      "afterTimeout": [
+        "We couldn’t confirm whether your change was saved.",
+        "We couldn’t confirm whether your change was saved. Your details are kept here. Check saved status before trying again; nothing will be submitted again."
+      ],
+      "afterCheck": [
+        "We couldn’t confirm whether your change was saved. The latest saved status is shown and doesn’t confirm it. Your details are kept here; submit again only if the change is still needed.",
+        "We couldn’t confirm whether your change was saved. The latest saved status is shown and doesn’t confirm it. Your details are kept here; submit again only if the change is still needed."
+      ],
+      "seen": [
+        "Send a practice message to see the result here.",
+        "Loading your saved details…",
+        "Loading saved value…",
+        "AI replies left today: 20 practice · 50 customer chat. Resets at midnight Houston time.",
+        "Using your existing appointment availability. Your saved arrival windows keep their existing days until you set appointment hours.",
+        "All changes saved. Connections shows any review, practice or permission needed for each service.",
+        "Before activation: Save your review of the current business rules. Complete a private test with the live AI service using the current rules. Simulated tests cannot activate customer chat. Your settings are saved. AI service must be available before customers use this desk.",
+        "All changes saved.",
+        "Saved visits and blocked time. Houston time.Refresh",
+        "Saving your connection…",
+        "We couldn’t confirm whether your change was saved.",
+        "We couldn’t confirm whether your change was saved. Your details are kept here. Check saved status before trying again; nothing will be submitted again.",
+        "We couldn’t confirm whether your change was saved. Checking the latest saved status…",
+        "Checking for the latest requests…",
+        "We couldn’t confirm whether your change was saved. The latest saved status is shown and doesn’t confirm it. Your details are kept here; submit again only if the change is still needed."
+      ],
+      "submitEnabledAfterCheck": true,
+      "posts": [
+        {
+          "expectedRevision": "e741e406785b",
+          "submissionId": null,
+          "forwardingMode": "use_new_number",
+          "fault": "held-in-flight"
+        },
+        {
+          "expectedRevision": "e741e406785b",
+          "submissionId": null,
+          "forwardingMode": "use_new_number",
+          "fault": null
+        }
+      ],
+      "final": [
+        "Your change is saved. Its current status is shown above."
+      ],
+      "dialogs": 0,
+      "focus": {
+        "body": false,
+        "id": "serviceConnectionMessage",
+        "text": "Your change is saved. Its current status is shown above.",
+        "visible": true
+      }
+    },
+    {
+      "width": 1440,
+      "afterCheck": [
+        "Your change is saved. Its current status is shown above."
+      ],
+      "committed": 1,
+      "saidSaved": true,
+      "saidUnknown": false,
+      "submitEnabledAfterCheck": null
+    },
+    {
+      "width": 390,
+      "afterTimeout": [
+        "We couldn’t confirm whether your change was saved.",
+        "We couldn’t confirm whether your change was saved. Your details are kept here. Check saved status before trying again; nothing will be submitted again."
+      ],
+      "afterCheck": [
+        "We couldn’t confirm whether your change was saved. The latest saved status is shown and doesn’t confirm it. Your details are kept here; submit again only if the change is still needed.",
+        "We couldn’t confirm whether your change was saved. The latest saved status is shown and doesn’t confirm it. Your details are kept here; submit again only if the change is still needed."
+      ],
+      "seen": [
+        "Send a practice message to see the result here.",
+        "Loading your saved details…",
+        "Loading saved value…",
+        "AI replies left today: 20 practice · 50 customer chat. Resets at midnight Houston time.",
+        "Using your existing appointment availability. Your saved arrival windows keep their existing days until you set appointment hours.",
+        "All changes saved. Connections shows any review, practice or permission needed for each service.",
+        "Before activation: Save your review of the current business rules. Complete a private test with the live AI service using the current rules. Simulated tests cannot activate customer chat. Your settings are saved. AI service must be available before customers use this desk.",
+        "All changes saved.",
+        "Saved visits and blocked time. Houston time.Refresh",
+        "Saving your connection…",
+        "We couldn’t confirm whether your change was saved.",
+        "We couldn’t confirm whether your change was saved. Your details are kept here. Check saved status before trying again; nothing will be submitted again.",
+        "We couldn’t confirm whether your change was saved. Checking the latest saved status…",
+        "Checking for the latest requests…",
+        "We couldn’t confirm whether your change was saved. The latest saved status is shown and doesn’t confirm it. Your details are kept here; submit again only if the change is still needed."
+      ],
+      "submitEnabledAfterCheck": true,
+      "posts": [
+        {
+          "expectedRevision": "e741e406785b",
+          "submissionId": null,
+          "forwardingMode": "use_new_number",
+          "fault": "held-in-flight"
+        },
+        {
+          "expectedRevision": "e741e406785b",
+          "submissionId": null,
+          "forwardingMode": "use_new_number",
+          "fault": null
+        }
+      ],
+      "final": [
+        "Your change is saved. Its current status is shown above."
+      ],
+      "dialogs": 0,
+      "focus": {
+        "body": false,
+        "id": "serviceConnectionMessage",
+        "text": "Your change is saved. Its current status is shown above.",
+        "visible": true
+      }
+    },
+    {
+      "width": 390,
+      "afterCheck": [
+        "Your change is saved. Its current status is shown above."
+      ],
+      "committed": 1,
+      "saidSaved": true,
+      "saidUnknown": false,
+      "submitEnabledAfterCheck": null
+    }
+  ],
+  "sourceAfter": {
+    "desk.html": "5fb1a9be91dc46a0f16ead29691ca693329244b8d624de9ae82db7af4da8ad13",
+    "desk.js": "f4017bc4745bca629f36159c05973b6e7c76c4961fa49ea9cb21dd77bbf428ee",
+    "desk-setup-guide.js": "bc6c0a20089093dda1f79b0b325a7f6bcfb534c57b43a2e12ee14ff999fa62c7",
+    "desk-connections.js": "a125b54a743993891976af32e15737f7941d262f95d4d52d668469335e69f4b1",
+    "desk-activity.js": "392726f8270f77a61ece66401f08586e6bb6a8860a91eac8e564af2d9850db15",
+    "desk-visits.js": "95c718fa8cb251c8e36b794d1bccb52e2db5b36098b6120a0040a10125b3139b",
+    "netlify/functions/client.mjs": "eafa4e54aae9adcf7e882f09f7daf3797486791178b88ebc1c2e3954cf4a7391",
+    "netlify/functions/lib/calendar-connection.mjs": "fa4b008639fdc132be2fcc73c1d72d92bc0c04cbff15fb139bf7963d72af6ce1",
+    "netlify/functions/lib/voice-activation.mjs": "920060e89f56786edebfa0132b4b4afc62a60bb4e0ac1cc76910326ce7b5325f",
+    "netlify/functions/lib/messaging-activation.mjs": "f93701fd56ae611e10ddbce65d568ed95ee44c89e334e7222a85153b632818cd",
+    "qa-artifacts/claude-collaboration/connection-errors/connection-errors-ui-check.mjs": "210b40901ac72a4230f4fb0b75b076476ba59f839d10034687314e06e169c6fe"
+  },
+  "passed": 6,
+  "total": 6
+}
