@@ -1,0 +1,73 @@
+{
+  "summary": {
+    "check": "missed-call-promise-check",
+    "repo": "/private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bpqa3-copy/p07",
+    "checks": 11,
+    "failed": 0,
+    "providerCalls": 13,
+    "physicalNetwork": 0,
+    "result": "PASS"
+  },
+  "results": [
+    {
+      "name": "new caller: text accepted, promise spoken and kept, owner told it was sent",
+      "pass": true,
+      "spoken": "Thanks for calling Promise HVAC. We are on a job right now. We are texting you this second so we can get you scheduled. Gracias por llamar. Le enviamos un mensaje de texto ahora mismo.",
+      "owner": "Promise HVAC front desk: missed call from +17135552201. Text-back sent; I will take it from here and text you the lead."
+    },
+    {
+      "name": "new caller, Spanish shop: both promises spoken and kept",
+      "pass": true,
+      "spoken": "Thanks for calling Promise HVAC. We are on a job right now. We are texting you this second so we can get you scheduled. Gracias por llamar. Le enviamos un mensaje de texto ahora mismo."
+    },
+    {
+      "name": "opted-out caller: no text, no promise, owner told they opted out",
+      "pass": true,
+      "spoken": "Thanks for calling Promise HVAC. We are on a job right now. Please call back, and we will get you scheduled. Gracias por llamar. Por favor vuelva a llamar.",
+      "owner": "Promise HVAC front desk: missed call from +17135552203. They opted out, so no text-back. Please call them back."
+    },
+    {
+      "name": "opted-out caller, Spanish shop: no promise in either language",
+      "pass": true,
+      "spoken": "Thanks for calling Promise HVAC. We are on a job right now. Please call back, and we will get you scheduled. Gracias por llamar. Por favor vuelva a llamar."
+    },
+    {
+      "name": "text-back switched off: no text, no promise",
+      "pass": true,
+      "spoken": "Thanks for calling Promise HVAC. We are on a job right now. Please call back, and we will get you scheduled. Gracias por llamar. Por favor vuelva a llamar.",
+      "owner": "Promise HVAC front desk: missed call from +17135552205. Text-back is off for this line, so no text-back. Please call them back."
+    },
+    {
+      "name": "caller texted in the last 24 hours: second call sends nothing and promises nothing",
+      "pass": true,
+      "spoken": "Thanks for calling Promise HVAC. We are on a job right now. Please reply to our earlier text or call back, and we will get you scheduled. Gracias por llamar. Por favor responda a nuestro mensaje anterior o vuelva a llamar.",
+      "owner": "Promise HVAC front desk: missed call from +17135552206. They were already sent a text-back in the last 24 hours, so no new one."
+    },
+    {
+      "name": "provider refuses the text: no promise, owner gets the real reason (not 'No texting sender yet')",
+      "pass": true,
+      "spoken": "Thanks for calling Promise HVAC. We are on a job right now. Please call back, and we will get you scheduled. Gracias por llamar. Por favor vuelva a llamar.",
+      "owner": "Promise HVAC front desk: missed call from +17135552207. The text-back could not be sent (Synthetic provider refusal). Please call them back."
+    },
+    {
+      "name": "no caller ID: no text, no promise, owner note does not mention a voicemail",
+      "pass": true,
+      "spoken": "Thanks for calling Promise HVAC. We are on a job right now. Please call back, and we will get you scheduled. Gracias por llamar. Por favor vuelva a llamar.",
+      "owner": "Promise HVAC front desk: missed call from unknown. No caller ID, so no text-back and no number to call back."
+    },
+    {
+      "name": "no physical transport and no non-Twilio destination",
+      "pass": true
+    },
+    {
+      "name": "texting not configured (send only logged): no promise, owner told texting is not set up",
+      "pass": true,
+      "spoken": "Thanks for calling Promise HVAC. We are on a job right now. Please call back, and we will get you scheduled. Gracias por llamar. Por favor vuelva a llamar.",
+      "owner": "Promise HVAC front desk: missed call from +17135552208. Texting is not set up yet, so no text-back was sent. Please call them back."
+    },
+    {
+      "name": "no physical transport and no non-Twilio destination",
+      "pass": true
+    }
+  ]
+}
