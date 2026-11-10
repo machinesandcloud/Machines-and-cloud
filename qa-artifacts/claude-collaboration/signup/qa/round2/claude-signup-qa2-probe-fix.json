@@ -1,0 +1,261 @@
+{
+  "at": "2026-11-10T09:57:42.053Z",
+  "signupJs": "4d37d54bfa947097dd90da13302d37ecd632c236c1753004132a499de1f7fa01",
+  "probes": {
+    "same-answers-repeated-loss": {
+      "name": "same-answers-repeated-loss",
+      "posts": [
+        "869b74ad-d23d-4f74-8dad-0bfc81690502",
+        "869b74ad-d23d-4f74-8dad-0bfc81690502",
+        "869b74ad-d23d-4f74-8dad-0bfc81690502",
+        "869b74ad-d23d-4f74-8dad-0bfc81690502"
+      ],
+      "statuses": [
+        "202-after",
+        "202-after",
+        "202-after",
+        "202"
+      ],
+      "faults": [],
+      "afterLosses": {
+        "status": "We couldn’t confirm whether your details were saved. They may already be saved, and your answers are still here. If you keep the same answers, choosing Continue to setup again is safe and won’t create a second signup. If you change an answer, it will be sent as a new signup.",
+        "focusStatus": true,
+        "button": true,
+        "path": "/",
+        "db": {
+          "handoffs": [
+            "P1 Biz"
+          ],
+          "prospectBusiness": "P1 Biz",
+          "emailRate": 1
+        }
+      },
+      "final": {
+        "ids": 1,
+        "db": {
+          "handoffs": [
+            "P1 Biz"
+          ],
+          "prospectBusiness": "P1 Biz",
+          "emailRate": 1
+        }
+      }
+    },
+    "changed-answers-after-loss": {
+      "name": "changed-answers-after-loss",
+      "posts": [
+        "47209555-57c2-488f-94d0-e17f7574f809",
+        "a96ae720-3a16-455a-86a9-29e1966c261b"
+      ],
+      "statuses": [
+        "202-after",
+        "202"
+      ],
+      "faults": [],
+      "lost": {
+        "status": "We couldn’t confirm whether your details were saved. They may already be saved, and your answers are still here. If you keep the same answers, choosing Continue to setup again is safe and won’t create a second signup. If you change an answer, it will be sent as a new signup.",
+        "focusStatus": true,
+        "button": true,
+        "path": "/"
+      },
+      "final": {
+        "ids": 2,
+        "db": {
+          "handoffs": [
+            "P2 Original",
+            "P2 Edited"
+          ],
+          "prospectBusiness": "P2 Original",
+          "emailRate": 2
+        },
+        "submissions": 3
+      }
+    },
+    "changed-email-after-loss": {
+      "name": "changed-email-after-loss",
+      "posts": [
+        "2dc017d1-528c-4679-8f08-2f9e008b0072",
+        "17722c32-3f31-41bb-9aa3-66e7e432657e"
+      ],
+      "statuses": [
+        "202-after",
+        "202"
+      ],
+      "faults": [],
+      "final": {
+        "typo": {
+          "handoffs": [
+            "P3 Biz"
+          ],
+          "prospectBusiness": "P3 Biz",
+          "emailRate": 1
+        },
+        "corrected": {
+          "handoffs": [
+            "P3 Biz"
+          ],
+          "prospectBusiness": "P3 Biz",
+          "emailRate": 1
+        }
+      }
+    },
+    "rate-limit-after-edits": {
+      "name": "rate-limit-after-edits",
+      "posts": [
+        "5cec305a-77af-4449-af48-5b48df17b0ad",
+        "a939d567-3215-4f58-a213-1da2e3f28fc9",
+        "6d1b5e3c-bb95-4d02-839f-b7375d9af7ba",
+        "80e96378-98fe-461f-83a5-b4d6bef0d4b9",
+        "6d1b5e3c-bb95-4d02-839f-b7375d9af7ba"
+      ],
+      "statuses": [
+        "202-after",
+        "202-after",
+        "202-after",
+        "429",
+        "202"
+      ],
+      "faults": [],
+      "beforeFourth": {
+        "handoffs": [
+          "P4 v1",
+          "P4 v2",
+          "P4 v3"
+        ],
+        "prospectBusiness": "P4 v1",
+        "emailRate": 3
+      },
+      "fourth": {
+        "status": "Please wait a few minutes before trying again.",
+        "focusStatus": true,
+        "button": true,
+        "path": "/",
+        "db": {
+          "handoffs": [
+            "P4 v1",
+            "P4 v2",
+            "P4 v3"
+          ],
+          "prospectBusiness": "P4 v1",
+          "emailRate": 3
+        }
+      },
+      "fatal": "page.evaluate: TypeError: Cannot read properties of null (reading 'textContent') |     at eval (eval at evaluate (:370:30), <anonymous>:1:80) |     at UtilityScript.evaluate (<anonymous>:372:16)"
+    },
+    "expired-after-loss": {
+      "name": "expired-after-loss",
+      "posts": [
+        "6e94b47a-42e8-4663-b61f-6d5ed3e19513",
+        "6e94b47a-42e8-4663-b61f-6d5ed3e19513",
+        "552e687b-3aa6-4bc7-bd9f-0799e86fba2b"
+      ],
+      "statuses": [
+        "202-after",
+        "410",
+        "202"
+      ],
+      "faults": [],
+      "expired": {
+        "status": "Those details expired before setup opened. Choose Continue to setup to send them again.",
+        "focusStatus": true,
+        "button": true,
+        "path": "/"
+      },
+      "final": {
+        "ids": 2,
+        "statuses": [
+          "202-after",
+          "410",
+          "202"
+        ],
+        "db": {
+          "handoffs": [
+            "P6 Biz",
+            "P6 Biz"
+          ],
+          "prospectBusiness": "P6 Biz",
+          "emailRate": 2
+        }
+      }
+    },
+    "onboard-nav-204": {
+      "name": "onboard-nav-204",
+      "posts": [
+        "adb4ee32-375e-41aa-b36b-2d45d81b349b"
+      ],
+      "statuses": [
+        "202"
+      ],
+      "onboard": "204",
+      "after": {
+        "path": "/",
+        "status": "Saved. Opening your setup…",
+        "disabled": true,
+        "linkInStatus": false,
+        "handoffStored": true
+      }
+    },
+    "onboard-nav-abort": {
+      "name": "onboard-nav-abort",
+      "posts": [
+        "ac66cc43-cf65-46de-8ef4-9f3683a9cdfb"
+      ],
+      "statuses": [
+        "202"
+      ],
+      "onboard": "abort",
+      "after": {
+        "url": "chrome-error://chromewebdata/"
+      },
+      "back": {
+        "path": "/",
+        "status": "",
+        "disabled": false,
+        "business": "P8 Biz"
+      }
+    },
+    "bfcache-back-resubmit": {
+      "name": "bfcache-back-resubmit",
+      "posts": [
+        "91ba62bd-3f2c-4a42-a973-d66925b49a96",
+        "5c416a99-a707-44af-ad23-50adaf5347b8"
+      ],
+      "statuses": [
+        "202",
+        "202"
+      ],
+      "back": {
+        "persisted": null,
+        "status": "",
+        "disabled": false,
+        "business": "P9 Biz"
+      },
+      "sameResubmit": {
+        "ids": 2,
+        "db": {
+          "handoffs": [
+            "P9 Biz",
+            "P9 Biz"
+          ],
+          "prospectBusiness": "P9 Biz",
+          "emailRate": 2
+        }
+      }
+    },
+    "server-invalid-email-a11y": {
+      "name": "server-invalid-email-a11y",
+      "posts": [
+        "423ec163-9c5c-49b0-80d2-a5bdc6adf9d7"
+      ],
+      "statuses": [
+        "400"
+      ],
+      "fatal": "page.waitForFunction: Timeout 30000ms exceeded. |     at settle (/private/tmp/mc-claude-signup-20261110/qa-artifacts/claude-collaboration/signup/qa/probe-scripts/signup-qa-probe.mjs:46:29) |     at /private/tmp/mc-claude-signup-20261110/qa-artifacts/claude-collaboration/signup/qa/probe-scripts/signup-qa-probe.mjs:129:45"
+    }
+  },
+  "blockedBrowser": [],
+  "blockedServer": [],
+  "pageErrors": [
+    "rate-limit-after-edits: Cannot read properties of null (reading 'disabled')"
+  ]
+}
