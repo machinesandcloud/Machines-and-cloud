@@ -1,0 +1,799 @@
+{
+  "at": "2026-11-10T08:56:23.020Z",
+  "browser": "channel:chrome",
+  "deskDir": "/private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/wt-dfb",
+  "noNav": false,
+  "served": {
+    "desk.js": [
+      "f4017bc4745bca629f36159c05973b6e7c76c4961fa49ea9cb21dd77bbf428ee"
+    ],
+    "desk.html": [
+      "5fb1a9be91dc46a0f16ead29691ca693329244b8d624de9ae82db7af4da8ad13"
+    ],
+    "desk.css": [
+      "40bc6c92580591703346f97449d926b0c275245ba8c040cc86968a3f40988502"
+    ]
+  },
+  "qualifications": "Synthetic workspace, session and request; actual local /api/client and /api/access handlers; memory storage; fake model. Lost responses are simulated with route.abort after (or before) the actual handler ran. No model/provider/email/OAuth/purchase/deployment performed.",
+  "checkSha256": "689f50e5852ca10b0901aa92649a87cde2e888997ec26629a5435c822433e3ff",
+  "checks": [
+    {
+      "name": "R0 environment: Navigation API present",
+      "pass": true
+    },
+    {
+      "name": "R1 rapid browser Back x4 fired concurrently (no awaits between): settles on the opening entry, no oscillation, then close+Back reaches Home",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: R1 dialog: {\"url\":\"about:blank\",\"hash\":\"\",\"len\":2,\"index\":null,\"entries\":null,\"hasNav\":true,\"state\":null,\"open\":[]}\n+ actual - expected\n\n+ []\n- [\n-   'visitDialog'\n- ]\n\n    at held (file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round2/hold-race-probe.mjs:127:41)\n    at file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round2/hold-race-probe.mjs:136:106\n    at async check (file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round2/hold-race-probe.mjs:87:72)\n    at async file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round2/hold-race-probe.mjs:133:3"
+    },
+    {
+      "name": "R2 script history.back() x3 in one task, and history.go(-2): held on the opening entry",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: R2 back x3 dialog: {\"url\":\"about:blank\",\"hash\":\"\",\"len\":2,\"index\":null,\"entries\":null,\"hasNav\":true,\"state\":null,\"open\":[]}\n+ actual - expected\n\n+ []\n- [\n-   'visitDialog'\n- ]\n\n    at held (file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round2/hold-race-probe.mjs:127:41)\n    at file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round2/hold-race-probe.mjs:143:5\n    at async check (file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round2/hold-race-probe.mjs:87:72)\n    at async file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round2/hold-race-probe.mjs:139:3"
+    },
+    {
+      "name": "R3 Back then Forward immediately (concurrent), then Forward/Back pairs x3 with 30ms gaps: held, quiet",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: R3a dialog: {\"url\":\"about:blank\",\"hash\":\"\",\"len\":2,\"index\":null,\"entries\":null,\"hasNav\":true,\"state\":null,\"open\":[]}\n+ actual - expected\n\n+ []\n- [\n-   'visitDialog'\n- ]\n\n    at held (file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round2/hold-race-probe.mjs:127:41)\n    at file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round2/hold-race-probe.mjs:150:110\n    at async check (file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round2/hold-race-probe.mjs:87:72)\n    at async file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round2/hold-race-probe.mjs:145:3"
+    },
+    {
+      "name": "R4 Forward while held keeps the forward entry: after close, Forward still reaches Availability",
+      "pass": false,
+      "error": "page.waitForFunction: Timeout 8000ms exceeded.\n    at /private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round2/hold-race-probe.mjs:155:41\n    at async check (/private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round2/hold-race-probe.mjs:87:72)\n    at async file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round2/hold-race-probe.mjs:153:3"
+    },
+    {
+      "name": "R5 Back while the restore is pending: 6 Backs 15ms apart, then one slow Back 1.2s later: held, and the hold still works after its pending timer",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: R5 burst dialog: {\"url\":\"about:blank\",\"hash\":\"\",\"len\":2,\"index\":null,\"entries\":null,\"hasNav\":true,\"state\":null,\"open\":[]}\n+ actual - expected\n\n+ []\n- [\n-   'visitDialog'\n- ]\n\n    at held (file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round2/hold-race-probe.mjs:127:41)\n    at file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round2/hold-race-probe.mjs:169:5\n    at async check (file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round2/hold-race-probe.mjs:87:72)\n    at async file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round2/hold-race-probe.mjs:164:3"
+    },
+    {
+      "name": "R6 calendar replaceState lands in the Back window (late schedule load re-renders the calendar while the Back entry is current)",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: R6 dialog: {\"url\":\"about:blank\",\"hash\":\"\",\"len\":2,\"index\":null,\"entries\":null,\"hasNav\":true,\"state\":null,\"open\":[]}\n+ actual - expected\n\n+ []\n- [\n-   'visitDialog'\n- ]\n\n    at held (file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round2/hold-race-probe.mjs:127:41)\n    at file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round2/hold-race-probe.mjs:187:5\n    at async check (file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round2/hold-race-probe.mjs:87:72)\n    at async file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round2/hold-race-probe.mjs:171:3"
+    },
+    {
+      "name": "R7 dialog opened after the calendar replaceState (calendar_date/view in the URL), date changed while open: Back holds the replaced URL, then close+Back reaches Home",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: R7a dialog: {\"url\":\"about:blank\",\"hash\":\"\",\"len\":2,\"index\":null,\"entries\":null,\"hasNav\":true,\"state\":null,\"open\":[]}\n+ actual - expected\n\n+ []\n- [\n-   'visitDialog'\n- ]\n\n    at held (file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round2/hold-race-probe.mjs:127:41)\n    at file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round2/hold-race-probe.mjs:196:48\n    at async check (file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round2/hold-race-probe.mjs:87:72)\n    at async file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round2/hold-race-probe.mjs:192:3"
+    },
+    {
+      "name": "R8 Escape-close then rapid Back x2: routes normally (no stale hold), no extra pushes",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ undefined\n- 'today'\n\n    at file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round2/hold-race-probe.mjs:202:55\n    at async check (file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round2/hold-race-probe.mjs:87:72)\n    at async file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round2/hold-race-probe.mjs:198:3"
+    },
+    {
+      "name": "R9 visit opened over Setup entry route (setup -> availability): Back to a #setup entry fires the setup guide hashchange; held, then close+Back reaches Setup",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: R9 dialog: {\"url\":\"about:blank\",\"hash\":\"\",\"len\":2,\"index\":null,\"entries\":null,\"hasNav\":true,\"state\":null,\"open\":[]}\n+ actual - expected\n\n+ []\n- [\n-   'visitDialog'\n- ]\n\n    at held (file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round2/hold-race-probe.mjs:127:41)\n    at file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round2/hold-race-probe.mjs:206:129\n    at async check (file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round2/hold-race-probe.mjs:87:72)\n    at async file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round2/hold-race-probe.mjs:204:3"
+    },
+    {
+      "name": "R10 Back from the first desk entry with a dialog open (cross-document to the public page), then Forward: informational",
+      "pass": true
+    },
+    {
+      "name": "R11 double browser Back while the page main thread is busy (300ms long task): held on the opening entry, URL matches the page",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: R11 dialog: {\"url\":\"about:blank\",\"hash\":\"\",\"len\":2,\"index\":null,\"entries\":null,\"hasNav\":true,\"state\":null,\"open\":[]}\n+ actual - expected\n\n+ []\n- [\n-   'visitDialog'\n- ]\n\n    at held (file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round2/hold-race-probe.mjs:127:41)\n    at file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round2/hold-race-probe.mjs:220:134\n    at async check (file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round2/hold-race-probe.mjs:87:72)\n    at async file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round2/hold-race-probe.mjs:215:3"
+    },
+    {
+      "name": "No physical transport, forbidden destinations or page errors",
+      "pass": true
+    }
+  ],
+  "requests": [
+    {
+      "slug": "followup-1",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-1",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-2",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-2",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-2",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-3",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-3",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-3",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-3",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-3",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-4",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-4",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-4",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-4",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-4",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-4",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-5",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-5",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-5",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-6",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-6",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-6",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-6",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-6",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-7",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-7",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-7",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-7",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-8",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-8",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-8",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-9",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-9",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-9",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-9",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-9",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-9",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-10",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-10",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-10",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-10",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-10",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-10",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-11",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-11",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-11",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-11",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-12",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-12",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-12",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-12",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-12",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    }
+  ],
+  "pageErrors": [],
+  "forbidden": [],
+  "physicalNetwork": 0,
+  "probe": [
+    {
+      "R0": {
+        "nav": "object",
+        "proto": false
+      }
+    },
+    {
+      "R1": {
+        "s0": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-2&calendar_date=2026-11-10&calendar_view=month#availability",
+          "hash": "#availability",
+          "page": "availability",
+          "len": 2,
+          "push": 0,
+          "go": [],
+          "pop": 0,
+          "index": 0,
+          "entries": [
+            "/desk.html?c=followup-2&calendar_date=2026-11-10&calendar_view=month#availability"
+          ],
+          "hasNav": true,
+          "state": null,
+          "open": [
+            "visitDialog"
+          ],
+          "draft": "Race Probe"
+        },
+        "s1": {
+          "url": "about:blank",
+          "hash": "",
+          "len": 2,
+          "index": null,
+          "entries": null,
+          "hasNav": true,
+          "state": null,
+          "open": []
+        }
+      }
+    },
+    {
+      "R2": {
+        "s0": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-3&calendar_date=2026-11-10&calendar_view=month#availability",
+          "hash": "#availability",
+          "page": "availability",
+          "len": 2,
+          "push": 0,
+          "go": [],
+          "pop": 0,
+          "index": 0,
+          "entries": [
+            "/desk.html?c=followup-3&calendar_date=2026-11-10&calendar_view=month#availability"
+          ],
+          "hasNav": true,
+          "state": null,
+          "open": [
+            "visitDialog"
+          ],
+          "draft": "Race Probe"
+        },
+        "s1": {
+          "url": "about:blank",
+          "hash": "",
+          "len": 2,
+          "index": null,
+          "entries": null,
+          "hasNav": true,
+          "state": null,
+          "open": []
+        },
+        "s2": {
+          "url": "about:blank",
+          "hash": "",
+          "len": 2,
+          "index": null,
+          "entries": null,
+          "hasNav": true,
+          "state": null,
+          "open": []
+        }
+      }
+    },
+    {
+      "R3": {
+        "s0": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-4&calendar_date=2026-11-10&calendar_view=month#availability",
+          "hash": "#availability",
+          "page": "availability",
+          "len": 2,
+          "push": 0,
+          "go": [],
+          "pop": 0,
+          "index": 0,
+          "entries": [
+            "/desk.html?c=followup-4&calendar_date=2026-11-10&calendar_view=month#availability"
+          ],
+          "hasNav": true,
+          "state": null,
+          "open": [
+            "visitDialog"
+          ],
+          "draft": "Race Probe"
+        },
+        "s1": {
+          "url": "about:blank",
+          "hash": "",
+          "len": 2,
+          "index": null,
+          "entries": null,
+          "hasNav": true,
+          "state": null,
+          "open": []
+        },
+        "s2": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-4&calendar_date=2026-11-10&calendar_view=month#availability",
+          "hash": "#availability",
+          "page": "availability",
+          "len": 2,
+          "index": 0,
+          "entries": [
+            "/desk.html?c=followup-4&calendar_date=2026-11-10&calendar_view=month#availability"
+          ],
+          "hasNav": true,
+          "state": null,
+          "open": [],
+          "draft": ""
+        }
+      }
+    },
+    {
+      "R5": {
+        "s0": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-6&calendar_date=2026-11-10&calendar_view=month#availability",
+          "hash": "#availability",
+          "page": "availability",
+          "len": 2,
+          "push": 0,
+          "go": [],
+          "pop": 0,
+          "index": 0,
+          "entries": [
+            "/desk.html?c=followup-6&calendar_date=2026-11-10&calendar_view=month#availability"
+          ],
+          "hasNav": true,
+          "state": null,
+          "open": [
+            "visitDialog"
+          ],
+          "draft": "Race Probe"
+        },
+        "s1": {
+          "url": "about:blank",
+          "hash": "",
+          "len": 2,
+          "index": null,
+          "entries": null,
+          "hasNav": true,
+          "state": null,
+          "open": []
+        },
+        "s2": {
+          "url": "about:blank",
+          "hash": "",
+          "len": 2,
+          "index": null,
+          "entries": null,
+          "hasNav": true,
+          "state": null,
+          "open": []
+        }
+      }
+    },
+    {
+      "R6": {
+        "s0": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-7&calendar_date=2026-11-10&calendar_view=month#availability",
+          "hash": "#availability",
+          "page": "availability",
+          "len": 2,
+          "push": 0,
+          "go": [],
+          "pop": 0,
+          "index": 0,
+          "entries": [
+            "/desk.html?c=followup-7&calendar_date=2026-11-10&calendar_view=month#availability"
+          ],
+          "hasNav": true,
+          "state": null,
+          "open": [
+            "visitDialog"
+          ],
+          "draft": "Race Probe"
+        },
+        "s1": {
+          "url": "about:blank",
+          "hash": "",
+          "len": 2,
+          "index": null,
+          "entries": null,
+          "hasNav": true,
+          "state": null,
+          "open": []
+        },
+        "late": {},
+        "entries": []
+      }
+    },
+    {
+      "R7": {
+        "s0": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-8&calendar_date=2026-11-10&calendar_view=month#availability",
+          "hash": "#availability",
+          "page": "availability",
+          "len": 2,
+          "push": 0,
+          "go": [],
+          "pop": 0,
+          "index": 0,
+          "entries": [
+            "/desk.html?c=followup-8&calendar_date=2026-11-10&calendar_view=month#availability"
+          ],
+          "hasNav": true,
+          "state": null,
+          "open": [
+            "visitDialog"
+          ],
+          "draft": "Race Probe"
+        },
+        "s1": {
+          "url": "about:blank",
+          "hash": "",
+          "len": 2,
+          "index": null,
+          "entries": null,
+          "hasNav": true,
+          "state": null,
+          "open": []
+        },
+        "s2": {
+          "url": "about:blank",
+          "hash": "",
+          "len": 2,
+          "index": null,
+          "entries": null,
+          "hasNav": true,
+          "state": null,
+          "open": []
+        }
+      }
+    },
+    {
+      "R8": {
+        "s0": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-9&calendar_date=2026-11-10&calendar_view=month#availability",
+          "hash": "#availability",
+          "page": "availability",
+          "len": 2,
+          "push": 0,
+          "go": [],
+          "pop": 0,
+          "index": 0,
+          "entries": [
+            "/desk.html?c=followup-9&calendar_date=2026-11-10&calendar_view=month#availability"
+          ],
+          "hasNav": true,
+          "state": null,
+          "open": [
+            "visitDialog"
+          ],
+          "draft": "Race Probe"
+        },
+        "s1": {
+          "url": "about:blank",
+          "hash": "",
+          "len": 2,
+          "index": null,
+          "entries": null,
+          "hasNav": true,
+          "state": null,
+          "open": []
+        },
+        "s2": {
+          "url": "about:blank",
+          "hash": "",
+          "len": 2,
+          "index": null,
+          "entries": null,
+          "hasNav": true,
+          "state": null,
+          "open": []
+        }
+      }
+    },
+    {
+      "R9": {
+        "s0": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-10&calendar_date=2026-11-10&calendar_view=month#availability",
+          "hash": "#availability",
+          "page": "availability",
+          "len": 2,
+          "push": 0,
+          "go": [],
+          "pop": 0,
+          "index": 0,
+          "entries": [
+            "/desk.html?c=followup-10&calendar_date=2026-11-10&calendar_view=month#availability"
+          ],
+          "hasNav": true,
+          "state": null,
+          "open": [
+            "visitDialog"
+          ],
+          "draft": "Race Probe"
+        },
+        "s1": {
+          "url": "about:blank",
+          "hash": "",
+          "len": 2,
+          "index": null,
+          "entries": null,
+          "hasNav": true,
+          "state": null,
+          "open": []
+        }
+      }
+    },
+    {
+      "R10": {
+        "afterBack": "http://127.0.0.1:8921/start.html",
+        "afterForward": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-11",
+          "open": [],
+          "draft": ""
+        }
+      }
+    },
+    {
+      "R11": {
+        "s0": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-12&calendar_date=2026-11-10&calendar_view=month#availability",
+          "hash": "#availability",
+          "page": "availability",
+          "len": 2,
+          "push": 0,
+          "go": [],
+          "pop": 0,
+          "index": 0,
+          "entries": [
+            "/desk.html?c=followup-12&calendar_date=2026-11-10&calendar_view=month#availability"
+          ],
+          "hasNav": true,
+          "state": null,
+          "open": [
+            "visitDialog"
+          ],
+          "draft": "Race Probe"
+        },
+        "s1": {
+          "url": "about:blank",
+          "hash": "",
+          "len": 2,
+          "index": null,
+          "entries": null,
+          "hasNav": true,
+          "state": null,
+          "open": []
+        }
+      }
+    }
+  ],
+  "screenshots": [
+    "scratchpad/claude-port-qa2-race-dfb-nav-failure-2.png",
+    "scratchpad/claude-port-qa2-race-dfb-nav-failure-3.png",
+    "scratchpad/claude-port-qa2-race-dfb-nav-failure-4.png",
+    "scratchpad/claude-port-qa2-race-dfb-nav-failure-5.png",
+    "scratchpad/claude-port-qa2-race-dfb-nav-failure-6.png",
+    "scratchpad/claude-port-qa2-race-dfb-nav-failure-7.png",
+    "scratchpad/claude-port-qa2-race-dfb-nav-failure-8.png",
+    "scratchpad/claude-port-qa2-race-dfb-nav-failure-9.png",
+    "scratchpad/claude-port-qa2-race-dfb-nav-failure-10.png",
+    "scratchpad/claude-port-qa2-race-dfb-nav-failure-12.png"
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 10,
+    "failing": [
+      "R1 rapid browser Back x4 fired concurrently (no awaits between): settles on the opening entry, no oscillation, then close+Back reaches Home",
+      "R2 script history.back() x3 in one task, and history.go(-2): held on the opening entry",
+      "R3 Back then Forward immediately (concurrent), then Forward/Back pairs x3 with 30ms gaps: held, quiet",
+      "R4 Forward while held keeps the forward entry: after close, Forward still reaches Availability",
+      "R5 Back while the restore is pending: 6 Backs 15ms apart, then one slow Back 1.2s later: held, and the hold still works after its pending timer",
+      "R6 calendar replaceState lands in the Back window (late schedule load re-renders the calendar while the Back entry is current)",
+      "R7 dialog opened after the calendar replaceState (calendar_date/view in the URL), date changed while open: Back holds the replaced URL, then close+Back reaches Home",
+      "R8 Escape-close then rapid Back x2: routes normally (no stale hold), no extra pushes",
+      "R9 visit opened over Setup entry route (setup -> availability): Back to a #setup entry fires the setup guide hashchange; held, then close+Back reaches Setup",
+      "R11 double browser Back while the page main thread is busy (300ms long task): held on the opening entry, URL matches the page"
+    ]
+  }
+}

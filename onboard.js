@@ -120,6 +120,23 @@
     if (intakeSaved && typeof intakeSaved.email === 'string') document.getElementById('access-email').value = intakeSaved.email;
     else document.getElementById('access-intro').textContent = 'Enter the same email you used a moment ago. We’ll send a secure link to continue with your saved details.';
   }
+  // A returning owner (the workspace's sign-in link sends mode=signin; the site's Sign in link sends signin=1) gets sign-in copy.
+  // Only the words change: the same form sends the same request, and a link request saves and creates nothing.
+  var returningOwner = !intakeToken && (q.get('mode') === 'signin' || q.get('signin') === '1'), accessSendLabel = returningOwner ? 'Email me a sign-in link' : accessSend.textContent;
+  if (returningOwner) {
+    document.getElementById('access-title').textContent = 'Sign in to your workspace';
+    document.getElementById('access-intro').textContent = 'Enter the email you use for Machines & Cloud. We’ll send a secure link that opens your workspace, or your setup if you haven’t finished it. No password to remember.';
+    accessSend.textContent = accessSendLabel;
+  }
+  // The top bar and page title follow the screen: sign-in wording while a returning owner's gate shows, setup wording once
+  // the setup form or the finished workspace is on screen.
+  var topbarLabel = document.querySelector('.onboard-topbar span'), setupTopbar = topbarLabel ? topbarLabel.textContent : '', setupDocTitle = document.title;
+  function syncPageLabels() {
+    var signingIn = returningOwner && ['questions', 'ready'].indexOf(document.body.dataset.setupState) < 0;
+    if (topbarLabel) topbarLabel.textContent = signingIn ? 'Sign in to your workspace' : setupTopbar;
+    document.title = signingIn ? 'Sign in to your workspace | Machines & Cloud' : setupDocTitle;
+  }
+  syncPageLabels();
   var initialAccessTitle = document.getElementById('access-title').textContent, initialAccessIntro = document.getElementById('access-intro').textContent;
   if (location.hash || ['email', 'name', 'phone', 'business'].some(function (key) { return q.has(key); })) {
     history.replaceState(null, '', location.pathname + (PLAN_IDS.indexOf(q.get('plan')) >= 0 ? '?plan=' + encodeURIComponent(q.get('plan')) : ''));
@@ -134,7 +151,7 @@
   }
   function gateOnly(message) {
     gate.hidden = false; form.hidden = true; document.querySelector('.ob-steps').hidden = true;
-    document.body.dataset.setupState = 'signin';
+    document.body.dataset.setupState = 'signin'; syncPageLabels();
     document.getElementById('access-signed-in').hidden = true; draftStatus.hidden = true;
     document.getElementById('done').classList.remove('on');
     gate.removeAttribute('aria-busy');
@@ -159,7 +176,7 @@
       }
       var data; try { data = await response.json(); } catch (error) { if (response.ok || response.status >= 500) throw connectionError(error, !response.ok); data = {}; }
       if (!response.ok) {
-        var failure = new Error(data.message || 'We could not confirm that request. Please try again.'); failure.code = data.error; failure.status = response.status; failure.field = data.field; throw failure;
+        var failure = new Error(data.message || (response.status < 500 ? 'Machines & Cloud didn’t accept that request. Check your details and try again.' : 'We could not confirm that request. Please try again.')); failure.code = data.error; failure.status = response.status; failure.field = data.field; throw failure;
       }
       return data;
     } finally { clearTimeout(timeout); }
@@ -221,17 +238,44 @@
     if (!fields.desiredChannels) fields.desiredChannels = [];
     return fields;
   }
-  async function saveDraft() {
+  // The visible status follows every keystroke and save. Screen readers hear only a settled outcome, once, from #draft-announce.
+  // A newer announcement always wins: a queued one is cancelled by the next, by a silent save starting, or by the error summary.
+  // A success identical to the last thing announced adds nothing and is skipped; failures and other messages always speak.
+  var draftAnnounce = document.getElementById('draft-announce'), announceTimer = null, lastAnnounced = '';
+  function cancelAnnouncement() { clearTimeout(announceTimer); announceTimer = null; }
+  function announceDraft(text, success) {
+    if (!draftAnnounce) return;
+    cancelAnnouncement();
+    if (success && text === lastAnnounced) return;
+    draftAnnounce.textContent = ''; announceTimer = setTimeout(function () { announceTimer = null; draftAnnounce.textContent = text; lastAnnounced = text; }, 100);
+  }
+  // options.silent: the caller moves on or reports the outcome itself. options.reportsFailure: the caller reports failures.
+  async function saveDraft(options) {
+    options = options || {};
+    if (options.silent) cancelAnnouncement();
     clearTimeout(saveTimer);
     if (!session || restoring) return;
-    if (saving) { saveAgain = true; await saving; if (dirty) return saveDraft(); return; }
+    if (saving) { saveAgain = true; await saving; if (dirty) return saveDraft(options); return; }
     var snapshot = collect(), step = i, generation = accessGeneration, preferenceVersion = marketingVersion;
     var saveBody = { fields: snapshot, step: step, revision: revision };
     if (preferenceVersion > marketingSavedVersion) saveBody.marketingConsent = marketingField.checked;
     draftStatus.textContent = 'Saving your answers…'; draftStatus.hidden = false;
     // A save whose reply was lost may still have landed. Adopt its revision only when the saved draft is exactly that save; any other change still meets the conflict check.
-    var unconfirmed = lostSave, confirm = unconfirmed ? request('/api/access').then(function (state) { if (generation !== accessGeneration) return; lostSave = null; var d = state.draft; if (d && d.revision === unconfirmed.revision + 1 && d.step === unconfirmed.step && sameFields(d.fields, unconfirmed.fields)) revision = d.revision; saveBody.revision = revision; }) : Promise.resolve();
-    var pending = confirm.then(function () { if (generation === accessGeneration) return request('/api/access', 'PUT', saveBody); }).then(function (result) {
+    var unconfirmed = lostSave, adopted = false, confirm = unconfirmed ? request('/api/access').then(function (state) { if (generation !== accessGeneration) return; lostSave = null; if (ownLostSave(state.draft, unconfirmed)) { revision = state.draft.revision; adopted = true; } saveBody.revision = revision; }) : Promise.resolve();
+    // The lost save can also commit after the read above, so this save meets a 409 that no other tab caused. Read once more and
+    // re-send once only when the stored draft is exactly that lost save. The PUT is conditional on the revision, so the re-send
+    // can only replace our own lost save; if anything else wrote, it meets the conflict check and the conflict is shown.
+    function lateOwnSave(error) {
+      if (error.status !== 409 || !unconfirmed || adopted || generation !== accessGeneration) throw error;
+      adopted = true;
+      return request('/api/access').then(function (state) {
+        if (generation !== accessGeneration) return;
+        if (!ownLostSave(state.draft, unconfirmed)) throw error;
+        revision = state.draft.revision; saveBody.revision = revision;
+        return request('/api/access', 'PUT', saveBody);
+      }, function (readError) { if (generation === accessGeneration && !lostSave) lostSave = unconfirmed; throw readError; });
+    }
+    var pending = confirm.then(function () { if (generation === accessGeneration) return request('/api/access', 'PUT', saveBody).catch(lateOwnSave); }).then(function (result) {
       if (generation !== accessGeneration) return;
       revision = result.draft.revision;
       if (!result.marketingPending && Object.prototype.hasOwnProperty.call(saveBody, 'marketingConsent')) marketingSavedVersion = preferenceVersion;
@@ -241,13 +285,17 @@
       if (generation !== accessGeneration) return; dirty = true;
       // A lost reply or a non-JSON server error leaves the outcome unknown; only a readable server answer is a definite failure.
       var unknown = error.code === 'connection' || error.code === 'unavailable'; if (unknown && !lostSave) lostSave = { fields: snapshot, step: step, revision: saveBody.revision };
-      draftStatus.textContent = unknown ? 'We couldn’t confirm whether your changes were saved.' + (error.code === 'connection' ? ' Check your connection.' : '') + ' They’re still on this page.' : error.message + ' Your changes are still on this page.'; throw error;
+      draftStatus.textContent = unknown ? 'We couldn’t confirm whether your changes were saved.' + (error.code === 'connection' ? ' Check your connection.' : '') + ' They’re still on this page.' : error.message + ' Your changes are still on this page.';
+      if (!options.silent && !options.reportsFailure) announceDraft(draftStatus.textContent);
+      throw error;
     });
     saving = pending;
     try { await pending; } finally { if (saving === pending) saving = null; }
     if (generation !== accessGeneration) return;
-    if (saveAgain || dirty) { saveAgain = false; return saveDraft(); }
+    if (saveAgain || dirty) { saveAgain = false; return saveDraft(options); }
+    if (!options.silent) announceDraft(draftStatus.textContent, true);
   }
+  function ownLostSave(draft, lost) { return !!draft && draft.revision === lost.revision + 1 && draft.step === lost.step && sameFields(draft.fields, lost.fields); }
   function sameFields(a, b) { var keys = Object.keys(a || {}); return keys.length === Object.keys(b || {}).length && keys.every(function (key) { return JSON.stringify(a[key]) === JSON.stringify(b[key]); }); }
   function scheduleSave() {
     if (!session || restoring) return;
@@ -279,14 +327,16 @@
     updatePhoneSetup(); updateConnectionPreview();
   }
   function workspace(portal, text) {
-    document.body.dataset.setupState = 'ready';
+    document.body.dataset.setupState = 'ready'; syncPageLabels();
     form.hidden = true; document.querySelector('.ob-steps').hidden = true; draftStatus.hidden = true; gate.hidden = true;
     document.getElementById('done').classList.add('on');
-    document.getElementById('done').querySelector('h2').textContent = 'Your workspace is ready';
+    var doneTitle = document.getElementById('done-title'); doneTitle.textContent = 'Your workspace is ready';
     document.getElementById('buildStatus').textContent = text || 'Your business details are saved. Review your answers, try a private conversation and finish your selected connections.';
     document.getElementById('portalLink').textContent = 'Open your private workspace'; document.getElementById('portalLink').href = portal; document.getElementById('goPortal').href = portal;
     document.getElementById('goPortal').textContent = text ? 'Open my workspace' : 'Review my front desk';
     if (!text) { var connectionPortal=portal.split('#')[0]+'#setup';document.getElementById('goPortal').href=connectionPortal;document.getElementById('goPortal').textContent='Continue my connections';document.getElementById('buildStatus').textContent='Your answers are saved. Your selected connections are next, with a clear step for anything that needs your permission.';document.getElementById('portalLink').href=portal.split('#')[0]+'#today';document.getElementById('portalLink').textContent='Open workspace overview'; }
+    // The focused Create button was just hidden; put keyboard and screen-reader users on the result.
+    window.scrollTo({ top: 0, behavior: 'instant' }); doneTitle.focus({ preventScroll: true });
   }
   async function signedIn() {
     var generation = accessGeneration;
@@ -315,8 +365,12 @@
     revision = state.draft.revision || 0; lostSave = null; restore(state.draft.fields || {});
     marketingField.checked = !!(state.marketing && state.marketing.preference === true); marketingVersion = 0; marketingSavedVersion = 0;
     form.hidden = false; document.querySelector('.ob-steps').hidden = false; draftStatus.hidden = false;
-    document.body.dataset.setupState = 'questions';
-    draftStatus.textContent = revision ? 'Your saved answers have been restored.' : 'Your answers will save automatically.'; show(state.draft.step || 0, false);
+    document.body.dataset.setupState = 'questions'; syncPageLabels();
+    draftStatus.textContent = revision ? 'Your saved answers have been restored.' : 'Your answers will save automatically.'; announceDraft(draftStatus.textContent); show(state.draft.step || 0, false);
+    // The form opens in place of the gate (after a sign-in link or on a return visit). Tell keyboard and screen-reader owners
+    // where they are by focusing the current step heading, unless they already put focus on something still on the page.
+    var active = document.activeElement;
+    if (!active || active === document.body || !active.getClientRects().length) document.getElementById('setup-context-title').focus();
   }
   function accessMessage(message, isError) {
     gateStatus.classList.remove('sr-only'); gateStatus.textContent = message || ''; if (isError) gateStatus.setAttribute('data-error', 'true'); else gateStatus.removeAttribute('data-error');
@@ -335,7 +389,7 @@
   function resetEmailConfirmation(restoreCopy) {
     clearInterval(resendTimer); resendTimer = null; resendNotBefore = 0; linkRequestPending = null; requestedEmail = ''; emailState = '';
     gate.removeAttribute('data-email-state'); gate.removeAttribute('aria-busy'); accessForm.removeAttribute('aria-busy');
-    accessConfirmation.hidden = true; accessForm.hidden = false; accessEmail.disabled = false; accessSend.disabled = false; accessSend.textContent = 'Send my sign-in link';
+    accessConfirmation.hidden = true; accessForm.hidden = false; accessEmail.disabled = false; accessSend.disabled = false; accessSend.textContent = accessSendLabel;
     document.getElementById('access-recipient').textContent = ''; gateStatus.removeAttribute('data-error'); gateStatus.classList.remove('sr-only'); updateEmailActions();
     if (restoreCopy) { document.getElementById('access-title').textContent = initialAccessTitle; document.getElementById('access-intro').textContent = initialAccessIntro; }
   }
@@ -373,7 +427,7 @@
       }
     } finally {
       if (attempt.generation === accessGeneration && linkRequestPending === attempt) {
-        linkRequestPending = null; accessEmail.disabled = false; accessSend.disabled = false; accessSend.textContent = 'Send my sign-in link';
+        linkRequestPending = null; accessEmail.disabled = false; accessSend.disabled = false; accessSend.textContent = accessSendLabel;
         gate.removeAttribute('aria-busy'); accessForm.removeAttribute('aria-busy'); updateEmailActions();
       }
     }
@@ -428,13 +482,21 @@
   });
   document.getElementById('access-sign-out').addEventListener('click', async function () {
     var generation = accessGeneration;
-    try { await request('/api/access', 'POST', { action: 'sign_out' }); } catch (error) { gateStatus.textContent = error.message; return; }
+    try { await request('/api/access', 'POST', { action: 'sign_out' }); } catch (error) {
+      if (generation !== accessGeneration) return;
+      // While the questions are open the gate (and its status line) is hidden, so say it where the owner is looking.
+      var lost = error.code === 'connection' || error.code === 'unavailable', status = gate.hidden ? draftStatus : gateStatus;
+      status.hidden = false; status.textContent = lost ? 'We couldn’t confirm that you were signed out.' + (error.code === 'connection' ? ' Check your connection.' : '') + ' You’re still signed in on this page. Select Sign out again.' : error.message;
+      if (status === draftStatus) announceDraft(status.textContent);
+      return;
+    }
     if (generation !== accessGeneration) return;
     accessGeneration++;
     clearTimeout(saveTimer); setSession(null); resetEmailConfirmation(true); form.reset(); appointmentSeeded = false; updateAppointmentHours(false); updateTrade(false); updatePhoneSetup(); updateConnectionPreview(); clearValidation(); revision = 0; lostSave = null; dirty = false; marketingVersion = 0; marketingSavedVersion = 0; gateOnly('Signed out. Your saved answers are kept securely.');
   });
   function setErrorSummary(message) {
     err.textContent = message; err.hidden = !message; err.classList.toggle('is-error', !!message);
+    if (message) { cancelAnnouncement(); lastAnnounced = message; } // The alert speaks now; nothing queued earlier may follow it.
   }
   function fieldMessage(field) {
     if (field.disabled) return '';
@@ -538,11 +600,12 @@
     var generation = accessGeneration, submittedStep = i, backWasDisabled = back.disabled, creating = false;
     next.disabled = true; back.disabled = true;
     try {
-      await saveDraft();
+      // Silent: a step change announces only the save after the move, and failures go to the error summary.
+      await saveDraft({ silent: true });
       if (generation !== accessGeneration) return;
       // Answers remain editable while saving. Check the latest values before proceeding.
       if (i !== submittedStep || !valid(submittedStep === steps.length - 1)) return;
-      if (i < steps.length - 1) { show(i + 1, true); dirty = true; await saveDraft(); return; }
+      if (i < steps.length - 1) { show(i + 1, true); dirty = true; await saveDraft({ reportsFailure: true }); return; }
       next.textContent = 'Creating your workspace…';
       var fields = collect(); fields.email = form.elements.email.value; creating = true;
       var result = await request('/api/onboard', 'POST', fields);

@@ -1,0 +1,976 @@
+{
+  "at": "2026-11-10T08:42:48.735Z",
+  "browser": "channel:chrome",
+  "deskDir": ".",
+  "served": {
+    "desk.js": [
+      "0e040d76b4e37c630b165cd14ee4084dcd2dc4f5d076c124413064f349a059a9"
+    ],
+    "desk.html": [
+      "e6e75e9ca26f880568119cb135e034445a4e42a37538f61c20e240f3feb96113"
+    ],
+    "desk.css": [
+      "f8d007462ef5ba11e0fd1979d54a3c275b6456310862d16f2ba0723dff3fb790"
+    ]
+  },
+  "qualifications": "Synthetic workspace, session and request; actual local /api/client and /api/access handlers; memory storage; fake model. Lost responses are simulated with route.abort after (or before) the actual handler ran. No model/provider/email/OAuth/purchase/deployment performed.",
+  "checkSha256": "fa973f040f1d29ecf4a306a365a7f63a0e973cfd3f09359abd96de0f16b8e94a",
+  "checks": [
+    {
+      "name": "1. lost-after \"Numbers that always ring through\" typed as (713) 555-0144 is confirmed saved, not \"changed while it was checked\"",
+      "pass": true
+    },
+    {
+      "name": "1. lost-after price line with no amount \"Diagnostic $89\" is confirmed saved and reads back as typed",
+      "pass": true
+    },
+    {
+      "name": "1. lost-after Tier 0 alone is still confirmed saved",
+      "pass": true
+    },
+    {
+      "name": "1. lost-after Tier 0 while another tab writes the emergency script is not \"saved\" and does not adopt the script",
+      "pass": true
+    },
+    {
+      "name": "1. a late-committing ring-through save is recognised by Check latest as already saved",
+      "pass": true
+    },
+    {
+      "name": "1440px 2. Back closes the open request with the typed note kept, Forward reopens it, Back/Forward move between pages, Back from the first page leaves",
+      "pass": true
+    },
+    {
+      "name": "1440px 2. unsaved Business details survive Back and Forward",
+      "pass": true
+    },
+    {
+      "name": "390px 2. Back closes the open request with the typed note kept, Forward reopens it, Back/Forward move between pages, Back from the first page leaves",
+      "pass": true
+    },
+    {
+      "name": "390px 2. unsaved Business details survive Back and Forward",
+      "pass": true
+    },
+    {
+      "name": "1440px 2b. Back with a visit dialog open keeps Availability, the dialog and its typed name, and restores #availability; after Close, Back returns to Home",
+      "pass": true
+    },
+    {
+      "name": "1440px 2b. Back with a support dialog open keeps Conversations, the dialog and its typed note, and restores #convs; after Close, Back returns to Inbox",
+      "pass": true
+    },
+    {
+      "name": "390px 2b. Back with a visit dialog open keeps Availability, the dialog and its typed name, and restores #availability; after Close, Back returns to Home",
+      "pass": true
+    },
+    {
+      "name": "390px 2b. Back with a support dialog open keeps Conversations, the dialog and its typed note, and restores #convs; after Close, Back returns to Inbox",
+      "pass": true
+    },
+    {
+      "name": "1440px 2b. Forward with a visit dialog open does not route either",
+      "pass": true
+    },
+    {
+      "name": "1440px 2c. saving Business details on a live website chat still warns that website chat is unavailable and offers Review business details",
+      "pass": true
+    },
+    {
+      "name": "390px 2c. saving Business details on a live website chat still warns that website chat is unavailable and offers Review business details",
+      "pass": true
+    },
+    {
+      "name": "1440px 3. a signed-out tab at #setup/voice/intro returns there after a fresh sign-in, once",
+      "pass": true
+    },
+    {
+      "name": "390px 3. a signed-out tab at #setup/voice/intro returns there after a fresh sign-in, once",
+      "pass": true
+    },
+    {
+      "name": "3. stale, foreign or unknown stored routes are ignored and the owner lands on Home",
+      "pass": true
+    },
+    {
+      "name": "390px 3./4b. session expiry keeps the place and shows a calm signed-out heading; sign-in link keeps signin=1",
+      "pass": true
+    },
+    {
+      "name": "390px 4b. after Sign out the heading reads Signed out, not Unable to open workspace",
+      "pass": true
+    },
+    {
+      "name": "1440px 4a. a block saved behind a lost response is confirmed from a read-only re-fetch and listed",
+      "pass": true
+    },
+    {
+      "name": "390px 4a. a block saved behind a lost response is confirmed from a read-only re-fetch and listed",
+      "pass": true
+    },
+    {
+      "name": "390px 4a. when the re-fetch is lost too, Reload availability is offered and confirms the block",
+      "pass": true
+    },
+    {
+      "name": "No physical transport, forbidden destinations or page errors",
+      "pass": true
+    }
+  ],
+  "requests": [
+    {
+      "slug": "followup-1",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-1",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-1",
+      "path": "/api/client",
+      "method": "PUT",
+      "status": 200,
+      "fixture": "lost-after-handler"
+    },
+    {
+      "slug": "followup-1",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-1",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-2",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-2",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-2",
+      "path": "/api/client",
+      "method": "PUT",
+      "status": 200,
+      "fixture": "lost-after-handler"
+    },
+    {
+      "slug": "followup-2",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-2",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-3",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-3",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-3",
+      "path": "/api/client",
+      "method": "PUT",
+      "status": 200,
+      "fixture": "lost-after-handler"
+    },
+    {
+      "slug": "followup-3",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-3",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-4",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-4",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-4",
+      "path": "/api/client",
+      "method": "PUT",
+      "status": 200,
+      "fixture": "lost-after-handler"
+    },
+    {
+      "slug": "followup-4",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-5",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-5",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-5",
+      "path": "/api/client",
+      "method": "PUT",
+      "fixture": "held",
+      "status": "aborted",
+      "lateStatus": 200
+    },
+    {
+      "slug": "followup-5",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-5",
+      "path": "/api/client",
+      "method": "PUT",
+      "status": 409
+    },
+    {
+      "slug": "followup-5",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-5",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-6",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-6",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-6",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-6",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-6",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-6",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-6",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-6",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-6",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-6",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-6",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-6",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-7",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-7",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-7",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-7",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-8",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-8",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-8",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-8",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-8",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-8",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-8",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-8",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-8",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-8",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-8",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-8",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-9",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-9",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-9",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-9",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-10",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-10",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-10",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-10",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-11",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-11",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-11",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-11",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-11",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-11",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-12",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-12",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-12",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-12",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-13",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-13",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-13",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-13",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-13",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-13",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-14",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-14",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-14",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-15",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-15",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-15",
+      "path": "/api/client",
+      "method": "PUT",
+      "status": 200
+    },
+    {
+      "slug": "followup-15",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-15",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-15",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-16",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-16",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-16",
+      "path": "/api/client",
+      "method": "PUT",
+      "status": 200
+    },
+    {
+      "slug": "followup-16",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-16",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-16",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-17",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-17",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-17",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-17",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-18",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-18",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-18",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-18",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-19",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-19",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-20",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-20",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-21",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-21",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-22",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-22",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-23",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-23",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-24",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-24",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-24",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "slug": "followup-25",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-25",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-25",
+      "path": "/api/access",
+      "method": "POST",
+      "action": "sign_out",
+      "status": 200
+    },
+    {
+      "slug": "followup-26",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-26",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-26",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-26",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "status": 200,
+      "fixture": "lost-after-handler"
+    },
+    {
+      "slug": "followup-26",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-26",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-27",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-27",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-27",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-27",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "status": 200,
+      "fixture": "lost-after-handler"
+    },
+    {
+      "slug": "followup-27",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-27",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-28",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-28",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-28",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-28",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "availability_block",
+      "status": 200,
+      "fixture": "lost-after-handler"
+    },
+    {
+      "slug": "followup-28",
+      "path": "/api/client",
+      "method": "GET",
+      "status": "aborted"
+    },
+    {
+      "slug": "followup-28",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-28",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    }
+  ],
+  "pageErrors": [],
+  "forbidden": [],
+  "physicalNetwork": 0,
+  "screenshots": [
+    "scratchpad/claude-port-rework-desk-followup-back-closed-request-1440.png",
+    "scratchpad/claude-port-rework-desk-followup-back-closed-request-390.png",
+    "scratchpad/claude-port-rework-desk-followup-back-visit-dialog-1440.png",
+    "scratchpad/claude-port-rework-desk-followup-back-support-dialog-1440.png",
+    "scratchpad/claude-port-rework-desk-followup-back-visit-dialog-390.png",
+    "scratchpad/claude-port-rework-desk-followup-back-support-dialog-390.png",
+    "scratchpad/claude-port-rework-desk-followup-web-impact-1440.png",
+    "scratchpad/claude-port-rework-desk-followup-web-impact-390.png",
+    "scratchpad/claude-port-rework-desk-followup-return-route-1440.png",
+    "scratchpad/claude-port-rework-desk-followup-return-route-390.png",
+    "scratchpad/claude-port-rework-desk-followup-session-expired-390.png",
+    "scratchpad/claude-port-rework-desk-followup-signed-out-390.png",
+    "scratchpad/claude-port-rework-desk-followup-block-reconciled-1440.png",
+    "scratchpad/claude-port-rework-desk-followup-block-reconciled-390.png",
+    "scratchpad/claude-port-rework-desk-followup-block-reload-390.png"
+  ],
+  "summary": {
+    "passed": 25,
+    "failed": 0,
+    "failing": []
+  }
+}

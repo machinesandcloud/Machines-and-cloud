@@ -1,0 +1,15 @@
+PASS R0 environment: Navigation API removed
+PASS R1 rapid browser Back x4 fired concurrently (no awaits between): settles on the opening entry, no oscillation, then close+Back reaches Home
+FAIL R2 script history.back() x3 in one task, and history.go(-2): held on the opening entry: R2 go(-2) dialog: {"url":"about:blank","hash":"","len":3,"index":null,"entries":null,"hasNav":false,"state":null,"open":[]}
+PASS R3 Back then Forward immediately (concurrent), then Forward/Back pairs x3 with 30ms gaps: held, quiet
+FAIL R4 Forward while held keeps the forward entry: after close, Forward still reaches Availability: Forward after close: {"url":"http://127.0.0.1:8921/desk.html?c=followup-5#today","hash":"#today","page":"today","len":5,"push":1,"go":[],"pop":1,"index":null,"entries":null,"hasNav":false,"state":{"mcDeskPage":"today"},"open":[],"draft":"Race Probe"}
+FAIL R5 Back while the restore is pending: 6 Backs 15ms apart, then one slow Back 1.2s later: held, and the hold still works after its pending timer: after close, Back lands on today: {"url":"http://127.0.0.1:8921/desk.html?c=followup-6#know","hash":"#know","page":"know","len":5,"push":7,"go":[],"pop":8,"index":null,"entries":null,"hasNav":false,"state":{"mcDeskPage":"know"},"open":[],"draft":"Race Probe"}
+PASS R6 calendar replaceState lands in the Back window (late schedule load re-renders the calendar while the Back entry is current)
+PASS R7 dialog opened after the calendar replaceState (calendar_date/view in the URL), date changed while open: Back holds the replaced URL, then close+Back reaches Home
+PASS R8 Escape-close then rapid Back x2: routes normally (no stale hold), no extra pushes
+PASS R9 visit opened over Setup entry route (setup -> availability): Back to a #setup entry fires the setup guide hashchange; held, then close+Back reaches Setup
+PASS R10 Back from the first desk entry with a dialog open (cross-document to the public page), then Forward: informational
+PASS R11 double browser Back while the page main thread is busy (300ms long task): held on the opening entry, URL matches the page
+PASS R12 human-speed double Back (120ms apart) while the page is busy for 400ms: held on the opening entry
+PASS No physical transport, forbidden destinations or page errors
+{"passed":11,"failed":3,"failing":["R2 script history.back() x3 in one task, and history.go(-2): held on the opening entry","R4 Forward while held keeps the forward entry: after close, Forward still reaches Availability","R5 Back while the restore is pending: 6 Backs 15ms apart, then one slow Back 1.2s later: held, and the hold still works after its pending timer"]} {"desk.js":["8edb2f51"],"desk.html":["e6e75e9c"],"desk.css":["f8d00746"]}

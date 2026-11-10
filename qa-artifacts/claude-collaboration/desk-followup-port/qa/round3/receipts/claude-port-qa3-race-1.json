@@ -1,0 +1,1170 @@
+{
+  "at": "2026-11-10T09:21:55.015Z",
+  "browser": "channel:chrome",
+  "deskDir": ".",
+  "noNav": false,
+  "served": {
+    "desk.js": [
+      "8edb2f514314d1ccc47606136cf1be872258bfa8ad7df2d53dd52a99d1587281"
+    ],
+    "desk.html": [
+      "e6e75e9ca26f880568119cb135e034445a4e42a37538f61c20e240f3feb96113"
+    ],
+    "desk.css": [
+      "f8d007462ef5ba11e0fd1979d54a3c275b6456310862d16f2ba0723dff3fb790"
+    ]
+  },
+  "qualifications": "Synthetic workspace, session and request; actual local /api/client and /api/access handlers; memory storage; fake model. Lost responses are simulated with route.abort after (or before) the actual handler ran. No model/provider/email/OAuth/purchase/deployment performed.",
+  "checkSha256": "8d907228bb58a2f73113160e18ade7d7df70b11675fc0e9b256fa9f500e0819e",
+  "checks": [
+    {
+      "name": "R0 environment: Navigation API present",
+      "pass": true
+    },
+    {
+      "name": "R1 rapid browser Back x4 fired concurrently (no awaits between): settles on the opening entry, no oscillation, then close+Back reaches Home",
+      "pass": true
+    },
+    {
+      "name": "R2 script history.back() x3 in one task, and history.go(-2): held on the opening entry",
+      "pass": true
+    },
+    {
+      "name": "R3 Back then Forward immediately (concurrent), then Forward/Back pairs x3 with 30ms gaps: held, quiet",
+      "pass": true
+    },
+    {
+      "name": "R4 Forward while held keeps the forward entry: after close, Forward still reaches Availability",
+      "pass": true
+    },
+    {
+      "name": "R5 Back while the restore is pending: 6 Backs 15ms apart, then one slow Back 1.2s later: held, and the hold still works after its pending timer",
+      "pass": true
+    },
+    {
+      "name": "R6 calendar replaceState lands in the Back window (late schedule load re-renders the calendar while the Back entry is current)",
+      "pass": true
+    },
+    {
+      "name": "R7 dialog opened after the calendar replaceState (calendar_date/view in the URL), date changed while open: Back holds the replaced URL, then close+Back reaches Home",
+      "pass": true
+    },
+    {
+      "name": "R8 Escape-close then rapid Back x2: routes normally (no stale hold), no extra pushes",
+      "pass": true
+    },
+    {
+      "name": "R9 visit opened over Setup entry route (setup -> availability): Back to a #setup entry fires the setup guide hashchange; held, then close+Back reaches Setup",
+      "pass": true
+    },
+    {
+      "name": "R10 Back from the first desk entry with a dialog open (cross-document to the public page), then Forward: informational",
+      "pass": true
+    },
+    {
+      "name": "R11 double browser Back while the page main thread is busy (300ms long task): held on the opening entry, URL matches the page",
+      "pass": true
+    },
+    {
+      "name": "R12 human-speed double Back (120ms apart) while the page is busy for 400ms: held on the opening entry",
+      "pass": true
+    },
+    {
+      "name": "No physical transport, forbidden destinations or page errors",
+      "pass": true
+    }
+  ],
+  "requests": [
+    {
+      "slug": "followup-1",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-1",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-2",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-2",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-2",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-3",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-3",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-3",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-3",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-3",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-3",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-4",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-4",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-4",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-5",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-5",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-5",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-5",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-6",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-6",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-6",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-6",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-6",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-7",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-7",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-7",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-7",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-8",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-8",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-8",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-9",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-9",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-9",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-9",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-9",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-9",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-9",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-10",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-10",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-10",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-10",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-10",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-10",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-11",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-11",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-11",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-11",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-12",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-12",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-12",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-12",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-12",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-12",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-13",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-13",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-13",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-13",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-13",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-13",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    }
+  ],
+  "pageErrors": [],
+  "forbidden": [],
+  "physicalNetwork": 0,
+  "probe": [
+    {
+      "R0": {
+        "nav": "object",
+        "proto": false
+      }
+    },
+    {
+      "R1": {
+        "s0": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-2&calendar_date=2026-11-10&calendar_view=month#availability",
+          "hash": "#availability",
+          "page": "availability",
+          "len": 4,
+          "push": 0,
+          "go": [],
+          "pop": 0,
+          "index": 2,
+          "entries": [
+            "/desk.html?c=followup-2",
+            "/desk.html?c=followup-2#today",
+            "/desk.html?c=followup-2&calendar_date=2026-11-10&calendar_view=month#availability"
+          ],
+          "hasNav": true,
+          "state": {
+            "mcDeskPage": "availability"
+          },
+          "open": [
+            "visitDialog"
+          ],
+          "draft": "Race Probe"
+        },
+        "s1": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-2&calendar_date=2026-11-10&calendar_view=month#availability",
+          "hash": "#availability",
+          "page": "availability",
+          "len": 4,
+          "push": 0,
+          "go": [],
+          "pop": 2,
+          "index": 2,
+          "entries": [
+            "/desk.html?c=followup-2",
+            "/desk.html?c=followup-2#today",
+            "/desk.html?c=followup-2&calendar_date=2026-11-10&calendar_view=month#availability"
+          ],
+          "hasNav": true,
+          "state": {
+            "mcDeskPage": "availability"
+          },
+          "open": [
+            "visitDialog"
+          ],
+          "draft": "Race Probe"
+        }
+      }
+    },
+    {
+      "R2": {
+        "s0": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-3&calendar_date=2026-11-10&calendar_view=month#availability",
+          "hash": "#availability",
+          "page": "availability",
+          "len": 5,
+          "push": 0,
+          "go": [],
+          "pop": 0,
+          "index": 3,
+          "entries": [
+            "/desk.html?c=followup-3",
+            "/desk.html?c=followup-3#leads",
+            "/desk.html?c=followup-3#today",
+            "/desk.html?c=followup-3&calendar_date=2026-11-10&calendar_view=month#availability"
+          ],
+          "hasNav": true,
+          "state": {
+            "mcDeskPage": "availability"
+          },
+          "open": [
+            "visitDialog"
+          ],
+          "draft": "Race Probe"
+        },
+        "s1": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-3&calendar_date=2026-11-10&calendar_view=month#availability",
+          "hash": "#availability",
+          "page": "availability",
+          "len": 5,
+          "push": 0,
+          "go": [],
+          "pop": 4,
+          "index": 3,
+          "entries": [
+            "/desk.html?c=followup-3",
+            "/desk.html?c=followup-3#leads",
+            "/desk.html?c=followup-3#today",
+            "/desk.html?c=followup-3&calendar_date=2026-11-10&calendar_view=month#availability"
+          ],
+          "hasNav": true,
+          "state": {
+            "mcDeskPage": "availability"
+          },
+          "open": [
+            "visitDialog"
+          ],
+          "draft": "Race Probe"
+        },
+        "s2": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-3&calendar_date=2026-11-10&calendar_view=month#availability",
+          "hash": "#availability",
+          "page": "availability",
+          "len": 5,
+          "push": 0,
+          "go": [
+            -2
+          ],
+          "pop": 6,
+          "index": 3,
+          "entries": [
+            "/desk.html?c=followup-3",
+            "/desk.html?c=followup-3#leads",
+            "/desk.html?c=followup-3#today",
+            "/desk.html?c=followup-3&calendar_date=2026-11-10&calendar_view=month#availability"
+          ],
+          "hasNav": true,
+          "state": {
+            "mcDeskPage": "availability"
+          },
+          "open": [
+            "visitDialog"
+          ],
+          "draft": "Race Probe"
+        }
+      }
+    },
+    {
+      "R3": {
+        "s0": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-4&calendar_date=2026-11-10&calendar_view=month#availability",
+          "hash": "#availability",
+          "page": "availability",
+          "len": 4,
+          "push": 0,
+          "go": [],
+          "pop": 0,
+          "index": 2,
+          "entries": [
+            "/desk.html?c=followup-4",
+            "/desk.html?c=followup-4#today",
+            "/desk.html?c=followup-4&calendar_date=2026-11-10&calendar_view=month#availability"
+          ],
+          "hasNav": true,
+          "state": {
+            "mcDeskPage": "availability"
+          },
+          "open": [
+            "visitDialog"
+          ],
+          "draft": "Race Probe"
+        },
+        "s1": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-4&calendar_date=2026-11-10&calendar_view=month#availability",
+          "hash": "#availability",
+          "page": "availability",
+          "len": 4,
+          "push": 0,
+          "go": [],
+          "pop": 2,
+          "index": 2,
+          "entries": [
+            "/desk.html?c=followup-4",
+            "/desk.html?c=followup-4#today",
+            "/desk.html?c=followup-4&calendar_date=2026-11-10&calendar_view=month#availability"
+          ],
+          "hasNav": true,
+          "state": {
+            "mcDeskPage": "availability"
+          },
+          "open": [
+            "visitDialog"
+          ],
+          "draft": "Race Probe"
+        },
+        "s2": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-4&calendar_date=2026-11-10&calendar_view=month#availability",
+          "hash": "#availability",
+          "page": "availability",
+          "len": 4,
+          "push": 0,
+          "go": [],
+          "pop": 8,
+          "index": 2,
+          "entries": [
+            "/desk.html?c=followup-4",
+            "/desk.html?c=followup-4#today",
+            "/desk.html?c=followup-4&calendar_date=2026-11-10&calendar_view=month#availability"
+          ],
+          "hasNav": true,
+          "state": {
+            "mcDeskPage": "availability"
+          },
+          "open": [
+            "visitDialog"
+          ],
+          "draft": "Race Probe"
+        }
+      }
+    },
+    {
+      "R4": {
+        "s0": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-5#today",
+          "hash": "#today",
+          "page": "today",
+          "len": 4,
+          "push": 0,
+          "go": [],
+          "pop": 0,
+          "index": 1,
+          "entries": [
+            "/desk.html?c=followup-5",
+            "/desk.html?c=followup-5#today",
+            "/desk.html?c=followup-5&calendar_date=2026-11-10&calendar_view=month#availability"
+          ],
+          "hasNav": true,
+          "state": {
+            "mcDeskPage": "today"
+          },
+          "open": [
+            "visitDialog"
+          ],
+          "draft": "Race Probe"
+        },
+        "s1": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-5#today",
+          "hash": "#today",
+          "page": "today",
+          "len": 4,
+          "push": 0,
+          "go": [],
+          "pop": 6,
+          "index": 1,
+          "entries": [
+            "/desk.html?c=followup-5",
+            "/desk.html?c=followup-5#today",
+            "/desk.html?c=followup-5&calendar_date=2026-11-10&calendar_view=month#availability"
+          ],
+          "hasNav": true,
+          "state": {
+            "mcDeskPage": "today"
+          },
+          "open": [
+            "visitDialog"
+          ],
+          "draft": "Race Probe"
+        }
+      }
+    },
+    {
+      "R4after": {
+        "url": "http://127.0.0.1:8921/desk.html?c=followup-5&calendar_date=2026-11-10&calendar_view=month#availability",
+        "hash": "#availability",
+        "page": "availability",
+        "len": 4,
+        "push": 0,
+        "go": [],
+        "pop": 7,
+        "index": 2,
+        "entries": [
+          "/desk.html?c=followup-5",
+          "/desk.html?c=followup-5#today",
+          "/desk.html?c=followup-5&calendar_date=2026-11-10&calendar_view=month#availability"
+        ],
+        "hasNav": true,
+        "state": {
+          "mcDeskPage": "availability"
+        },
+        "open": [],
+        "draft": "Race Probe"
+      }
+    },
+    {
+      "R5": {
+        "s0": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-6&calendar_date=2026-11-10&calendar_view=month#availability",
+          "hash": "#availability",
+          "page": "availability",
+          "len": 6,
+          "push": 0,
+          "go": [],
+          "pop": 0,
+          "index": 4,
+          "entries": [
+            "/desk.html?c=followup-6",
+            "/desk.html?c=followup-6#leads",
+            "/desk.html?c=followup-6#know",
+            "/desk.html?c=followup-6#today",
+            "/desk.html?c=followup-6&calendar_date=2026-11-10&calendar_view=month#availability"
+          ],
+          "hasNav": true,
+          "state": {
+            "mcDeskPage": "availability"
+          },
+          "open": [
+            "visitDialog"
+          ],
+          "draft": "Race Probe"
+        },
+        "s1": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-6&calendar_date=2026-11-10&calendar_view=month#availability",
+          "hash": "#availability",
+          "page": "availability",
+          "len": 6,
+          "push": 0,
+          "go": [],
+          "pop": 12,
+          "index": 4,
+          "entries": [
+            "/desk.html?c=followup-6",
+            "/desk.html?c=followup-6#leads",
+            "/desk.html?c=followup-6#know",
+            "/desk.html?c=followup-6#today",
+            "/desk.html?c=followup-6&calendar_date=2026-11-10&calendar_view=month#availability"
+          ],
+          "hasNav": true,
+          "state": {
+            "mcDeskPage": "availability"
+          },
+          "open": [
+            "visitDialog"
+          ],
+          "draft": "Race Probe"
+        },
+        "s2": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-6&calendar_date=2026-11-10&calendar_view=month#availability",
+          "hash": "#availability",
+          "page": "availability",
+          "len": 6,
+          "push": 0,
+          "go": [],
+          "pop": 14,
+          "index": 4,
+          "entries": [
+            "/desk.html?c=followup-6",
+            "/desk.html?c=followup-6#leads",
+            "/desk.html?c=followup-6#know",
+            "/desk.html?c=followup-6#today",
+            "/desk.html?c=followup-6&calendar_date=2026-11-10&calendar_view=month#availability"
+          ],
+          "hasNav": true,
+          "state": {
+            "mcDeskPage": "availability"
+          },
+          "open": [
+            "visitDialog"
+          ],
+          "draft": "Race Probe"
+        }
+      }
+    },
+    {
+      "R6": {
+        "s0": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-7&calendar_date=2026-11-10&calendar_view=month#availability",
+          "hash": "#availability",
+          "page": "availability",
+          "len": 4,
+          "push": 0,
+          "go": [],
+          "pop": 0,
+          "index": 2,
+          "entries": [
+            "/desk.html?c=followup-7",
+            "/desk.html?c=followup-7#today",
+            "/desk.html?c=followup-7&calendar_date=2026-11-10&calendar_view=month#availability"
+          ],
+          "hasNav": true,
+          "state": {
+            "mcDeskPage": "availability"
+          },
+          "open": [
+            "visitDialog"
+          ],
+          "draft": "Race Probe"
+        },
+        "s1": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-7&calendar_date=2026-11-10&calendar_view=month#availability",
+          "hash": "#availability",
+          "page": "availability",
+          "len": 4,
+          "push": 0,
+          "go": [],
+          "pop": 2,
+          "index": 2,
+          "entries": [
+            "/desk.html?c=followup-7",
+            "/desk.html?c=followup-7#today",
+            "/desk.html?c=followup-7&calendar_date=2026-11-10&calendar_view=month#availability"
+          ],
+          "hasNav": true,
+          "state": {
+            "mcDeskPage": "availability"
+          },
+          "open": [
+            "visitDialog"
+          ],
+          "draft": "Race Probe"
+        },
+        "late": {
+          "at": "http://127.0.0.1:8921/desk.html?c=followup-7#today",
+          "after": "http://127.0.0.1:8921/desk.html?c=followup-7#today"
+        },
+        "entries": [
+          "/desk.html?c=followup-7",
+          "/desk.html?c=followup-7#today",
+          "/desk.html?c=followup-7&calendar_date=2026-11-10&calendar_view=month#availability"
+        ]
+      }
+    },
+    {
+      "R7": {
+        "s0": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-8&calendar_date=2026-11-10&calendar_view=month#availability",
+          "hash": "#availability",
+          "page": "availability",
+          "len": 4,
+          "push": 0,
+          "go": [],
+          "pop": 0,
+          "index": 2,
+          "entries": [
+            "/desk.html?c=followup-8",
+            "/desk.html?c=followup-8#today",
+            "/desk.html?c=followup-8&calendar_date=2026-11-10&calendar_view=month#availability"
+          ],
+          "hasNav": true,
+          "state": {
+            "mcDeskPage": "availability"
+          },
+          "open": [
+            "visitDialog"
+          ],
+          "draft": "Race Probe"
+        },
+        "s1": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-8&calendar_date=2026-11-10&calendar_view=month#availability",
+          "hash": "#availability",
+          "page": "availability",
+          "len": 4,
+          "push": 0,
+          "go": [],
+          "pop": 2,
+          "index": 2,
+          "entries": [
+            "/desk.html?c=followup-8",
+            "/desk.html?c=followup-8#today",
+            "/desk.html?c=followup-8&calendar_date=2026-11-10&calendar_view=month#availability"
+          ],
+          "hasNav": true,
+          "state": {
+            "mcDeskPage": "availability"
+          },
+          "open": [
+            "visitDialog"
+          ],
+          "draft": "Race Probe"
+        },
+        "s2": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-8&calendar_date=2026-11-10&calendar_view=month#availability",
+          "hash": "#availability",
+          "page": "availability",
+          "len": 4,
+          "push": 0,
+          "go": [],
+          "pop": 4,
+          "index": 2,
+          "entries": [
+            "/desk.html?c=followup-8",
+            "/desk.html?c=followup-8#today",
+            "/desk.html?c=followup-8&calendar_date=2026-11-10&calendar_view=month#availability"
+          ],
+          "hasNav": true,
+          "state": {
+            "mcDeskPage": "availability"
+          },
+          "open": [
+            "visitDialog"
+          ],
+          "draft": "Race Probe"
+        }
+      }
+    },
+    {
+      "R8": {
+        "s0": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-9&calendar_date=2026-11-10&calendar_view=month#availability",
+          "hash": "#availability",
+          "page": "availability",
+          "len": 5,
+          "push": 0,
+          "go": [],
+          "pop": 0,
+          "index": 3,
+          "entries": [
+            "/desk.html?c=followup-9",
+            "/desk.html?c=followup-9#leads",
+            "/desk.html?c=followup-9#today",
+            "/desk.html?c=followup-9&calendar_date=2026-11-10&calendar_view=month#availability"
+          ],
+          "hasNav": true,
+          "state": {
+            "mcDeskPage": "availability"
+          },
+          "open": [
+            "visitDialog"
+          ],
+          "draft": "Race Probe"
+        },
+        "s1": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-9#today",
+          "hash": "#today",
+          "page": "today",
+          "len": 5,
+          "push": 0,
+          "go": [],
+          "pop": 1,
+          "index": 2,
+          "entries": [
+            "/desk.html?c=followup-9",
+            "/desk.html?c=followup-9#leads",
+            "/desk.html?c=followup-9#today",
+            "/desk.html?c=followup-9&calendar_date=2026-11-10&calendar_view=month#availability"
+          ],
+          "hasNav": true,
+          "state": {
+            "mcDeskPage": "today"
+          },
+          "open": [],
+          "draft": "Race Probe"
+        },
+        "s2": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-9#leads",
+          "hash": "#leads",
+          "page": "leads",
+          "len": 5,
+          "push": 0,
+          "go": [],
+          "pop": 2,
+          "index": 1,
+          "entries": [
+            "/desk.html?c=followup-9",
+            "/desk.html?c=followup-9#leads",
+            "/desk.html?c=followup-9#today",
+            "/desk.html?c=followup-9&calendar_date=2026-11-10&calendar_view=month#availability"
+          ],
+          "hasNav": true,
+          "state": {
+            "mcDeskPage": "leads"
+          },
+          "open": [],
+          "draft": "Race Probe"
+        }
+      }
+    },
+    {
+      "R9": {
+        "s0": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-10&calendar_date=2026-11-10&calendar_view=month#availability",
+          "hash": "#availability",
+          "page": "availability",
+          "len": 4,
+          "push": 0,
+          "go": [],
+          "pop": 0,
+          "index": 2,
+          "entries": [
+            "/desk.html?c=followup-10",
+            "/desk.html?c=followup-10#setup",
+            "/desk.html?c=followup-10&calendar_date=2026-11-10&calendar_view=month#availability"
+          ],
+          "hasNav": true,
+          "state": {
+            "mcDeskPage": "availability"
+          },
+          "open": [
+            "visitDialog"
+          ],
+          "draft": "Race Probe"
+        },
+        "s1": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-10&calendar_date=2026-11-10&calendar_view=month#availability",
+          "hash": "#availability",
+          "page": "availability",
+          "len": 4,
+          "push": 0,
+          "go": [],
+          "pop": 2,
+          "index": 2,
+          "entries": [
+            "/desk.html?c=followup-10",
+            "/desk.html?c=followup-10#setup",
+            "/desk.html?c=followup-10&calendar_date=2026-11-10&calendar_view=month#availability"
+          ],
+          "hasNav": true,
+          "state": {
+            "mcDeskPage": "availability"
+          },
+          "open": [
+            "visitDialog"
+          ],
+          "draft": "Race Probe"
+        }
+      }
+    },
+    {
+      "R10": {
+        "afterBack": "http://127.0.0.1:8921/start.html",
+        "afterForward": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-11",
+          "open": [],
+          "draft": ""
+        }
+      }
+    },
+    {
+      "R11": {
+        "s0": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-12&calendar_date=2026-11-10&calendar_view=month#availability",
+          "hash": "#availability",
+          "page": "availability",
+          "len": 5,
+          "push": 0,
+          "go": [],
+          "pop": 0,
+          "index": 3,
+          "entries": [
+            "/desk.html?c=followup-12",
+            "/desk.html?c=followup-12#leads",
+            "/desk.html?c=followup-12#today",
+            "/desk.html?c=followup-12&calendar_date=2026-11-10&calendar_view=month#availability"
+          ],
+          "hasNav": true,
+          "state": {
+            "mcDeskPage": "availability"
+          },
+          "open": [
+            "visitDialog"
+          ],
+          "draft": "Race Probe"
+        },
+        "s1": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-12&calendar_date=2026-11-10&calendar_view=month#availability",
+          "hash": "#availability",
+          "page": "availability",
+          "len": 5,
+          "push": 0,
+          "go": [],
+          "pop": 3,
+          "index": 3,
+          "entries": [
+            "/desk.html?c=followup-12",
+            "/desk.html?c=followup-12#leads",
+            "/desk.html?c=followup-12#today",
+            "/desk.html?c=followup-12&calendar_date=2026-11-10&calendar_view=month#availability"
+          ],
+          "hasNav": true,
+          "state": {
+            "mcDeskPage": "availability"
+          },
+          "open": [
+            "visitDialog"
+          ],
+          "draft": "Race Probe"
+        }
+      }
+    },
+    {
+      "R12": {
+        "s0": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-13&calendar_date=2026-11-10&calendar_view=month#availability",
+          "hash": "#availability",
+          "page": "availability",
+          "len": 5,
+          "push": 0,
+          "go": [],
+          "pop": 0,
+          "index": 3,
+          "entries": [
+            "/desk.html?c=followup-13",
+            "/desk.html?c=followup-13#leads",
+            "/desk.html?c=followup-13#today",
+            "/desk.html?c=followup-13&calendar_date=2026-11-10&calendar_view=month#availability"
+          ],
+          "hasNav": true,
+          "state": {
+            "mcDeskPage": "availability"
+          },
+          "open": [
+            "visitDialog"
+          ],
+          "draft": "Race Probe"
+        },
+        "s1": {
+          "url": "http://127.0.0.1:8921/desk.html?c=followup-13&calendar_date=2026-11-10&calendar_view=month#availability",
+          "hash": "#availability",
+          "page": "availability",
+          "len": 5,
+          "push": 0,
+          "go": [],
+          "pop": 3,
+          "index": 3,
+          "entries": [
+            "/desk.html?c=followup-13",
+            "/desk.html?c=followup-13#leads",
+            "/desk.html?c=followup-13#today",
+            "/desk.html?c=followup-13&calendar_date=2026-11-10&calendar_view=month#availability"
+          ],
+          "hasNav": true,
+          "state": {
+            "mcDeskPage": "availability"
+          },
+          "open": [
+            "visitDialog"
+          ],
+          "draft": "Race Probe"
+        }
+      }
+    }
+  ],
+  "summary": {
+    "passed": 14,
+    "failed": 0,
+    "failing": []
+  }
+}

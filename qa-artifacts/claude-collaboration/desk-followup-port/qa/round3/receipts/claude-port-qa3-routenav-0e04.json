@@ -1,0 +1,859 @@
+{
+  "at": "2026-11-10T09:27:15.328Z",
+  "browser": "channel:chrome",
+  "deskDir": "qa-artifacts/claude-collaboration/desk-followup-port/qa/round3/variant-0e04",
+  "noNav": false,
+  "served": {
+    "desk.js": [
+      "0e040d76b4e37c630b165cd14ee4084dcd2dc4f5d076c124413064f349a059a9"
+    ],
+    "desk.html": [
+      "e6e75e9ca26f880568119cb135e034445a4e42a37538f61c20e240f3feb96113"
+    ],
+    "desk.css": [
+      "f8d007462ef5ba11e0fd1979d54a3c275b6456310862d16f2ba0723dff3fb790"
+    ]
+  },
+  "qualifications": "Synthetic workspace, session and request; actual local /api/client and /api/access handlers; memory storage; fake model. Lost responses are simulated with route.abort after (or before) the actual handler ran. No model/provider/email/OAuth/purchase/deployment performed.",
+  "checkSha256": "a0dda89ecf5156a0d3c279a651c8d8748c9c30a5faadc61ae5f2234d05653495",
+  "checks": [
+    {
+      "name": "N0 environment: Navigation API present",
+      "pass": true
+    },
+    {
+      "name": "N1 every tab via its nav button: one entry each, URL/state/title/heading/focus right after routeTo; Back then Forward across all restore page+title with no extra entries",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: Back url step 1\n+ actual - expected\n\n+ '/desk.html?c=followup-2&calendar_date=2026-11-10&calendar_view=month#convs'\n- '/desk.html?c=followup-2#convs'\n\n    at file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round3/route-nav-probe.mjs:145:125\n    at async check (file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round3/route-nav-probe.mjs:87:72)\n    at async file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round3/route-nav-probe.mjs:136:3"
+    },
+    {
+      "name": "N2 calendar date/view params land on the Availability entry, not the page left; later calendar changes replace (no new entries); Back/Forward keep params per entry",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: params written onto the Leads entry: /desk.html?c=followup-3&calendar_date=2026-11-10&calendar_view=month#leads\n    at file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round3/route-nav-probe.mjs:155:30\n    at async check (file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round3/route-nav-probe.mjs:87:72)\n    at async file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round3/route-nav-probe.mjs:151:3"
+    },
+    {
+      "name": "N3 deep links: #availability with calendar params, #setup/sms (normalized), #know; no extra entries on load; Back leaves to the public page",
+      "pass": true
+    },
+    {
+      "name": "N4 connector sub-route through mc:desk-route connectionHash: one entry, hash normalized to /intro, Back returns to the prior page",
+      "pass": true
+    },
+    {
+      "name": "N5 typed hash change (#know) routes with the browser entry only (routeTo replaces, no second entry); Back returns",
+      "pass": true
+    },
+    {
+      "name": "N6 re-sign-in return route: session expiry on Availability with params stores #availability; sign-in returns there",
+      "pass": true
+    },
+    {
+      "name": "N7 Quick tour: one tour entry; tour steps route without entries; Back closes tour on the origin page with its URL",
+      "pass": true
+    },
+    {
+      "name": "M1 no dialog open: replaceState (another module cleaning a param) and a same-URL replace are never cancelled",
+      "pass": true
+    },
+    {
+      "name": "M2 held dialog open on its own entry: replaceState of the held entry is allowed and updates the hold; push (hash link) inside the dialog not cancelled, dialog held",
+      "pass": true
+    },
+    {
+      "name": "M3 Back window (held entry not current): replaceState is cancelled (intended); cross-document location.replace in that window: informational",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: replace in Back window not cancelled {\"before\":\"/desk.html?c=followup-11&calendar_date=2026-11-10&calendar_view=month#today\",\"after\":\"/desk.html?c=followup-11&calendar_date=2026-11-10&calendar_view=month&qa=window#today\",\"same\":false}\n    at file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round3/route-nav-probe.mjs:221:12\n    at async check (file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round3/route-nav-probe.mjs:87:72)\n    at async file:///private/tmp/mc-claude-desk-followup-port-20261110/qa-artifacts/claude-collaboration/desk-followup-port/qa/round3/route-nav-probe.mjs:217:3"
+    },
+    {
+      "name": "M4 listener inert after the held dialog closes: replaceState in a Back/traverse of a normal page is not cancelled",
+      "pass": true
+    },
+    {
+      "name": "I1 user alternates Back/Forward 8 times at human speed (180ms) with a held dialog: no oscillation, settles held",
+      "pass": true
+    },
+    {
+      "name": "I2 user closes the dialog mid-retry (Back then Escape 20ms later): page matches URL, no further movement, timer cleared",
+      "pass": true
+    },
+    {
+      "name": "I3 cap: traversals refused by the browser: at most 12 traverseTo calls, then the 250ms re-check keeps polling while the dialog is open (informational), stops on close",
+      "pass": true
+    },
+    {
+      "name": "No physical transport, forbidden destinations or page errors",
+      "pass": true
+    }
+  ],
+  "requests": [
+    {
+      "slug": "followup-1",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-1",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-2",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-2",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-2",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-2",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-2",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-2",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-2",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-2",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-3",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-3",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-3",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-3",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-3",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-4",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-4",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-4",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-4",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-4",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-4",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-4",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-4",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-4",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-4",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-5",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-5",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-5",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-5",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-5",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-5",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-5",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-5",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-6",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-6",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-7",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-7",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-7",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-7",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-7",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-7",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-8",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-8",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-8",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-8",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-8",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-8",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-8",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-9",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-9",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-9",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-9",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-10",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-10",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-10",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-11",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-11",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-11",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-12",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-12",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-12",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-12",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-12",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-13",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-13",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-13",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-13",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-13",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-13",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-13",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-13",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-14",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-14",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-14",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-15",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-15",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "followup-15",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    }
+  ],
+  "pageErrors": [],
+  "forbidden": [],
+  "physicalNetwork": 0,
+  "probe": [
+    {
+      "N1": {
+        "s0": {
+          "url": "/desk.html?c=followup-2",
+          "hash": "",
+          "search": "?c=followup-2",
+          "page": "today",
+          "title": "Home | Your front desk | Machines & Cloud",
+          "heading": "Get your front desk ready",
+          "focus": "",
+          "len": 3,
+          "state": null,
+          "entries": [
+            "/start.html",
+            "/desk.html?c=followup-2"
+          ],
+          "index": 1,
+          "open": []
+        },
+        "seen": [
+          {
+            "url": "/desk.html?c=followup-2#leads",
+            "title": "Inbox | Your front desk | Machines & Cloud",
+            "len": 4
+          },
+          {
+            "url": "/desk.html?c=followup-2#convs",
+            "title": "Conversations | Your front desk | Machines & Cloud",
+            "len": 5
+          },
+          {
+            "url": "/desk.html?c=followup-2&calendar_date=2026-11-10&calendar_view=month#availability",
+            "title": "Schedule | Your front desk | Machines & Cloud",
+            "len": 6
+          },
+          {
+            "url": "/desk.html?c=followup-2&calendar_date=2026-11-10&calendar_view=month#know",
+            "title": "Business details | Your front desk | Machines & Cloud",
+            "len": 7
+          },
+          {
+            "url": "/desk.html?c=followup-2&calendar_date=2026-11-10&calendar_view=month#test",
+            "title": "Test answers | Your front desk | Machines & Cloud",
+            "len": 8
+          },
+          {
+            "url": "/desk.html?c=followup-2&calendar_date=2026-11-10&calendar_view=month#setup",
+            "title": "Connections | Your front desk | Machines & Cloud",
+            "len": 9
+          },
+          {
+            "url": "/desk.html?c=followup-2&calendar_date=2026-11-10&calendar_view=month#account",
+            "title": "Account | Your front desk | Machines & Cloud",
+            "len": 10
+          },
+          {
+            "url": "/desk.html?c=followup-2&calendar_date=2026-11-10&calendar_view=month#today",
+            "title": "Home | Your front desk | Machines & Cloud",
+            "len": 11
+          }
+        ]
+      }
+    },
+    {
+      "N3": {
+        "sS": {
+          "url": "/desk.html?c=followup-4#setup/sms",
+          "hash": "#setup/sms",
+          "search": "?c=followup-4",
+          "page": "setup",
+          "title": "Connections | Your front desk | Machines & Cloud",
+          "heading": "Connections",
+          "focus": "",
+          "len": 5,
+          "state": null,
+          "entries": [
+            "/start.html",
+            "/desk.html?c=followup-4&calendar_date=2026-11-10&calendar_view=month#availability",
+            "/desk.html?c=followup-4&calendar_date=2026-11-30&calendar_view=week#availability",
+            "/desk.html?c=followup-4#setup/sms"
+          ],
+          "index": 3,
+          "open": []
+        }
+      }
+    },
+    {
+      "N4": {
+        "s0": "/desk.html?c=followup-5#leads",
+        "s1": "/desk.html?c=followup-5#setup/sms/intro",
+        "len": [
+          3,
+          4
+        ],
+        "entries": [
+          "/desk.html?c=followup-5",
+          "/desk.html?c=followup-5#leads",
+          "/desk.html?c=followup-5#setup/sms/intro"
+        ]
+      }
+    },
+    {
+      "N6": {
+        "slug": "followup-7",
+        "hash": "#availability",
+        "at": 1794302849896
+      }
+    },
+    {
+      "N6b": "/desk.html?c=followup-7&calendar_date=2026-11-10&calendar_view=month#availability"
+    },
+    {
+      "N7": {
+        "s0": "/desk.html?c=followup-8#leads",
+        "s1": "/desk.html?c=followup-8#today",
+        "s2": "/desk.html?c=followup-8&calendar_date=2026-11-10&calendar_view=month#setup",
+        "page": "setup",
+        "state": {
+          "mcTour": true
+        }
+      }
+    },
+    {
+      "M1": [
+        {
+          "type": "push",
+          "url": "/desk.html?c=followup-9#setup",
+          "prevented": false,
+          "cancelable": true
+        },
+        {
+          "type": "replace",
+          "url": "/desk.html?c=followup-9&connection=thumbtack#setup",
+          "prevented": false,
+          "cancelable": true
+        },
+        {
+          "type": "replace",
+          "url": "/desk.html?c=followup-9#setup",
+          "prevented": false,
+          "cancelable": true
+        }
+      ]
+    },
+    {
+      "M2": {
+        "s": {
+          "url": "http://127.0.0.1:8923/desk.html?c=followup-10&calendar_date=2026-11-10&calendar_view=month&qa=1#availability-anchor",
+          "hash": "#availability-anchor",
+          "page": "availability",
+          "len": 5,
+          "push": 0,
+          "go": [
+            1
+          ],
+          "pop": 3,
+          "index": 3,
+          "entries": [
+            "/desk.html?c=followup-10",
+            "/desk.html?c=followup-10&calendar_date=2026-11-10&calendar_view=month#today",
+            "/desk.html?c=followup-10&calendar_date=2026-11-10&calendar_view=month&qa=1#availability",
+            "/desk.html?c=followup-10&calendar_date=2026-11-10&calendar_view=month&qa=1#availability-anchor"
+          ],
+          "hasNav": true,
+          "state": null,
+          "open": [
+            "visitDialog"
+          ],
+          "draft": "Race Probe"
+        },
+        "log2": [
+          {
+            "type": "replace",
+            "url": "/desk.html?c=followup-10&calendar_date=2026-11-10&calendar_view=month&qa=1#availability",
+            "prevented": false,
+            "cancelable": true
+          },
+          {
+            "type": "traverse",
+            "url": "/desk.html?c=followup-10&calendar_date=2026-11-10&calendar_view=month#today",
+            "prevented": false,
+            "cancelable": true
+          },
+          {
+            "type": "traverse",
+            "url": "/desk.html?c=followup-10&calendar_date=2026-11-10&calendar_view=month&qa=1#availability",
+            "prevented": false,
+            "cancelable": true
+          },
+          {
+            "type": "push",
+            "url": "/desk.html?c=followup-10&calendar_date=2026-11-10&calendar_view=month&qa=1#availability-anchor",
+            "prevented": false,
+            "cancelable": true
+          }
+        ]
+      }
+    },
+    {
+      "M3": {
+        "r": {
+          "before": "/desk.html?c=followup-11&calendar_date=2026-11-10&calendar_view=month#today",
+          "after": "/desk.html?c=followup-11&calendar_date=2026-11-10&calendar_view=month&qa=window#today",
+          "same": false
+        },
+        "s": {
+          "url": "http://127.0.0.1:8923/desk.html?c=followup-11&calendar_date=2026-11-10&calendar_view=month&qa=window#today",
+          "open": [
+            "visitDialog"
+          ]
+        },
+        "log": [
+          {
+            "type": "traverse",
+            "url": "/desk.html?c=followup-11&calendar_date=2026-11-10&calendar_view=month#today",
+            "prevented": false,
+            "cancelable": true
+          },
+          {
+            "type": "replace",
+            "url": "/desk.html?c=followup-11&calendar_date=2026-11-10&calendar_view=month&qa=window#today",
+            "prevented": false,
+            "cancelable": true
+          }
+        ]
+      }
+    },
+    {
+      "I1": {
+        "s0": "http://127.0.0.1:8923/desk.html?c=followup-13&calendar_date=2026-11-10&calendar_view=month#availability",
+        "s": "http://127.0.0.1:8923/desk.html?c=followup-13&calendar_date=2026-11-10&calendar_view=month#availability",
+        "len": [
+          5,
+          5
+        ],
+        "idx": [
+          3,
+          3
+        ]
+      }
+    },
+    {
+      "I2": {
+        "s0": "http://127.0.0.1:8923/desk.html?c=followup-14&calendar_date=2026-11-10&calendar_view=month#availability",
+        "s": "http://127.0.0.1:8923/desk.html?c=followup-14&calendar_date=2026-11-10&calendar_view=month#today",
+        "page": "today",
+        "open": [],
+        "a": {
+          "t": 0,
+          "tr": 0
+        },
+        "b": {
+          "t": 0,
+          "tr": 0
+        }
+      }
+    },
+    {
+      "I3": {
+        "a": {
+          "t": 0,
+          "tr": 0
+        },
+        "b": {
+          "t": 0,
+          "tr": 0
+        },
+        "c": {
+          "t": 0,
+          "tr": 0
+        },
+        "d": {
+          "t": 0,
+          "tr": 0
+        },
+        "s1": {
+          "url": "http://127.0.0.1:8923/desk.html?c=followup-15&calendar_date=2026-11-10&calendar_view=month#availability",
+          "page": "availability",
+          "open": [
+            "visitDialog"
+          ]
+        },
+        "s2": {
+          "url": "http://127.0.0.1:8923/desk.html?c=followup-15&calendar_date=2026-11-10&calendar_view=month#availability",
+          "page": "availability"
+        }
+      }
+    }
+  ],
+  "screenshots": [
+    "scratchpad/claude-port-qa3-routenav-0e04-failure-2.png",
+    "scratchpad/claude-port-qa3-routenav-0e04-failure-3.png",
+    "scratchpad/claude-port-qa3-routenav-0e04-failure-11.png"
+  ],
+  "summary": {
+    "passed": 13,
+    "failed": 3,
+    "failing": [
+      "N1 every tab via its nav button: one entry each, URL/state/title/heading/focus right after routeTo; Back then Forward across all restore page+title with no extra entries",
+      "N2 calendar date/view params land on the Availability entry, not the page left; later calendar changes replace (no new entries); Back/Forward keep params per entry",
+      "M3 Back window (held entry not current): replaceState is cancelled (intended); cross-document location.replace in that window: informational"
+    ]
+  }
+}

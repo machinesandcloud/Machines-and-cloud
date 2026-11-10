@@ -1,0 +1,3128 @@
+{
+  "at": "2026-11-10T08:22:45.992Z",
+  "mode": "actual onboarding source + access/onboard handlers in memory; fake mailbox and model; no network",
+  "checks": [
+    {
+      "name": "own-late-commit-1440: the lost autosave says the outcome is unknown",
+      "pass": true,
+      "detail": "We couldn’t confirm whether your changes were saved. Check your connection. They’re still on this page."
+    },
+    {
+      "name": "own-late-commit-1440: typed answers stay on the page",
+      "pass": true,
+      "detail": {
+        "name": "Late Owner",
+        "phone": "7135550101"
+      }
+    },
+    {
+      "name": "own-late-commit-1440: status copy has no em dash or raw error text",
+      "pass": true,
+      "detail": "Saved. You can leave and continue later."
+    },
+    {
+      "name": "own-late-commit-1440: the late commit landed after the page re-read the draft",
+      "pass": true,
+      "detail": [
+        {
+          "revision": 0,
+          "name": "Late Owner",
+          "phone": "",
+          "status": "held",
+          "lateStatus": 200
+        },
+        {
+          "revision": 0,
+          "name": "Late Owner",
+          "phone": "7135550101",
+          "status": 409
+        },
+        {
+          "revision": 1,
+          "name": "Late Owner",
+          "phone": "7135550101",
+          "status": 200
+        },
+        {
+          "revision": 2,
+          "name": "Late Owner Two",
+          "phone": "7135550101",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "name": "own-late-commit-1440: own late save is not reported as another tab",
+      "pass": true,
+      "detail": "Saved. You can leave and continue later."
+    },
+    {
+      "name": "own-late-commit-1440: the newer answers are saved",
+      "pass": true,
+      "detail": {
+        "status": "Saved. You can leave and continue later.",
+        "stored": {
+          "revision": 2,
+          "name": "Late Owner",
+          "phone": "7135550101"
+        }
+      }
+    },
+    {
+      "name": "own-late-commit-1440: exactly one re-send after the 409, on the verified-own revision",
+      "pass": true,
+      "detail": [
+        {
+          "revision": 0,
+          "name": "Late Owner",
+          "phone": "7135550101",
+          "status": 409
+        },
+        {
+          "revision": 1,
+          "name": "Late Owner",
+          "phone": "7135550101",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "name": "own-late-commit-1440: the following edit saves on the adopted revision",
+      "pass": true,
+      "detail": {
+        "status": "Saved. You can leave and continue later.",
+        "revision": 3
+      }
+    },
+    {
+      "name": "own-late-commit-1440: reload keeps everything typed, including the phone number",
+      "pass": true,
+      "detail": {
+        "name": "Late Owner Two",
+        "phone": "7135550101"
+      }
+    },
+    {
+      "name": "own-late-commit-1440: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "after-next",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "own-late-commit-1440: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "other-tab-after-lost-1440: the lost autosave says the outcome is unknown",
+      "pass": true,
+      "detail": "We couldn’t confirm whether your changes were saved. Check your connection. They’re still on this page."
+    },
+    {
+      "name": "other-tab-after-lost-1440: typed answers stay on the page",
+      "pass": true,
+      "detail": {
+        "name": "Late Owner",
+        "phone": "7135550101"
+      }
+    },
+    {
+      "name": "other-tab-after-lost-1440: status copy has no em dash or raw error text",
+      "pass": true,
+      "detail": "Your saved answers changed in another tab. Reload to continue with the latest version. Your changes are still on this page."
+    },
+    {
+      "name": "other-tab-after-lost-1440: a genuine other-tab change still shows the conflict",
+      "pass": true,
+      "detail": {
+        "status": "Your saved answers changed in another tab. Reload to continue with the latest version. Your changes are still on this page.",
+        "otherTab": 200
+      }
+    },
+    {
+      "name": "other-tab-after-lost-1440: the other tab's saved answers are not overwritten",
+      "pass": true,
+      "detail": {
+        "revision": 1,
+        "name": "Other Tab Owner"
+      }
+    },
+    {
+      "name": "other-tab-after-lost-1440: no re-send on a revision that is not our own",
+      "pass": true,
+      "detail": [
+        {
+          "revision": 0,
+          "name": "Late Owner",
+          "phone": "7135550101",
+          "status": 409
+        }
+      ]
+    },
+    {
+      "name": "other-tab-after-lost-1440: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "after-next",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "other-tab-after-lost-1440: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "own-late-then-other-tab-1440: the lost autosave says the outcome is unknown",
+      "pass": true,
+      "detail": "We couldn’t confirm whether your changes were saved. Check your connection. They’re still on this page."
+    },
+    {
+      "name": "own-late-then-other-tab-1440: typed answers stay on the page",
+      "pass": true,
+      "detail": {
+        "name": "Late Owner",
+        "phone": "7135550101"
+      }
+    },
+    {
+      "name": "own-late-then-other-tab-1440: status copy has no em dash or raw error text",
+      "pass": true,
+      "detail": "Your saved answers changed in another tab. Reload to continue with the latest version. Your changes are still on this page."
+    },
+    {
+      "name": "own-late-then-other-tab-1440: a genuine other-tab change still shows the conflict",
+      "pass": true,
+      "detail": {
+        "status": "Your saved answers changed in another tab. Reload to continue with the latest version. Your changes are still on this page.",
+        "otherTab": 200
+      }
+    },
+    {
+      "name": "own-late-then-other-tab-1440: the other tab's saved answers are not overwritten",
+      "pass": true,
+      "detail": {
+        "revision": 2,
+        "name": "Other Tab Owner",
+        "phone": ""
+      }
+    },
+    {
+      "name": "own-late-then-other-tab-1440: no re-send on a revision that is not our own",
+      "pass": true,
+      "detail": [
+        {
+          "revision": 0,
+          "name": "Late Owner",
+          "phone": "7135550101",
+          "status": 409
+        }
+      ]
+    },
+    {
+      "name": "own-late-then-other-tab-1440: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "after-next",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "own-late-then-other-tab-1440: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "other-tab-before-resend-1440: the lost autosave says the outcome is unknown",
+      "pass": true,
+      "detail": "We couldn’t confirm whether your changes were saved. Check your connection. They’re still on this page."
+    },
+    {
+      "name": "other-tab-before-resend-1440: typed answers stay on the page",
+      "pass": true,
+      "detail": {
+        "name": "Late Owner",
+        "phone": "7135550101"
+      }
+    },
+    {
+      "name": "other-tab-before-resend-1440: status copy has no em dash or raw error text",
+      "pass": true,
+      "detail": "Your saved answers changed in another tab. Reload to continue with the latest version. Your changes are still on this page."
+    },
+    {
+      "name": "other-tab-before-resend-1440: a genuine other-tab change still shows the conflict",
+      "pass": true,
+      "detail": {
+        "status": "Your saved answers changed in another tab. Reload to continue with the latest version. Your changes are still on this page.",
+        "otherTab": 200
+      }
+    },
+    {
+      "name": "other-tab-before-resend-1440: the other tab's saved answers are not overwritten",
+      "pass": true,
+      "detail": {
+        "revision": 2,
+        "name": "Other Tab Owner",
+        "phone": ""
+      }
+    },
+    {
+      "name": "other-tab-before-resend-1440: the single re-send meets the conflict and is not repeated",
+      "pass": true,
+      "detail": [
+        {
+          "revision": 0,
+          "name": "Late Owner",
+          "phone": "7135550101",
+          "status": 409
+        },
+        {
+          "revision": 1,
+          "name": "Late Owner",
+          "phone": "7135550101",
+          "status": 409
+        }
+      ]
+    },
+    {
+      "name": "other-tab-before-resend-1440: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "after-next",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "other-tab-before-resend-1440: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "own-late-commit-390: the lost autosave says the outcome is unknown",
+      "pass": true,
+      "detail": "We couldn’t confirm whether your changes were saved. Check your connection. They’re still on this page."
+    },
+    {
+      "name": "own-late-commit-390: typed answers stay on the page",
+      "pass": true,
+      "detail": {
+        "name": "Late Owner",
+        "phone": "7135550101"
+      }
+    },
+    {
+      "name": "own-late-commit-390: status copy has no em dash or raw error text",
+      "pass": true,
+      "detail": "Saved. You can leave and continue later."
+    },
+    {
+      "name": "own-late-commit-390: the late commit landed after the page re-read the draft",
+      "pass": true,
+      "detail": [
+        {
+          "revision": 0,
+          "name": "Late Owner",
+          "phone": "",
+          "status": "held",
+          "lateStatus": 200
+        },
+        {
+          "revision": 0,
+          "name": "Late Owner",
+          "phone": "7135550101",
+          "status": 409
+        },
+        {
+          "revision": 1,
+          "name": "Late Owner",
+          "phone": "7135550101",
+          "status": 200
+        },
+        {
+          "revision": 2,
+          "name": "Late Owner Two",
+          "phone": "7135550101",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "name": "own-late-commit-390: own late save is not reported as another tab",
+      "pass": true,
+      "detail": "Saved. You can leave and continue later."
+    },
+    {
+      "name": "own-late-commit-390: the newer answers are saved",
+      "pass": true,
+      "detail": {
+        "status": "Saved. You can leave and continue later.",
+        "stored": {
+          "revision": 2,
+          "name": "Late Owner",
+          "phone": "7135550101"
+        }
+      }
+    },
+    {
+      "name": "own-late-commit-390: exactly one re-send after the 409, on the verified-own revision",
+      "pass": true,
+      "detail": [
+        {
+          "revision": 0,
+          "name": "Late Owner",
+          "phone": "7135550101",
+          "status": 409
+        },
+        {
+          "revision": 1,
+          "name": "Late Owner",
+          "phone": "7135550101",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "name": "own-late-commit-390: the following edit saves on the adopted revision",
+      "pass": true,
+      "detail": {
+        "status": "Saved. You can leave and continue later.",
+        "revision": 3
+      }
+    },
+    {
+      "name": "own-late-commit-390: reload keeps everything typed, including the phone number",
+      "pass": true,
+      "detail": {
+        "name": "Late Owner Two",
+        "phone": "7135550101"
+      }
+    },
+    {
+      "name": "own-late-commit-390: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "after-next",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "own-late-commit-390: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "other-tab-after-lost-390: the lost autosave says the outcome is unknown",
+      "pass": true,
+      "detail": "We couldn’t confirm whether your changes were saved. Check your connection. They’re still on this page."
+    },
+    {
+      "name": "other-tab-after-lost-390: typed answers stay on the page",
+      "pass": true,
+      "detail": {
+        "name": "Late Owner",
+        "phone": "7135550101"
+      }
+    },
+    {
+      "name": "other-tab-after-lost-390: status copy has no em dash or raw error text",
+      "pass": true,
+      "detail": "Your saved answers changed in another tab. Reload to continue with the latest version. Your changes are still on this page."
+    },
+    {
+      "name": "other-tab-after-lost-390: a genuine other-tab change still shows the conflict",
+      "pass": true,
+      "detail": {
+        "status": "Your saved answers changed in another tab. Reload to continue with the latest version. Your changes are still on this page.",
+        "otherTab": 200
+      }
+    },
+    {
+      "name": "other-tab-after-lost-390: the other tab's saved answers are not overwritten",
+      "pass": true,
+      "detail": {
+        "revision": 1,
+        "name": "Other Tab Owner"
+      }
+    },
+    {
+      "name": "other-tab-after-lost-390: no re-send on a revision that is not our own",
+      "pass": true,
+      "detail": [
+        {
+          "revision": 0,
+          "name": "Late Owner",
+          "phone": "7135550101",
+          "status": 409
+        }
+      ]
+    },
+    {
+      "name": "other-tab-after-lost-390: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "after-next",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "other-tab-after-lost-390: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "own-late-then-other-tab-390: the lost autosave says the outcome is unknown",
+      "pass": true,
+      "detail": "We couldn’t confirm whether your changes were saved. Check your connection. They’re still on this page."
+    },
+    {
+      "name": "own-late-then-other-tab-390: typed answers stay on the page",
+      "pass": true,
+      "detail": {
+        "name": "Late Owner",
+        "phone": "7135550101"
+      }
+    },
+    {
+      "name": "own-late-then-other-tab-390: status copy has no em dash or raw error text",
+      "pass": true,
+      "detail": "Your saved answers changed in another tab. Reload to continue with the latest version. Your changes are still on this page."
+    },
+    {
+      "name": "own-late-then-other-tab-390: a genuine other-tab change still shows the conflict",
+      "pass": true,
+      "detail": {
+        "status": "Your saved answers changed in another tab. Reload to continue with the latest version. Your changes are still on this page.",
+        "otherTab": 200
+      }
+    },
+    {
+      "name": "own-late-then-other-tab-390: the other tab's saved answers are not overwritten",
+      "pass": true,
+      "detail": {
+        "revision": 2,
+        "name": "Other Tab Owner",
+        "phone": ""
+      }
+    },
+    {
+      "name": "own-late-then-other-tab-390: no re-send on a revision that is not our own",
+      "pass": true,
+      "detail": [
+        {
+          "revision": 0,
+          "name": "Late Owner",
+          "phone": "7135550101",
+          "status": 409
+        }
+      ]
+    },
+    {
+      "name": "own-late-then-other-tab-390: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "after-next",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "own-late-then-other-tab-390: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "other-tab-before-resend-390: the lost autosave says the outcome is unknown",
+      "pass": true,
+      "detail": "We couldn’t confirm whether your changes were saved. Check your connection. They’re still on this page."
+    },
+    {
+      "name": "other-tab-before-resend-390: typed answers stay on the page",
+      "pass": true,
+      "detail": {
+        "name": "Late Owner",
+        "phone": "7135550101"
+      }
+    },
+    {
+      "name": "other-tab-before-resend-390: status copy has no em dash or raw error text",
+      "pass": true,
+      "detail": "Your saved answers changed in another tab. Reload to continue with the latest version. Your changes are still on this page."
+    },
+    {
+      "name": "other-tab-before-resend-390: a genuine other-tab change still shows the conflict",
+      "pass": true,
+      "detail": {
+        "status": "Your saved answers changed in another tab. Reload to continue with the latest version. Your changes are still on this page.",
+        "otherTab": 200
+      }
+    },
+    {
+      "name": "other-tab-before-resend-390: the other tab's saved answers are not overwritten",
+      "pass": true,
+      "detail": {
+        "revision": 2,
+        "name": "Other Tab Owner",
+        "phone": ""
+      }
+    },
+    {
+      "name": "other-tab-before-resend-390: the single re-send meets the conflict and is not repeated",
+      "pass": true,
+      "detail": [
+        {
+          "revision": 0,
+          "name": "Late Owner",
+          "phone": "7135550101",
+          "status": 409
+        },
+        {
+          "revision": 1,
+          "name": "Late Owner",
+          "phone": "7135550101",
+          "status": 409
+        }
+      ]
+    },
+    {
+      "name": "other-tab-before-resend-390: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "after-next",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "other-tab-before-resend-390: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "signout-lost-1440: a lost sign-out reply is shown in a visible status",
+      "pass": true,
+      "detail": {
+        "status": "We couldn’t confirm that you were signed out. Check your connection. You’re still signed in on this page. Select Sign out again.",
+        "gateText": "Checking your secure sign-in link…",
+        "gateVisible": false,
+        "signedIn": true,
+        "form": true
+      }
+    },
+    {
+      "name": "signout-lost-1440: the lost sign-out message has no raw error text or em dash",
+      "pass": true,
+      "detail": {
+        "status": "We couldn’t confirm that you were signed out. Check your connection. You’re still signed in on this page. Select Sign out again.",
+        "gateText": "Checking your secure sign-in link…",
+        "gateVisible": false,
+        "signedIn": true,
+        "form": true
+      }
+    },
+    {
+      "name": "signout-lost-1440: the page stays signed in with the answers",
+      "pass": true,
+      "detail": {
+        "status": "We couldn’t confirm that you were signed out. Check your connection. You’re still signed in on this page. Select Sign out again.",
+        "gateText": "Checking your secure sign-in link…",
+        "gateVisible": false,
+        "signedIn": true,
+        "form": true
+      }
+    },
+    {
+      "name": "signout-lost-1440: Sign out again signs out",
+      "pass": true
+    },
+    {
+      "name": "signout-lost-1440: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "lost",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "signout-lost-1440: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "signout-lost-390: a lost sign-out reply is shown in a visible status",
+      "pass": true,
+      "detail": {
+        "status": "We couldn’t confirm that you were signed out. Check your connection. You’re still signed in on this page. Select Sign out again.",
+        "gateText": "Checking your secure sign-in link…",
+        "gateVisible": false,
+        "signedIn": true,
+        "form": true
+      }
+    },
+    {
+      "name": "signout-lost-390: the lost sign-out message has no raw error text or em dash",
+      "pass": true,
+      "detail": {
+        "status": "We couldn’t confirm that you were signed out. Check your connection. You’re still signed in on this page. Select Sign out again.",
+        "gateText": "Checking your secure sign-in link…",
+        "gateVisible": false,
+        "signedIn": true,
+        "form": true
+      }
+    },
+    {
+      "name": "signout-lost-390: the page stays signed in with the answers",
+      "pass": true,
+      "detail": {
+        "status": "We couldn’t confirm that you were signed out. Check your connection. You’re still signed in on this page. Select Sign out again.",
+        "gateText": "Checking your secure sign-in link…",
+        "gateVisible": false,
+        "signedIn": true,
+        "form": true
+      }
+    },
+    {
+      "name": "signout-lost-390: Sign out again signs out",
+      "pass": true
+    },
+    {
+      "name": "signout-lost-390: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "lost",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "signout-lost-390: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "reject-link-1440: a readable 4xx with no message says the request was not accepted",
+      "pass": true,
+      "detail": "Machines & Cloud didn’t accept that request. Check your details and try again."
+    },
+    {
+      "name": "reject-link-1440: the rejection copy has no raw error text or em dash, and the owner's input stays",
+      "pass": true,
+      "detail": {
+        "text": "Machines & Cloud didn’t accept that request. Check your details and try again.",
+        "formVisible": true
+      }
+    },
+    {
+      "name": "reject-link-1440: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "rejected",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "reject-link-1440: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "reject-autosave-1440: a readable 4xx with no message says the request was not accepted",
+      "pass": true,
+      "detail": "Machines & Cloud didn’t accept that request. Check your details and try again. Your changes are still on this page."
+    },
+    {
+      "name": "reject-autosave-1440: the rejection copy has no raw error text or em dash, and the owner's input stays",
+      "pass": true,
+      "detail": {
+        "text": "Machines & Cloud didn’t accept that request. Check your details and try again. Your changes are still on this page.",
+        "formVisible": true
+      }
+    },
+    {
+      "name": "reject-autosave-1440: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "rejected",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "reject-autosave-1440: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "reject-link-390: a readable 4xx with no message says the request was not accepted",
+      "pass": true,
+      "detail": "Machines & Cloud didn’t accept that request. Check your details and try again."
+    },
+    {
+      "name": "reject-link-390: the rejection copy has no raw error text or em dash, and the owner's input stays",
+      "pass": true,
+      "detail": {
+        "text": "Machines & Cloud didn’t accept that request. Check your details and try again.",
+        "formVisible": true
+      }
+    },
+    {
+      "name": "reject-link-390: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "rejected",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "reject-link-390: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "reject-autosave-390: a readable 4xx with no message says the request was not accepted",
+      "pass": true,
+      "detail": "Machines & Cloud didn’t accept that request. Check your details and try again. Your changes are still on this page."
+    },
+    {
+      "name": "reject-autosave-390: the rejection copy has no raw error text or em dash, and the owner's input stays",
+      "pass": true,
+      "detail": {
+        "text": "Machines & Cloud didn’t accept that request. Check your details and try again. Your changes are still on this page.",
+        "formVisible": true
+      }
+    },
+    {
+      "name": "reject-autosave-390: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "rejected",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "reject-autosave-390: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "signin-copy-1440: without mode=signin the email step keeps the new-signup copy",
+      "pass": true,
+      "detail": {
+        "docTitle": "Set up your front desk | Machines & Cloud",
+        "topbar": "Set up your front desk",
+        "title": "Your business starts here.",
+        "intro": "Enter your email to open your secure setup. No password to remember.",
+        "button": "Send my sign-in link",
+        "gate": "Your business starts here.\n\nEnter your email to open your secure setup. No password to remember.\n\nEmail address\nSend my sign-in link\n\nYour setup stays with your account. Leave and pick up where you left off.",
+        "plan": "growth",
+        "formVisible": true
+      }
+    },
+    {
+      "name": "signin-copy-1440: ?plan= and an unknown mode leave the gate unchanged",
+      "pass": true,
+      "detail": {
+        "?plan=starter": "Your business starts here.",
+        "?plan=growth": "Your business starts here.",
+        "?mode=other": "Your business starts here."
+      }
+    },
+    {
+      "name": "signin-copy-1440: ?plan= still selects the plan",
+      "pass": true,
+      "detail": {
+        "starter": "starter",
+        "growth": "growth",
+        "none": "growth"
+      }
+    },
+    {
+      "name": "signin-copy-1440: mode=signin (and the site's existing signin=1) shows returning-owner copy on the email step",
+      "pass": true,
+      "detail": {
+        "?mode=signin": [
+          "Sign in to your workspace",
+          "Email me a sign-in link"
+        ],
+        "?mode=signin&plan=starter": [
+          "Sign in to your workspace",
+          "Email me a sign-in link"
+        ],
+        "?plan=starter&mode=signin": [
+          "Sign in to your workspace",
+          "Email me a sign-in link"
+        ],
+        "?plan=pro&mode=signin": [
+          "Sign in to your workspace",
+          "Email me a sign-in link"
+        ],
+        "?signin=1": [
+          "Sign in to your workspace",
+          "Email me a sign-in link"
+        ],
+        "?plan=starter&signin=1": [
+          "Sign in to your workspace",
+          "Email me a sign-in link"
+        ]
+      }
+    },
+    {
+      "name": "signin-copy-1440: mode=signin intro is about the existing workspace and claims no new account or save",
+      "pass": true,
+      "detail": "Enter the email you use for Machines & Cloud. We’ll send a secure link that opens your workspace, or your setup if you haven’t finished it. No password to remember."
+    },
+    {
+      "name": "signin-copy-1440: sign-in mode names sign-in in the top bar and the page title",
+      "pass": true,
+      "detail": {
+        "?mode=signin": [
+          "Sign in to your workspace | Machines & Cloud",
+          "Sign in to your workspace"
+        ],
+        "?mode=signin&plan=starter": [
+          "Sign in to your workspace | Machines & Cloud",
+          "Sign in to your workspace"
+        ],
+        "?plan=starter&mode=signin": [
+          "Sign in to your workspace | Machines & Cloud",
+          "Sign in to your workspace"
+        ],
+        "?plan=pro&mode=signin": [
+          "Sign in to your workspace | Machines & Cloud",
+          "Sign in to your workspace"
+        ],
+        "?signin=1": [
+          "Sign in to your workspace | Machines & Cloud",
+          "Sign in to your workspace"
+        ],
+        "?plan=starter&signin=1": [
+          "Sign in to your workspace | Machines & Cloud",
+          "Sign in to your workspace"
+        ]
+      }
+    },
+    {
+      "name": "signin-copy-1440: without sign-in mode the top bar and page title keep the setup wording",
+      "pass": true,
+      "detail": {
+        "(none)": [
+          "Set up your front desk | Machines & Cloud",
+          "Set up your front desk"
+        ],
+        "?mode=other": [
+          "Set up your front desk | Machines & Cloud",
+          "Set up your front desk"
+        ]
+      }
+    },
+    {
+      "name": "signin-copy-1440: mode=signin copy has no em dash",
+      "pass": true,
+      "detail": "Sign in to your workspace\n\nEnter the email you use for Machines & Cloud. We’ll send a secure link that opens your workspace, or your setup if you haven’t finished it. No password to remember.\n\nEmail address\nEmail me a sign-in link\n\nYour setup stays with your account. Leave and pick up where you left off."
+    },
+    {
+      "name": "signin-copy-1440: mode=signin keeps ?plan= selection",
+      "pass": true,
+      "detail": [
+        "growth",
+        "starter",
+        "starter",
+        "growth",
+        "growth",
+        "starter"
+      ]
+    },
+    {
+      "name": "signin-copy-1440: mode=signin sends the same request as the plain page",
+      "pass": true,
+      "detail": [
+        {
+          "action": "request_link",
+          "email": "qa-followup-signin-1440@example.test",
+          "plan": "starter"
+        }
+      ]
+    },
+    {
+      "name": "signin-copy-1440: mode=signin reaches the same confirmation",
+      "pass": true,
+      "detail": "Your test link is ready"
+    },
+    {
+      "name": "signin-copy-1440: Use a different email returns to the sign-in copy and action",
+      "pass": true,
+      "detail": {
+        "docTitle": "Sign in to your workspace | Machines & Cloud",
+        "topbar": "Sign in to your workspace",
+        "title": "Sign in to your workspace",
+        "intro": "Enter the email you use for Machines & Cloud. We’ll send a secure link that opens your workspace, or your setup if you haven’t finished it. No password to remember.",
+        "button": "Email me a sign-in link",
+        "gate": "Sign in to your workspace\n\nEnter the email you use for Machines & Cloud. We’ll send a secure link that opens your workspace, or your setup if you haven’t finished it. No password to remember.\n\nEmail address\nEmail me a sign-in link\n\nYour setup stays with your account. Leave and pick up where you left off.",
+        "plan": "starter",
+        "formVisible": true
+      }
+    },
+    {
+      "name": "signin-copy-1440: the link from mode=signin opens the same setup",
+      "pass": true
+    },
+    {
+      "name": "signin-copy-1440: once the setup form opens, the top bar and page title say setup again",
+      "pass": true,
+      "detail": [
+        "Set up your front desk | Machines & Cloud",
+        "Set up your front desk"
+      ]
+    },
+    {
+      "name": "signin-copy-1440: after sign-out in sign-in mode, the gate is named sign-in again",
+      "pass": true,
+      "detail": [
+        "Sign in to your workspace | Machines & Cloud",
+        "Sign in to your workspace",
+        "Sign in to your workspace"
+      ]
+    },
+    {
+      "name": "signin-copy-1440: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "",
+          false
+        ],
+        [
+          "?plan=starter",
+          false
+        ],
+        [
+          "?plan=growth",
+          false
+        ],
+        [
+          "?mode=other",
+          false
+        ],
+        [
+          "?mode=signin",
+          false
+        ],
+        [
+          "?mode=signin&plan=starter",
+          false
+        ],
+        [
+          "?plan=starter&mode=signin",
+          false
+        ],
+        [
+          "?plan=pro&mode=signin",
+          false
+        ],
+        [
+          "?signin=1",
+          false
+        ],
+        [
+          "?plan=starter&signin=1",
+          false
+        ],
+        [
+          "confirmation",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "signin-copy-1440: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "signin-copy-390: without mode=signin the email step keeps the new-signup copy",
+      "pass": true,
+      "detail": {
+        "docTitle": "Set up your front desk | Machines & Cloud",
+        "topbar": "Set up your front desk",
+        "title": "Your business starts here.",
+        "intro": "Enter your email to open your secure setup. No password to remember.",
+        "button": "Send my sign-in link",
+        "gate": "Your business starts here.\n\nEnter your email to open your secure setup. No password to remember.\n\nEmail address\nSend my sign-in link\n\nYour setup stays with your account. Leave and pick up where you left off.",
+        "plan": "growth",
+        "formVisible": true
+      }
+    },
+    {
+      "name": "signin-copy-390: ?plan= and an unknown mode leave the gate unchanged",
+      "pass": true,
+      "detail": {
+        "?plan=starter": "Your business starts here.",
+        "?plan=growth": "Your business starts here.",
+        "?mode=other": "Your business starts here."
+      }
+    },
+    {
+      "name": "signin-copy-390: ?plan= still selects the plan",
+      "pass": true,
+      "detail": {
+        "starter": "starter",
+        "growth": "growth",
+        "none": "growth"
+      }
+    },
+    {
+      "name": "signin-copy-390: mode=signin (and the site's existing signin=1) shows returning-owner copy on the email step",
+      "pass": true,
+      "detail": {
+        "?mode=signin": [
+          "Sign in to your workspace",
+          "Email me a sign-in link"
+        ],
+        "?mode=signin&plan=starter": [
+          "Sign in to your workspace",
+          "Email me a sign-in link"
+        ],
+        "?plan=starter&mode=signin": [
+          "Sign in to your workspace",
+          "Email me a sign-in link"
+        ],
+        "?plan=pro&mode=signin": [
+          "Sign in to your workspace",
+          "Email me a sign-in link"
+        ],
+        "?signin=1": [
+          "Sign in to your workspace",
+          "Email me a sign-in link"
+        ],
+        "?plan=starter&signin=1": [
+          "Sign in to your workspace",
+          "Email me a sign-in link"
+        ]
+      }
+    },
+    {
+      "name": "signin-copy-390: mode=signin intro is about the existing workspace and claims no new account or save",
+      "pass": true,
+      "detail": "Enter the email you use for Machines & Cloud. We’ll send a secure link that opens your workspace, or your setup if you haven’t finished it. No password to remember."
+    },
+    {
+      "name": "signin-copy-390: sign-in mode names sign-in in the top bar and the page title",
+      "pass": true,
+      "detail": {
+        "?mode=signin": [
+          "Sign in to your workspace | Machines & Cloud",
+          "Sign in to your workspace"
+        ],
+        "?mode=signin&plan=starter": [
+          "Sign in to your workspace | Machines & Cloud",
+          "Sign in to your workspace"
+        ],
+        "?plan=starter&mode=signin": [
+          "Sign in to your workspace | Machines & Cloud",
+          "Sign in to your workspace"
+        ],
+        "?plan=pro&mode=signin": [
+          "Sign in to your workspace | Machines & Cloud",
+          "Sign in to your workspace"
+        ],
+        "?signin=1": [
+          "Sign in to your workspace | Machines & Cloud",
+          "Sign in to your workspace"
+        ],
+        "?plan=starter&signin=1": [
+          "Sign in to your workspace | Machines & Cloud",
+          "Sign in to your workspace"
+        ]
+      }
+    },
+    {
+      "name": "signin-copy-390: without sign-in mode the top bar and page title keep the setup wording",
+      "pass": true,
+      "detail": {
+        "(none)": [
+          "Set up your front desk | Machines & Cloud",
+          "Set up your front desk"
+        ],
+        "?mode=other": [
+          "Set up your front desk | Machines & Cloud",
+          "Set up your front desk"
+        ]
+      }
+    },
+    {
+      "name": "signin-copy-390: mode=signin copy has no em dash",
+      "pass": true,
+      "detail": "Sign in to your workspace\n\nEnter the email you use for Machines & Cloud. We’ll send a secure link that opens your workspace, or your setup if you haven’t finished it. No password to remember.\n\nEmail address\nEmail me a sign-in link\n\nYour setup stays with your account. Leave and pick up where you left off."
+    },
+    {
+      "name": "signin-copy-390: mode=signin keeps ?plan= selection",
+      "pass": true,
+      "detail": [
+        "growth",
+        "starter",
+        "starter",
+        "growth",
+        "growth",
+        "starter"
+      ]
+    },
+    {
+      "name": "signin-copy-390: mode=signin sends the same request as the plain page",
+      "pass": true,
+      "detail": [
+        {
+          "action": "request_link",
+          "email": "qa-followup-signin-390@example.test",
+          "plan": "starter"
+        }
+      ]
+    },
+    {
+      "name": "signin-copy-390: mode=signin reaches the same confirmation",
+      "pass": true,
+      "detail": "Your test link is ready"
+    },
+    {
+      "name": "signin-copy-390: Use a different email returns to the sign-in copy and action",
+      "pass": true,
+      "detail": {
+        "docTitle": "Sign in to your workspace | Machines & Cloud",
+        "topbar": "Sign in to your workspace",
+        "title": "Sign in to your workspace",
+        "intro": "Enter the email you use for Machines & Cloud. We’ll send a secure link that opens your workspace, or your setup if you haven’t finished it. No password to remember.",
+        "button": "Email me a sign-in link",
+        "gate": "Sign in to your workspace\n\nEnter the email you use for Machines & Cloud. We’ll send a secure link that opens your workspace, or your setup if you haven’t finished it. No password to remember.\n\nEmail address\nEmail me a sign-in link\n\nYour setup stays with your account. Leave and pick up where you left off.",
+        "plan": "starter",
+        "formVisible": true
+      }
+    },
+    {
+      "name": "signin-copy-390: the link from mode=signin opens the same setup",
+      "pass": true
+    },
+    {
+      "name": "signin-copy-390: once the setup form opens, the top bar and page title say setup again",
+      "pass": true,
+      "detail": [
+        "Set up your front desk | Machines & Cloud",
+        "Set up your front desk"
+      ]
+    },
+    {
+      "name": "signin-copy-390: after sign-out in sign-in mode, the gate is named sign-in again",
+      "pass": true,
+      "detail": [
+        "Sign in to your workspace | Machines & Cloud",
+        "Sign in to your workspace",
+        "Sign in to your workspace"
+      ]
+    },
+    {
+      "name": "signin-copy-390: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "",
+          false
+        ],
+        [
+          "?plan=starter",
+          false
+        ],
+        [
+          "?plan=growth",
+          false
+        ],
+        [
+          "?mode=other",
+          false
+        ],
+        [
+          "?mode=signin",
+          false
+        ],
+        [
+          "?mode=signin&plan=starter",
+          false
+        ],
+        [
+          "?plan=starter&mode=signin",
+          false
+        ],
+        [
+          "?plan=pro&mode=signin",
+          false
+        ],
+        [
+          "?signin=1",
+          false
+        ],
+        [
+          "?plan=starter&signin=1",
+          false
+        ],
+        [
+          "confirmation",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "signin-copy-390: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "No browser request left the fixture origin",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "No forbidden API route was requested",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "No physical server transport was attempted",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Exactly one onboard.js was served, and it is the pinned source",
+      "pass": true,
+      "detail": {
+        "served": [
+          "4eb76ed91e2cd5f93e3de4b2828f340fd3f65a8806196af5e7fc9cd148bbf3ab"
+        ],
+        "expected": null
+      }
+    },
+    {
+      "name": "Source stayed stable throughout the check",
+      "pass": true
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "own-late-commit-1440",
+      "kind": "own-late-commit",
+      "width": 1440,
+      "events": [
+        "held PUT revision 0; reply lost",
+        "held PUT committed late with 200"
+      ],
+      "puts": [
+        {
+          "revision": 0,
+          "name": "Late Owner",
+          "phone": "",
+          "status": "held",
+          "lateStatus": 200
+        },
+        {
+          "revision": 0,
+          "name": "Late Owner",
+          "phone": "7135550101",
+          "status": 409
+        },
+        {
+          "revision": 1,
+          "name": "Late Owner",
+          "phone": "7135550101",
+          "status": 200
+        },
+        {
+          "revision": 2,
+          "name": "Late Owner Two",
+          "phone": "7135550101",
+          "status": 200
+        }
+      ],
+      "linkBodies": [
+        {
+          "action": "request_link",
+          "email": "qa-followup-own-late-commit-1440@example.test",
+          "plan": "starter"
+        }
+      ],
+      "overflow": [
+        [
+          "after-next",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "holdPut": false,
+      "lostStatus": "We couldn’t confirm whether your changes were saved. Check your connection. They’re still on this page.",
+      "getHooks": [],
+      "nextStatus": "Saved. You can leave and continue later.",
+      "after": [
+        {
+          "revision": 0,
+          "name": "Late Owner",
+          "phone": "7135550101",
+          "status": 409
+        },
+        {
+          "revision": 1,
+          "name": "Late Owner",
+          "phone": "7135550101",
+          "status": 200
+        }
+      ],
+      "stored": {
+        "revision": 2,
+        "name": "Late Owner",
+        "phone": "7135550101"
+      },
+      "page": {
+        "name": "Late Owner",
+        "phone": "7135550101"
+      },
+      "thirdStatus": "Saved. You can leave and continue later.",
+      "reloaded": {
+        "name": "Late Owner Two",
+        "phone": "7135550101"
+      }
+    },
+    {
+      "id": "other-tab-after-lost-1440",
+      "kind": "other-tab-after-lost",
+      "width": 1440,
+      "events": [
+        "PUT revision 0 lost before the handler ran"
+      ],
+      "puts": [
+        {
+          "revision": 0,
+          "name": "Late Owner",
+          "phone": "",
+          "status": "lost-before"
+        },
+        {
+          "revision": 0,
+          "name": "Late Owner",
+          "phone": "7135550101",
+          "status": 409
+        }
+      ],
+      "linkBodies": [
+        {
+          "action": "request_link",
+          "email": "qa-followup-other-tab-after-lost-1440@example.test",
+          "plan": "starter"
+        }
+      ],
+      "overflow": [
+        [
+          "after-next",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "dropPut": false,
+      "lostStatus": "We couldn’t confirm whether your changes were saved. Check your connection. They’re still on this page.",
+      "otherTab": 200,
+      "nextStatus": "Your saved answers changed in another tab. Reload to continue with the latest version. Your changes are still on this page.",
+      "after": [
+        {
+          "revision": 0,
+          "name": "Late Owner",
+          "phone": "7135550101",
+          "status": 409
+        }
+      ],
+      "stored": {
+        "revision": 1,
+        "name": "Other Tab Owner"
+      },
+      "page": {
+        "name": "Late Owner",
+        "phone": "7135550101"
+      }
+    },
+    {
+      "id": "own-late-then-other-tab-1440",
+      "kind": "own-late-then-other-tab",
+      "width": 1440,
+      "events": [
+        "held PUT revision 0; reply lost",
+        "held PUT committed late with 200"
+      ],
+      "puts": [
+        {
+          "revision": 0,
+          "name": "Late Owner",
+          "phone": "",
+          "status": "held",
+          "lateStatus": 200
+        },
+        {
+          "revision": 0,
+          "name": "Late Owner",
+          "phone": "7135550101",
+          "status": 409
+        }
+      ],
+      "linkBodies": [
+        {
+          "action": "request_link",
+          "email": "qa-followup-own-late-then-other-tab-1440@example.test",
+          "plan": "starter"
+        }
+      ],
+      "overflow": [
+        [
+          "after-next",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "holdPut": false,
+      "lostStatus": "We couldn’t confirm whether your changes were saved. Check your connection. They’re still on this page.",
+      "getHooks": [],
+      "otherTab": 200,
+      "nextStatus": "Your saved answers changed in another tab. Reload to continue with the latest version. Your changes are still on this page.",
+      "after": [
+        {
+          "revision": 0,
+          "name": "Late Owner",
+          "phone": "7135550101",
+          "status": 409
+        }
+      ],
+      "stored": {
+        "revision": 2,
+        "name": "Other Tab Owner",
+        "phone": ""
+      },
+      "page": {
+        "name": "Late Owner",
+        "phone": "7135550101"
+      }
+    },
+    {
+      "id": "other-tab-before-resend-1440",
+      "kind": "other-tab-before-resend",
+      "width": 1440,
+      "events": [
+        "held PUT revision 0; reply lost",
+        "held PUT committed late with 200"
+      ],
+      "puts": [
+        {
+          "revision": 0,
+          "name": "Late Owner",
+          "phone": "",
+          "status": "held",
+          "lateStatus": 200
+        },
+        {
+          "revision": 0,
+          "name": "Late Owner",
+          "phone": "7135550101",
+          "status": 409
+        },
+        {
+          "revision": 1,
+          "name": "Late Owner",
+          "phone": "7135550101",
+          "status": 409
+        }
+      ],
+      "linkBodies": [
+        {
+          "action": "request_link",
+          "email": "qa-followup-other-tab-before-resend-1440@example.test",
+          "plan": "starter"
+        }
+      ],
+      "overflow": [
+        [
+          "after-next",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "holdPut": false,
+      "lostStatus": "We couldn’t confirm whether your changes were saved. Check your connection. They’re still on this page.",
+      "getHooks": [],
+      "otherTab": 200,
+      "nextStatus": "Your saved answers changed in another tab. Reload to continue with the latest version. Your changes are still on this page.",
+      "after": [
+        {
+          "revision": 0,
+          "name": "Late Owner",
+          "phone": "7135550101",
+          "status": 409
+        },
+        {
+          "revision": 1,
+          "name": "Late Owner",
+          "phone": "7135550101",
+          "status": 409
+        }
+      ],
+      "stored": {
+        "revision": 2,
+        "name": "Other Tab Owner",
+        "phone": ""
+      },
+      "page": {
+        "name": "Late Owner",
+        "phone": "7135550101"
+      }
+    },
+    {
+      "id": "own-late-commit-390",
+      "kind": "own-late-commit",
+      "width": 390,
+      "events": [
+        "held PUT revision 0; reply lost",
+        "held PUT committed late with 200"
+      ],
+      "puts": [
+        {
+          "revision": 0,
+          "name": "Late Owner",
+          "phone": "",
+          "status": "held",
+          "lateStatus": 200
+        },
+        {
+          "revision": 0,
+          "name": "Late Owner",
+          "phone": "7135550101",
+          "status": 409
+        },
+        {
+          "revision": 1,
+          "name": "Late Owner",
+          "phone": "7135550101",
+          "status": 200
+        },
+        {
+          "revision": 2,
+          "name": "Late Owner Two",
+          "phone": "7135550101",
+          "status": 200
+        }
+      ],
+      "linkBodies": [
+        {
+          "action": "request_link",
+          "email": "qa-followup-own-late-commit-390@example.test",
+          "plan": "starter"
+        }
+      ],
+      "overflow": [
+        [
+          "after-next",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "holdPut": false,
+      "lostStatus": "We couldn’t confirm whether your changes were saved. Check your connection. They’re still on this page.",
+      "getHooks": [],
+      "nextStatus": "Saved. You can leave and continue later.",
+      "after": [
+        {
+          "revision": 0,
+          "name": "Late Owner",
+          "phone": "7135550101",
+          "status": 409
+        },
+        {
+          "revision": 1,
+          "name": "Late Owner",
+          "phone": "7135550101",
+          "status": 200
+        }
+      ],
+      "stored": {
+        "revision": 2,
+        "name": "Late Owner",
+        "phone": "7135550101"
+      },
+      "page": {
+        "name": "Late Owner",
+        "phone": "7135550101"
+      },
+      "thirdStatus": "Saved. You can leave and continue later.",
+      "reloaded": {
+        "name": "Late Owner Two",
+        "phone": "7135550101"
+      }
+    },
+    {
+      "id": "other-tab-after-lost-390",
+      "kind": "other-tab-after-lost",
+      "width": 390,
+      "events": [
+        "PUT revision 0 lost before the handler ran"
+      ],
+      "puts": [
+        {
+          "revision": 0,
+          "name": "Late Owner",
+          "phone": "",
+          "status": "lost-before"
+        },
+        {
+          "revision": 0,
+          "name": "Late Owner",
+          "phone": "7135550101",
+          "status": 409
+        }
+      ],
+      "linkBodies": [
+        {
+          "action": "request_link",
+          "email": "qa-followup-other-tab-after-lost-390@example.test",
+          "plan": "starter"
+        }
+      ],
+      "overflow": [
+        [
+          "after-next",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "dropPut": false,
+      "lostStatus": "We couldn’t confirm whether your changes were saved. Check your connection. They’re still on this page.",
+      "otherTab": 200,
+      "nextStatus": "Your saved answers changed in another tab. Reload to continue with the latest version. Your changes are still on this page.",
+      "after": [
+        {
+          "revision": 0,
+          "name": "Late Owner",
+          "phone": "7135550101",
+          "status": 409
+        }
+      ],
+      "stored": {
+        "revision": 1,
+        "name": "Other Tab Owner"
+      },
+      "page": {
+        "name": "Late Owner",
+        "phone": "7135550101"
+      }
+    },
+    {
+      "id": "own-late-then-other-tab-390",
+      "kind": "own-late-then-other-tab",
+      "width": 390,
+      "events": [
+        "held PUT revision 0; reply lost",
+        "held PUT committed late with 200"
+      ],
+      "puts": [
+        {
+          "revision": 0,
+          "name": "Late Owner",
+          "phone": "",
+          "status": "held",
+          "lateStatus": 200
+        },
+        {
+          "revision": 0,
+          "name": "Late Owner",
+          "phone": "7135550101",
+          "status": 409
+        }
+      ],
+      "linkBodies": [
+        {
+          "action": "request_link",
+          "email": "qa-followup-own-late-then-other-tab-390@example.test",
+          "plan": "starter"
+        }
+      ],
+      "overflow": [
+        [
+          "after-next",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "holdPut": false,
+      "lostStatus": "We couldn’t confirm whether your changes were saved. Check your connection. They’re still on this page.",
+      "getHooks": [],
+      "otherTab": 200,
+      "nextStatus": "Your saved answers changed in another tab. Reload to continue with the latest version. Your changes are still on this page.",
+      "after": [
+        {
+          "revision": 0,
+          "name": "Late Owner",
+          "phone": "7135550101",
+          "status": 409
+        }
+      ],
+      "stored": {
+        "revision": 2,
+        "name": "Other Tab Owner",
+        "phone": ""
+      },
+      "page": {
+        "name": "Late Owner",
+        "phone": "7135550101"
+      }
+    },
+    {
+      "id": "other-tab-before-resend-390",
+      "kind": "other-tab-before-resend",
+      "width": 390,
+      "events": [
+        "held PUT revision 0; reply lost",
+        "held PUT committed late with 200"
+      ],
+      "puts": [
+        {
+          "revision": 0,
+          "name": "Late Owner",
+          "phone": "",
+          "status": "held",
+          "lateStatus": 200
+        },
+        {
+          "revision": 0,
+          "name": "Late Owner",
+          "phone": "7135550101",
+          "status": 409
+        },
+        {
+          "revision": 1,
+          "name": "Late Owner",
+          "phone": "7135550101",
+          "status": 409
+        }
+      ],
+      "linkBodies": [
+        {
+          "action": "request_link",
+          "email": "qa-followup-other-tab-before-resend-390@example.test",
+          "plan": "starter"
+        }
+      ],
+      "overflow": [
+        [
+          "after-next",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "holdPut": false,
+      "lostStatus": "We couldn’t confirm whether your changes were saved. Check your connection. They’re still on this page.",
+      "getHooks": [],
+      "otherTab": 200,
+      "nextStatus": "Your saved answers changed in another tab. Reload to continue with the latest version. Your changes are still on this page.",
+      "after": [
+        {
+          "revision": 0,
+          "name": "Late Owner",
+          "phone": "7135550101",
+          "status": 409
+        },
+        {
+          "revision": 1,
+          "name": "Late Owner",
+          "phone": "7135550101",
+          "status": 409
+        }
+      ],
+      "stored": {
+        "revision": 2,
+        "name": "Other Tab Owner",
+        "phone": ""
+      },
+      "page": {
+        "name": "Late Owner",
+        "phone": "7135550101"
+      }
+    },
+    {
+      "id": "signout-lost-1440",
+      "kind": "signout-lost",
+      "width": 1440,
+      "events": [
+        "sign_out lost before the handler ran"
+      ],
+      "puts": [
+        {
+          "revision": 0,
+          "name": "Sign Out Owner",
+          "phone": "",
+          "status": 200
+        }
+      ],
+      "linkBodies": [
+        {
+          "action": "request_link",
+          "email": "qa-followup-signout-1440@example.test",
+          "plan": "starter"
+        }
+      ],
+      "overflow": [
+        [
+          "lost",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "dropSignOut": false,
+      "lost": {
+        "status": "We couldn’t confirm that you were signed out. Check your connection. You’re still signed in on this page. Select Sign out again.",
+        "gateText": "Checking your secure sign-in link…",
+        "gateVisible": false,
+        "signedIn": true,
+        "form": true
+      }
+    },
+    {
+      "id": "signout-lost-390",
+      "kind": "signout-lost",
+      "width": 390,
+      "events": [
+        "sign_out lost before the handler ran"
+      ],
+      "puts": [
+        {
+          "revision": 0,
+          "name": "Sign Out Owner",
+          "phone": "",
+          "status": 200
+        }
+      ],
+      "linkBodies": [
+        {
+          "action": "request_link",
+          "email": "qa-followup-signout-390@example.test",
+          "plan": "starter"
+        }
+      ],
+      "overflow": [
+        [
+          "lost",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "dropSignOut": false,
+      "lost": {
+        "status": "We couldn’t confirm that you were signed out. Check your connection. You’re still signed in on this page. Select Sign out again.",
+        "gateText": "Checking your secure sign-in link…",
+        "gateVisible": false,
+        "signedIn": true,
+        "form": true
+      }
+    },
+    {
+      "id": "reject-link-1440",
+      "kind": "reject-link",
+      "width": 1440,
+      "events": [
+        "readable 400 with no message for POST request_link"
+      ],
+      "puts": [],
+      "linkBodies": [
+        {
+          "action": "request_link",
+          "email": "qa-followup-reject-1440@example.test",
+          "plan": "growth"
+        }
+      ],
+      "overflow": [
+        [
+          "rejected",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "reject": null,
+      "text": "Machines & Cloud didn’t accept that request. Check your details and try again.",
+      "formVisible": true
+    },
+    {
+      "id": "reject-autosave-1440",
+      "kind": "reject-autosave",
+      "width": 1440,
+      "events": [
+        "readable 400 with no message for PUT /api/access"
+      ],
+      "puts": [],
+      "linkBodies": [
+        {
+          "action": "request_link",
+          "email": "qa-followup-reject-1440@example.test",
+          "plan": "starter"
+        }
+      ],
+      "overflow": [
+        [
+          "rejected",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "reject": null,
+      "text": "Machines & Cloud didn’t accept that request. Check your details and try again. Your changes are still on this page.",
+      "formVisible": true
+    },
+    {
+      "id": "reject-link-390",
+      "kind": "reject-link",
+      "width": 390,
+      "events": [
+        "readable 400 with no message for POST request_link"
+      ],
+      "puts": [],
+      "linkBodies": [
+        {
+          "action": "request_link",
+          "email": "qa-followup-reject-390@example.test",
+          "plan": "growth"
+        }
+      ],
+      "overflow": [
+        [
+          "rejected",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "reject": null,
+      "text": "Machines & Cloud didn’t accept that request. Check your details and try again.",
+      "formVisible": true
+    },
+    {
+      "id": "reject-autosave-390",
+      "kind": "reject-autosave",
+      "width": 390,
+      "events": [
+        "readable 400 with no message for PUT /api/access"
+      ],
+      "puts": [],
+      "linkBodies": [
+        {
+          "action": "request_link",
+          "email": "qa-followup-reject-390@example.test",
+          "plan": "starter"
+        }
+      ],
+      "overflow": [
+        [
+          "rejected",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "reject": null,
+      "text": "Machines & Cloud didn’t accept that request. Check your details and try again. Your changes are still on this page.",
+      "formVisible": true
+    },
+    {
+      "id": "signin-copy-1440",
+      "kind": "signin-copy",
+      "width": 1440,
+      "events": [],
+      "puts": [],
+      "linkBodies": [
+        {
+          "action": "request_link",
+          "email": "qa-followup-signin-1440@example.test",
+          "plan": "starter"
+        }
+      ],
+      "overflow": [
+        [
+          "",
+          false
+        ],
+        [
+          "?plan=starter",
+          false
+        ],
+        [
+          "?plan=growth",
+          false
+        ],
+        [
+          "?mode=other",
+          false
+        ],
+        [
+          "?mode=signin",
+          false
+        ],
+        [
+          "?mode=signin&plan=starter",
+          false
+        ],
+        [
+          "?plan=starter&mode=signin",
+          false
+        ],
+        [
+          "?plan=pro&mode=signin",
+          false
+        ],
+        [
+          "?signin=1",
+          false
+        ],
+        [
+          "?plan=starter&signin=1",
+          false
+        ],
+        [
+          "confirmation",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "gates": {
+        "(none)": {
+          "docTitle": "Set up your front desk | Machines & Cloud",
+          "topbar": "Set up your front desk",
+          "title": "Your business starts here.",
+          "intro": "Enter your email to open your secure setup. No password to remember.",
+          "button": "Send my sign-in link",
+          "gate": "Your business starts here.\n\nEnter your email to open your secure setup. No password to remember.\n\nEmail address\nSend my sign-in link\n\nYour setup stays with your account. Leave and pick up where you left off.",
+          "plan": "growth",
+          "formVisible": true
+        },
+        "?plan=starter": {
+          "docTitle": "Set up your front desk | Machines & Cloud",
+          "topbar": "Set up your front desk",
+          "title": "Your business starts here.",
+          "intro": "Enter your email to open your secure setup. No password to remember.",
+          "button": "Send my sign-in link",
+          "gate": "Your business starts here.\n\nEnter your email to open your secure setup. No password to remember.\n\nEmail address\nSend my sign-in link\n\nYour setup stays with your account. Leave and pick up where you left off.",
+          "plan": "starter",
+          "formVisible": true
+        },
+        "?plan=growth": {
+          "docTitle": "Set up your front desk | Machines & Cloud",
+          "topbar": "Set up your front desk",
+          "title": "Your business starts here.",
+          "intro": "Enter your email to open your secure setup. No password to remember.",
+          "button": "Send my sign-in link",
+          "gate": "Your business starts here.\n\nEnter your email to open your secure setup. No password to remember.\n\nEmail address\nSend my sign-in link\n\nYour setup stays with your account. Leave and pick up where you left off.",
+          "plan": "growth",
+          "formVisible": true
+        },
+        "?mode=other": {
+          "docTitle": "Set up your front desk | Machines & Cloud",
+          "topbar": "Set up your front desk",
+          "title": "Your business starts here.",
+          "intro": "Enter your email to open your secure setup. No password to remember.",
+          "button": "Send my sign-in link",
+          "gate": "Your business starts here.\n\nEnter your email to open your secure setup. No password to remember.\n\nEmail address\nSend my sign-in link\n\nYour setup stays with your account. Leave and pick up where you left off.",
+          "plan": "growth",
+          "formVisible": true
+        },
+        "?mode=signin": {
+          "docTitle": "Sign in to your workspace | Machines & Cloud",
+          "topbar": "Sign in to your workspace",
+          "title": "Sign in to your workspace",
+          "intro": "Enter the email you use for Machines & Cloud. We’ll send a secure link that opens your workspace, or your setup if you haven’t finished it. No password to remember.",
+          "button": "Email me a sign-in link",
+          "gate": "Sign in to your workspace\n\nEnter the email you use for Machines & Cloud. We’ll send a secure link that opens your workspace, or your setup if you haven’t finished it. No password to remember.\n\nEmail address\nEmail me a sign-in link\n\nYour setup stays with your account. Leave and pick up where you left off.",
+          "plan": "growth",
+          "formVisible": true
+        },
+        "?mode=signin&plan=starter": {
+          "docTitle": "Sign in to your workspace | Machines & Cloud",
+          "topbar": "Sign in to your workspace",
+          "title": "Sign in to your workspace",
+          "intro": "Enter the email you use for Machines & Cloud. We’ll send a secure link that opens your workspace, or your setup if you haven’t finished it. No password to remember.",
+          "button": "Email me a sign-in link",
+          "gate": "Sign in to your workspace\n\nEnter the email you use for Machines & Cloud. We’ll send a secure link that opens your workspace, or your setup if you haven’t finished it. No password to remember.\n\nEmail address\nEmail me a sign-in link\n\nYour setup stays with your account. Leave and pick up where you left off.",
+          "plan": "starter",
+          "formVisible": true
+        },
+        "?plan=starter&mode=signin": {
+          "docTitle": "Sign in to your workspace | Machines & Cloud",
+          "topbar": "Sign in to your workspace",
+          "title": "Sign in to your workspace",
+          "intro": "Enter the email you use for Machines & Cloud. We’ll send a secure link that opens your workspace, or your setup if you haven’t finished it. No password to remember.",
+          "button": "Email me a sign-in link",
+          "gate": "Sign in to your workspace\n\nEnter the email you use for Machines & Cloud. We’ll send a secure link that opens your workspace, or your setup if you haven’t finished it. No password to remember.\n\nEmail address\nEmail me a sign-in link\n\nYour setup stays with your account. Leave and pick up where you left off.",
+          "plan": "starter",
+          "formVisible": true
+        },
+        "?plan=pro&mode=signin": {
+          "docTitle": "Sign in to your workspace | Machines & Cloud",
+          "topbar": "Sign in to your workspace",
+          "title": "Sign in to your workspace",
+          "intro": "Enter the email you use for Machines & Cloud. We’ll send a secure link that opens your workspace, or your setup if you haven’t finished it. No password to remember.",
+          "button": "Email me a sign-in link",
+          "gate": "Sign in to your workspace\n\nEnter the email you use for Machines & Cloud. We’ll send a secure link that opens your workspace, or your setup if you haven’t finished it. No password to remember.\n\nEmail address\nEmail me a sign-in link\n\nYour setup stays with your account. Leave and pick up where you left off.",
+          "plan": "growth",
+          "formVisible": true
+        },
+        "?signin=1": {
+          "docTitle": "Sign in to your workspace | Machines & Cloud",
+          "topbar": "Sign in to your workspace",
+          "title": "Sign in to your workspace",
+          "intro": "Enter the email you use for Machines & Cloud. We’ll send a secure link that opens your workspace, or your setup if you haven’t finished it. No password to remember.",
+          "button": "Email me a sign-in link",
+          "gate": "Sign in to your workspace\n\nEnter the email you use for Machines & Cloud. We’ll send a secure link that opens your workspace, or your setup if you haven’t finished it. No password to remember.\n\nEmail address\nEmail me a sign-in link\n\nYour setup stays with your account. Leave and pick up where you left off.",
+          "plan": "growth",
+          "formVisible": true
+        },
+        "?plan=starter&signin=1": {
+          "docTitle": "Sign in to your workspace | Machines & Cloud",
+          "topbar": "Sign in to your workspace",
+          "title": "Sign in to your workspace",
+          "intro": "Enter the email you use for Machines & Cloud. We’ll send a secure link that opens your workspace, or your setup if you haven’t finished it. No password to remember.",
+          "button": "Email me a sign-in link",
+          "gate": "Sign in to your workspace\n\nEnter the email you use for Machines & Cloud. We’ll send a secure link that opens your workspace, or your setup if you haven’t finished it. No password to remember.\n\nEmail address\nEmail me a sign-in link\n\nYour setup stays with your account. Leave and pick up where you left off.",
+          "plan": "starter",
+          "formVisible": true
+        }
+      },
+      "confirmation": {
+        "docTitle": "Sign in to your workspace | Machines & Cloud",
+        "topbar": "Sign in to your workspace",
+        "title": "Your test link is ready",
+        "intro": "A local test link is ready for",
+        "button": "Email me a sign-in link",
+        "gate": "Your test link is ready\n\nA local test link is ready for\n\nqa-followup-signin-1440@example.test\n\nThis preview uses a local test inbox. No email was sent.\n\nResend in 30s\nUse a different email\n\nCan’t find it? Give it a minute, then check your spam folder.\n\nA link was saved in the local test inbox. No email was sent.\n\nYour setup stays with your account. Leave and pick up where you left off.",
+        "plan": "starter",
+        "formVisible": false
+      },
+      "changed": {
+        "docTitle": "Sign in to your workspace | Machines & Cloud",
+        "topbar": "Sign in to your workspace",
+        "title": "Sign in to your workspace",
+        "intro": "Enter the email you use for Machines & Cloud. We’ll send a secure link that opens your workspace, or your setup if you haven’t finished it. No password to remember.",
+        "button": "Email me a sign-in link",
+        "gate": "Sign in to your workspace\n\nEnter the email you use for Machines & Cloud. We’ll send a secure link that opens your workspace, or your setup if you haven’t finished it. No password to remember.\n\nEmail address\nEmail me a sign-in link\n\nYour setup stays with your account. Leave and pick up where you left off.",
+        "plan": "starter",
+        "formVisible": true
+      },
+      "openedSignedIn": {
+        "docTitle": "Set up your front desk | Machines & Cloud",
+        "topbar": "Set up your front desk",
+        "title": "Sign in to your workspace",
+        "intro": "Enter the email you use for Machines & Cloud. We’ll send a secure link that opens your workspace, or your setup if you haven’t finished it. No password to remember.",
+        "button": "Email me a sign-in link",
+        "gate": "\n          Sign in to your workspaceEnter the email you use for Machines & Cloud. We’ll send a secure link that opens your workspace, or your setup if you haven’t finished it. No password to remember.\n          Email addressEmail me a sign-in link\n          \n            \n            \n            Resend sign-in linkUse a different email\n            Can’t find it? Give it a minute, then check your spam folder.\n          \n          Try opening my account again\n          Your setup stays with your account. Leave and pick up where you left off.\n        ",
+        "plan": "growth",
+        "formVisible": true
+      },
+      "signedOut": {
+        "docTitle": "Sign in to your workspace | Machines & Cloud",
+        "topbar": "Sign in to your workspace",
+        "title": "Sign in to your workspace",
+        "intro": "Enter the email you use for Machines & Cloud. We’ll send a secure link that opens your workspace, or your setup if you haven’t finished it. No password to remember.",
+        "button": "Email me a sign-in link",
+        "gate": "Sign in to your workspace\n\nEnter the email you use for Machines & Cloud. We’ll send a secure link that opens your workspace, or your setup if you haven’t finished it. No password to remember.\n\nEmail address\nEmail me a sign-in link\n\nSigned out. Your saved answers are kept securely.\n\nYour setup stays with your account. Leave and pick up where you left off.",
+        "plan": "growth",
+        "formVisible": true
+      }
+    },
+    {
+      "id": "signin-copy-390",
+      "kind": "signin-copy",
+      "width": 390,
+      "events": [],
+      "puts": [],
+      "linkBodies": [
+        {
+          "action": "request_link",
+          "email": "qa-followup-signin-390@example.test",
+          "plan": "starter"
+        }
+      ],
+      "overflow": [
+        [
+          "",
+          false
+        ],
+        [
+          "?plan=starter",
+          false
+        ],
+        [
+          "?plan=growth",
+          false
+        ],
+        [
+          "?mode=other",
+          false
+        ],
+        [
+          "?mode=signin",
+          false
+        ],
+        [
+          "?mode=signin&plan=starter",
+          false
+        ],
+        [
+          "?plan=starter&mode=signin",
+          false
+        ],
+        [
+          "?plan=pro&mode=signin",
+          false
+        ],
+        [
+          "?signin=1",
+          false
+        ],
+        [
+          "?plan=starter&signin=1",
+          false
+        ],
+        [
+          "confirmation",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "gates": {
+        "(none)": {
+          "docTitle": "Set up your front desk | Machines & Cloud",
+          "topbar": "Set up your front desk",
+          "title": "Your business starts here.",
+          "intro": "Enter your email to open your secure setup. No password to remember.",
+          "button": "Send my sign-in link",
+          "gate": "Your business starts here.\n\nEnter your email to open your secure setup. No password to remember.\n\nEmail address\nSend my sign-in link\n\nYour setup stays with your account. Leave and pick up where you left off.",
+          "plan": "growth",
+          "formVisible": true
+        },
+        "?plan=starter": {
+          "docTitle": "Set up your front desk | Machines & Cloud",
+          "topbar": "Set up your front desk",
+          "title": "Your business starts here.",
+          "intro": "Enter your email to open your secure setup. No password to remember.",
+          "button": "Send my sign-in link",
+          "gate": "Your business starts here.\n\nEnter your email to open your secure setup. No password to remember.\n\nEmail address\nSend my sign-in link\n\nYour setup stays with your account. Leave and pick up where you left off.",
+          "plan": "starter",
+          "formVisible": true
+        },
+        "?plan=growth": {
+          "docTitle": "Set up your front desk | Machines & Cloud",
+          "topbar": "Set up your front desk",
+          "title": "Your business starts here.",
+          "intro": "Enter your email to open your secure setup. No password to remember.",
+          "button": "Send my sign-in link",
+          "gate": "Your business starts here.\n\nEnter your email to open your secure setup. No password to remember.\n\nEmail address\nSend my sign-in link\n\nYour setup stays with your account. Leave and pick up where you left off.",
+          "plan": "growth",
+          "formVisible": true
+        },
+        "?mode=other": {
+          "docTitle": "Set up your front desk | Machines & Cloud",
+          "topbar": "Set up your front desk",
+          "title": "Your business starts here.",
+          "intro": "Enter your email to open your secure setup. No password to remember.",
+          "button": "Send my sign-in link",
+          "gate": "Your business starts here.\n\nEnter your email to open your secure setup. No password to remember.\n\nEmail address\nSend my sign-in link\n\nYour setup stays with your account. Leave and pick up where you left off.",
+          "plan": "growth",
+          "formVisible": true
+        },
+        "?mode=signin": {
+          "docTitle": "Sign in to your workspace | Machines & Cloud",
+          "topbar": "Sign in to your workspace",
+          "title": "Sign in to your workspace",
+          "intro": "Enter the email you use for Machines & Cloud. We’ll send a secure link that opens your workspace, or your setup if you haven’t finished it. No password to remember.",
+          "button": "Email me a sign-in link",
+          "gate": "Sign in to your workspace\n\nEnter the email you use for Machines & Cloud. We’ll send a secure link that opens your workspace, or your setup if you haven’t finished it. No password to remember.\n\nEmail address\nEmail me a sign-in link\n\nYour setup stays with your account. Leave and pick up where you left off.",
+          "plan": "growth",
+          "formVisible": true
+        },
+        "?mode=signin&plan=starter": {
+          "docTitle": "Sign in to your workspace | Machines & Cloud",
+          "topbar": "Sign in to your workspace",
+          "title": "Sign in to your workspace",
+          "intro": "Enter the email you use for Machines & Cloud. We’ll send a secure link that opens your workspace, or your setup if you haven’t finished it. No password to remember.",
+          "button": "Email me a sign-in link",
+          "gate": "Sign in to your workspace\n\nEnter the email you use for Machines & Cloud. We’ll send a secure link that opens your workspace, or your setup if you haven’t finished it. No password to remember.\n\nEmail address\nEmail me a sign-in link\n\nYour setup stays with your account. Leave and pick up where you left off.",
+          "plan": "starter",
+          "formVisible": true
+        },
+        "?plan=starter&mode=signin": {
+          "docTitle": "Sign in to your workspace | Machines & Cloud",
+          "topbar": "Sign in to your workspace",
+          "title": "Sign in to your workspace",
+          "intro": "Enter the email you use for Machines & Cloud. We’ll send a secure link that opens your workspace, or your setup if you haven’t finished it. No password to remember.",
+          "button": "Email me a sign-in link",
+          "gate": "Sign in to your workspace\n\nEnter the email you use for Machines & Cloud. We’ll send a secure link that opens your workspace, or your setup if you haven’t finished it. No password to remember.\n\nEmail address\nEmail me a sign-in link\n\nYour setup stays with your account. Leave and pick up where you left off.",
+          "plan": "starter",
+          "formVisible": true
+        },
+        "?plan=pro&mode=signin": {
+          "docTitle": "Sign in to your workspace | Machines & Cloud",
+          "topbar": "Sign in to your workspace",
+          "title": "Sign in to your workspace",
+          "intro": "Enter the email you use for Machines & Cloud. We’ll send a secure link that opens your workspace, or your setup if you haven’t finished it. No password to remember.",
+          "button": "Email me a sign-in link",
+          "gate": "Sign in to your workspace\n\nEnter the email you use for Machines & Cloud. We’ll send a secure link that opens your workspace, or your setup if you haven’t finished it. No password to remember.\n\nEmail address\nEmail me a sign-in link\n\nYour setup stays with your account. Leave and pick up where you left off.",
+          "plan": "growth",
+          "formVisible": true
+        },
+        "?signin=1": {
+          "docTitle": "Sign in to your workspace | Machines & Cloud",
+          "topbar": "Sign in to your workspace",
+          "title": "Sign in to your workspace",
+          "intro": "Enter the email you use for Machines & Cloud. We’ll send a secure link that opens your workspace, or your setup if you haven’t finished it. No password to remember.",
+          "button": "Email me a sign-in link",
+          "gate": "Sign in to your workspace\n\nEnter the email you use for Machines & Cloud. We’ll send a secure link that opens your workspace, or your setup if you haven’t finished it. No password to remember.\n\nEmail address\nEmail me a sign-in link\n\nYour setup stays with your account. Leave and pick up where you left off.",
+          "plan": "growth",
+          "formVisible": true
+        },
+        "?plan=starter&signin=1": {
+          "docTitle": "Sign in to your workspace | Machines & Cloud",
+          "topbar": "Sign in to your workspace",
+          "title": "Sign in to your workspace",
+          "intro": "Enter the email you use for Machines & Cloud. We’ll send a secure link that opens your workspace, or your setup if you haven’t finished it. No password to remember.",
+          "button": "Email me a sign-in link",
+          "gate": "Sign in to your workspace\n\nEnter the email you use for Machines & Cloud. We’ll send a secure link that opens your workspace, or your setup if you haven’t finished it. No password to remember.\n\nEmail address\nEmail me a sign-in link\n\nYour setup stays with your account. Leave and pick up where you left off.",
+          "plan": "starter",
+          "formVisible": true
+        }
+      },
+      "confirmation": {
+        "docTitle": "Sign in to your workspace | Machines & Cloud",
+        "topbar": "Sign in to your workspace",
+        "title": "Your test link is ready",
+        "intro": "A local test link is ready for",
+        "button": "Email me a sign-in link",
+        "gate": "Your test link is ready\n\nA local test link is ready for\n\nqa-followup-signin-390@example.test\n\nThis preview uses a local test inbox. No email was sent.\n\nResend in 30s\nUse a different email\n\nCan’t find it? Give it a minute, then check your spam folder.\n\nA link was saved in the local test inbox. No email was sent.\n\nYour setup stays with your account. Leave and pick up where you left off.",
+        "plan": "starter",
+        "formVisible": false
+      },
+      "changed": {
+        "docTitle": "Sign in to your workspace | Machines & Cloud",
+        "topbar": "Sign in to your workspace",
+        "title": "Sign in to your workspace",
+        "intro": "Enter the email you use for Machines & Cloud. We’ll send a secure link that opens your workspace, or your setup if you haven’t finished it. No password to remember.",
+        "button": "Email me a sign-in link",
+        "gate": "Sign in to your workspace\n\nEnter the email you use for Machines & Cloud. We’ll send a secure link that opens your workspace, or your setup if you haven’t finished it. No password to remember.\n\nEmail address\nEmail me a sign-in link\n\nYour setup stays with your account. Leave and pick up where you left off.",
+        "plan": "starter",
+        "formVisible": true
+      },
+      "openedSignedIn": {
+        "docTitle": "Set up your front desk | Machines & Cloud",
+        "topbar": "Set up your front desk",
+        "title": "Sign in to your workspace",
+        "intro": "Enter the email you use for Machines & Cloud. We’ll send a secure link that opens your workspace, or your setup if you haven’t finished it. No password to remember.",
+        "button": "Email me a sign-in link",
+        "gate": "\n          Sign in to your workspaceEnter the email you use for Machines & Cloud. We’ll send a secure link that opens your workspace, or your setup if you haven’t finished it. No password to remember.\n          Email addressEmail me a sign-in link\n          \n            \n            \n            Resend sign-in linkUse a different email\n            Can’t find it? Give it a minute, then check your spam folder.\n          \n          Try opening my account again\n          Your setup stays with your account. Leave and pick up where you left off.\n        ",
+        "plan": "growth",
+        "formVisible": true
+      },
+      "signedOut": {
+        "docTitle": "Sign in to your workspace | Machines & Cloud",
+        "topbar": "Sign in to your workspace",
+        "title": "Sign in to your workspace",
+        "intro": "Enter the email you use for Machines & Cloud. We’ll send a secure link that opens your workspace, or your setup if you haven’t finished it. No password to remember.",
+        "button": "Email me a sign-in link",
+        "gate": "Sign in to your workspace\n\nEnter the email you use for Machines & Cloud. We’ll send a secure link that opens your workspace, or your setup if you haven’t finished it. No password to remember.\n\nEmail address\nEmail me a sign-in link\n\nSigned out. Your saved answers are kept securely.\n\nYour setup stays with your account. Leave and pick up where you left off.",
+        "plan": "growth",
+        "formVisible": true
+      }
+    }
+  ],
+  "requests": [
+    {
+      "id": "own-late-commit-1440",
+      "method": "POST",
+      "path": "/api/access",
+      "action": "request_link",
+      "status": 202
+    },
+    {
+      "id": "own-late-commit-1440",
+      "method": "POST",
+      "path": "/api/access",
+      "action": "exchange",
+      "status": 200
+    },
+    {
+      "id": "own-late-commit-1440",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "own-late-commit-1440",
+      "method": "PUT",
+      "path": "/api/access",
+      "lost": "held"
+    },
+    {
+      "id": "own-late-commit-1440",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "own-late-commit-1440",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 409
+    },
+    {
+      "id": "own-late-commit-1440",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "own-late-commit-1440",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "own-late-commit-1440",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "own-late-commit-1440",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "other-tab-after-lost-1440",
+      "method": "POST",
+      "path": "/api/access",
+      "action": "request_link",
+      "status": 202
+    },
+    {
+      "id": "other-tab-after-lost-1440",
+      "method": "POST",
+      "path": "/api/access",
+      "action": "exchange",
+      "status": 200
+    },
+    {
+      "id": "other-tab-after-lost-1440",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "other-tab-after-lost-1440",
+      "method": "PUT",
+      "path": "/api/access",
+      "lost": "lost-before"
+    },
+    {
+      "id": "other-tab-after-lost-1440",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "other-tab-after-lost-1440",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 409
+    },
+    {
+      "id": "other-tab-after-lost-1440",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "own-late-then-other-tab-1440",
+      "method": "POST",
+      "path": "/api/access",
+      "action": "request_link",
+      "status": 202
+    },
+    {
+      "id": "own-late-then-other-tab-1440",
+      "method": "POST",
+      "path": "/api/access",
+      "action": "exchange",
+      "status": 200
+    },
+    {
+      "id": "own-late-then-other-tab-1440",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "own-late-then-other-tab-1440",
+      "method": "PUT",
+      "path": "/api/access",
+      "lost": "held"
+    },
+    {
+      "id": "own-late-then-other-tab-1440",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "own-late-then-other-tab-1440",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 409
+    },
+    {
+      "id": "own-late-then-other-tab-1440",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "other-tab-before-resend-1440",
+      "method": "POST",
+      "path": "/api/access",
+      "action": "request_link",
+      "status": 202
+    },
+    {
+      "id": "other-tab-before-resend-1440",
+      "method": "POST",
+      "path": "/api/access",
+      "action": "exchange",
+      "status": 200
+    },
+    {
+      "id": "other-tab-before-resend-1440",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "other-tab-before-resend-1440",
+      "method": "PUT",
+      "path": "/api/access",
+      "lost": "held"
+    },
+    {
+      "id": "other-tab-before-resend-1440",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "other-tab-before-resend-1440",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 409
+    },
+    {
+      "id": "other-tab-before-resend-1440",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "other-tab-before-resend-1440",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 409
+    },
+    {
+      "id": "own-late-commit-390",
+      "method": "POST",
+      "path": "/api/access",
+      "action": "request_link",
+      "status": 202
+    },
+    {
+      "id": "own-late-commit-390",
+      "method": "POST",
+      "path": "/api/access",
+      "action": "exchange",
+      "status": 200
+    },
+    {
+      "id": "own-late-commit-390",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "own-late-commit-390",
+      "method": "PUT",
+      "path": "/api/access",
+      "lost": "held"
+    },
+    {
+      "id": "own-late-commit-390",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "own-late-commit-390",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 409
+    },
+    {
+      "id": "own-late-commit-390",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "own-late-commit-390",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "own-late-commit-390",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "own-late-commit-390",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "other-tab-after-lost-390",
+      "method": "POST",
+      "path": "/api/access",
+      "action": "request_link",
+      "status": 202
+    },
+    {
+      "id": "other-tab-after-lost-390",
+      "method": "POST",
+      "path": "/api/access",
+      "action": "exchange",
+      "status": 200
+    },
+    {
+      "id": "other-tab-after-lost-390",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "other-tab-after-lost-390",
+      "method": "PUT",
+      "path": "/api/access",
+      "lost": "lost-before"
+    },
+    {
+      "id": "other-tab-after-lost-390",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "other-tab-after-lost-390",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 409
+    },
+    {
+      "id": "other-tab-after-lost-390",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "own-late-then-other-tab-390",
+      "method": "POST",
+      "path": "/api/access",
+      "action": "request_link",
+      "status": 202
+    },
+    {
+      "id": "own-late-then-other-tab-390",
+      "method": "POST",
+      "path": "/api/access",
+      "action": "exchange",
+      "status": 200
+    },
+    {
+      "id": "own-late-then-other-tab-390",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "own-late-then-other-tab-390",
+      "method": "PUT",
+      "path": "/api/access",
+      "lost": "held"
+    },
+    {
+      "id": "own-late-then-other-tab-390",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "own-late-then-other-tab-390",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 409
+    },
+    {
+      "id": "own-late-then-other-tab-390",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "other-tab-before-resend-390",
+      "method": "POST",
+      "path": "/api/access",
+      "action": "request_link",
+      "status": 202
+    },
+    {
+      "id": "other-tab-before-resend-390",
+      "method": "POST",
+      "path": "/api/access",
+      "action": "exchange",
+      "status": 200
+    },
+    {
+      "id": "other-tab-before-resend-390",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "other-tab-before-resend-390",
+      "method": "PUT",
+      "path": "/api/access",
+      "lost": "held"
+    },
+    {
+      "id": "other-tab-before-resend-390",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "other-tab-before-resend-390",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 409
+    },
+    {
+      "id": "other-tab-before-resend-390",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "other-tab-before-resend-390",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 409
+    },
+    {
+      "id": "signout-lost-1440",
+      "method": "POST",
+      "path": "/api/access",
+      "action": "request_link",
+      "status": 202
+    },
+    {
+      "id": "signout-lost-1440",
+      "method": "POST",
+      "path": "/api/access",
+      "action": "exchange",
+      "status": 200
+    },
+    {
+      "id": "signout-lost-1440",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "signout-lost-1440",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "signout-lost-1440",
+      "method": "POST",
+      "path": "/api/access",
+      "action": "sign_out",
+      "lost": "before"
+    },
+    {
+      "id": "signout-lost-1440",
+      "method": "POST",
+      "path": "/api/access",
+      "action": "sign_out",
+      "status": 200
+    },
+    {
+      "id": "signout-lost-390",
+      "method": "POST",
+      "path": "/api/access",
+      "action": "request_link",
+      "status": 202
+    },
+    {
+      "id": "signout-lost-390",
+      "method": "POST",
+      "path": "/api/access",
+      "action": "exchange",
+      "status": 200
+    },
+    {
+      "id": "signout-lost-390",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "signout-lost-390",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "signout-lost-390",
+      "method": "POST",
+      "path": "/api/access",
+      "action": "sign_out",
+      "lost": "before"
+    },
+    {
+      "id": "signout-lost-390",
+      "method": "POST",
+      "path": "/api/access",
+      "action": "sign_out",
+      "status": 200
+    },
+    {
+      "id": "reject-link-1440",
+      "method": "POST",
+      "path": "/api/access",
+      "action": "request_link",
+      "status": 400,
+      "fake": "no-message"
+    },
+    {
+      "id": "reject-autosave-1440",
+      "method": "POST",
+      "path": "/api/access",
+      "action": "request_link",
+      "status": 202
+    },
+    {
+      "id": "reject-autosave-1440",
+      "method": "POST",
+      "path": "/api/access",
+      "action": "exchange",
+      "status": 200
+    },
+    {
+      "id": "reject-autosave-1440",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "reject-autosave-1440",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 400,
+      "fake": "no-message"
+    },
+    {
+      "id": "reject-link-390",
+      "method": "POST",
+      "path": "/api/access",
+      "action": "request_link",
+      "status": 400,
+      "fake": "no-message"
+    },
+    {
+      "id": "reject-autosave-390",
+      "method": "POST",
+      "path": "/api/access",
+      "action": "request_link",
+      "status": 202
+    },
+    {
+      "id": "reject-autosave-390",
+      "method": "POST",
+      "path": "/api/access",
+      "action": "exchange",
+      "status": 200
+    },
+    {
+      "id": "reject-autosave-390",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "reject-autosave-390",
+      "method": "PUT",
+      "path": "/api/access",
+      "status": 400,
+      "fake": "no-message"
+    },
+    {
+      "id": "signin-copy-1440",
+      "method": "POST",
+      "path": "/api/access",
+      "action": "request_link",
+      "status": 202
+    },
+    {
+      "id": "signin-copy-1440",
+      "method": "POST",
+      "path": "/api/access",
+      "action": "exchange",
+      "status": 200
+    },
+    {
+      "id": "signin-copy-1440",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "signin-copy-1440",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "signin-copy-1440",
+      "method": "POST",
+      "path": "/api/access",
+      "action": "sign_out",
+      "status": 200
+    },
+    {
+      "id": "signin-copy-390",
+      "method": "POST",
+      "path": "/api/access",
+      "action": "request_link",
+      "status": 202
+    },
+    {
+      "id": "signin-copy-390",
+      "method": "POST",
+      "path": "/api/access",
+      "action": "exchange",
+      "status": 200
+    },
+    {
+      "id": "signin-copy-390",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "signin-copy-390",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "signin-copy-390",
+      "method": "POST",
+      "path": "/api/access",
+      "action": "sign_out",
+      "status": 200
+    }
+  ],
+  "blockedBrowser": [],
+  "forbiddenApi": [],
+  "blockedServer": [],
+  "pageErrors": [],
+  "screenshots": [
+    "scratchpad/claude-port-onboard-followup-final-own-late-commit-1440.png",
+    "scratchpad/claude-port-onboard-followup-final-other-tab-after-lost-1440.png",
+    "scratchpad/claude-port-onboard-followup-final-own-late-then-other-tab-1440.png",
+    "scratchpad/claude-port-onboard-followup-final-other-tab-before-resend-1440.png",
+    "scratchpad/claude-port-onboard-followup-final-own-late-commit-390.png",
+    "scratchpad/claude-port-onboard-followup-final-own-late-commit-390-reloaded.png",
+    "scratchpad/claude-port-onboard-followup-final-other-tab-after-lost-390.png",
+    "scratchpad/claude-port-onboard-followup-final-own-late-then-other-tab-390.png",
+    "scratchpad/claude-port-onboard-followup-final-other-tab-before-resend-390.png",
+    "scratchpad/claude-port-onboard-followup-final-signout-lost-1440.png",
+    "scratchpad/claude-port-onboard-followup-final-signout-lost-390.png",
+    "scratchpad/claude-port-onboard-followup-final-reject-link-390.png",
+    "scratchpad/claude-port-onboard-followup-final-reject-autosave-390.png",
+    "scratchpad/claude-port-onboard-followup-final-signin-copy-390-gate.png",
+    "scratchpad/claude-port-onboard-followup-final-signin-copy-390-confirmation.png",
+    "scratchpad/claude-port-onboard-followup-final-signin-copy-390-form-opened.png"
+  ],
+  "servedOnboardJs": [
+    "4eb76ed91e2cd5f93e3de4b2828f340fd3f65a8806196af5e7fc9cd148bbf3ab"
+  ],
+  "sourceBefore": {
+    "onboard.html": "0e4b2a766f2b70c41930a635c5433f5c284168ec48ea5dbab82a6815bcf450ca",
+    "onboard.js": "4eb76ed91e2cd5f93e3de4b2828f340fd3f65a8806196af5e7fc9cd148bbf3ab",
+    "onboard.css": "b24b7abd16708d492425120b577c06e997cf478912f727c0154e152850e3bee9",
+    "product-ui.css": "e120e163a8e73f5c776b4ee9361382d3204dfb07f549b75f561c975bfcae54cb",
+    "netlify/functions/access.mjs": "5141bce6641cdf35a3503f4de41021b313b7de1745c82e2101ac7bdf19c89b53",
+    "netlify/functions/onboard.mjs": "be2ed480eabf172059f88162cb6010e974c7e8f38846104f58d915c458daa31e",
+    "netlify/functions/lib/access.mjs": "057921a525476b4cba51ce15233cca477a2ab135ece40b59bfce56d17a16969d",
+    "netlify/functions/lib/store.mjs": "4b12e064e451311f79b32e54a25a0cbd0c55ce8efc5a423fdb5166be419858da"
+  },
+  "sourceAfter": {
+    "onboard.html": "0e4b2a766f2b70c41930a635c5433f5c284168ec48ea5dbab82a6815bcf450ca",
+    "onboard.js": "4eb76ed91e2cd5f93e3de4b2828f340fd3f65a8806196af5e7fc9cd148bbf3ab",
+    "onboard.css": "b24b7abd16708d492425120b577c06e997cf478912f727c0154e152850e3bee9",
+    "product-ui.css": "e120e163a8e73f5c776b4ee9361382d3204dfb07f549b75f561c975bfcae54cb",
+    "netlify/functions/access.mjs": "5141bce6641cdf35a3503f4de41021b313b7de1745c82e2101ac7bdf19c89b53",
+    "netlify/functions/onboard.mjs": "be2ed480eabf172059f88162cb6010e974c7e8f38846104f58d915c458daa31e",
+    "netlify/functions/lib/access.mjs": "057921a525476b4cba51ce15233cca477a2ab135ece40b59bfce56d17a16969d",
+    "netlify/functions/lib/store.mjs": "4b12e064e451311f79b32e54a25a0cbd0c55ce8efc5a423fdb5166be419858da"
+  },
+  "summary": {
+    "checks": 137,
+    "passed": 137,
+    "failed": 0
+  },
+  "failed": []
+}

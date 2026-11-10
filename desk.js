@@ -2,7 +2,18 @@
   var brandMark = typeof window.MCBrandMark === 'function' ? window.MCBrandMark : function () { return ''; };
   var q = new URLSearchParams(location.search), slug = q.get('c'), key = q.get('k');
   var ownerSession = null; try { ownerSession = sessionStorage.getItem('mc-onboarding-session-v1'); } catch (error) { /* Email sign-in is available when storage is disabled. */ }
-  if (!slug || (!key && !ownerSession)) { document.body.dataset.workspaceState = 'recovery'; document.getElementById('title').textContent = 'Your workspace'; document.getElementById('status').textContent = 'Sign in to continue'; document.getElementById('portalRecovery').hidden = false; document.getElementById('retryLoad').hidden = true; return; }
+  // A signed-out owner keeps their place: the next successful sign-in to this workspace within 30 minutes returns there.
+  var RETURN_ROUTE_KEY = 'mc-return-route-v1', RETURN_ROUTE_MS = 30 * 60 * 1000;
+  function returnRouteValid(hash) { return typeof hash === 'string' && /^#(?:today|leads|convs|availability|know|test|setup|account|setup\/(?:web|voice|sms|calendar|thumbtack|angi)(?:\/[a-z0-9_-]{1,40})?)$/.test(hash); }
+  function rememberReturnRoute(hash) { if (!slug || !returnRouteValid(hash)) return; try { localStorage.setItem(RETURN_ROUTE_KEY, JSON.stringify({ slug: slug, hash: hash, at: Date.now() })); } catch (error) { /* Without storage the owner lands on Home. */ } }
+  function takeReturnRoute() {
+    var saved = null; try { saved = JSON.parse(localStorage.getItem(RETURN_ROUTE_KEY) || 'null'); } catch (error) { saved = null; }
+    if (!saved || typeof saved !== 'object' || saved.slug !== slug) return null;
+    try { localStorage.removeItem(RETURN_ROUTE_KEY); } catch (error) { /* The route is used once at most. */ }
+    var age = Date.now() - saved.at;
+    return typeof saved.at === 'number' && age >= 0 && age <= RETURN_ROUTE_MS && returnRouteValid(saved.hash) ? saved.hash : null;
+  }
+  if (!slug || (!key && !ownerSession)) { rememberReturnRoute(location.hash); document.body.dataset.workspaceState = 'recovery'; document.getElementById('title').textContent = 'Your workspace'; document.getElementById('status').textContent = 'Sign in to continue'; document.getElementById('portalRecovery').hidden = false; document.getElementById('retryLoad').hidden = true; return; }
   var API_BASE = (function () { var m = document.querySelector('meta[name="mc-api-base"]'); return (m && m.content) ? m.content.replace(/\/$/, '') : ''; })();
   var API = API_BASE + '/api/client?c=' + encodeURIComponent(slug) + (key ? '&k=' + encodeURIComponent(key) : '');
   var portalGeneration = 0, loadSequence = 0, loadPending = null, reviewBusy = false, leaving = false, chatController = null, cfgRevision = null, cfgEditRevision = null, cfgDirty = false, data = null, contact = 't' + Math.random().toString(36).slice(2, 10), transcript = [];
@@ -11,18 +22,19 @@
   function ownerHeaders() { var headers = { 'Content-Type': 'application/json' }; if (ownerSession) headers.Authorization = 'Bearer ' + ownerSession; return headers; }
   function toast(t) { var el = $('toast'); el.textContent = t; el.style.display = 'block'; setTimeout(function () { el.style.display = 'none'; }, 2500); }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
-  function recover(message) {
+  function recover(message, signedOut) {
     closeTour(false, false);
     if (leaving) supportReset(); else if ($('supportDialog')?.open) $('supportDialog').close();
     if ($('phoneCancelDialog').open) $('phoneCancelDialog').close(); phoneCancelSnapshot = null; if ($('phoneAuthority')) $('phoneAuthority').checked = false; if ($('phoneCosts')) $('phoneCosts').checked = false;
     if ($('cancelBox').open) $('cancelBox').close();
     if ($('visitDialog').open) $('visitDialog').close(); visitPending = null; visitSelected = null;
     $('portalContent').hidden = true; $('portalRecovery').hidden = false; document.body.dataset.workspaceState = 'recovery'; $('deskRail').hidden = true; $('railBusiness').textContent = 'Your front desk';
-    $('title').textContent = 'Your workspace'; $('status').textContent = 'Unable to open workspace';
+    $('title').textContent = 'Your workspace'; $('status').textContent = signedOut ? 'Signed out' : 'Unable to open workspace';
     $('recoveryMessage').textContent = message; if ($('liveBtns')) $('liveBtns').innerHTML = '';
   }
   document.addEventListener('mc:session-expired',function () {
     if (leaving && !ownerSession && !key) return;
+    rememberReturnRoute(location.hash);
     leaving = true; portalGeneration++; ownerSession = null; key = null; data = null; transcript = []; cancelPracticeReply(); availabilityReset();
     websitePrivateClear();
     preferenceBaseline=[];preferenceDirty=false;preferenceBusy=false;homeActivityChosen=false;
@@ -30,7 +42,7 @@
     acctBaseline = null; acctBaseClient = null; acctRevision = null; acctEditRevision = null; acctConflict = null; acctDirty = false; acctBusy = false;
     try { sessionStorage.removeItem('mc-owner-visit-pending-v1:'+slug); sessionStorage.removeItem('mc-onboarding-session-v1'); sessionStorage.removeItem('mc-calendar-pending-v1'); } catch (error) { /* Private content is still cleared. */ }
     closeTour(false, false);
-    recover('Your session expired. Sign in by email to reopen your workspace.'); $('portalContent').innerHTML = ''; $('deskSignOut').hidden = true; $('retryLoad').hidden = true;
+    recover('Your session expired. Sign in by email to reopen your workspace.', true); $('portalContent').innerHTML = ''; $('deskSignOut').hidden = true; $('retryLoad').hidden = true;
   });
   document.addEventListener('mc:desk-refresh',function(event){if(!leaving)load(null,{soft:event.detail?.soft===true,connectionProgress:event.detail?.reason==='connection-progress',connectionProgressRequest:event.detail?.requestId});});
   document.addEventListener('mc:desk-snapshot',function(event){
@@ -188,7 +200,7 @@
   }
   function availabilityReset() {
     if (availabilityController) availabilityController.abort();
-    availabilityController = null; availabilityBusy = false; availabilityControls(false);
+    availabilityController = null; availabilityBusy = false; availabilityControls(false); pendingAvailability = null; if ($('availabilityReload')) $('availabilityReload').hidden = true;
   }
   async function availabilityChange(actionName, date, window) {
     if (availabilityBusy || leaving || !data) return;
@@ -196,7 +208,7 @@
     var returnAfterSave=!!$('scheduleBlockManager')?.open&&$('availabilityForm').contains(focusAtStart);
     function current() { return !leaving && generation === portalGeneration && session === ownerSession && ownerKey === key && availabilityController === controller; }
     availabilityBusy = true; availabilityController = controller; availabilityControls(true);
-    $('availabilityBackToCalendar').hidden=true;
+    $('availabilityBackToCalendar').hidden=true; $('availabilityReload').hidden=true; pendingAvailability=null;
     $('availabilityMessage').textContent = 'Saving…';
     var timeout = setTimeout(function () { controller.abort(); }, 20000);
     try {
@@ -205,10 +217,11 @@
       if (response.status === 401 || response.status === 403) { document.dispatchEvent(new CustomEvent('mc:session-expired')); return; }
       var result = await response.json(); if (!current()) return;
       if (!response.ok || !result.ok) {
+        if (response.status >= 500) throw Object.assign(new Error('Availability outcome unknown'), { availabilityUncertain: true });
         var messages = { invalid_date: 'Choose a valid date in Houston time.', invalid_window: 'Choose one of your saved arrival windows.', too_many_blocks: 'Remove an old block before adding another.', availability_unavailable: 'Availability could not be saved. Reload availability before trying again.' };
         throw Object.assign(new Error('Availability request failed'), { availabilityMessage: messages[result.error] || result.message || 'Could not save availability. Reload availability before trying again.' });
       }
-      if (!Array.isArray(result.availabilityBlocks)) throw Object.assign(new Error('Availability response incomplete'), { availabilityMessage: 'The schedule change could not be confirmed. Reload availability before trying again.' });
+      if (!Array.isArray(result.availabilityBlocks)) throw Object.assign(new Error('Availability response incomplete'), { availabilityUncertain: true });
       renderAvailability(result.availabilityBlocks);
       data.availabilityBlocks=result.availabilityBlocks;
       scheduleEmit('mc:schedule-availability',{blocks:result.availabilityBlocks,busy:true});
@@ -219,13 +232,40 @@
       if(returnAfterSave&&$('availabilityDate').value===date&&$('availabilityWindow').value===(window||'')&&(document.activeElement===focusAtStart||document.activeElement===document.body)){$('availabilityBackToCalendar').focus({preventScroll:true});$('availabilityBackToCalendar').scrollIntoView({block:'center',behavior:'auto'});}
     } catch (error) {
       if (!current()) return;
-      $('availabilityMessage').textContent = (error.name === 'AbortError' ? 'The schedule change timed out. Reload availability before trying again.' : error.availabilityMessage || 'The schedule change could not be confirmed. Reload availability before trying again.') + ' Your selected date and window are still here.';
-      scheduleEmit('mc:schedule-availability',{busy:true,error:true,message:$('availabilityMessage').textContent});
+      if (error.availabilityMessage) { $('availabilityMessage').textContent = error.availabilityMessage + ' Your selected date and window are still here.'; scheduleEmit('mc:schedule-availability',{busy:true,error:true,message:$('availabilityMessage').textContent}); }
+      // A lost, timed-out or failed response may still have saved. Read the saved blocks (read only) before saying anything.
+      else { pendingAvailability = { action: actionName, date: date, window: window || '' }; await availabilityReconcile(controller); }
     } finally {
       clearTimeout(timeout);
       if (current()) { availabilityController = null; availabilityBusy = false; availabilityControls(false); }
     }
   }
+  var pendingAvailability = null;
+  function availabilityHas(blocks, date, window) { return blocks.some(function (b) { return b.date === date && (b.window || '') === window; }); }
+  async function availabilityReconcile(ownController) {
+    var change = pendingAvailability; if (!change || leaving || !data) return;
+    var generation = portalGeneration, session = ownerSession, controller = ownController || new AbortController();
+    function current() { return change === pendingAvailability && !leaving && generation === portalGeneration && session === ownerSession && (!ownController || availabilityController === ownController); }
+    if (!ownController) { availabilityBusy = true; availabilityController = controller; availabilityControls(true); }
+    $('availabilityReload').hidden = true; $('availabilityMessage').textContent = 'Checking your saved blocked time…';
+    try {
+      var latest = await apiRequest(); if (!current()) return;
+      if (!Array.isArray(latest.availabilityBlocks)) throw new Error('incomplete');
+      var blocks = latest.availabilityBlocks, label = availabilityDateLabel(change.date) + ' · ' + (change.window || 'Whole day'), present = availabilityHas(blocks, change.date, change.window);
+      renderAvailability(blocks); data.availabilityBlocks = blocks; scheduleEmit('mc:schedule-availability', { blocks: blocks, busy: true });
+      if (scheduleRange) readSchedule({ from: scheduleRange.from, to: scheduleRange.to, force: true });
+      pendingAvailability = null;
+      var confirmed = change.action === 'availability_block' ? present : !present;
+      $('availabilityMessage').textContent = confirmed ? (change.action === 'availability_block' ? 'Time blocked. ' : 'Block removed. ') + label + '. Confirmed from your saved schedule.' : 'We couldn’t confirm this change yet. Your saved blocked time is shown below. Your selected date and window are still here; try again when ready. A block can’t be added twice.';
+    } catch (error) {
+      if (!current()) return;
+      if (error.status === 401 || error.status === 403) return;
+      $('availabilityMessage').textContent = 'We couldn’t confirm this change or read your saved blocked time. Your selected date and window are still here. Reload availability to check before trying again.';
+      $('availabilityReload').hidden = false;
+      scheduleEmit('mc:schedule-availability', { busy: true, error: true, message: $('availabilityMessage').textContent });
+    } finally { if (!ownController && availabilityController === controller) { availabilityController = null; availabilityBusy = false; availabilityControls(false); } }
+  }
+  $('availabilityReload').addEventListener('click', function () { if (!availabilityBusy && pendingAvailability) availabilityReconcile(null); });
   $('availabilityForm').addEventListener('submit', function (e) { e.preventDefault(); availabilityChange('availability_block', $('availabilityDate').value, $('availabilityWindow').value); });
   $('availabilityBlocks').addEventListener('click', function (e) { var button = e.target.closest('button.availability-remove'); if (button) availabilityChange('availability_unblock', button.dataset.date, button.dataset.window); });
   $('availabilityBackToCalendar').addEventListener('click',function(){if($('scheduleBlockManager'))$('scheduleBlockManager').open=false;scheduleEmit('mc:schedule-return',{date:this.dataset.date});});
@@ -249,7 +289,8 @@
     document.querySelectorAll('.pane').forEach(function (p) { p.classList.toggle('on', p.id === 'p-' + t); });
     document.body.dataset.activePage = t;
     scheduleEmit('mc:schedule-visible',{active:t==='availability'});
-    $('pageTitle').textContent = pageCopy[t][1]; $('pageDescription').textContent = pageCopy[t][2]; if(data){renderHomeNext(data);if(t==='account')renderAccount(data);}else syncNextActionVisibility();
+    $('pageTitle').textContent = pageCopy[t][1]; $('pageDescription').textContent = pageCopy[t][2];
+    document.title = (t === 'today' ? 'Home' : pageCopy[t][1]) + ' | Your front desk | Machines & Cloud'; if(data){renderHomeNext(data);if(t==='account')renderAccount(data);}else syncNextActionVisibility();
   }
   $('homeActivityDetails').querySelector('summary').addEventListener('click',function(){homeActivityChosen=true;});
   function syncNextActionVisibility() { var guide = $('workspaceGuide'); guide.hidden = guide.dataset.needed !== 'true' || document.body.dataset.activePage !== 'today'; }
@@ -257,17 +298,115 @@
   else showTab('today');
   document.querySelectorAll('.tabs button').forEach(function (b) { b.addEventListener('click', function () { routeTo(b.dataset.t); }); });
   document.querySelectorAll('[data-workspace-route]').forEach(function (b) { b.addEventListener('click', function () { routeTo(b.dataset.workspaceRoute); }); });
-  window.addEventListener('hashchange', function () { var tab=location.hash.slice(1).split('/')[0];if(!leaving&&pageCopy[tab])routeTo(tab,location.hash); });
-  function routeTo(tab,connectionHash) {
+  // Workspace history: an owner's page change adds an entry, so Back and Forward move between workspace pages and Back
+  // from the first workspace page still leaves normally. Back/Forward, refreshes, restores and the tour route without adding one.
+  // Pages set their own scroll; automatic restoration also blurs focus when the desk steps back to a #page entry.
+  try { history.scrollRestoration = 'manual'; } catch (error) { /* Older browsers restore scroll themselves. */ }
+  var deskRoutedHref = location.href, deskStepBackFocus = null, tourHistoryBack = false, requestHistory = null, requestHistoryBack = false, requestReopening = false, requestLastId = null;
+  function deskOtherDialogOpen() { return !!document.querySelector('dialog[open]:not(#requestDialog):not(#guideDialog)'); }
+  // One modal policy for popstate and hashchange. The desk's own modals (a visit, a support report, a saved conversation and
+  // the account confirmations) hold Back and Forward: the dialog stays open with its typed details, the page underneath is not
+  // routed, and the browser is traversed back to the entry the dialog was opened on, with its address and state intact.
+  // The hold traverses to that entry by its Navigation API key (navigation.traverseTo), so it adds no history without a user
+  // gesture, keeps Forward, and does not depend on how many traversals were queued. Until the held entry is current again it
+  // re-checks after each traversal settles and on a short timer, so a traversal that lands late or is dropped is still corrected.
+  // Dialogs whose own scripts keep history (lead-source and connection dialogs, the request dialog, the tour) are left to them.
+  var deskHeldDialogs = '#visitDialog[open],#supportDialog[open],#conversationDialog[open],#cancelBox[open],#phoneCancelDialog[open],#billingCancel[open]';
+  var deskHold = null, deskHoldTimer = 0;
+  function deskHeldModalOpen() { return !!document.querySelector(deskHeldDialogs); }
+  function deskNav() { try { var nav = window.navigation; return nav && nav.currentEntry && typeof nav.traverseTo === 'function' ? nav : null; } catch (error) { return null; } }
+  // Records the entry under a held dialog: when the first one opens, and after the desk's own steps or added entries while it is open.
+  function deskHoldSync() { var nav = deskNav(); deskHold = deskHeldModalOpen() ? { key: nav ? nav.currentEntry.key : null, href: location.href, state: history.state, going: null, tries: 0 } : null; }
+  function deskHoldSettle() {
+    var hold = deskHold, nav = deskNav(); clearTimeout(deskHoldTimer);
+    if (!hold || !hold.key || !nav || leaving || !deskHeldModalOpen()) return;
+    if (nav.currentEntry.key === hold.key) { hold.going = null; hold.tries = 0; return; }
+    if (!nav.entries().some(function (entry) { return entry.key === hold.key; })) {
+      // The held entry no longer exists (an entry was added after it); put its address and state back once instead.
+      try { history.pushState(hold.state, '', hold.href); } catch (error) { /* The page and dialog stay as they are. */ }
+      deskHoldSync(); return;
+    }
+    if (hold.going && Date.now() - hold.going.at > 1500) hold.going = null;
+    if (!hold.going && hold.tries < 12) {
+      hold.tries++;
+      var going = { at: Date.now() }, done = function () { if (hold.going === going) hold.going = null; if (deskHold === hold) setTimeout(deskHoldSettle, 0); };
+      hold.going = going;
+      try { var result = nav.traverseTo(hold.key); result.committed.catch(function () {}); result.finished.then(done, done); } catch (error) { hold.going = null; }
+    }
+    deskHoldTimer = setTimeout(deskHoldSettle, 250);
+  }
+  function deskModalHold() {
+    if (!deskHeldModalOpen()) return false;
+    if (!deskHold) deskHoldSync();
+    if (deskHold.key) deskHoldSettle();
+    else if (location.href !== deskHold.href) {
+      // Without the Navigation API the entry is unknown; put the held address and state back as a new entry instead.
+      try { history.pushState(deskHold.state, '', deskHold.href); } catch (error) { /* The page and dialog stay as they are. */ }
+    }
+    return true;
+  }
+  new MutationObserver(function () { if (!deskHeldModalOpen()) { deskHold = null; clearTimeout(deskHoldTimer); } else if (!deskHold) deskHoldSync(); }).observe(document.body, { subtree: true, attributes: true, attributeFilter: ['open'] });
+  try {
+    if (deskNav()) {
+      // While the Back or Forward entry is current, an address rewrite from the page underneath (the calendar's date and view)
+      // would land on that other entry; it is skipped, and only a rewrite of the held entry itself updates the hold.
+      window.navigation.addEventListener('navigate', function (event) { if (deskHold && deskHold.key && event.navigationType === 'replace' && event.cancelable && event.destination.sameDocument && window.navigation.currentEntry.key !== deskHold.key && deskHeldModalOpen()) event.preventDefault(); });
+      window.navigation.addEventListener('currententrychange', function (event) {
+        if (!deskHold) return;
+        if (event.navigationType === 'push') deskHoldSync();
+        else if (event.navigationType === 'replace' && window.navigation.currentEntry.key === deskHold.key) { deskHold.href = location.href; deskHold.state = history.state; }
+      });
+    }
+  } catch (error) { /* The hold falls back to the recorded address. */ }
+  window.addEventListener('hashchange', function () { var tab=location.hash.slice(1).split('/')[0];if(leaving||deskModalHold()||!pageCopy[tab]||document.body.dataset.activePage===tab&&deskRoutedHref===location.href)return;routeTo(tab,location.hash,true); });
+  window.addEventListener('popstate', function () {
+    if (leaving) return;
+    var dialog = $('requestDialog'), state = history.state || {};
+    // The desk's own step back off a request or tour entry: traversing to a #fragment entry can drop focus, so put it back.
+    if (requestHistoryBack || tourHistoryBack) { var own = requestHistoryBack ? !state.mcRequestDialog : !state.mcTour; requestHistoryBack = tourHistoryBack = false; if (own) { if (deskHold) deskHoldSync(); var kept = deskStepBackFocus; deskStepBackFocus = null; if (kept) setTimeout(function () { if (leaving || document.activeElement && document.activeElement !== document.body || !kept.node.isConnected) return; window.scrollTo({ top: kept.scroll, behavior: 'instant' }); kept.node.focus({ preventScroll: true }); }, 0); return; } }
+    if (deskModalHold()) return;
+    if (tourActive && tourOrigin && !state.mcTour) { var origin = tourOrigin; if (pageCopy[origin.tab]) routeTo(origin.tab, origin.hash || null, true); closeTour(false, true); return; }
+    if (dialog && dialog.open && !state.mcRequestDialog) {
+      // Back closes the open request. Its close keeps a typed note for when the request is opened again.
+      var entry = requestHistory; requestHistory = null; $('requestClose').click();
+      if (dialog.open) { requestHistory = entry; try { history.pushState({ mcRequestDialog: entry && entry.id || true }, '', entry ? entry.href : location.href); } catch (error) { /* The request stays open. */ } return; }
+    }
+    if (deskOtherDialogOpen()) return;
+    var hash = location.hash, tab = hash ? hash.slice(1).split('/')[0] : 'today';
+    if (!pageCopy[tab]) return;
+    if (!(document.body.dataset.activePage === tab && deskRoutedHref === location.href)) routeTo(tab, hash || null, true);
+    // Forward to a request entry opens that request again, with its kept note.
+    if (state.mcRequestDialog && dialog && !dialog.open) {
+      var id = typeof state.mcRequestDialog === 'string' ? state.mcRequestDialog : null, pane = $('p-' + document.body.dataset.activePage);
+      var button = id && pane && Array.prototype.find.call(pane.querySelectorAll('[data-request-open]'), function (node) { return node.dataset.requestOpen === id && node.getClientRects().length; });
+      if (button) { requestHistory = { href: location.href, id: id }; requestReopening = true; button.click(); requestReopening = false; if (!dialog.open) requestHistory = null; }
+    }
+  });
+  document.addEventListener('click', function (event) { var button = event.target.closest && event.target.closest('[data-request-open]'); if (button) requestLastId = button.dataset.requestOpen; }, true);
+  if ($('requestDialog')) new MutationObserver(function () {
+    var dialog = $('requestDialog');
+    if (dialog.open && !requestHistory) { requestHistory = { href: location.href, id: requestLastId }; try { history.pushState({ mcRequestDialog: requestLastId || true }, '', location.href); } catch (error) { requestHistory = null; } }
+    else if (!dialog.open && requestHistory) {
+      // Closed in the page (Close, Esc or a link): step back off the request entry unless a new page was already added.
+      var entry = requestHistory; requestHistory = null;
+      if (!leaving && history.state && history.state.mcRequestDialog && location.href === entry.href) { requestHistoryBack = true; deskStepBackFocus = { node: document.activeElement, scroll: window.scrollY }; history.back(); }
+    }
+  }).observe($('requestDialog'), { attributes: true, attributeFilter: ['open'] });
+  function routeTo(tab,connectionHash,quiet) {
     if (!pageCopy[tab] || leaving) return;
     var previous=document.body.dataset.activePage;
     window.__tabPicked = true; if (tab === 'test') $('tabTest').style.display = '';
-    showTab(tab); var pane = $('p-' + tab); if (!pane) return;
+    var pane = $('p-' + tab); if (!pane) return;
     var connectorHash=typeof connectionHash==='string'&&/^#setup\/(?:web|voice|sms|calendar|thumbtack|angi)(?:\/[a-z0-9_-]+)?$/.test(connectionHash)?connectionHash:null;
     if(connectorHash&&connectorHash.split('/').length===2)connectorHash+='/intro';
-    history.replaceState(history.state, '', location.pathname + location.search + (connectorHash||'#' + tab));
+    var destination = location.pathname + location.search + (connectorHash||'#' + tab);
+    // The new entry is added before the page is shown, so a page that writes its own address while it is shown
+    // (the calendar's date and view) writes onto its own entry, not onto the page the owner just left.
+    try { if (!quiet && destination !== location.pathname + location.search + location.hash) history.pushState({ mcDeskPage: tab }, '', destination); else history.replaceState(history.state, '', destination); } catch (error) { /* The page still changes. */ }
+    showTab(tab);
+    deskRoutedHref = location.href;
     document.querySelectorAll('.guide-target').forEach(function (node) { node.classList.remove('guide-target'); });
-    pane.classList.add('guide-target'); pane.tabIndex = -1; window.scrollTo({top:0,behavior:'instant'}); pane.focus({ preventScroll: true });
+    pane.classList.add('guide-target'); pane.tabIndex = -1; window.scrollTo({top:0,behavior:'instant'}); $('pageTitle').focus({ preventScroll: true });
     if(tab==='leads'&&data){var readSequence=loadSequence;queueMicrotask(function(){if(!leaving&&data&&document.body.dataset.activePage==='leads'&&loadSequence===readSequence)load(null,{soft:true});});}
   }
   $('inboxRefreshRetry').addEventListener('click',function(){if(!leaving&&data)load(null,{soft:true});});
@@ -784,10 +923,13 @@
     var anchor = tourAnchor, opener = returnFocus, origin = tourOrigin; tourOrigin = null; tourCleanup(); if ($('guideDialog').open) $('guideDialog').close();
     if (remember !== false) try { localStorage.setItem('mc-walkthrough-v1:' + slug, 'seen'); } catch (error) { /* Preference only, never setup proof. */ }
     if (restore === false || leaving) return;
+    // Closed in the page: step back off the tour's own entry once the opening page is restored.
+    var tourEntry = remember !== false && history.state && history.state.mcTour;
     // An owner closing the tour (Close, Skip, Esc, Finish) returns to the page and route it was opened from. Navigation during the tour keeps the new page.
-    if (remember !== false && origin && pageCopy[origin.tab] && document.body.dataset.activePage !== origin.tab) { showTab(origin.tab); history.replaceState(history.state, '', location.pathname + location.search + (origin.hash || '#' + origin.tab)); window.scrollTo({ top: origin.scroll, behavior: 'instant' }); }
+    if (remember !== false && origin && pageCopy[origin.tab] && document.body.dataset.activePage !== origin.tab) { showTab(origin.tab); history.replaceState(history.state, '', location.pathname + location.search + (origin.hash || '#' + origin.tab)); deskRoutedHref = location.href; window.scrollTo({ top: origin.scroll, behavior: 'instant' }); }
     var destination = tourVisible(opener) ? opener : tourVisible(anchor) ? anchor.querySelector('h2,h3,h4') || anchor.closest('.card2')?.querySelector('h2,h3,h4') || anchor : $('pageTitle');
     if (tourVisible(destination)) { destination.scrollIntoView({ block: 'nearest', behavior: 'instant' }); tourFocus(destination); }
+    if (tourEntry) { tourHistoryBack = true; deskStepBackFocus = { node: document.activeElement, scroll: window.scrollY }; history.back(); }
   }
   function tourNavigation() { if (tourCurrent() && location.hash !== '#' + tour[tourIndex].tab) { closeTour(false, true); var tab = location.hash.slice(1); if (pageCopy[tab]) showTab(tab); } }
   function tourReducedMotion() { if (tourMotion.matches && tourAnimation) { tourAnimation.cancel(); tourAnimation = null; } scheduleTour(); }
@@ -833,7 +975,7 @@
   function renderTour() {
     if (!tourCurrent()) return; tourEpoch++; if (tourFrame) cancelAnimationFrame(tourFrame); tourFrame = 0;
     var step = tour[tourIndex], dialog = $('guideDialog'); dialog.dataset.tourReady = 'false'; $('tourSpotlight').hidden = true;
-    showTab(step.tab); window.__tabPicked = true; history.replaceState(null, '', location.pathname + location.search + '#' + step.tab);
+    showTab(step.tab); window.__tabPicked = true; history.replaceState(history.state && history.state.mcTour ? history.state : null, '', location.pathname + location.search + '#' + step.tab); deskRoutedHref = location.href;
     if(step.target==='websiteInstallStep'&&$('websiteSetupDetails')&&!$('websiteSetupDetails').hidden){if(tourWebsiteOpen===null)tourWebsiteOpen=$('websiteSetupDetails').open;$('websiteSetupDetails').open=true;}
     var reveal=$(step.target);while(reveal){if(reveal.tagName==='DETAILS'&&!reveal.open){tourRevealedDetails.push(reveal);reveal.open=true;}reveal=reveal.parentElement;}
     $('tourCount').textContent = 'Getting started · ' + (tourIndex + 1) + ' of ' + tour.length; $('tourTitle').textContent = step.title; $('tourBody').textContent = step.body; $('tourAction').textContent = step.action;
@@ -845,6 +987,8 @@
   function openTour() {
     if (leaving || !data || $('portalContent').hidden || document.querySelector('dialog[open]:not(#guideDialog)')) return;
     if (tourActive) return; returnFocus = document.activeElement; tourOrigin = { tab: document.body.dataset.activePage, hash: location.hash, scroll: window.scrollY }; tourActive = true; tourGeneration = portalGeneration;
+    // The tour has one history entry of its own, so Back closes it on the page it was opened from.
+    try { history.pushState({ mcTour: true }, '', location.href); } catch (error) { /* The tour still works without history. */ }
     document.body.classList.add('guide-tour-open'); $('guideDialog').dataset.tourReady = 'false'; $('guideDialog').showModal();
     window.addEventListener('resize', scheduleTour); window.addEventListener('scroll', scheduleTour, true); window.addEventListener('hashchange', tourNavigation); window.addEventListener('popstate', tourNavigation); tourMotion.addEventListener('change', tourReducedMotion);
     if (window.visualViewport) { visualViewport.addEventListener('resize', scheduleTour); visualViewport.addEventListener('scroll', scheduleTour); }
@@ -965,6 +1109,7 @@
     finally{if(generation===portalGeneration&&!leaving){accountBusy=false;if(data)renderAccount(data);}}
   });
 
+  var returnRoute;
   function load(snapshot, options) {
     options=options||{};
     var generation = portalGeneration, fence = cfgFence, sequence = ++loadSequence,refreshApplied=false;
@@ -990,6 +1135,7 @@
       st.textContent = c.status === 'live' ? 'live' : c.status === 'testing' ? 'testing, not live yet' : c.status === 'paused' ? 'paused: calls ring your phone, no texts, no chat' : c.status === 'cancelled' ? 'cancelled' : c.status;
       var offBtns = (d.forwarding && d.forwarding.off && d.forwarding.off.length && (c.status === 'paused' || c.status === 'cancelled')) ? '<div class="muted" style="margin-top:8px">Send calls back to your phone: ' + d.forwarding.off.map(function (k) { return '<a class="btn-pill btn-pill-dark btn-sm" style="margin:4px 6px 4px 0" href="tel:' + encodeURIComponent(k) + '">Dial ' + esc(k) + '</a>'; }).join('') + '<br>' + esc(d.forwarding.offLong || '') + '</div>' : '';
       var live = c.status === 'live'; $('tabToday').style.display = ''; $('tabTest').style.display = c.status === 'cancelled' ? 'none' : '';
+      if (returnRoute === undefined) { returnRoute = takeReturnRoute(); if (returnRoute && !location.hash && !window.__tabPicked) { routeTo(returnRoute.slice(1).split('/')[0], returnRoute, true); window.__tabPicked = true; } }
       if (!location.hash && !window.__tabPicked) { showTab('today'); window.__tabPicked = true; }
 
       var needsFollowup=homeFollowupRows(d);
@@ -1086,7 +1232,8 @@
     cfgArrayFields.forEach(function(name){values[name]=(read(name)||[]).join('\n');});
     values['business.spanish']=client.business.spanish?'yes':'no'; values['phone.forwarding']=client.phone.forwarding||'missed';
     values['rules.windowCapacity']=String(client.rules.windowCapacity||1);values['rules.ackMinutes']=String(client.rules.ackMinutes||10);values['digest.text']=!(client.digest&&client.digest.text===false);
-    values.fees=(client.fees||[]).map(function(row){return row.label+': '+row.amount+(row.note?' ('+row.note+')':'');}).join('\n');
+    // A price line saved without an amount shows as typed, so it reads back exactly as the save parsed it.
+    values.fees=(client.fees||[]).map(function(row){return !row.amount&&!row.note?row.label:row.label+': '+row.amount+(row.note?' ('+row.note+')':'');}).join('\n');
     values.faq=(client.faq||[]).map(function(row){return row.q+' '+row.a;}).join('\n');
     var hours={};cfgDays.forEach(function(day){var row=client.rules.hours&&client.rules.hours[day];hours[day]={open:row&&row.open||'',close:row&&row.close||''};});values['rules.hours']=JSON.stringify(hours);values['rules.appointmentHours']=Object.hasOwn(client.rules,'appointmentHours')?JSON.stringify(client.rules.appointmentHours):'';return values;
   }
@@ -1103,7 +1250,9 @@
   function cfgPhoneField(name) { return ['owner.phone','owner.backupPhone','phone.businessNumber','phone.transferTo'].indexOf(name)>=0; }
   function cfgPhoneDigits(value) { var digits=String(value||'').replace(/\D/g,'');return digits.length===11&&digits[0]==='1'?digits.slice(1):digits; }
   // The same phone number in another format is the same saved fact, never a conflict. Other values compare exactly.
-  function cfgSame(name,a,b) {return a===b||cfgPhoneField(name)&&typeof a==='string'&&typeof b==='string'&&cfgValidPhone(a)&&cfgValidPhone(b)&&cfgPhoneDigits(a)===cfgPhoneDigits(b);}
+  function cfgSame(name,a,b) {return a===b||cfgPhoneField(name)&&typeof a==='string'&&typeof b==='string'&&cfgValidPhone(a)&&cfgValidPhone(b)&&cfgPhoneDigits(a)===cfgPhoneDigits(b)||name==='rules.bypass'&&typeof a==='string'&&typeof b==='string'&&cfgPredictable(name,a)&&cfgPredictable(name,b)&&cfgNorm(name,a)===cfgNorm(name,b);}
+  // A value whose stored form the desk can predict exactly. Anything else can only stay unconfirmed after a lost response.
+  function cfgPredictable(name,value) {return name!=='rules.bypass'||String(value||'').split('\n').map(function(row){return row.trim();}).filter(Boolean).every(function(line){return cfgValidPhone(line);});}
   function cfgFeeRow(line) {var m=line.match(/^(.*?)[:\-–]\s*(\$?[\d,.]+[^(]*)(?:\((.*)\))?$/);return m?{label:m[1].trim(),amount:m[2].trim(),note:(m[3]||'').trim()}:{label:line,amount:'',note:''};}
   // The form value as the server will store it, through the same parsing the save sends (fee and question rows, phone digits, website origins, trimmed lines).
   // Used only to recognise our own stored values after a lost response; a value it cannot predict simply stays unconfirmed.
@@ -1112,6 +1261,8 @@
     if(cfgPhoneField(name))return cfgValidPhone(value)?cfgPhoneDigits(value):value.trim();
     if(name==='fees')return lines.map(function(line){var row=cfgFeeRow(line);return row.label+': '+row.amount+(row.note?' ('+row.note+')':'');}).join('\n');
     if(name==='faq')return lines.map(function(line){var i=line.indexOf('?');return i<0?line:line.slice(0,i+1).trim()+' '+line.slice(i+1).trim();}).join('\n');
+    // Always-ring-through numbers are stored one per line as +1 and ten digits; legacy saves also drop repeats.
+    if(name==='rules.bypass'){var numbers=lines.map(function(line){return cfgValidPhone(line)?'+1'+cfgPhoneDigits(line):line;});if(!(data&&data.client&&data.client.onboarding&&data.client.onboarding.version===1))numbers=numbers.filter(function(number,index){return numbers.indexOf(number)===index;});return numbers.join('\n');}
     if(name==='widget.allowedOrigins')return lines.map(function(line){try{var url=new URL(line);return line.replace(/\/$/,'')===url.origin?url.origin:line;}catch(error){return line;}}).join('\n');
     if(cfgArrayFields.indexOf(name)>=0)return lines.join('\n');
     if(name==='rules.hours'||name==='rules.appointmentHours'){try{return value?JSON.stringify(canon(JSON.parse(value))):'';}catch(error){return value;}}
@@ -1119,7 +1270,12 @@
     return value.trim();
   }
   // Fields the server re-derives from a submitted source field; their movement is explained by our own save.
-  function cfgDerived(changed) {var out=[];if(changed.indexOf('business.hours')>=0)out.push('rules.hours');if(changed.some(function(name){return name.indexOf('rules.emergencies.')===0;}))$('cfg').querySelectorAll('[name^="rules.emergencies."]').forEach(function(field){out.push(field.name);});return out;}
+  // The hours table is rebuilt from the hours text. An emergency field that was not submitted is only re-normalized
+  // from its saved value, so it may move only when the move is that normalization (trimmed lines), never to new content.
+  function cfgDerived(changed,latestValues,base) {var out=[];if(changed.indexOf('business.hours')>=0)out.push('rules.hours');if(changed.some(function(name){return name.indexOf('rules.emergencies.')===0;}))$('cfg').querySelectorAll('[name^="rules.emergencies."]').forEach(function(field){var name=field.name;if(changed.indexOf(name)<0&&latestValues&&base&&cfgNorm(name,latestValues[name])===cfgNorm(name,base[name]))out.push(name);});return out;}
+  // Self-service workspaces carry revisions on every read; legacy workspaces have none, and their reads are still the latest saved details.
+  function cfgSelfService(result) { return !!(result&&result.client&&result.client.onboarding&&result.client.onboarding.version===1); }
+  function cfgLatestReadable(result) { return !!(result&&result.client&&(!cfgSelfService(result)||/^[a-f0-9]{64}$/.test(result.configurationRevision||'')&&/^[a-f0-9]{64}$/.test(result.editRevision||''))); }
   function cfgStatus(kind,message) { $('cfg').dataset.saveState=kind;if($('saveMsg').textContent!==message)$('saveMsg').textContent=message;$('saveCfg').disabled=cfgBusy||acctBusy||websiteBusy||cfgClosed;$('cfg').setAttribute('aria-busy',String(cfgBusy));$('cfgCheckLatest').disabled=cfgBusy||acctBusy;$('cfgKeepEdits').disabled=cfgBusy||acctBusy;$('saveAcct').disabled=cfgBusy||acctBusy||websiteBusy||cfgClosed;cfgWebNext(); }
   function cfgIncomplete(setup) { return !!(setup&&setup.channels&&setup.channels.web&&setup.channels.web.blockers.some(function(row){return row.id==='rules'||row.id==='handoff';})); }
   function cfgWebImpact(setup) {
@@ -1181,7 +1337,22 @@
     var current=cfgRead(),preserve={};Object.keys(current).forEach(function(name){if(current[name]!==snapshot[name])preserve[name]=current[name];});var saved=cfgFromClient(result.client);cfgFill(saved,preserve);cfgBaseline=saved;cfgRevision=result.configurationRevision;cfgEditRevision=result.editRevision;cfgFence++;data.client=result.client;if(result.setup)data.setup=result.setup;if(result.configurationRevision)data.configurationRevision=result.configurationRevision;if(result.editRevision)data.editRevision=result.editRevision;cfgDirty=cfgChanges(cfgRead(),cfgBaseline).length>0;cfgConflict=null;$('cfgConflictPanel').hidden=true;renderSetup(data);if(!leaving)document.dispatchEvent(new CustomEvent('mc:desk',{detail:data}));
     acctObserve(result,true);cfgBusy=false;cfgStatus(cfgDirty?'dirty':cfgIncomplete(result.setup)?'incomplete':'saved',(note||'')+(cfgDirty?'Submitted changes saved. Your newer edits are still unsaved.'+(cfgWebImpact(result.setup)?' '+cfgWebImpact(result.setup).message:''):cfgSavedMessage(result.setup)));
   }
+  // Busy controls are disabled to block double submits, which drops keyboard focus. When a save or check finishes, return focus
+  // only if it was lost (or still rests on Save or the status): to Check latest while a conflict is open, otherwise to Save.
+  var deskInteraction = 0;
+  // Pointer, touch and wheel always mean the owner moved on. A key counts only when it can move focus from a real element:
+  // modifier keys (including a screen reader's stop-speech Control) and keys pressed while focus was already lost to the page do not.
+  ['pointerdown', 'wheel', 'touchstart'].forEach(function (type) { document.addEventListener(type, function () { deskInteraction++; }, { capture: true, passive: true }); });
+  document.addEventListener('keydown', function (event) { var focused = document.activeElement; if (['Shift', 'Control', 'Alt', 'Meta'].indexOf(event.key) >= 0 || !focused || focused === document.body) return; deskInteraction++; }, { capture: true, passive: true });
+  function deskFocusStart(controls) { return { on: controls.indexOf(document.activeElement) >= 0, mark: deskInteraction }; }
+  function cfgFocusAfter(start) {
+    if (leaving || document.body.dataset.activePage !== 'know' || !start || !start.on || start.mark !== deskInteraction) return;
+    var focused = document.activeElement, lost = !focused || focused === document.body || focused.disabled || !focused.getClientRects().length || focused.closest('[hidden]');
+    if (!$('cfgConflictPanel').hidden && (lost || focused === $('saveCfg') || focused === $('saveMsg'))) { $('cfgCheckLatest').focus(); return; }
+    if (lost) { if (!$('saveCfg').disabled) $('saveCfg').focus(); else $('saveMsg').focus(); }
+  }
   async function saveCfg() {
+    var focusStart=deskFocusStart([$('saveCfg'),$('cfgCheckLatest'),$('cfgKeepEdits'),$('saveMsg')]);
     if(cfgBusy||acctBusy||websiteBusy||cfgClosed||leaving||!data||!cfgBaseline)return;
     var snapshot=cfgRead(),changed=cfgChanges(snapshot,cfgBaseline);if(!changed.length){cfgChanged();return;}
     if(cfgConflict){$('cfgConflictPanel').hidden=false;cfgStatus('conflict','Your edits are kept. Check the latest saved version before saving again.');$('cfgCheckLatest').focus();return;}
@@ -1196,20 +1367,46 @@
           // Saved only with positive evidence: the revision moved, every submitted field is stored as submitted, and nothing else moved except fields derived from ours.
           // An unchanged read never proves "not saved": the original request can still finish after this read. Everything ambiguous stays unconfirmed with the edits kept.
           // With a revision, the next save carries the old one, so a late commit turns it into a 409 that Check latest reconciles. Legacy workspaces carry no revision.
-          var latestValues=cfgFromClient(latest.client),moved=cfgChanges(latestValues,base),derived=cfgDerived(changed),known=latest.client.onboarding?.version===1&&typeof revision==='string'&&typeof latest.configurationRevision==='string';
+          var latestValues=cfgFromClient(latest.client),moved=cfgChanges(latestValues,base),derived=cfgDerived(changed,latestValues,base),known=latest.client.onboarding?.version===1&&typeof revision==='string'&&typeof latest.configurationRevision==='string';
           var landed=changed.every(function(name){return cfgNorm(name,latestValues[name])===cfgNorm(name,snapshot[name]);}),stray=moved.filter(function(name){return changed.indexOf(name)<0&&derived.indexOf(name)<0;});
+          var predictable=changed.every(function(name){return cfgPredictable(name,snapshot[name]);});
           if(known?latest.configurationRevision===revision&&latest.editRevision===editRevision:!moved.length){cfgBusy=false;cfgDirty=cfgChanges(cfgRead(),cfgBaseline).length>0;cfgStatus('dirty',known?'We couldn’t confirm this save yet. Your edits are still here. Save again when you are ready; a save can’t apply twice.':'We couldn’t confirm this save yet. Your edits are still here. Save again to send the same details.');}
-          else if(landed&&!stray.length)cfgSaved(latest,snapshot);
+          else if(landed&&!stray.length&&predictable)cfgSaved(latest,snapshot);
+          else if(!predictable&&!stray.length){cfgBusy=false;cfgDirty=cfgChanges(cfgRead(),cfgBaseline).length>0;cfgConflict={latest:null};$('cfgConflictPanel').hidden=false;$('cfgKeepEdits').hidden=true;cfgStatus('conflict','We couldn’t confirm this save. Your edits are kept; check the latest saved version before saving again.');}
           else{cfgBusy=false;cfgDirty=cfgChanges(cfgRead(),cfgBaseline).length>0;cfgConflict={latest:null};$('cfgConflictPanel').hidden=false;$('cfgKeepEdits').hidden=true;cfgStatus('conflict','We couldn’t confirm this save. Your saved details changed while it was checked. Your edits are kept; check the latest version before saving again.');}
         }catch(readError){if(leaving||generation!==portalGeneration)return;cfgBusy=false;if(readError.status===401||readError.status===403){document.dispatchEvent(new CustomEvent('mc:session-expired'));return;}cfgStatus('error','We could not confirm the save. Your edits are still here; save again when your connection returns.');}
         return;}
       if(error.code==='configuration_changed'){cfgConflict={latest:null};$('cfgConflictPanel').hidden=false;$('cfgKeepEdits').hidden=true;cfgStatus('conflict','Your saved details changed elsewhere. Your edits are kept; check the latest version.');}else{if(error.code==='workspace_closed')cfgClosed=true;cfgStatus('error',(error.message||'The save could not be confirmed.')+' Your edits are still here.');var fieldErrors=Object.assign({},error.fieldErrors||{});if(error.field&&!Object.keys(fieldErrors).length)fieldErrors[error.field]=error.message;var present=cfgRead();Object.keys(fieldErrors).forEach(function(name){var field=cfgField(name),grouped=name.indexOf('rules.appointmentHours')===0?'rules.appointmentHours':name.indexOf('rules.hours')===0?'rules.hours':field&&field.name||name;if(present[grouped]!==snapshot[grouped])delete fieldErrors[name];});if(Object.keys(fieldErrors).length)cfgShowErrors(fieldErrors);}}
-    finally{if(!leaving&&generation===portalGeneration){cfgBusy=false;$('cfg').setAttribute('aria-busy','false');$('saveCfg').disabled=cfgClosed||acctBusy;$('cfgCheckLatest').disabled=false;$('cfgKeepEdits').disabled=false;reviewState(data);acctStatus();}}
+    finally{if(!leaving&&generation===portalGeneration){cfgBusy=false;$('cfg').setAttribute('aria-busy','false');$('saveCfg').disabled=cfgClosed||acctBusy;$('cfgCheckLatest').disabled=false;$('cfgKeepEdits').disabled=false;reviewState(data);acctStatus();cfgFocusAfter(focusStart);}}
   }
   function cfgLabel(name) {var field=cfgField(name),label=field&&field.closest('.form-group')&&field.closest('.form-group').querySelector('label');return name==='rules.appointmentHours'?'Appointment hours':name==='rules.hours'?'Business hours':label?label.textContent.trim():name==='faq'?'Customer questions':name;}
   function cfgDisplay(name,value) {if(cfgPhoneField(name)&&value&&cfgValidPhone(value)){var digits=cfgPhoneDigits(value);return '('+digits.slice(0,3)+') '+digits.slice(3,6)+'-'+digits.slice(6);}if(name==='rules.appointmentHours'){var policy=cfgAppointmentPolicy(value);return policy.mode==='legacy'?'Existing appointment availability':policy.mode==='business'?'Use my business hours':policy.mode==='custom'?'Custom: '+cfgDays.map(function(day){var row=policy.hours[day];return day+': '+(row?row.open+' to '+row.close:'closed');}).join('; '):'Needs review';}if(name==='rules.hours'){var hours=JSON.parse(value);return cfgDays.map(function(day){return day+': '+(hours[day].open||hours[day].close?hours[day].open+' to '+hours[day].close:'closed');}).join('; ');}return typeof value==='boolean'?value?'Yes':'No':value||'Blank';}
-  $('cfgCheckLatest').addEventListener('click',async function(){if(cfgBusy||acctBusy||!cfgConflict||leaving)return;var generation=portalGeneration;cfgBusy=true;cfgStatus('conflict','Checking the latest saved details. Your edits will stay here.');try{var latest=await apiRequest();if(leaving||generation!==portalGeneration)return;if(!latest.client||!/^[a-f0-9]{64}$/.test(latest.configurationRevision||'')||!/^[a-f0-9]{64}$/.test(latest.editRevision||''))throw new Error('The latest saved version could not be read.');if(['cancelled','archived'].includes(latest.client.status)){cfgClosed=true;cfgConflict=null;$('cfgConflictPanel').hidden=true;throw new Error('This workspace no longer accepts business edits.');}cfgConflict.latest={data:latest,values:cfgFromClient(latest.client)};var mine=cfgRead(),latestValues=cfgConflict.latest.values;if(Object.keys(mine).every(function(name){return cfgSame(name,latestValues[name],mine[name]);})){cfgSaved(latest,mine,'Your edits were already saved. ');return;}var changed=cfgChanges(latestValues,cfgBaseline).filter(function(name){return !cfgSame(name,latestValues[name],mine[name]);}),box=$('cfgConflictFields');box.replaceChildren();changed.forEach(function(name){var row=document.createElement('p');row.className='cfg-conflict-field';row.textContent=cfgLabel(name)+' | Latest saved: '+cfgDisplay(name,cfgConflict.latest.values[name])+'. Your current value: '+cfgDisplay(name,mine[name]);box.appendChild(row);});$('cfgConflictText').textContent=changed.length?'Compare these updates with your draft. Keeping your edits saves only the fields you changed.':'The latest saved version is ready to compare. Keeping your edits saves only the fields you changed.';$('cfgKeepEdits').hidden=false;cfgStatus('conflict','Latest saved version checked. Your draft is unchanged; review the differences before continuing.');}catch(error){if(leaving||generation!==portalGeneration)return;if(error.status===401||error.status===403){document.dispatchEvent(new CustomEvent('mc:session-expired'));return;}cfgStatus(cfgClosed?'error':'conflict',error.message+' Your edits are still here.');}finally{if(!leaving&&generation===portalGeneration){cfgBusy=false;$('cfg').setAttribute('aria-busy','false');$('saveCfg').disabled=cfgClosed||acctBusy;$('cfgCheckLatest').disabled=false;$('cfgKeepEdits').disabled=false;}}});
-  $('cfgKeepEdits').addEventListener('click',function(){if(cfgBusy||acctBusy||websiteBusy||cfgClosed||!cfgConflict||!cfgConflict.latest||leaving)return;var mine=cfgRead(),preserve={};cfgChanges(mine,cfgBaseline).forEach(function(name){preserve[name]=mine[name];});var latest=cfgConflict.latest;cfgFill(latest.values,preserve);cfgBaseline=latest.values;cfgRevision=latest.data.configurationRevision;cfgEditRevision=latest.data.editRevision;data=latest.data;cfgConflict=null;$('cfgConflictPanel').hidden=true;cfgFence++;cfgChanged();saveCfg();});
+  // Show the latest saved version against the draft. Returns false when the draft already matches it (then it is confirmed saved).
+  function cfgShowLatest(latest,again) {
+    cfgConflict.latest={data:latest,values:cfgFromClient(latest.client)};var mine=cfgRead(),latestValues=cfgConflict.latest.values;
+    if(Object.keys(mine).every(function(name){return cfgSame(name,latestValues[name],mine[name]);})){cfgSaved(latest,mine,'Your edits were already saved. ');return false;}
+    var changed=cfgChanges(latestValues,cfgBaseline).filter(function(name){return !cfgSame(name,latestValues[name],mine[name]);}),box=$('cfgConflictFields');box.replaceChildren();
+    changed.forEach(function(name){var row=document.createElement('p');row.className='cfg-conflict-field';row.textContent=cfgLabel(name)+' | Latest saved: '+cfgDisplay(name,cfgConflict.latest.values[name])+'. Your current value: '+cfgDisplay(name,mine[name]);box.appendChild(row);});
+    $('cfgConflictText').textContent=changed.length?'Compare these updates with your draft. Keeping your edits saves only the fields you changed.':'The latest saved version is ready to compare. Keeping your edits saves only the fields you changed.';
+    if(!cfgSelfService(latest))$('cfgConflictText').textContent+=' This workspace saves every detail on this page together, so check the latest values shown here first.';
+    $('cfgConflictPanel').hidden=false;$('cfgKeepEdits').hidden=false;
+    cfgStatus('conflict',again?'Your saved details changed again while you reviewed them. Nothing was saved. Review the updated values before keeping your edits.':'Latest saved version checked. Your draft is unchanged; review the differences before continuing.');
+    return true;
+  }
+  $('cfgCheckLatest').addEventListener('click',async function(){var focusStart=deskFocusStart([$('cfgCheckLatest'),$('saveMsg')]);if(cfgBusy||acctBusy||!cfgConflict||leaving)return;var generation=portalGeneration;cfgBusy=true;cfgStatus('conflict','Checking the latest saved details. Your edits will stay here.');try{var latest=await apiRequest();if(leaving||generation!==portalGeneration)return;if(!cfgLatestReadable(latest))throw new Error('The latest saved version could not be read.');if(['cancelled','archived'].includes(latest.client.status)){cfgClosed=true;cfgConflict=null;$('cfgConflictPanel').hidden=true;throw new Error('This workspace no longer accepts business edits.');}cfgShowLatest(latest,false);}catch(error){if(leaving||generation!==portalGeneration)return;if(error.status===401||error.status===403){document.dispatchEvent(new CustomEvent('mc:session-expired'));return;}cfgStatus(cfgClosed?'error':'conflict',error.message+' Your edits are still here.');}finally{if(!leaving&&generation===portalGeneration){cfgBusy=false;$('cfg').setAttribute('aria-busy','false');$('saveCfg').disabled=cfgClosed||acctBusy;$('cfgCheckLatest').disabled=false;$('cfgKeepEdits').disabled=false;cfgFocusAfter(focusStart);}}});
+  $('cfgKeepEdits').addEventListener('click',async function(){if(cfgBusy||acctBusy||websiteBusy||cfgClosed||!cfgConflict||!cfgConflict.latest||leaving)return;
+    // A legacy save sends every field, so first re-read: a change made after Check latest must be shown, never overwritten unseen.
+    if(!cfgSelfService(cfgConflict.latest.data)){
+      var focusStart=deskFocusStart([this,$('cfgCheckLatest'),$('saveMsg')]),generation=portalGeneration,shown=cfgConflict.latest.values,fresh=null;
+      cfgBusy=true;cfgStatus('conflict','Checking that your saved details have not changed again. Your edits will stay here.');
+      try{fresh=await apiRequest();if(leaving||generation!==portalGeneration)return;if(!cfgLatestReadable(fresh))throw new Error('The latest saved version could not be read.');}
+      catch(error){if(leaving||generation!==portalGeneration)return;cfgBusy=false;if(error.status===401||error.status===403){document.dispatchEvent(new CustomEvent('mc:session-expired'));return;}cfgStatus('conflict',error.message+' Nothing was saved. Your edits are still here.');cfgFocusAfter(focusStart);return;}
+      cfgBusy=false;
+      if(cfgChanges(cfgFromClient(fresh.client),shown).length){cfgShowLatest(fresh,true);cfgFocusAfter(focusStart);return;}
+      if(!cfgConflict||!cfgConflict.latest||cfgClosed)return;
+      if(focusStart.on&&focusStart.mark===deskInteraction&&(document.activeElement===document.body||document.activeElement===this))$('saveMsg').focus({preventScroll:true});
+    }
+    else if(document.activeElement===this)$('saveMsg').focus({preventScroll:true});var mine=cfgRead(),preserve={};cfgChanges(mine,cfgBaseline).forEach(function(name){preserve[name]=mine[name];});var latest=cfgConflict.latest;cfgFill(latest.values,preserve);cfgBaseline=latest.values;cfgRevision=latest.data.configurationRevision;cfgEditRevision=latest.data.editRevision;data=latest.data;cfgConflict=null;$('cfgConflictPanel').hidden=true;cfgFence++;cfgChanged();saveCfg();});
 
   $('cfgAdoptAppointmentHours').addEventListener('click',function(){$('cfgAppointmentHoursMode').value='business';cfgAppointmentRefresh(true);cfgChanged();$('cfgAppointmentHoursMode').focus();});
   $('cfgFixAppointmentWindows').addEventListener('click',function(){$('cfg').elements.windows.focus();$('cfg').elements.windows.scrollIntoView({block:'center'});});
@@ -1233,7 +1430,15 @@
     var saved=acctValue(result.client);if($('avgTicket').value===snapshot)$('avgTicket').value=saved;acctEventValue=saved;acctBaseline=saved;acctBaseClient=result.client;acctRevision=result.configurationRevision;acctEditRevision=result.editRevision;acctDirty=$('avgTicket').value!==acctBaseline;acctConflict=null;$('acctConflictPanel').hidden=true;cfgFence++;data.client=result.client;if(result.setup)data.setup=result.setup;data.configurationRevision=result.configurationRevision;data.editRevision=result.editRevision;
     if(!cfgChanges(cfgFromClient(result.client),cfgBaseline).length){cfgRevision=result.configurationRevision;cfgEditRevision=result.editRevision;}renderSetup(data);document.dispatchEvent(new CustomEvent('mc:desk',{detail:data}));acctBusy=false;acctStatus(acctDirty?'dirty':'saved',acctDirty?'Submitted value saved. Your newer value is still unsaved.':'All changes saved.');
   }
+  // Average job value uses the same disabled-while-busy guard as Business details; return lost focus the same way.
+  function acctFocusAfter(start) {
+    if (leaving || document.body.dataset.activePage !== 'account' || !start || !start.on || start.mark !== deskInteraction) return;
+    var focused = document.activeElement, lost = !focused || focused === document.body || focused.disabled || !focused.getClientRects().length || focused.closest('[hidden]');
+    if (!$('acctConflictPanel').hidden && (lost || focused === $('saveAcct') || focused === $('acctMsg'))) { $('acctCheckLatest').focus(); return; }
+    if (lost) { if (!$('saveAcct').disabled) $('saveAcct').focus(); else $('acctMsg').focus(); }
+  }
   async function saveAcct() {
+    var focusStart=deskFocusStart([$('saveAcct'),$('acctCheckLatest'),$('acctKeepEdits'),$('acctMsg')]);
     if(acctBusy||cfgBusy||websiteBusy||cfgClosed||leaving||!data||acctBaseline===null)return;
     var snapshot=$('avgTicket').value;if(snapshot===acctBaseline){acctStatus();return;}
     if(acctConflict){acctStatus('conflict','Your value is kept. Check the latest saved version before saving again.');$('acctCheckLatest').focus();return;}
@@ -1253,12 +1458,12 @@
         }catch(readError){if(leaving||generation!==portalGeneration)return;acctBusy=false;if(readError.status===401||readError.status===403){document.dispatchEvent(new CustomEvent('mc:session-expired'));return;}acctStatus('error','We could not confirm the save. Your value is still here; save again when your connection returns.');}
         return;}
       if(error.code==='configuration_changed'){acctConflict={latest:null};$('acctConflictPanel').hidden=false;$('acctKeepEdits').hidden=true;acctStatus('conflict','Your saved details changed elsewhere. Your value is kept; check the latest version.');}else{if(error.code==='workspace_closed')cfgClosed=true;acctStatus('error',(error.message||'The save could not be confirmed.')+' Your value is still here.');if($('avgTicket').value===snapshot&&error.fieldErrors&&error.fieldErrors['rules.avgTicket']){acctError(error.fieldErrors['rules.avgTicket']);$('avgTicket').focus();}}}
-    finally{if(!leaving&&generation===portalGeneration){acctBusy=false;$('acct').setAttribute('aria-busy','false');$('saveAcct').disabled=cfgClosed;$('acctCheckLatest').disabled=false;$('acctKeepEdits').disabled=false;cfgChanged();}}
+    finally{if(!leaving&&generation===portalGeneration){acctBusy=false;$('acct').setAttribute('aria-busy','false');$('saveAcct').disabled=cfgClosed;$('acctCheckLatest').disabled=false;$('acctKeepEdits').disabled=false;cfgChanged();acctFocusAfter(focusStart);}}
   }
   $('acct').addEventListener('submit',function(event){event.preventDefault();saveAcct();});
   ['input','change'].forEach(function(type){$('avgTicket').addEventListener(type,acctChanged);});
-  $('acctCheckLatest').addEventListener('click',async function(){if(acctBusy||cfgBusy||!acctConflict||leaving)return;var generation=portalGeneration;acctBusy=true;acctStatus('conflict','Checking the latest saved value. Your value will stay here.');cfgChanged();try{var latest=await apiRequest();if(leaving||generation!==portalGeneration)return;if(!latest.client||!/^[a-f0-9]{64}$/.test(latest.configurationRevision||'')||!/^[a-f0-9]{64}$/.test(latest.editRevision||''))throw new Error('The latest saved value could not be read.');if(['cancelled','archived'].includes(latest.client.status)){cfgClosed=true;acctConflict=null;$('acctConflictPanel').hidden=true;throw new Error('This workspace no longer accepts business edits.');}acctConflict.latest=latest;$('acctConflictText').textContent='Latest saved: '+(acctValue(latest.client)||'Blank')+'. Your current value: '+($('avgTicket').value||'Blank')+'. Keeping your value changes only the average job value.';$('acctKeepEdits').hidden=false;acctStatus('conflict','Latest saved value checked. Review it before keeping your value.');}catch(error){if(leaving||generation!==portalGeneration)return;if(error.status===401||error.status===403){document.dispatchEvent(new CustomEvent('mc:session-expired'));return;}acctStatus('conflict',error.message+' Your value is still here.');}finally{if(!leaving&&generation===portalGeneration){acctBusy=false;$('acct').setAttribute('aria-busy','false');$('saveAcct').disabled=cfgClosed;$('acctCheckLatest').disabled=false;$('acctKeepEdits').disabled=false;cfgChanged();}}});
-  $('acctKeepEdits').addEventListener('click',function(){if(acctBusy||cfgBusy||websiteBusy||cfgClosed||!acctConflict||!acctConflict.latest||leaving)return;var latest=acctConflict.latest;acctBaseline=acctValue(latest.client);acctBaseClient=latest.client;acctRevision=latest.configurationRevision;acctEditRevision=latest.editRevision;acctConflict=null;$('acctConflictPanel').hidden=true;acctDirty=$('avgTicket').value!==acctBaseline;saveAcct();});
+  $('acctCheckLatest').addEventListener('click',async function(){var focusStart=deskFocusStart([$('acctCheckLatest'),$('acctMsg')]);if(acctBusy||cfgBusy||!acctConflict||leaving)return;var generation=portalGeneration;acctBusy=true;acctStatus('conflict','Checking the latest saved value. Your value will stay here.');cfgChanged();try{var latest=await apiRequest();if(leaving||generation!==portalGeneration)return;if(!cfgLatestReadable(latest))throw new Error('The latest saved value could not be read.');if(['cancelled','archived'].includes(latest.client.status)){cfgClosed=true;acctConflict=null;$('acctConflictPanel').hidden=true;throw new Error('This workspace no longer accepts business edits.');}acctConflict.latest=latest;$('acctConflictText').textContent='Latest saved: '+(acctValue(latest.client)||'Blank')+'. Your current value: '+($('avgTicket').value||'Blank')+'. Keeping your value changes only the average job value.'+(cfgSelfService(latest)?'':' This workspace does not check for other changes when saving, so your value replaces the one shown.');$('acctKeepEdits').hidden=false;acctStatus('conflict','Latest saved value checked. Review it before keeping your value.');}catch(error){if(leaving||generation!==portalGeneration)return;if(error.status===401||error.status===403){document.dispatchEvent(new CustomEvent('mc:session-expired'));return;}acctStatus('conflict',error.message+' Your value is still here.');}finally{if(!leaving&&generation===portalGeneration){acctBusy=false;$('acct').setAttribute('aria-busy','false');$('saveAcct').disabled=cfgClosed;$('acctCheckLatest').disabled=false;$('acctKeepEdits').disabled=false;cfgChanged();acctFocusAfter(focusStart);}}});
+  $('acctKeepEdits').addEventListener('click',function(){if(acctBusy||cfgBusy||websiteBusy||cfgClosed||!acctConflict||!acctConflict.latest||leaving)return;if(document.activeElement===this)$('acctMsg').focus({preventScroll:true});var latest=acctConflict.latest;acctBaseline=acctValue(latest.client);acctBaseClient=latest.client;acctRevision=latest.configurationRevision;acctEditRevision=latest.editRevision;acctConflict=null;$('acctConflictPanel').hidden=true;acctDirty=$('avgTicket').value!==acctBaseline;saveAcct();});
   $('legal').addEventListener('submit', function (e) {
     e.preventDefault(); var f = e.target;
     apiRequest('PUT', { legal: { legalName: f.elements['legalName'].value, ein: f.elements['ein'].value, businessType: f.elements['businessType'].value, street: f.elements['street'].value, city: f.elements['city'].value, state: f.elements['state'].value, zip: f.elements['zip'].value } })
@@ -1279,7 +1484,8 @@
       try { sessionStorage.removeItem('mc-owner-visit-pending-v1:'+slug); sessionStorage.removeItem('mc-onboarding-session-v1'); } catch (error) { /* Session is revoked on the server. */ }
       button.hidden = true; $('retryLoad').hidden = true;
       history.replaceState(null, '', location.pathname);
-      recover('Signed out. Use an email sign-in link to open your workspace again.');
+      try { localStorage.removeItem(RETURN_ROUTE_KEY); } catch (error) { /* Nothing to return to after a chosen sign-out. */ }
+      recover('Signed out. Use an email sign-in link to open your workspace again.', true);
       $('portalContent').innerHTML = '';
     } catch (error) { if (!ownerSession && !key) return; leaving = false; cfgBusy = false; acctBusy = false; websiteBusy=false; reviewBusy=false;
       if(interruptedExport){exportBusy=false;['expBookings','expLeads','expConvs','expCustomers'].forEach(function(id){$(id).disabled=false;});$('accountDownloads').setAttribute('aria-busy','false');$('exportMessage').dataset.error='true';$('exportMessage').textContent='Sign out could not be confirmed. Your earlier download was interrupted; try the download again.';}
@@ -1392,7 +1598,8 @@
         // An unanswered question leaves the conversation and returns to the input, so the next send stays a normal user/assistant exchange.
         var message = error.name === 'AbortError' ? 'The reply took too long and did not arrive.' : error instanceof TypeError ? 'The reply did not arrive.' : error.message;
         if (!finished) { if (question.isConnected) question.remove(); if (bubble && bubble.isConnected) bubble.remove(); var later = /allowance|unavailable/.test(message); if (!$('chatIn').value.trim()) { $('chatIn').value = text; message += ' Your question is back in the message box; send it again' + (later ? ' when replies are available.' : '.'); } else message = (/did not arrive/.test(message) ? '' : message + ' ') + 'The reply to “' + (text.length > 80 ? text.slice(0, 79) + '…' : text) + '” did not arrive. Send it again when ' + (later ? 'replies are available.' : 'you’re ready.'); }
-        add('sys', message); practiceStatus(message); $('testPreview').textContent = message;
+        // The conversation log announces the message once: clear the status first, and end the log's busy state before adding it.
+        practiceStatus(''); msgs.setAttribute('aria-busy', 'false'); add('sys', message); $('testPreview').textContent = message;
       }
     }
     finally { if (!finished) { var unanswered = transcript.indexOf(turn); if (unanswered >= 0) transcript.splice(unanswered, 1); } clearTimeout(timeout); if (chatController === controller) { clearPracticePending(); chatController = null; practiceControls(false); if (!leaving && $('chatIn')) $('chatIn').focus(); if(!leaving){document.dispatchEvent(new CustomEvent('mc:guide-state-change'));if(proofRecorded&&practiceGeneration===portalGeneration&&data?.setup?.revision===practiceRevision&&data.client.setupProof?.testedRevision===practiceRevision&&data.client.setupProof?.testMode==='live'&&!cfgDirty&&!cfgBusy)document.dispatchEvent(new CustomEvent('mc:guide-step-complete',{detail:{step:'practice',revision:practiceRevision,slug:slug}}));} } }
