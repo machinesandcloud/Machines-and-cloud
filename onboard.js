@@ -140,7 +140,8 @@
     if (message) gateStatus.textContent = message;
   }
   // A dropped or timed-out connection never shows the browser's own error text; callers word the next step.
-  function connectionError(error) { var timedOut = !!error && error.name === 'AbortError', lost = new Error(timedOut ? 'Machines & Cloud took too long to answer. Check your connection and try again.' : 'We couldn’t reach Machines & Cloud. Check your connection and try again.'); lost.name = timedOut ? 'AbortError' : 'ConnectionError'; lost.code = 'connection'; return lost; }
+  // A server reply that isn't JSON (such as a gateway page) is 'unavailable', not the owner's connection.
+  function connectionError(error, unavailable) { var timedOut = !unavailable && !!error && error.name === 'AbortError', lost = new Error(unavailable ? 'Machines & Cloud couldn’t answer right now. Try again in a moment.' : timedOut ? 'Machines & Cloud took too long to answer. Check your connection and try again.' : 'We couldn’t reach Machines & Cloud. Check your connection and try again.'); lost.name = timedOut ? 'AbortError' : 'ConnectionError'; lost.code = unavailable ? 'unavailable' : 'connection'; return lost; }
   async function request(path, method, body) {
     var generation = accessGeneration;
     var headers = { 'Content-Type': 'application/json' }; if (session) headers.Authorization = 'Bearer ' + session;
@@ -155,7 +156,7 @@
         }
         throw expired;
       }
-      var data; try { data = await response.json(); } catch (error) { if (response.ok || response.status >= 500) throw connectionError(error); data = {}; }
+      var data; try { data = await response.json(); } catch (error) { if (response.ok || response.status >= 500) throw connectionError(error, !response.ok); data = {}; }
       if (!response.ok) {
         var failure = new Error(data.message || 'We could not confirm that request. Please try again.'); failure.code = data.error; failure.status = response.status; failure.field = data.field; throw failure;
       }
@@ -233,7 +234,7 @@
       if (!result.marketingPending && Object.prototype.hasOwnProperty.call(saveBody, 'marketingConsent')) marketingSavedVersion = preferenceVersion;
       dirty = JSON.stringify(collect()) !== JSON.stringify(snapshot) || i !== step || marketingVersion !== preferenceVersion;
       draftStatus.textContent = result.marketingPending ? 'Your answers are saved. Your email preference could not be confirmed; it will retry when you save or continue.' : 'Saved. You can leave and continue later.';
-    }).catch(function (error) { if (generation !== accessGeneration) return; dirty = true; draftStatus.textContent = (error.code === 'connection' ? 'Your latest changes couldn’t be saved. Check your connection.' : error.message) + ' Your changes are still on this page.'; throw error; });
+    }).catch(function (error) { if (generation !== accessGeneration) return; dirty = true; draftStatus.textContent = (error.code === 'connection' ? 'Your latest changes couldn’t be saved. Check your connection.' : error.code === 'unavailable' ? 'Machines & Cloud couldn’t save your changes right now.' : error.message) + ' Your changes are still on this page.'; throw error; });
     saving = pending;
     try { await pending; } finally { if (saving === pending) saving = null; }
     if (generation !== accessGeneration) return;
@@ -541,8 +542,10 @@
       workspace(result.portal);
     } catch (error) {
       if (generation !== accessGeneration) return;
-      // The create call is safe to repeat: the server returns the workspace already made for this email instead of a second one.
-      var message = error.code !== 'connection' ? error.message : creating ? 'We couldn’t confirm that your workspace was created. Your answers are saved, and it may already be ready. Select Create my workspace again. If it was created, you’ll get that same workspace, not a second one.' : 'We couldn’t save your answers. Check your connection, then select ' + (submittedStep === steps.length - 1 ? 'Create my workspace' : 'Save and continue') + ' again. Your answers are still on this page.';
+      // The create call is safe to repeat: the server returns the workspace already made for this email, with the answers it first received.
+      // Name the button shown now; a lost save after advancing leaves the page on the next step.
+      var lost = error.code === 'connection' || error.code === 'unavailable', button = i === steps.length - 1 ? 'Create my workspace' : 'Save and continue';
+      var message = !lost ? error.message : creating ? 'We couldn’t confirm that your workspace was created. Your answers are saved, and it may already be ready. Select Create my workspace again. If it was created, you’ll get that same workspace, not a second one. Changes you make now may not reach it, but you can update details in your workspace.' : 'We couldn’t save your latest answers' + (error.code === 'connection' ? '. Check your connection.' : ' right now.') + ' They’re still on this page and will save when you select ' + button + '.';
       var hasField = error.field && revealFieldError(error.field, message);
       setErrorSummary(hasField ? 'Check the highlighted field to continue.' : message);
       if (!hasField) focusError(err);

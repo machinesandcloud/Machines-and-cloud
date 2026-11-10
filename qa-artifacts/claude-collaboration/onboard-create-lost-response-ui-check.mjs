@@ -30,7 +30,7 @@ const { chromium } = await import(pathToFileURL(playwrightPath).href);
 const browser = await chromium.launch(process.env.MC_PLAYWRIGHT_EXECUTABLE ? { executablePath: process.env.MC_PLAYWRIGHT_EXECUTABLE, headless: true } : { channel: 'chrome', headless: true });
 let ip = 10;
 
-// fault: { path, method, when: 'after' | 'before', remaining } loses one matching response.
+// fault: { path, method, when: 'after' | 'before' | 'html502', remaining, skip } loses one matching response after `skip` matching requests pass.
 async function newContext(width, row, session) {
   const context = await browser.newContext({ viewport: { width, height: width >= 1000 ? 900 : 844 }, reducedMotion: 'reduce' });
   if (session) await context.addInitScript(value => sessionStorage.setItem('mc-onboarding-session-v1', value), session);
@@ -40,8 +40,10 @@ async function newContext(width, row, session) {
     if (url.origin !== base) { report.blockedBrowser.push({ origin: url.origin, pathname: url.pathname }); return route.abort('blockedbyclient'); }
     if (url.pathname.startsWith('/api/')) {
       if (!handlers[url.pathname]) { report.forbiddenApi.push({ method: incoming.method(), path: url.pathname }); return route.fulfill({ status: 404, contentType: 'application/json', body: '{"error":"qa_route_not_allowed"}' }); }
-      const fault = row.fault && row.fault.remaining > 0 && row.fault.path === url.pathname && row.fault.method === incoming.method() ? row.fault : null;
-      if (fault) fault.remaining--;
+      const matched = row.fault && row.fault.remaining > 0 && row.fault.path === url.pathname && row.fault.method === incoming.method() ? row.fault : null;
+      const fault = matched && !(matched.skip > 0) ? matched : null;
+      if (matched && matched.skip > 0) matched.skip--; else if (fault) fault.remaining--;
+      if (fault?.when === 'html502') { row.events.push('gateway 502 HTML for ' + incoming.method() + ' ' + url.pathname); report.requests.push({ id: row.id, method: incoming.method(), path: url.pathname, status: 502, fake: 'html' }); return route.fulfill({ status: 502, contentType: 'text/html', body: '<!doctype html><title>Bad gateway</title><h1>502 Bad Gateway</h1>' }); }
       if (fault?.when === 'before') { row.events.push('lost ' + incoming.method() + ' ' + url.pathname + ' before the handler ran'); report.requests.push({ id: row.id, method: incoming.method(), path: url.pathname, lost: 'before' }); return route.abort('connectionfailed'); }
       const req = new Request(url, { method: incoming.method(), headers: incoming.headers(), ...(['GET', 'HEAD'].includes(incoming.method()) ? {} : { body: incoming.postData() }) });
       const response = await handlers[url.pathname](req, { ip: clientIp });
@@ -78,16 +80,16 @@ async function signIn(page, email) {
   await page.goto(delivery.link); await page.locator('#ob').waitFor({ state: 'visible' }); await onStep(page, 1);
   return page.evaluate(() => sessionStorage.getItem('mc-onboarding-session-v1'));
 }
-async function toStep4(page, row) {
+async function toStep3(page, row) {
   await page.locator('#name').fill('Create QA Owner'); await page.locator('#phone').fill('7135550101'); await advance(page, 1);
   await page.locator('#business').fill(row.business); await page.locator('#trade').selectOption('HVAC'); await page.locator('#services').fill('AC repair'); await page.locator('#serviceArea').fill('Katy'); await page.locator('#spanish').selectOption('no'); await page.locator('#hours').fill('Mon to Fri 7 to 6'); await advance(page, 2);
-  await page.locator('#windows').fill('8 to 12\n12 to 5'); await advance(page, 3);
 }
+async function toStep4(page, row) { await toStep3(page, row); await page.locator('#windows').fill('8 to 12\n12 to 5'); await advance(page, 3); }
 const workspacesFor = async email => { const out = []; for (const slug of await store.list('clients', '')) { const client = await store.getClient(slug); if (client?.owner?.email === email) out.push(slug); } return out; };
 const errorState = page => page.evaluate(() => ({ err: document.getElementById('err').hidden ? '' : document.getElementById('err').innerText, button: document.getElementById('next').textContent, buttonEnabled: !document.getElementById('next').disabled, step4: document.querySelector('fieldset[data-step="4"]').classList.contains('on'), done: document.getElementById('done').classList.contains('on'), focusOnError: document.activeElement === document.getElementById('err'), notes: document.getElementById('notes')?.value }));
 
 const scenarios = [];
-for (const width of [1440, 390]) scenarios.push(['create-lost-after-handler', width], ['create-lost-before-handler', width], ['autosave-lost', width], ['reopen-lost', width]);
+for (const width of [1440, 390]) scenarios.push(['create-lost-after-handler', width], ['create-lost-before-handler', width], ['autosave-lost', width], ['reopen-lost', width], ['advance-save-lost', width], ['edit-after-lost-create', width], ['autosave-502', width]);
 for (const [kind, width] of scenarios) {
   const row = { id: kind + '-' + width, kind, width, business: `Create QA ${kind} ${width}`, events: [], overflow: [], pageErrors: [] }; report.scenarios.push(row);
   const email = `qa-create-${kind}-${width}@example.test`, contexts = [];
@@ -115,6 +117,38 @@ for (const [kind, width] of scenarios) {
       row.workspacesAfterRetry = await workspacesFor(email);
       check(`${row.id}: retry lands in exactly one workspace`, row.workspacesAfterRetry.length === 1 && row.workspacesAfterRetry[0] === slug && (row.fault.when === 'before' || row.workspacesAfterLoss[0] === slug), { slug, after: row.workspacesAfterRetry });
       await shot(page, row.id + '-retried');
+    } else if (kind === 'advance-save-lost') {
+      // Step 3 saves, the page moves to step 4, then the save of the new position is lost.
+      await toStep3(page, row); await page.locator('#windows').fill('8 to 12\n12 to 5'); await page.locator('#draft-status').filter({ hasText: 'Saved.' }).waitFor();
+      row.fault = { path: '/api/access', method: 'PUT', when: 'before', remaining: 1, skip: 1 };
+      await page.locator('#next').click(); await page.waitForFunction(() => !document.getElementById('err').hidden && !document.getElementById('next').disabled);
+      row.lostState = await errorState(page); row.overflow.push(['error', await overflow(page)]);
+      row.visibleButtons = await page.evaluate(() => [...document.querySelectorAll('#ob button')].filter(b => b.offsetParent && getComputedStyle(b).visibility !== 'hidden').map(b => b.textContent.trim()));
+      await shot(page, row.id + '-error');
+      check(`${row.id}: lost save after advancing names only the button on the page`, row.lostState.step4 && row.lostState.err.includes(row.lostState.button.trim()) && row.visibleButtons.includes(row.lostState.button.trim()) && !row.visibleButtons.includes('Save and continue') && !row.lostState.err.includes('Save and continue'), { err: row.lostState.err, visibleButtons: row.visibleButtons });
+      check(`${row.id}: lost save after advancing shows no raw text or em dash and keeps the answers`, !RAW.test(row.lostState.err) && !/—/.test(row.lostState.err) && /still on this page/.test(row.lostState.err), row.lostState.err);
+      check(`${row.id}: no workspace is created by the lost save`, (await workspacesFor(email)).length === 0);
+    } else if (kind === 'edit-after-lost-create') {
+      await toStep4(page, row); await page.locator('#notes').fill('Original notes');
+      row.fault = { path: '/api/onboard', method: 'POST', when: 'after', remaining: 1 };
+      await page.locator('#next').click(); await page.waitForFunction(() => !document.getElementById('err').hidden && !document.getElementById('next').disabled);
+      row.lostState = await errorState(page); row.overflow.push(['error', await overflow(page)]);
+      await shot(page, row.id + '-error');
+      check(`${row.id}: lost create warns that changes made now may not reach a workspace that was already created`, /changes you make now may not/i.test(row.lostState.err) && /update (?:any )?details in your workspace/i.test(row.lostState.err), row.lostState.err);
+      check(`${row.id}: lost create copy shows no raw text or em dash`, !RAW.test(row.lostState.err) && !/—/.test(row.lostState.err), row.lostState.err);
+      await page.locator('#notes').fill('Edited after the lost response'); await page.locator('#next').click(); await page.locator('#done.on').waitFor();
+      row.overflow.push(['done', await overflow(page)]);
+      const slugs = await workspacesFor(email), client = slugs.length ? await store.getClient(slugs[0]) : null; row.created = { slugs, summary: client?.summary };
+      check(`${row.id}: retry returns the one workspace already created with the answers first sent, as the message warned`, slugs.length === 1 && client.summary === 'Original notes', row.created);
+    } else if (kind === 'autosave-502') {
+      row.fault = { path: '/api/access', method: 'PUT', when: 'html502', remaining: 1 };
+      await page.locator('#name').fill('Create QA Owner');
+      await page.locator('#draft-status').filter({ hasText: /still on this page/ }).waitFor();
+      row.statusText = await page.locator('#draft-status').innerText(); row.overflow.push(['autosave', await overflow(page)]);
+      await shot(page, row.id + '-error');
+      check(`${row.id}: a server 502 during autosave does not blame the owner's connection`, !/connection/i.test(row.statusText) && /right now/i.test(row.statusText) && /still on this page/.test(row.statusText) && !RAW.test(row.statusText) && !/—/.test(row.statusText), row.statusText);
+      await page.locator('#phone').fill('7135550101'); await page.locator('#draft-status').filter({ hasText: 'Saved.' }).waitFor();
+      check(`${row.id}: the next change saves the kept answers`, await page.locator('#name').inputValue() === 'Create QA Owner');
     } else if (kind === 'autosave-lost') {
       row.fault = { path: '/api/access', method: 'PUT', when: 'before', remaining: 1 };
       await page.locator('#name').fill('Create QA Owner');
