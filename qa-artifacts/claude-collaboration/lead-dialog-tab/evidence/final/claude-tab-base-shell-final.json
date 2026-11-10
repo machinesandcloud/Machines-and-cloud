@@ -1,0 +1,580 @@
+{
+  "at": "2026-11-10T08:45:36.091Z",
+  "mode": "Actual owner handlers in-process, memory store, fake model, Playwright-served worktree files; provider env deleted; physical transport denied",
+  "sourceBefore": {
+    "desk-setup-guide.js": "4b3d3b15b199d0e1916474ef5c3bc0db8bad23b08ad251bfc771f0e51f7b6363",
+    "desk-lead-sources.js": "aad869548df36d319e41d6a7913df1d9807fb05a5fb3f03a0c1013fd6899af93",
+    "desk-setup-guide.css": "fa9c98b9d38f3909a779524461085639e9547e6cb20d77ec831383732bf3e663",
+    "desk.html": "5fb1a9be91dc46a0f16ead29691ca693329244b8d624de9ae82db7af4da8ad13",
+    "desk.js": "f4017bc4745bca629f36159c05973b6e7c76c4961fa49ea9cb21dd77bbf428ee",
+    "desk.css": "40bc6c92580591703346f97449d926b0c275245ba8c040cc86968a3f40988502",
+    "desk-lead-sources.css": "5b290deb61d8777f51daff8941c7769ff78bc8e8795bfbca3edcee048d26379a",
+    "netlify/functions/client.mjs": "eafa4e54aae9adcf7e882f09f7daf3797486791178b88ebc1c2e3954cf4a7391",
+    "netlify/functions/lib/lead-connections.mjs": "14d6a77d9110decea5ef6e8587f9358bc669a1e8e64bf33810e301229b6ebcec",
+    "netlify/functions/lib/connection-journey.mjs": "d0f1fc710875864e61c313674d9c6353c4c54af91e69a2c78398199fd12ba37c",
+    "netlify/functions/lib/thumbtack-connection.mjs": "82a99be09bd74d433336b909291453b846c688bc5d6e6a8acc349f2af8c7903f",
+    "qa-artifacts/claude-collaboration/lead-dialog-tab/lead-dialog-tab-ui-check.mjs": "c520e45176df35685d04f66f30840b5ff578c3b794774cfd3557264ca52994b9"
+  },
+  "served": {
+    "desk-setup-guide.css": "fa9c98b9d38f3909a779524461085639e9547e6cb20d77ec831383732bf3e663",
+    "desk-lead-sources.js": "836dcbb99f0cdfdbadc585fe305b2199b94cfe1ed032513837156aa0d0ed4150",
+    "desk-setup-guide.js": "4b3d3b15b199d0e1916474ef5c3bc0db8bad23b08ad251bfc771f0e51f7b6363"
+  },
+  "checks": [
+    {
+      "name": "angi: account, request and waiting steps keep Tab/Shift+Tab inside the dialog; Esc returns to the opener (1440)",
+      "pass": false,
+      "ms": 494,
+      "error": "AssertionError [ERR_ASSERTION]: angi account: focus left the dialog: Tab -> <BODY, document lost focus>; Tab -> <BODY, document lost focus>; Shift+Tab -> <BODY, document lost focus>; Shift+Tab -> <BODY, document lost focus>\n\n1 !== 0\n\n    at keyboardPass (file:///private/tmp/mc-claude-lead-dialog-tab-20261110/qa-artifacts/claude-collaboration/lead-dialog-tab/lead-dialog-tab-ui-check.mjs:206:30)\n    at async file:///private/tmp/mc-claude-lead-dialog-tab-20261110/qa-artifacts/claude-collaboration/lead-dialog-tab/lead-dialog-tab-ui-check.mjs:232:5\n    at async check (file:///private/tmp/mc-claude-lead-dialog-tab-20261110/qa-artifacts/claude-collaboration/lead-dialog-tab/lead-dialog-tab-ui-check.mjs:109:9)\n    at async file:///private/tmp/mc-claude-lead-dialog-tab-20261110/qa-artifacts/claude-collaboration/lead-dialog-tab/lead-dialog-tab-ui-check.mjs:229:3",
+      "state": {
+        "hash": "#setup/angi/prepare",
+        "view": "step",
+        "focus": "leadSourceClose",
+        "heading": "Confirm your Angi account",
+        "text": "Angi setup\n← All connections\nAngi\nStep 1 of 5\nConfirm your Angi account\n\nSave the Angi business ID and contact email. We use these details to prepare your connection request.\n\nBack\nExit setup\nSet up Angi",
+        "controls": [
+          "connectorAllServices:← All connections",
+          "connectorBack:Back",
+          "connectorSaveExit:Exit setup",
+          "setupGuideContinue:Set up Angi"
+        ],
+        "dialog": {
+          "stage": "account",
+          "busy": "false",
+          "text": "Exit setup\nSet up Angi lead delivery\n\nStep 1 of 5 · Your Angi account\n\nConfirm your Angi account below. We will prepare the connection request for you, then guide you through the provider handoff.\n\nYour business ID on the platform\n\nOn the Angi for Pros website, select your company name at the top right; the ID is beside your city and state. In the app, select the person icon, then Account credentials, and find your ID. It uses digits only (0 to 9), such as 12345678.\n\nAccount contact email\n\nSave and prepare request\n\nPrepare your Angi connection to bring new leads into Inbox.",
+          "buttons": [
+            "Exit setup",
+            "Save and prepare request"
+          ]
+        }
+      },
+      "screenshot": "scratchpad/claude-tab-base-shell-final-failure-1.png"
+    },
+    {
+      "name": "thumbtack lead notifications: chooser and pages 1-3 keep Tab/Shift+Tab inside the dialog; Esc returns to the opener (1440)",
+      "pass": false,
+      "ms": 429,
+      "error": "AssertionError [ERR_ASSERTION]: thumbtack chooser: focus left the dialog: Tab -> <BODY, document lost focus>; Tab -> <BODY, document lost focus>; Shift+Tab -> <BODY, document lost focus>; Shift+Tab -> <BODY, document lost focus>\n\n1 !== 0\n\n    at keyboardPass (file:///private/tmp/mc-claude-lead-dialog-tab-20261110/qa-artifacts/claude-collaboration/lead-dialog-tab/lead-dialog-tab-ui-check.mjs:206:30)\n    at async file:///private/tmp/mc-claude-lead-dialog-tab-20261110/qa-artifacts/claude-collaboration/lead-dialog-tab/lead-dialog-tab-ui-check.mjs:244:5\n    at async check (file:///private/tmp/mc-claude-lead-dialog-tab-20261110/qa-artifacts/claude-collaboration/lead-dialog-tab/lead-dialog-tab-ui-check.mjs:109:9)\n    at async file:///private/tmp/mc-claude-lead-dialog-tab-20261110/qa-artifacts/claude-collaboration/lead-dialog-tab/lead-dialog-tab-ui-check.mjs:241:3",
+      "state": {
+        "hash": "#setup/thumbtack/account",
+        "view": "step",
+        "focus": "leadSourceClose",
+        "heading": "Request Thumbtack setup",
+        "text": "Thumbtack setup\n← All connections\nThumbtack\nChoose your connection\nRequest Thumbtack setup\n\nSend your setup request to Machines & Cloud. You do not need a new provider account.\n\nBack\nExit setup\nRequest Thumbtack setup",
+        "controls": [
+          "connectorAllServices:← All connections",
+          "connectorBack:Back",
+          "connectorSaveExit:Exit setup",
+          "setupGuideContinue:Request Thumbtack setup"
+        ],
+        "dialog": {
+          "stage": "self-serve",
+          "busy": "false",
+          "text": "Exit setup\nThumbtack lead notifications\n\nChoose your connection\n\nLead notifications in Inbox\n\nConnect notifications from your Thumbtack business without waiting for partner access. You’ll open Thumbtack to see the customer and reply.\n\nThis saves a lead reference only. Customer details, messages and AI replies are not included.\n\nSet up lead notifications\n\nWe prepare a private address and key. You choose your business and save them in Thumbtack next.\n\nReview partner conversation setup instead",
+          "buttons": [
+            "Exit setup",
+            "Set up lead notifications",
+            "Review partner conversation setup instead"
+          ]
+        }
+      },
+      "screenshot": "scratchpad/claude-tab-base-shell-final-failure-2.png"
+    },
+    {
+      "name": "thumbtack partner route: account, waiting and \"lead notifications instead\" keep Tab/Shift+Tab inside the dialog; Esc returns to the opener (1440)",
+      "pass": false,
+      "ms": 421,
+      "error": "AssertionError [ERR_ASSERTION]: partner account: focus left the dialog: Tab -> <BODY, document lost focus>; Tab -> <BODY, document lost focus>; Shift+Tab -> <BODY, document lost focus>; Shift+Tab -> <BODY, document lost focus>\n\n1 !== 0\n\n    at keyboardPass (file:///private/tmp/mc-claude-lead-dialog-tab-20261110/qa-artifacts/claude-collaboration/lead-dialog-tab/lead-dialog-tab-ui-check.mjs:206:30)\n    at async file:///private/tmp/mc-claude-lead-dialog-tab-20261110/qa-artifacts/claude-collaboration/lead-dialog-tab/lead-dialog-tab-ui-check.mjs:258:5\n    at async check (file:///private/tmp/mc-claude-lead-dialog-tab-20261110/qa-artifacts/claude-collaboration/lead-dialog-tab/lead-dialog-tab-ui-check.mjs:109:9)\n    at async file:///private/tmp/mc-claude-lead-dialog-tab-20261110/qa-artifacts/claude-collaboration/lead-dialog-tab/lead-dialog-tab-ui-check.mjs:254:3",
+      "state": {
+        "hash": "#setup/thumbtack/account",
+        "view": "step",
+        "focus": "leadSourceClose",
+        "heading": "Request Thumbtack setup",
+        "text": "Thumbtack setup\n← All connections\nThumbtack\nStep 1 of 6\nRequest Thumbtack setup\n\nSend your setup request to Machines & Cloud. You do not need a new provider account.\n\nBack\nExit setup\nRequest Thumbtack setup",
+        "controls": [
+          "connectorAllServices:← All connections",
+          "connectorBack:Back",
+          "connectorSaveExit:Exit setup",
+          "setupGuideContinue:Request Thumbtack setup"
+        ],
+        "dialog": {
+          "stage": "account",
+          "busy": "false",
+          "text": "Exit setup\nThumbtack setup\n\nStep 1 of 6 · Your Thumbtack account\n\nConfirm the email on your Thumbtack account. Machines & Cloud prepares the platform connection before you sign in and choose your business.\n\nAccount contact email\n\nRequest Thumbtack setup",
+          "buttons": [
+            "Exit setup",
+            "Request Thumbtack setup"
+          ]
+        }
+      },
+      "screenshot": "scratchpad/claude-tab-base-shell-final-failure-3.png"
+    },
+    {
+      "name": "angi: account, request and waiting steps keep Tab/Shift+Tab inside the dialog; Esc returns to the opener (390)",
+      "pass": false,
+      "ms": 432,
+      "error": "AssertionError [ERR_ASSERTION]: angi account: focus left the dialog: Tab -> <BODY, document lost focus>; Tab -> <BODY, document lost focus>; Shift+Tab -> <BODY, document lost focus>; Shift+Tab -> <BODY, document lost focus>\n\n1 !== 0\n\n    at keyboardPass (file:///private/tmp/mc-claude-lead-dialog-tab-20261110/qa-artifacts/claude-collaboration/lead-dialog-tab/lead-dialog-tab-ui-check.mjs:206:30)\n    at async file:///private/tmp/mc-claude-lead-dialog-tab-20261110/qa-artifacts/claude-collaboration/lead-dialog-tab/lead-dialog-tab-ui-check.mjs:232:5\n    at async check (file:///private/tmp/mc-claude-lead-dialog-tab-20261110/qa-artifacts/claude-collaboration/lead-dialog-tab/lead-dialog-tab-ui-check.mjs:109:9)\n    at async file:///private/tmp/mc-claude-lead-dialog-tab-20261110/qa-artifacts/claude-collaboration/lead-dialog-tab/lead-dialog-tab-ui-check.mjs:229:3",
+      "state": {
+        "hash": "#setup/angi/prepare",
+        "view": "step",
+        "focus": "leadSourceClose",
+        "heading": "Confirm your Angi account",
+        "text": "Angi setup\n← All connections\nAngi\nStep 1 of 5\nConfirm your Angi account\n\nSave the Angi business ID and contact email. We use these details to prepare your connection request.\n\nBack\nExit setup\nSet up Angi",
+        "controls": [
+          "connectorAllServices:← All connections",
+          "connectorBack:Back",
+          "connectorSaveExit:Exit setup",
+          "setupGuideContinue:Set up Angi"
+        ],
+        "dialog": {
+          "stage": "account",
+          "busy": "false",
+          "text": "Exit setup\nSet up Angi lead delivery\n\nStep 1 of 5 · Your Angi account\n\nConfirm your Angi account below. We will prepare the connection request for you, then guide you through the provider handoff.\n\nYour business ID on the platform\n\nOn the Angi for Pros website, select your company name at the top right; the ID is beside your city and state. In the app, select the person icon, then Account credentials, and find your ID. It uses digits only (0 to 9), such as 12345678.\n\nAccount contact email\n\nSave and prepare request\n\nPrepare your Angi connection to bring new leads into Inbox.",
+          "buttons": [
+            "Exit setup",
+            "Save and prepare request"
+          ]
+        }
+      },
+      "screenshot": "scratchpad/claude-tab-base-shell-final-failure-4.png"
+    },
+    {
+      "name": "thumbtack lead notifications: chooser and pages 1-3 keep Tab/Shift+Tab inside the dialog; Esc returns to the opener (390)",
+      "pass": false,
+      "ms": 472,
+      "error": "AssertionError [ERR_ASSERTION]: thumbtack chooser: focus left the dialog: Tab -> <BODY, document lost focus>; Tab -> <BODY, document lost focus>; Shift+Tab -> <BODY, document lost focus>; Shift+Tab -> <BODY, document lost focus>\n\n1 !== 0\n\n    at keyboardPass (file:///private/tmp/mc-claude-lead-dialog-tab-20261110/qa-artifacts/claude-collaboration/lead-dialog-tab/lead-dialog-tab-ui-check.mjs:206:30)\n    at async file:///private/tmp/mc-claude-lead-dialog-tab-20261110/qa-artifacts/claude-collaboration/lead-dialog-tab/lead-dialog-tab-ui-check.mjs:244:5\n    at async check (file:///private/tmp/mc-claude-lead-dialog-tab-20261110/qa-artifacts/claude-collaboration/lead-dialog-tab/lead-dialog-tab-ui-check.mjs:109:9)\n    at async file:///private/tmp/mc-claude-lead-dialog-tab-20261110/qa-artifacts/claude-collaboration/lead-dialog-tab/lead-dialog-tab-ui-check.mjs:241:3",
+      "state": {
+        "hash": "#setup/thumbtack/account",
+        "view": "step",
+        "focus": "leadSourceClose",
+        "heading": "Request Thumbtack setup",
+        "text": "Thumbtack setup\n← All connections\nThumbtack\nChoose your connection\nRequest Thumbtack setup\n\nSend your setup request to Machines & Cloud. You do not need a new provider account.\n\nBack\nExit setup\nRequest Thumbtack setup",
+        "controls": [
+          "connectorAllServices:← All connections",
+          "connectorBack:Back",
+          "connectorSaveExit:Exit setup",
+          "setupGuideContinue:Request Thumbtack setup"
+        ],
+        "dialog": {
+          "stage": "self-serve",
+          "busy": "false",
+          "text": "Exit setup\nThumbtack lead notifications\n\nChoose your connection\n\nLead notifications in Inbox\n\nConnect notifications from your Thumbtack business without waiting for partner access. You’ll open Thumbtack to see the customer and reply.\n\nThis saves a lead reference only. Customer details, messages and AI replies are not included.\n\nSet up lead notifications\n\nWe prepare a private address and key. You choose your business and save them in Thumbtack next.\n\nReview partner conversation setup instead",
+          "buttons": [
+            "Exit setup",
+            "Set up lead notifications",
+            "Review partner conversation setup instead"
+          ]
+        }
+      },
+      "screenshot": "scratchpad/claude-tab-base-shell-final-failure-5.png"
+    },
+    {
+      "name": "thumbtack partner route: account, waiting and \"lead notifications instead\" keep Tab/Shift+Tab inside the dialog; Esc returns to the opener (390)",
+      "pass": false,
+      "ms": 446,
+      "error": "AssertionError [ERR_ASSERTION]: partner account: focus left the dialog: Tab -> <BODY, document lost focus>; Tab -> <BODY, document lost focus>; Shift+Tab -> <BODY, document lost focus>; Shift+Tab -> <BODY, document lost focus>\n\n1 !== 0\n\n    at keyboardPass (file:///private/tmp/mc-claude-lead-dialog-tab-20261110/qa-artifacts/claude-collaboration/lead-dialog-tab/lead-dialog-tab-ui-check.mjs:206:30)\n    at async file:///private/tmp/mc-claude-lead-dialog-tab-20261110/qa-artifacts/claude-collaboration/lead-dialog-tab/lead-dialog-tab-ui-check.mjs:258:5\n    at async check (file:///private/tmp/mc-claude-lead-dialog-tab-20261110/qa-artifacts/claude-collaboration/lead-dialog-tab/lead-dialog-tab-ui-check.mjs:109:9)\n    at async file:///private/tmp/mc-claude-lead-dialog-tab-20261110/qa-artifacts/claude-collaboration/lead-dialog-tab/lead-dialog-tab-ui-check.mjs:254:3",
+      "state": {
+        "hash": "#setup/thumbtack/account",
+        "view": "step",
+        "focus": "leadSourceClose",
+        "heading": "Request Thumbtack setup",
+        "text": "Thumbtack setup\n← All connections\nThumbtack\nStep 1 of 6\nRequest Thumbtack setup\n\nSend your setup request to Machines & Cloud. You do not need a new provider account.\n\nBack\nExit setup\nRequest Thumbtack setup",
+        "controls": [
+          "connectorAllServices:← All connections",
+          "connectorBack:Back",
+          "connectorSaveExit:Exit setup",
+          "setupGuideContinue:Request Thumbtack setup"
+        ],
+        "dialog": {
+          "stage": "account",
+          "busy": "false",
+          "text": "Exit setup\nThumbtack setup\n\nStep 1 of 6 · Your Thumbtack account\n\nConfirm the email on your Thumbtack account. Machines & Cloud prepares the platform connection before you sign in and choose your business.\n\nAccount contact email\n\nRequest Thumbtack setup",
+          "buttons": [
+            "Exit setup",
+            "Request Thumbtack setup"
+          ]
+        }
+      },
+      "screenshot": "scratchpad/claude-tab-base-shell-final-failure-6.png"
+    }
+  ],
+  "observations": [
+    {
+      "where": "angi account",
+      "width": 1440,
+      "start": "h2#leadSourceTitle Set up Angi lead delivery",
+      "controls": [
+        "button#leadSourceClose Exit setup",
+        "input#leadSourceBusiness ",
+        "input#leadSourceEmail tab-1-1440@example.test",
+        "button#leadSourcePrepare Save and prepare request"
+      ],
+      "forward": [
+        "input#leadSourceBusiness ",
+        "input#leadSourceEmail tab-1-1440@example.test",
+        "button#leadSourcePrepare Save and prepare request",
+        "<BODY, document lost focus>",
+        "button#leadSourceClose Exit setup",
+        "input#leadSourceBusiness ",
+        "input#leadSourceEmail tab-1-1440@example.test",
+        "button#leadSourcePrepare Save and prepare request",
+        "<BODY, document lost focus>",
+        "button#leadSourceClose Exit setup"
+      ],
+      "backward": [
+        "<BODY, document lost focus>",
+        "button#leadSourcePrepare Save and prepare request",
+        "input#leadSourceEmail tab-1-1440@example.test",
+        "input#leadSourceBusiness ",
+        "button#leadSourceClose Exit setup",
+        "<BODY, document lost focus>",
+        "button#leadSourcePrepare Save and prepare request",
+        "input#leadSourceEmail tab-1-1440@example.test",
+        "input#leadSourceBusiness ",
+        "button#leadSourceClose Exit setup"
+      ],
+      "escaped": [
+        "Tab -> <BODY, document lost focus>",
+        "Tab -> <BODY, document lost focus>",
+        "Shift+Tab -> <BODY, document lost focus>",
+        "Shift+Tab -> <BODY, document lost focus>"
+      ],
+      "pass": false,
+      "failures": [
+        "focus left the dialog: Tab -> <BODY, document lost focus>; Tab -> <BODY, document lost focus>; Shift+Tab -> <BODY, document lost focus>; Shift+Tab -> <BODY, document lost focus>"
+      ]
+    },
+    {
+      "where": "thumbtack chooser",
+      "width": 1440,
+      "start": "h2#leadSourceTitle Thumbtack lead notifications",
+      "controls": [
+        "button#leadSourceClose Exit setup",
+        "button#selfServePrepare Set up lead notifications",
+        "button#selfServeNative Review partner conversation setup instea"
+      ],
+      "forward": [
+        "button#selfServePrepare Set up lead notifications",
+        "button#selfServeNative Review partner conversation setup instea",
+        "<BODY, document lost focus>",
+        "button#leadSourceClose Exit setup",
+        "button#selfServePrepare Set up lead notifications",
+        "button#selfServeNative Review partner conversation setup instea",
+        "<BODY, document lost focus>",
+        "button#leadSourceClose Exit setup"
+      ],
+      "backward": [
+        "<BODY, document lost focus>",
+        "button#selfServeNative Review partner conversation setup instea",
+        "button#selfServePrepare Set up lead notifications",
+        "button#leadSourceClose Exit setup",
+        "<BODY, document lost focus>",
+        "button#selfServeNative Review partner conversation setup instea",
+        "button#selfServePrepare Set up lead notifications",
+        "button#leadSourceClose Exit setup"
+      ],
+      "escaped": [
+        "Tab -> <BODY, document lost focus>",
+        "Tab -> <BODY, document lost focus>",
+        "Shift+Tab -> <BODY, document lost focus>",
+        "Shift+Tab -> <BODY, document lost focus>"
+      ],
+      "pass": false,
+      "failures": [
+        "focus left the dialog: Tab -> <BODY, document lost focus>; Tab -> <BODY, document lost focus>; Shift+Tab -> <BODY, document lost focus>; Shift+Tab -> <BODY, document lost focus>"
+      ]
+    },
+    {
+      "where": "partner account",
+      "width": 1440,
+      "start": "h2#leadSourceTitle Thumbtack setup",
+      "controls": [
+        "button#leadSourceClose Exit setup",
+        "input#leadSourceEmail tab-3-1440@example.test",
+        "button#leadSourcePrepare Request Thumbtack setup"
+      ],
+      "forward": [
+        "input#leadSourceEmail tab-3-1440@example.test",
+        "button#leadSourcePrepare Request Thumbtack setup",
+        "<BODY, document lost focus>",
+        "button#leadSourceClose Exit setup",
+        "input#leadSourceEmail tab-3-1440@example.test",
+        "button#leadSourcePrepare Request Thumbtack setup",
+        "<BODY, document lost focus>",
+        "button#leadSourceClose Exit setup"
+      ],
+      "backward": [
+        "<BODY, document lost focus>",
+        "button#leadSourcePrepare Request Thumbtack setup",
+        "input#leadSourceEmail tab-3-1440@example.test",
+        "button#leadSourceClose Exit setup",
+        "<BODY, document lost focus>",
+        "button#leadSourcePrepare Request Thumbtack setup",
+        "input#leadSourceEmail tab-3-1440@example.test",
+        "button#leadSourceClose Exit setup"
+      ],
+      "escaped": [
+        "Tab -> <BODY, document lost focus>",
+        "Tab -> <BODY, document lost focus>",
+        "Shift+Tab -> <BODY, document lost focus>",
+        "Shift+Tab -> <BODY, document lost focus>"
+      ],
+      "pass": false,
+      "failures": [
+        "focus left the dialog: Tab -> <BODY, document lost focus>; Tab -> <BODY, document lost focus>; Shift+Tab -> <BODY, document lost focus>; Shift+Tab -> <BODY, document lost focus>"
+      ]
+    },
+    {
+      "where": "angi account",
+      "width": 390,
+      "start": "h2#leadSourceTitle Set up Angi lead delivery",
+      "controls": [
+        "button#leadSourceClose Exit setup",
+        "input#leadSourceBusiness ",
+        "input#leadSourceEmail tab-4-390@example.test",
+        "button#leadSourcePrepare Save and prepare request"
+      ],
+      "forward": [
+        "input#leadSourceBusiness ",
+        "input#leadSourceEmail tab-4-390@example.test",
+        "button#leadSourcePrepare Save and prepare request",
+        "<BODY, document lost focus>",
+        "button#leadSourceClose Exit setup",
+        "input#leadSourceBusiness ",
+        "input#leadSourceEmail tab-4-390@example.test",
+        "button#leadSourcePrepare Save and prepare request",
+        "<BODY, document lost focus>",
+        "button#leadSourceClose Exit setup"
+      ],
+      "backward": [
+        "<BODY, document lost focus>",
+        "button#leadSourcePrepare Save and prepare request",
+        "input#leadSourceEmail tab-4-390@example.test",
+        "input#leadSourceBusiness ",
+        "button#leadSourceClose Exit setup",
+        "<BODY, document lost focus>",
+        "button#leadSourcePrepare Save and prepare request",
+        "input#leadSourceEmail tab-4-390@example.test",
+        "input#leadSourceBusiness ",
+        "button#leadSourceClose Exit setup"
+      ],
+      "escaped": [
+        "Tab -> <BODY, document lost focus>",
+        "Tab -> <BODY, document lost focus>",
+        "Shift+Tab -> <BODY, document lost focus>",
+        "Shift+Tab -> <BODY, document lost focus>"
+      ],
+      "pass": false,
+      "failures": [
+        "focus left the dialog: Tab -> <BODY, document lost focus>; Tab -> <BODY, document lost focus>; Shift+Tab -> <BODY, document lost focus>; Shift+Tab -> <BODY, document lost focus>"
+      ]
+    },
+    {
+      "where": "thumbtack chooser",
+      "width": 390,
+      "start": "h2#leadSourceTitle Thumbtack lead notifications",
+      "controls": [
+        "button#leadSourceClose Exit setup",
+        "button#selfServePrepare Set up lead notifications",
+        "button#selfServeNative Review partner conversation setup instea"
+      ],
+      "forward": [
+        "button#selfServePrepare Set up lead notifications",
+        "button#selfServeNative Review partner conversation setup instea",
+        "<BODY, document lost focus>",
+        "button#leadSourceClose Exit setup",
+        "button#selfServePrepare Set up lead notifications",
+        "button#selfServeNative Review partner conversation setup instea",
+        "<BODY, document lost focus>",
+        "button#leadSourceClose Exit setup"
+      ],
+      "backward": [
+        "<BODY, document lost focus>",
+        "button#selfServeNative Review partner conversation setup instea",
+        "button#selfServePrepare Set up lead notifications",
+        "button#leadSourceClose Exit setup",
+        "<BODY, document lost focus>",
+        "button#selfServeNative Review partner conversation setup instea",
+        "button#selfServePrepare Set up lead notifications",
+        "button#leadSourceClose Exit setup"
+      ],
+      "escaped": [
+        "Tab -> <BODY, document lost focus>",
+        "Tab -> <BODY, document lost focus>",
+        "Shift+Tab -> <BODY, document lost focus>",
+        "Shift+Tab -> <BODY, document lost focus>"
+      ],
+      "pass": false,
+      "failures": [
+        "focus left the dialog: Tab -> <BODY, document lost focus>; Tab -> <BODY, document lost focus>; Shift+Tab -> <BODY, document lost focus>; Shift+Tab -> <BODY, document lost focus>"
+      ]
+    },
+    {
+      "where": "partner account",
+      "width": 390,
+      "start": "h2#leadSourceTitle Thumbtack setup",
+      "controls": [
+        "button#leadSourceClose Exit setup",
+        "input#leadSourceEmail tab-6-390@example.test",
+        "button#leadSourcePrepare Request Thumbtack setup"
+      ],
+      "forward": [
+        "input#leadSourceEmail tab-6-390@example.test",
+        "button#leadSourcePrepare Request Thumbtack setup",
+        "<BODY, document lost focus>",
+        "button#leadSourceClose Exit setup",
+        "input#leadSourceEmail tab-6-390@example.test",
+        "button#leadSourcePrepare Request Thumbtack setup",
+        "<BODY, document lost focus>",
+        "button#leadSourceClose Exit setup"
+      ],
+      "backward": [
+        "<BODY, document lost focus>",
+        "button#leadSourcePrepare Request Thumbtack setup",
+        "input#leadSourceEmail tab-6-390@example.test",
+        "button#leadSourceClose Exit setup",
+        "<BODY, document lost focus>",
+        "button#leadSourcePrepare Request Thumbtack setup",
+        "input#leadSourceEmail tab-6-390@example.test",
+        "button#leadSourceClose Exit setup"
+      ],
+      "escaped": [
+        "Tab -> <BODY, document lost focus>",
+        "Tab -> <BODY, document lost focus>",
+        "Shift+Tab -> <BODY, document lost focus>",
+        "Shift+Tab -> <BODY, document lost focus>"
+      ],
+      "pass": false,
+      "failures": [
+        "focus left the dialog: Tab -> <BODY, document lost focus>; Tab -> <BODY, document lost focus>; Shift+Tab -> <BODY, document lost focus>; Shift+Tab -> <BODY, document lost focus>"
+      ]
+    }
+  ],
+  "screenshots": [
+    "scratchpad/claude-tab-base-shell-final-fail-angi-account-1440.png",
+    "scratchpad/claude-tab-base-shell-final-failure-1.png",
+    "scratchpad/claude-tab-base-shell-final-fail-thumbtack-chooser-1440.png",
+    "scratchpad/claude-tab-base-shell-final-failure-2.png",
+    "scratchpad/claude-tab-base-shell-final-fail-partner-account-1440.png",
+    "scratchpad/claude-tab-base-shell-final-failure-3.png",
+    "scratchpad/claude-tab-base-shell-final-fail-angi-account-390.png",
+    "scratchpad/claude-tab-base-shell-final-failure-4.png",
+    "scratchpad/claude-tab-base-shell-final-fail-thumbtack-chooser-390.png",
+    "scratchpad/claude-tab-base-shell-final-failure-5.png",
+    "scratchpad/claude-tab-base-shell-final-fail-partner-account-390.png",
+    "scratchpad/claude-tab-base-shell-final-failure-6.png"
+  ],
+  "requests": [
+    {
+      "slug": "tab-1-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "tab-1-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "tab-2-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "tab-2-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "tab-3-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "tab-3-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "tab-4-390",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "tab-4-390",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "tab-5-390",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "tab-5-390",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "tab-6-390",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "tab-6-390",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    }
+  ],
+  "pageErrors": [],
+  "forbidden": [],
+  "intercepted": [],
+  "physicalNetwork": 0,
+  "handlers": [
+    "/api/client",
+    "/api/access",
+    "/api/onboard",
+    "/api/workspace-billing",
+    "/api/angi",
+    "/api/thumbtack",
+    "/api/thumbtack/self-serve",
+    "/api/thumbtack/connect"
+  ],
+  "pinnedFrom": "/private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/base-0982b756",
+  "browser": {
+    "engine": "bundled chrome-headless-shell",
+    "executable": "/Users/stevengoumnai/Library/Caches/ms-playwright/chromium_headless_shell-1223/chrome-headless-shell-mac-arm64/chrome-headless-shell",
+    "version": "148.0.7778.96"
+  },
+  "tabDiagnostic": false,
+  "sourceAfter": {
+    "desk-setup-guide.js": "4b3d3b15b199d0e1916474ef5c3bc0db8bad23b08ad251bfc771f0e51f7b6363",
+    "desk-lead-sources.js": "aad869548df36d319e41d6a7913df1d9807fb05a5fb3f03a0c1013fd6899af93",
+    "desk-setup-guide.css": "fa9c98b9d38f3909a779524461085639e9547e6cb20d77ec831383732bf3e663",
+    "desk.html": "5fb1a9be91dc46a0f16ead29691ca693329244b8d624de9ae82db7af4da8ad13",
+    "desk.js": "f4017bc4745bca629f36159c05973b6e7c76c4961fa49ea9cb21dd77bbf428ee",
+    "desk.css": "40bc6c92580591703346f97449d926b0c275245ba8c040cc86968a3f40988502",
+    "desk-lead-sources.css": "5b290deb61d8777f51daff8941c7769ff78bc8e8795bfbca3edcee048d26379a",
+    "netlify/functions/client.mjs": "eafa4e54aae9adcf7e882f09f7daf3797486791178b88ebc1c2e3954cf4a7391",
+    "netlify/functions/lib/lead-connections.mjs": "14d6a77d9110decea5ef6e8587f9358bc669a1e8e64bf33810e301229b6ebcec",
+    "netlify/functions/lib/connection-journey.mjs": "d0f1fc710875864e61c313674d9c6353c4c54af91e69a2c78398199fd12ba37c",
+    "netlify/functions/lib/thumbtack-connection.mjs": "82a99be09bd74d433336b909291453b846c688bc5d6e6a8acc349f2af8c7903f",
+    "qa-artifacts/claude-collaboration/lead-dialog-tab/lead-dialog-tab-ui-check.mjs": "c520e45176df35685d04f66f30840b5ff578c3b794774cfd3557264ca52994b9"
+  },
+  "sourceStable": true,
+  "passed": 0,
+  "total": 6,
+  "ms": 3370
+}
