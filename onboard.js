@@ -51,6 +51,9 @@
   function fillHours() { if (!hoursTouched) fillBusinessTable(parseHours(form.elements.hours.value)); }
   form.elements['hours'].addEventListener('input', fillHours); form.elements['hours'].addEventListener('blur', fillHours);
   function hoursTable() { var t = {}; DAYS.forEach(function (d) { var o = hoursRows.querySelector('input[data-d="' + d + '"][data-k="open"]').value, c = hoursRows.querySelector('input[data-d="' + d + '"][data-k="close"]').value; t[d] = o && c ? { open: o, close: c === '00:00' ? '24:00' : c } : null; }); return t; }
+  // A saved table is the owner's own edit only when it has an open day and differs from what the hours text produces.
+  function sameHours(a, b) { var close = function (row) { return row.close === '00:00' ? '24:00' : row.close; }; return DAYS.every(function (d) { var x = a && a[d] || null, y = b && b[d] || null; return !x === !y && (!x || x.open === y.open && close(x) === close(y)); }); }
+  function customHours(table) { return !!table && typeof table === 'object' && DAYS.some(function (d) { return !!table[d]; }) && !sameHours(table, parseHours(form.elements.hours.value)); }
   var appointmentMode = document.getElementById('appointmentHoursMode'), appointmentRows = document.getElementById('appointmentHoursRows'), appointmentSeeded = false;
   appointmentRows.innerHTML = DAYS.map(function (day) { var label = day.charAt(0).toUpperCase() + day.slice(1); return '<div class="hours-row"><span>' + label + '</span><input class="form-input" type="time" id="appointment-' + day + '-open" aria-label="' + label + ' appointment start time" data-d="' + day + '" data-k="open" disabled><span>to</span><input class="form-input" type="time" id="appointment-' + day + '-close" aria-label="' + label + ' appointment end time" data-d="' + day + '" data-k="close" disabled></div>'; }).join('');
   function readAppointmentTable() { var table = {}; DAYS.forEach(function (day) { var open = appointmentRows.querySelector('[data-d="' + day + '"][data-k="open"]').value, close = appointmentRows.querySelector('[data-d="' + day + '"][data-k="close"]').value.trim(); table[day] = open || close ? { open: open, close: open && close === '00:00' ? '24:00' : close } : null; }); return table; }
@@ -254,7 +257,7 @@
     });
     var savedPlan = fields.plan;
     selectPlan(PLAN_IDS.indexOf(savedPlan) >= 0 || savedPlan === 'pro' ? savedPlan : retiredPlanHint ? 'pro' : form.elements.plan.value);
-    if (fields.hoursTable) { try { var hours = JSON.parse(fields.hoursTable); hoursTouched = true; fillBusinessTable(hours); } catch (error) { fillHours(); } } else fillHours();
+    if (fields.hoursTable) { try { var hours = JSON.parse(fields.hoursTable); hoursTouched = customHours(hours); if (hoursTouched) fillBusinessTable(hours); else fillHours(); } catch (error) { fillHours(); } } else fillHours();
     appointmentMode.value = fields.appointmentHoursMode === 'custom' ? 'custom' : 'business'; appointmentSeeded = false;
     if (fields.appointmentHoursTable) { try { fillAppointmentTable(JSON.parse(fields.appointmentHoursTable)); appointmentSeeded = true; } catch (error) { fillAppointmentTable(null); } } else fillAppointmentTable(null);
     updateAppointmentHours(appointmentMode.value === 'custom');
