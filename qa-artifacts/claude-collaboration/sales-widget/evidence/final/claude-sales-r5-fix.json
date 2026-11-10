@@ -1,0 +1,975 @@
+{
+  "at": "2026-11-10T15:08:04.730Z",
+  "widget": "worktree",
+  "widgetFile": null,
+  "mode": "Actual chat handler in-process (memory store, fake model, emptied env, physical transport denied); Playwright-served worktree files; injected failures around the handler; stream-shape fixtures labelled",
+  "served": {
+    "agent-widget.js (served)": "023ecc06643d67f1b1d6e4750cb9aa292712acf02af940535b86b944cf07555e",
+    "index.html": "471b25d6aae88216fe2090a1258ffc4aa19d8718fe8dbb1aaad156d83cc331f4",
+    "about.html": "3a50274273a708972acc1d399e21378698418b5badcf39ba32bf6f7f99c08f9d",
+    "styles.css": "e8ac1b30d0205f99c9499dab7cf3d51e4970f8f69295e9c66f963a12033bd56b",
+    "site-refresh.css": "5c962fe8bf9507c3c639a71c9b046f2ed66d4e066e50e3d2fce91faff2082cc1",
+    "script.js": "acbadd0add3111e505b07155d57a04547cc7f6a38a466809e13a2f3d81cab488",
+    "stories.js": "9ab41df39707ab15f5b9ded30979c90d1a3ddd35bdf9dbea57cb10f28377597f",
+    "signup-intake.js": "7f6e01593eedd12ecf9d768a41a9b43d3976799306825e0bd4d53fc1a29b89d9",
+    "hero-photos.js": "06724a4492702e1b53b166d9734b3244a8a205430e78b47215a1f29d16cc5cbf",
+    "brand-marks.js": "0ad46b72e9f5a42174df67cff8e361ce47adf414a01dde615feb0ddc4d60b8aa",
+    "netlify/functions/chat.mjs": "ff6eeb89edc2ad0f5a05a96428aa05c523135e2d76ea1605d876068c92d291ab",
+    "netlify/functions/lib/agent.mjs": "5bb4f8aac60fb7f81cae7c9a65760b96d02f679c668cf86dba5ccb17ed31319a",
+    "netlify/functions/lib/sales-desk.mjs": "1f3938b34febfec82165514a13adbc67cd5fb55976b918f69da14710dd3bc8ba",
+    "netlify/functions/lib/sales-budget.mjs": "f36e78062b23bc1f715a5522ad955fbd6611504016d78428a70dd292a584d20b",
+    "netlify/functions/lib/fake-model.mjs": "dd230abc17cef0af0232917662c8ecd9cb28eab3d18a9e75919ebc7999869f1e"
+  },
+  "checks": [
+    {
+      "name": "phone /: keyboard open focuses the composer inside a labelled dialog",
+      "pass": true,
+      "detail": {
+        "modal": "true",
+        "role": "dialog",
+        "label": true,
+        "allInert": true,
+        "focus": "mcAgentInput"
+      }
+    },
+    {
+      "name": "phone /: aria-modal is honest (every background child inert)",
+      "pass": true,
+      "detail": {
+        "modal": "true",
+        "role": "dialog",
+        "label": true,
+        "allInert": true,
+        "focus": "mcAgentInput"
+      }
+    },
+    {
+      "name": "phone /: the actual handler's reply is shown and saved as one complete exchange",
+      "pass": true,
+      "detail": {
+        "requests": 1,
+        "turns": 2,
+        "handler": 200
+      }
+    },
+    {
+      "name": "phone /: Esc closes, restores the page and returns focus to the launcher",
+      "pass": true,
+      "detail": {
+        "hidden": true,
+        "inert": false,
+        "focus": "mcAgentLauncher"
+      }
+    },
+    {
+      "name": "phone /: reopening keeps the conversation",
+      "pass": true
+    },
+    {
+      "name": "phone /about.html: keyboard open focuses the composer inside a labelled dialog",
+      "pass": true,
+      "detail": {
+        "modal": "true",
+        "role": "dialog",
+        "label": true,
+        "allInert": true,
+        "focus": "mcAgentInput"
+      }
+    },
+    {
+      "name": "phone /about.html: aria-modal is honest (every background child inert)",
+      "pass": true,
+      "detail": {
+        "modal": "true",
+        "role": "dialog",
+        "label": true,
+        "allInert": true,
+        "focus": "mcAgentInput"
+      }
+    },
+    {
+      "name": "phone /about.html: the actual handler's reply is shown and saved as one complete exchange",
+      "pass": true,
+      "detail": {
+        "requests": 1,
+        "turns": 2,
+        "handler": 200
+      }
+    },
+    {
+      "name": "phone /about.html: Esc closes, restores the page and returns focus to the launcher",
+      "pass": true,
+      "detail": {
+        "hidden": true,
+        "inert": false,
+        "focus": "mcAgentLauncher"
+      }
+    },
+    {
+      "name": "phone /about.html: reopening keeps the conversation",
+      "pass": true
+    },
+    {
+      "name": "phone: Send by keyboard keeps focus on a visible chat control while waiting",
+      "pass": true,
+      "detail": {
+        "onSend": {
+          "id": "mcAgentSend",
+          "tag": "BUTTON",
+          "cls": "btn btn-primary",
+          "text": "Send",
+          "inPanel": true,
+          "visible": true
+        },
+        "during": {
+          "id": "mcAgentStop",
+          "tag": "BUTTON",
+          "cls": "mc-agent-stop",
+          "text": "Stop",
+          "inPanel": true,
+          "visible": true
+        }
+      }
+    },
+    {
+      "name": "phone: Send by keyboard keeps focus on a visible chat control after the reply",
+      "pass": true,
+      "detail": {
+        "id": "mcAgentSend",
+        "tag": "BUTTON",
+        "cls": "btn btn-primary",
+        "text": "Send",
+        "inPanel": true,
+        "visible": true
+      }
+    },
+    {
+      "name": "phone: exactly one request for one Send",
+      "pass": true,
+      "detail": 1
+    },
+    {
+      "name": "phone: a keyboard-chosen suggestion leaves focus on a visible chat control",
+      "pass": true,
+      "detail": {
+        "id": "mcAgentSend",
+        "tag": "BUTTON",
+        "cls": "btn btn-primary",
+        "text": "Send",
+        "inPanel": true,
+        "visible": true
+      }
+    },
+    {
+      "name": "phone: lost response shows plain words, keeps the question and offers Retry",
+      "pass": true,
+      "detail": {
+        "text": "connect right now. Your question is saved. You can retry, or use “Talk with us” below to choose a time.\nRetry this question\nYour question is still here. Try again.\nI can’t connect right now. Your question is saved. You can retry, or use “Talk with us” below to choose a time.\nYour message\nSend\n\nAI assistant. History saved for this tab. Messages go to our AI provider. Privacy\n\nSave chat\nTalk with us"
+      }
+    },
+    {
+      "name": "phone: after a failure focus stays on a visible chat control",
+      "pass": true,
+      "detail": {
+        "id": "mcAgentInput",
+        "tag": "TEXTAREA",
+        "cls": "",
+        "text": "",
+        "inPanel": true,
+        "visible": true
+      }
+    },
+    {
+      "name": "phone: keyboard Retry keeps focus on a visible chat control while waiting",
+      "pass": true,
+      "detail": {
+        "id": "mcAgentStop",
+        "tag": "BUTTON",
+        "cls": "mc-agent-stop",
+        "text": "Stop",
+        "inPanel": true,
+        "visible": true
+      }
+    },
+    {
+      "name": "phone: keyboard Retry keeps focus on a visible chat control after the reply",
+      "pass": true,
+      "detail": {
+        "id": "mcAgentSend",
+        "tag": "BUTTON",
+        "cls": "btn btn-primary",
+        "text": "Send",
+        "inPanel": true,
+        "visible": true
+      }
+    },
+    {
+      "name": "phone: Retry completes once with no duplicate turn",
+      "pass": true,
+      "detail": {
+        "requests": 2,
+        "turns": 2
+      }
+    },
+    {
+      "name": "phone: a non-JSON 502 shows plain recovery copy and Retry, no raw body",
+      "pass": true,
+      "detail": ". You can retry without losing your question.\nRetry this question\nYour question is still here. Try again.\nThat reply didn’t finish. You can retry without losing your question.\nYour message\nSend\n\nAI assistant. History saved for this tab. Messages go to our AI provider. Privacy\n\nSave chat\nTalk with us"
+    },
+    {
+      "name": "phone: Retry after 502 completes",
+      "pass": true
+    },
+    {
+      "name": "phone: the actual handler's 429 shows the allowance copy, keeps the question and a way to talk with us",
+      "pass": true,
+      "detail": {
+        "handler": {
+          "status": 429,
+          "text": "{\"error\":\"sales_daily_limit\",\"message\":\"Today's AI chat allowance is used up. You can still explore the examples, create a workspace or contact us directly.\",\"resetAt\":\"2026-11-11T06:00:00.000Z\"}"
+        },
+        "text": "s question\nYour question is still here. Try again.\nToday’s AI allowance is used up. Save your chat and come back after the daily reset, or use “Talk with us” to choose a time.\nYour message\nSend\n\nAI assistant. History saved for this tab. Messages go to our AI provider. Privacy\n\nSave chat\nTalk with us"
+      }
+    },
+    {
+      "name": "phone: a busy 429 shows plain copy and keeps the question",
+      "pass": true
+    },
+    {
+      "name": "phone: repeated Enter/submit while waiting sends exactly once and keeps the new draft",
+      "pass": true,
+      "detail": {
+        "requests": 1
+      }
+    },
+    {
+      "name": "phone: double-activating Retry sends once",
+      "pass": true,
+      "detail": {
+        "requests": 3
+      }
+    },
+    {
+      "name": "phone: after 20s of waiting the chat says it is still working and that Stop/Retry is available",
+      "pass": true,
+      "detail": {
+        "status": "Still working on this one. You can keep waiting, or choose Stop and try again.",
+        "announced": "Working through your question… | Still working on this one. You can keep waiting, or choose Stop and try again."
+      }
+    },
+    {
+      "name": "phone: closing and reopening mid-reply keeps the wait visible with Stop",
+      "pass": true
+    },
+    {
+      "name": "phone: the slow reply lands after reopening",
+      "pass": true
+    },
+    {
+      "name": "phone: the 85s timeout ends in plain recovery copy with Retry",
+      "pass": true
+    },
+    {
+      "name": "phone: Stop by keyboard leaves focus on a visible chat control (Retry or composer)",
+      "pass": true,
+      "detail": {
+        "id": "",
+        "tag": "BUTTON",
+        "cls": "mc-agent-retry",
+        "text": "Retry this question",
+        "inPanel": true,
+        "visible": true
+      }
+    },
+    {
+      "name": "phone: focus stays on the earlier reply's link when the new reply finishes",
+      "pass": true,
+      "detail": {
+        "before": {
+          "id": "",
+          "tag": "A",
+          "cls": "mc-agent-action",
+          "text": "See it work",
+          "inPanel": true,
+          "visible": true
+        },
+        "after": {
+          "id": "",
+          "tag": "A",
+          "cls": "mc-agent-action",
+          "text": "See it work",
+          "inPanel": true,
+          "visible": true
+        }
+      }
+    },
+    {
+      "name": "phone: a click in the conversation during the wait is not overridden by the finishing reply",
+      "pass": true,
+      "detail": {
+        "clicked": {
+          "id": "",
+          "tag": "BODY",
+          "cls": "theme-light site-refresh reduce-motion",
+          "text": "Skip to content\n\n  \n  \n  See it workConn",
+          "inPanel": false,
+          "visible": true
+        },
+        "afterClick": {
+          "id": "",
+          "tag": "BODY",
+          "cls": "theme-light site-refresh reduce-motion",
+          "text": "Skip to content\n\n  \n  \n  See it workConn",
+          "inPanel": false,
+          "visible": true
+        }
+      }
+    },
+    {
+      "name": "phone: a text selection made during the wait survives the reply",
+      "pass": true,
+      "detail": {
+        "selBefore": 74,
+        "selAfter": 74,
+        "afterSel": {
+          "id": "",
+          "tag": "BODY",
+          "cls": "theme-light site-refresh reduce-motion",
+          "text": "Skip to content\n\n  \n  \n  See it workConn",
+          "inPanel": false,
+          "visible": true
+        }
+      }
+    },
+    {
+      "name": "phone: streamed partial text is not announced; the final reply is announced exactly once",
+      "pass": true,
+      "detail": [
+        {
+          "region": "mcAgentAnnounce",
+          "text": "Working through your question…"
+        },
+        {
+          "region": "mcAgentAnnounce",
+          "text": "Front desk replied: FINAL-ANSWER for your shop."
+        }
+      ]
+    },
+    {
+      "name": "phone: a failure is announced once, without re-reading the question",
+      "pass": true,
+      "detail": [
+        {
+          "region": "mcAgentAnnounce",
+          "text": "Working through your question…"
+        },
+        {
+          "region": "mcAgentAnnounce",
+          "text": "I can’t connect right now. Your question is saved. You can retry, or use “Talk with us” below to choose a time."
+        }
+      ]
+    },
+    {
+      "name": "phone: opening a saved conversation does not read the whole history aloud",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "phone: Esc that ends an IME composition does not close the chat",
+      "pass": true
+    },
+    {
+      "name": "phone: Tab and Shift+Tab never leave the open dialog",
+      "pass": true,
+      "detail": [
+        "mcAgentClose",
+        "ItemDetailDiagnostic$89",
+        "A useful starting point for your busines",
+        "See it work",
+        "Choose a time to talk",
+        "Copy reply",
+        "mcAgentInput",
+        "mcAgentSend",
+        "Privacy",
+        "mcAgentSave",
+        "Talk with us",
+        "mcAgentReset",
+        "mcAgentClose",
+        "ItemDetailDiagnostic$89",
+        "A useful starting point for your busines",
+        "See it work",
+        "Choose a time to talk",
+        "Copy reply",
+        "mcAgentInput",
+        "mcAgentSend",
+        "Privacy",
+        "mcAgentSave",
+        "Talk with us",
+        "mcAgentReset",
+        "mcAgentClose",
+        "ItemDetailDiagnostic$89",
+        "A useful starting point for your busines",
+        "See it work",
+        "Choose a time to talk",
+        "Copy reply"
+      ]
+    },
+    {
+      "name": "phone: suggestion buttons are at least 44px tall",
+      "pass": true,
+      "detail": [
+        {
+          "text": "Show me a customer reply",
+          "w": 175,
+          "h": 44
+        },
+        {
+          "text": "Would this fit my business?",
+          "w": 178,
+          "h": 44
+        },
+        {
+          "text": "Try my customer’s question",
+          "w": 181,
+          "h": 44
+        },
+        {
+          "text": "Hablemos en español",
+          "w": 147,
+          "h": 44
+        }
+      ]
+    },
+    {
+      "name": "phone: every chat control outside running text is at least 44×44px",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "phone: the panel fits the viewport with no horizontal scroll",
+      "pass": true,
+      "detail": {
+        "left": 8,
+        "right": 382,
+        "top": 56,
+        "bottom": 836,
+        "w": 390,
+        "h": 844,
+        "scroll": true
+      }
+    },
+    {
+      "name": "phone: visible chat text meets WCAG AA contrast",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "phone: composer and Close stay inside the visible viewport above a simulated keyboard",
+      "pass": true,
+      "detail": [
+        {
+          "h": 480,
+          "top": 0,
+          "inputTop": 363,
+          "inputBottom": 411,
+          "sendBottom": 411,
+          "closeTop": 23,
+          "ok": true
+        },
+        {
+          "h": 430,
+          "top": 210,
+          "inputTop": 551,
+          "inputBottom": 599,
+          "sendBottom": 599,
+          "closeTop": 233,
+          "ok": true
+        }
+      ]
+    },
+    {
+      "name": "desktop /: keyboard open focuses the composer inside a labelled dialog",
+      "pass": true,
+      "detail": {
+        "modal": "true",
+        "role": "dialog",
+        "label": true,
+        "allInert": true,
+        "focus": "mcAgentInput"
+      }
+    },
+    {
+      "name": "desktop /: aria-modal is honest (every background child inert)",
+      "pass": true,
+      "detail": {
+        "modal": "true",
+        "role": "dialog",
+        "label": true,
+        "allInert": true,
+        "focus": "mcAgentInput"
+      }
+    },
+    {
+      "name": "desktop /: the actual handler's reply is shown and saved as one complete exchange",
+      "pass": true,
+      "detail": {
+        "requests": 1,
+        "turns": 2,
+        "handler": 200
+      }
+    },
+    {
+      "name": "desktop /: Esc closes, restores the page and returns focus to the launcher",
+      "pass": true,
+      "detail": {
+        "hidden": true,
+        "inert": false,
+        "focus": "mcAgentLauncher"
+      }
+    },
+    {
+      "name": "desktop /: reopening keeps the conversation",
+      "pass": true
+    },
+    {
+      "name": "desktop /about.html: keyboard open focuses the composer inside a labelled dialog",
+      "pass": true,
+      "detail": {
+        "modal": "true",
+        "role": "dialog",
+        "label": true,
+        "allInert": true,
+        "focus": "mcAgentInput"
+      }
+    },
+    {
+      "name": "desktop /about.html: aria-modal is honest (every background child inert)",
+      "pass": true,
+      "detail": {
+        "modal": "true",
+        "role": "dialog",
+        "label": true,
+        "allInert": true,
+        "focus": "mcAgentInput"
+      }
+    },
+    {
+      "name": "desktop /about.html: the actual handler's reply is shown and saved as one complete exchange",
+      "pass": true,
+      "detail": {
+        "requests": 1,
+        "turns": 2,
+        "handler": 200
+      }
+    },
+    {
+      "name": "desktop /about.html: Esc closes, restores the page and returns focus to the launcher",
+      "pass": true,
+      "detail": {
+        "hidden": true,
+        "inert": false,
+        "focus": "mcAgentLauncher"
+      }
+    },
+    {
+      "name": "desktop /about.html: reopening keeps the conversation",
+      "pass": true
+    },
+    {
+      "name": "desktop: Send by keyboard keeps focus on a visible chat control while waiting",
+      "pass": true,
+      "detail": {
+        "onSend": {
+          "id": "mcAgentSend",
+          "tag": "BUTTON",
+          "cls": "btn btn-primary",
+          "text": "Send",
+          "inPanel": true,
+          "visible": true
+        },
+        "during": {
+          "id": "mcAgentStop",
+          "tag": "BUTTON",
+          "cls": "mc-agent-stop",
+          "text": "Stop",
+          "inPanel": true,
+          "visible": true
+        }
+      }
+    },
+    {
+      "name": "desktop: Send by keyboard keeps focus on a visible chat control after the reply",
+      "pass": true,
+      "detail": {
+        "id": "mcAgentInput",
+        "tag": "TEXTAREA",
+        "cls": "",
+        "text": "",
+        "inPanel": true,
+        "visible": true
+      }
+    },
+    {
+      "name": "desktop: exactly one request for one Send",
+      "pass": true,
+      "detail": 1
+    },
+    {
+      "name": "desktop: a keyboard-chosen suggestion leaves focus on a visible chat control",
+      "pass": true,
+      "detail": {
+        "id": "mcAgentInput",
+        "tag": "TEXTAREA",
+        "cls": "",
+        "text": "",
+        "inPanel": true,
+        "visible": true
+      }
+    },
+    {
+      "name": "desktop: lost response shows plain words, keeps the question and offers Retry",
+      "pass": true,
+      "detail": {
+        "text": "connect right now. Your question is saved. You can retry, or use “Talk with us” below to choose a time.\nRetry this question\nYour question is still here. Try again.\nI can’t connect right now. Your question is saved. You can retry, or use “Talk with us” below to choose a time.\nYour message\nSend\n\nAI assistant. History saved for this tab. Messages go to our AI provider. Privacy\n\nSave chat\nTalk with us"
+      }
+    },
+    {
+      "name": "desktop: after a failure focus stays on a visible chat control",
+      "pass": true,
+      "detail": {
+        "id": "mcAgentInput",
+        "tag": "TEXTAREA",
+        "cls": "",
+        "text": "",
+        "inPanel": true,
+        "visible": true
+      }
+    },
+    {
+      "name": "desktop: keyboard Retry keeps focus on a visible chat control while waiting",
+      "pass": true,
+      "detail": {
+        "id": "mcAgentStop",
+        "tag": "BUTTON",
+        "cls": "mc-agent-stop",
+        "text": "Stop",
+        "inPanel": true,
+        "visible": true
+      }
+    },
+    {
+      "name": "desktop: keyboard Retry keeps focus on a visible chat control after the reply",
+      "pass": true,
+      "detail": {
+        "id": "mcAgentInput",
+        "tag": "TEXTAREA",
+        "cls": "",
+        "text": "",
+        "inPanel": true,
+        "visible": true
+      }
+    },
+    {
+      "name": "desktop: Retry completes once with no duplicate turn",
+      "pass": true,
+      "detail": {
+        "requests": 2,
+        "turns": 2
+      }
+    },
+    {
+      "name": "desktop: a non-JSON 502 shows plain recovery copy and Retry, no raw body",
+      "pass": true,
+      "detail": ". You can retry without losing your question.\nRetry this question\nYour question is still here. Try again.\nThat reply didn’t finish. You can retry without losing your question.\nYour message\nSend\n\nAI assistant. History saved for this tab. Messages go to our AI provider. Privacy\n\nSave chat\nTalk with us"
+    },
+    {
+      "name": "desktop: Retry after 502 completes",
+      "pass": true
+    },
+    {
+      "name": "desktop: the actual handler's 429 shows the allowance copy, keeps the question and a way to talk with us",
+      "pass": true,
+      "detail": {
+        "handler": {
+          "status": 429,
+          "text": "{\"error\":\"sales_daily_limit\",\"message\":\"Today's AI chat allowance is used up. You can still explore the examples, create a workspace or contact us directly.\",\"resetAt\":\"2026-11-11T06:00:00.000Z\"}"
+        },
+        "text": "s question\nYour question is still here. Try again.\nToday’s AI allowance is used up. Save your chat and come back after the daily reset, or use “Talk with us” to choose a time.\nYour message\nSend\n\nAI assistant. History saved for this tab. Messages go to our AI provider. Privacy\n\nSave chat\nTalk with us"
+      }
+    },
+    {
+      "name": "desktop: a busy 429 shows plain copy and keeps the question",
+      "pass": true
+    },
+    {
+      "name": "desktop: repeated Enter/submit while waiting sends exactly once and keeps the new draft",
+      "pass": true,
+      "detail": {
+        "requests": 1
+      }
+    },
+    {
+      "name": "desktop: double-activating Retry sends once",
+      "pass": true,
+      "detail": {
+        "requests": 3
+      }
+    },
+    {
+      "name": "desktop: after 20s of waiting the chat says it is still working and that Stop/Retry is available",
+      "pass": true,
+      "detail": {
+        "status": "Still working on this one. You can keep waiting, or choose Stop and try again.",
+        "announced": "Working through your question… | Still working on this one. You can keep waiting, or choose Stop and try again."
+      }
+    },
+    {
+      "name": "desktop: closing and reopening mid-reply keeps the wait visible with Stop",
+      "pass": true
+    },
+    {
+      "name": "desktop: the slow reply lands after reopening",
+      "pass": true
+    },
+    {
+      "name": "desktop: the 85s timeout ends in plain recovery copy with Retry",
+      "pass": true
+    },
+    {
+      "name": "desktop: Stop by keyboard leaves focus on a visible chat control (Retry or composer)",
+      "pass": true,
+      "detail": {
+        "id": "",
+        "tag": "BUTTON",
+        "cls": "mc-agent-retry",
+        "text": "Retry this question",
+        "inPanel": true,
+        "visible": true
+      }
+    },
+    {
+      "name": "desktop: focus stays on the earlier reply's link when the new reply finishes",
+      "pass": true,
+      "detail": {
+        "before": {
+          "id": "",
+          "tag": "A",
+          "cls": "mc-agent-action",
+          "text": "See it work",
+          "inPanel": true,
+          "visible": true
+        },
+        "after": {
+          "id": "",
+          "tag": "A",
+          "cls": "mc-agent-action",
+          "text": "See it work",
+          "inPanel": true,
+          "visible": true
+        }
+      }
+    },
+    {
+      "name": "desktop: a click in the conversation during the wait is not overridden by the finishing reply",
+      "pass": true,
+      "detail": {
+        "clicked": {
+          "id": "",
+          "tag": "BODY",
+          "cls": "theme-light site-refresh reduce-motion",
+          "text": "Skip to content\n\n  \n  \n  See it workConn",
+          "inPanel": false,
+          "visible": true
+        },
+        "afterClick": {
+          "id": "",
+          "tag": "BODY",
+          "cls": "theme-light site-refresh reduce-motion",
+          "text": "Skip to content\n\n  \n  \n  See it workConn",
+          "inPanel": false,
+          "visible": true
+        }
+      }
+    },
+    {
+      "name": "desktop: a text selection made during the wait survives the reply",
+      "pass": true,
+      "detail": {
+        "selBefore": 74,
+        "selAfter": 74,
+        "afterSel": {
+          "id": "",
+          "tag": "BODY",
+          "cls": "theme-light site-refresh reduce-motion",
+          "text": "Skip to content\n\n  \n  \n  See it workConn",
+          "inPanel": false,
+          "visible": true
+        }
+      }
+    },
+    {
+      "name": "desktop: streamed partial text is not announced; the final reply is announced exactly once",
+      "pass": true,
+      "detail": [
+        {
+          "region": "mcAgentAnnounce",
+          "text": "Working through your question…"
+        },
+        {
+          "region": "mcAgentAnnounce",
+          "text": "Front desk replied: FINAL-ANSWER for your shop."
+        }
+      ]
+    },
+    {
+      "name": "desktop: a failure is announced once, without re-reading the question",
+      "pass": true,
+      "detail": [
+        {
+          "region": "mcAgentAnnounce",
+          "text": "Working through your question…"
+        },
+        {
+          "region": "mcAgentAnnounce",
+          "text": "I can’t connect right now. Your question is saved. You can retry, or use “Talk with us” below to choose a time."
+        }
+      ]
+    },
+    {
+      "name": "desktop: opening a saved conversation does not read the whole history aloud",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "desktop: Esc that ends an IME composition does not close the chat",
+      "pass": true
+    },
+    {
+      "name": "desktop: Tab and Shift+Tab never leave the open dialog",
+      "pass": true,
+      "detail": [
+        "mcAgentClose",
+        "ItemDetailDiagnostic$89",
+        "A useful starting point for your busines",
+        "See it work",
+        "Choose a time to talk",
+        "Copy reply",
+        "mcAgentInput",
+        "mcAgentSend",
+        "Privacy",
+        "mcAgentSave",
+        "Talk with us",
+        "mcAgentReset",
+        "mcAgentClose",
+        "ItemDetailDiagnostic$89",
+        "A useful starting point for your busines",
+        "See it work",
+        "Choose a time to talk",
+        "Copy reply",
+        "mcAgentInput",
+        "mcAgentSend",
+        "Privacy",
+        "mcAgentSave",
+        "Talk with us",
+        "mcAgentReset",
+        "mcAgentClose",
+        "ItemDetailDiagnostic$89",
+        "A useful starting point for your busines",
+        "See it work",
+        "Choose a time to talk",
+        "Copy reply"
+      ]
+    },
+    {
+      "name": "desktop: suggestion buttons are at least 24px tall",
+      "pass": true,
+      "detail": [
+        {
+          "text": "Show me a customer reply",
+          "w": 175,
+          "h": 38
+        },
+        {
+          "text": "Would this fit my business?",
+          "w": 178,
+          "h": 38
+        },
+        {
+          "text": "Try my customer’s question",
+          "w": 181,
+          "h": 38
+        },
+        {
+          "text": "Hablemos en español",
+          "w": 147,
+          "h": 38
+        }
+      ]
+    },
+    {
+      "name": "desktop: every chat control outside running text is at least 24×24px",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "desktop: the panel fits the viewport with no horizontal scroll",
+      "pass": true,
+      "detail": {
+        "left": 944,
+        "right": 1424,
+        "top": 84,
+        "bottom": 824,
+        "w": 1440,
+        "h": 900,
+        "scroll": true
+      }
+    },
+    {
+      "name": "desktop: visible chat text meets WCAG AA contrast",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "phone: composer text is at least 16px so iOS Safari does not zoom on focus",
+      "pass": true,
+      "detail": 16
+    },
+    {
+      "name": "tablet: composer text is at least 16px so iOS Safari does not zoom on focus",
+      "pass": true,
+      "detail": 16
+    }
+  ],
+  "handlerCalls": 32,
+  "fixtureResponses": 12,
+  "injectedFailures": 14,
+  "externalBlocked": [],
+  "blockedAPI": [],
+  "physicalNetwork": 0,
+  "pageErrors": [],
+  "screenshots": [
+    "scratchpad/claude-sales-r5-fix-phone-controls.png"
+  ],
+  "browser": "channel:chrome",
+  "browserVersion": "156.0.8078.82",
+  "servedAfter": {
+    "agent-widget.js (served)": "023ecc06643d67f1b1d6e4750cb9aa292712acf02af940535b86b944cf07555e",
+    "index.html": "471b25d6aae88216fe2090a1258ffc4aa19d8718fe8dbb1aaad156d83cc331f4",
+    "about.html": "3a50274273a708972acc1d399e21378698418b5badcf39ba32bf6f7f99c08f9d",
+    "styles.css": "e8ac1b30d0205f99c9499dab7cf3d51e4970f8f69295e9c66f963a12033bd56b",
+    "site-refresh.css": "5c962fe8bf9507c3c639a71c9b046f2ed66d4e066e50e3d2fce91faff2082cc1",
+    "script.js": "acbadd0add3111e505b07155d57a04547cc7f6a38a466809e13a2f3d81cab488",
+    "stories.js": "9ab41df39707ab15f5b9ded30979c90d1a3ddd35bdf9dbea57cb10f28377597f",
+    "signup-intake.js": "7f6e01593eedd12ecf9d768a41a9b43d3976799306825e0bd4d53fc1a29b89d9",
+    "hero-photos.js": "06724a4492702e1b53b166d9734b3244a8a205430e78b47215a1f29d16cc5cbf",
+    "brand-marks.js": "0ad46b72e9f5a42174df67cff8e361ce47adf414a01dde615feb0ddc4d60b8aa",
+    "netlify/functions/chat.mjs": "ff6eeb89edc2ad0f5a05a96428aa05c523135e2d76ea1605d876068c92d291ab",
+    "netlify/functions/lib/agent.mjs": "5bb4f8aac60fb7f81cae7c9a65760b96d02f679c668cf86dba5ccb17ed31319a",
+    "netlify/functions/lib/sales-desk.mjs": "1f3938b34febfec82165514a13adbc67cd5fb55976b918f69da14710dd3bc8ba",
+    "netlify/functions/lib/sales-budget.mjs": "f36e78062b23bc1f715a5522ad955fbd6611504016d78428a70dd292a584d20b",
+    "netlify/functions/lib/fake-model.mjs": "dd230abc17cef0af0232917662c8ecd9cb28eab3d18a9e75919ebc7999869f1e"
+  },
+  "sourceStable": true,
+  "passed": 87,
+  "failed": 0
+}

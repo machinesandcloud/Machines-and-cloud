@@ -51,11 +51,27 @@
   root.innerHTML = '<button type="button" class="mc-agent-launcher" id="mcAgentLauncher" aria-expanded="false" aria-controls="mcAgentPanel"><span class="mc-agent-launcher-dot" aria-hidden="true"></span><span>Ask the front desk</span></button>' +
     '<section class="mc-agent-panel" id="mcAgentPanel" role="dialog" aria-modal="true" aria-labelledby="mcAgentTitle" hidden>' +
     '<header class="mc-agent-header"><div class="mc-agent-brand"><span class="mc-agent-avatar" aria-hidden="true">M<span>&</span>C</span><div><strong id="mcAgentTitle">Ask the front desk</strong><span class="mc-agent-sub">AI adviser · Machines &amp; Cloud</span></div></div><div class="mc-agent-header-actions"><button type="button" class="mc-agent-reset" id="mcAgentReset">New chat</button><button type="button" class="mc-agent-close" id="mcAgentClose" aria-label="Close chat">&times;</button></div></header>' +
-    '<div class="mc-agent-messages" id="mcAgentMessages" role="log" aria-label="Conversation" aria-live="polite" aria-relevant="additions"></div>' +
+    '<div class="mc-agent-messages" id="mcAgentMessages" role="region" aria-label="Conversation"></div>' +
     '<div class="mc-agent-chips" id="mcAgentChips"></div>' +
-    '<div class="mc-agent-status" id="mcAgentStatus" role="status"></div>' +
+    '<div class="mc-agent-status" id="mcAgentStatus"></div><div class="sr-only" id="mcAgentAnnounce" role="status" aria-live="polite" aria-atomic="true"></div>' +
     '<form class="mc-agent-form" id="mcAgentForm"><label for="mcAgentInput" class="sr-only">Your message</label><textarea id="mcAgentInput" rows="1" placeholder="Tell me about your business…" maxlength="1500" required></textarea><button type="submit" class="btn btn-primary" id="mcAgentSend">Send</button><button type="button" class="mc-agent-stop" id="mcAgentStop" hidden>Stop</button></form>' +
     '<div class="mc-agent-bottom"><p class="mc-agent-foot">AI assistant. History saved for this tab. Messages go to our AI provider. <a href="/privacy">Privacy</a></p><div class="mc-agent-bottom-actions"><button type="button" class="mc-agent-save" id="mcAgentSave">Save chat</button><a href="https://calendly.com/ngoumnaisteve/30" target="_blank" rel="noopener noreferrer">Talk with us</a></div></div></section>';
+  // Scoped sizing the shared stylesheets don't provide: 44px touch targets, 16px composer text on touch (no iOS zoom),
+  // 24px minimum for the small text buttons everywhere, and an AA-contrast placeholder.
+  var style = el('style'); style.id = 'mcAgentStyle';
+  style.textContent = '#mcAgent .mc-agent-form textarea::placeholder{color:#5d6b82}' +
+    '#mcAgent .mc-agent-copy,#mcAgent .mc-agent-save,#mcAgent .mc-agent-bottom-actions>a{display:inline-flex;align-items:center;min-height:24px}' +
+    '#mcAgent .mc-agent-retry{display:flex;align-items:center;width:fit-content;min-height:24px}' +
+    '@media (pointer:coarse),(max-width:600px){' +
+    '#mcAgent .mc-agent-close{width:44px;height:44px}#mcAgent .mc-agent-reset{min-height:44px;padding:0 12px}' +
+    '#mcAgent .mc-agent-chip,#mcAgent .mc-agent-next .mc-agent-action{display:inline-flex;align-items:center;min-height:44px}' +
+    '#mcAgent .mc-agent-copy,#mcAgent .mc-agent-retry,#mcAgent .mc-agent-save,#mcAgent .mc-agent-bottom-actions>a{min-height:44px;min-width:44px}' +
+    '#mcAgent .mc-agent-retry{margin-top:2px}#mcAgent .mc-agent-copy{margin-top:4px}' +
+    '#mcAgent .mc-agent-bottom-actions{flex-direction:row;align-items:center;gap:14px}#mcAgent .mc-agent-bottom{align-items:center;padding-bottom:6px}' +
+    '#mcAgent .mc-agent-card summary{padding-top:13px;padding-bottom:13px}#mcAgent .mc-agent-form textarea{font-size:16px}}' +
+    // Short visible viewport (phone keyboard open): give the composer the room the larger targets took.
+    '@media (max-height:480px){#mcAgent .mc-agent-messages{min-height:40px}#mcAgent .mc-agent-header{padding-top:6px;padding-bottom:6px}#mcAgent .mc-agent-form{padding-top:8px}}';
+  root.appendChild(style);
   document.body.appendChild(root);
   var launcher = document.getElementById('mcAgentLauncher'), panel = document.getElementById('mcAgentPanel');
   var closeBtn = document.getElementById('mcAgentClose'), resetBtn = document.getElementById('mcAgentReset');
@@ -63,9 +79,26 @@
   var form = document.getElementById('mcAgentForm'), input = document.getElementById('mcAgentInput');
   var sendBtn = document.getElementById('mcAgentSend'), stopBtn = document.getElementById('mcAgentStop');
   var status = document.getElementById('mcAgentStatus'), saveBtn = document.getElementById('mcAgentSave');
+  var announcer = document.getElementById('mcAgentAnnounce');
   var lastFocus = null, inertNodes = [], failureRow = null, viewport;
   input.value = restoredDraft;
 
+  var LIMIT_TEXT = 'Save this conversation, then choose New chat to continue.', SLOW_MS = 15000;
+  var SLOW = 'Still working on this one. You can keep waiting, or choose Stop and try again.';
+  // One polite region speaks each outcome once; streamed fragments and restored history are never read out.
+  function announce(text) {
+    text = String(text || '').replace(/\s+/g, ' ').trim(); if (!text) return;
+    announcer.textContent = announcer.textContent === text ? text + '\u00a0' : text;
+  }
+  function plain(node) {
+    var parts = [], walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT);
+    for (var t = walker.nextNode(); t; t = walker.nextNode()) parts.push(t.data);
+    var text = parts.join(' ').replace(/\s+/g, ' ').trim();
+    return text.length > 1500 ? text.slice(0, 1500) + '… The full reply is in the conversation.' : text;
+  }
+  // A visible, enabled control inside the chat panel.
+  function usable(n) { return !!(n && n.nodeType === 1 && panel.contains(n) && !n.disabled && !n.closest('[hidden]') && n.getClientRects().length); }
+  function coarse() { try { return window.matchMedia('(pointer: coarse)').matches; } catch (_) { return false; } }
   function escapeHtml(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   // DOM-built links keep attributes separate from text, including quotes and HTML in a response.
   function inline(target, text) {
@@ -208,7 +241,7 @@
     sendBtn.hidden = busy; stopBtn.hidden = !busy; sendBtn.disabled = busy || limit;
     input.disabled = limit;
     list.setAttribute('aria-busy', String(busy));
-    if (limit) status.textContent = 'Save this conversation, then choose New chat to continue.';
+    if (limit) { if (status.textContent !== LIMIT_TEXT && !panel.hidden) announce(LIMIT_TEXT); status.textContent = LIMIT_TEXT; }
     else if (!busy && !failedText) status.textContent = '';
   }
   function resizeInput() { input.style.height = 'auto'; input.style.height = Math.min(input.scrollHeight, 110) + 'px'; }
@@ -236,11 +269,21 @@
     generation++; if (active) { active.controller.abort(); clearTimeout(active.timer); active = null; }
     transcript = []; failedText = ''; failureRow = null; input.value = ''; status.textContent = ''; persist(); render(); resizeInput(); input.focus();
   }
+  panel.addEventListener('focusin', function (e) { if (active) { active.focusTarget = e.target; active.userMoved = false; } });
+  panel.addEventListener('pointerdown', function (e) {
+    if (!active) return;
+    var control = e.target.closest && e.target.closest('button, a[href], textarea, summary, [tabindex]');
+    if (control && panel.contains(control)) { active.focusTarget = control; active.userMoved = false; } else active.userMoved = true;
+  });
+  document.addEventListener('selectionchange', function () {
+    var sel = active && window.getSelection && window.getSelection();
+    if (sel && !sel.isCollapsed && sel.anchorNode && panel.contains(sel.anchorNode)) active.userMoved = true;
+  });
   launcher.addEventListener('click', function () { panel.hidden ? open() : close(); });
   closeBtn.addEventListener('click', close); resetBtn.addEventListener('click', reset);
   document.addEventListener('keydown', function (e) {
     if (panel.hidden) return;
-    if (e.key === 'Escape') { e.preventDefault(); close(); return; }
+    if (e.key === 'Escape') { if (e.isComposing || e.keyCode === 229) return; e.preventDefault(); close(); return; }
     if (e.key !== 'Tab') return;
     var focusable = Array.prototype.filter.call(panel.querySelectorAll('button:not([disabled]), a[href], textarea:not([disabled])'), function (n) { return !n.hidden && n.getClientRects().length; });
     if (!focusable.length) return;
@@ -251,7 +294,7 @@
   document.addEventListener('click', function (e) { var t = e.target.closest('[data-open-agent], a[href="#agent"]'); if (t) { e.preventDefault(); open(); } });
   if (window.visualViewport) { viewport = window.visualViewport; viewport.addEventListener('resize', fitViewport); viewport.addEventListener('scroll', fitViewport); }
   input.addEventListener('input', function () { resizeInput(); persist(); });
-  input.addEventListener('keydown', function (e) { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); if (!active) form.requestSubmit(); } });
+  input.addEventListener('keydown', function (e) { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && e.keyCode !== 229) { e.preventDefault(); if (!active) form.requestSubmit(); } });
   form.addEventListener('submit', function (e) {
     e.preventDefault(); if (active) return;
     var text = input.value.trim(); if (!text) return;
@@ -292,9 +335,13 @@
   function send(text) {
     if (!text || active || input.disabled) return false;
     text = text.trim().slice(0, 1500); if (!text) return false;
+    // A keyboard user who activated Send, a suggestion or Retry keeps focus in the chat: those controls hide or go away.
+    var from = document.activeElement, keepFocus = usable(from);
     if (failureRow && failureRow.isConnected) failureRow.remove(); failureRow = null; failedText = '';
-    var request = { controller: new AbortController(), generation: generation, terminal: false, stopped: false, timer: null };
-    active = request; updateControls(); chips.hidden = true; status.textContent = 'Working through your question…';
+    // focusTarget is the chat control the visitor is using; userMoved means they clicked or selected elsewhere since.
+    var request = { controller: new AbortController(), generation: generation, terminal: false, stopped: false, timer: null, slowTimer: null, focusTarget: keepFocus ? from : null, userMoved: false };
+    active = request; updateControls(); chips.hidden = true; status.textContent = 'Working through your question…'; announce(status.textContent);
+    if (keepFocus && !usable(from)) { stopBtn.focus({ preventScroll: true }); request.focusTarget = stopBtn; }
     var userBubble = addMessage('user', text), typing = el('div', 'mc-agent-thinking', 'Working through your question…'); list.appendChild(typing);
     var bubble = null, full = '';
     function current() { return active === request && generation === request.generation && !request.terminal; }
@@ -309,16 +356,17 @@
       if (typeof reply !== 'string' || !reply.trim() || reply.length > 16000) throw new Error('Missing final answer');
       request.terminal = true; typing.remove();
       if (!bubble) bubble = addMessage('agent', reply); else renderText(bubble, reply);
-      var safe = cleanEvents(events); bubble.dataset.reply = reply; renderEvents(bubble, safe);
+      var spoken = plain(bubble), safe = cleanEvents(events); bubble.dataset.reply = reply; renderEvents(bubble, safe);
       transcript.push({ role: 'user', content: text }, { role: 'assistant', content: reply, events: safe });
-      failedText = ''; status.textContent = ''; persist(); scrollDown();
+      failedText = ''; status.textContent = ''; persist(); scrollDown(); announce('Front desk replied: ' + spoken);
     }
     function fail(message) {
       if (!current()) return;
       request.terminal = true; typing.remove(); if (bubble) bubble.parentElement.remove(); userBubble.parentElement.remove();
-      failedText = text; showFailure(text, message); status.textContent = 'Your question is still here. Try again.'; persist();
+      failedText = text; showFailure(text, message); status.textContent = 'Your question is still here. Try again.'; persist(); announce(message);
     }
     request.timer = setTimeout(function () { request.controller.abort(); }, TIMEOUT_MS);
+    request.slowTimer = setTimeout(function () { if (current()) { status.textContent = SLOW; announce(SLOW); } }, SLOW_MS);
     // Save unanswered input separately; it never becomes a fabricated assistant or dangling user turn.
     failedText = text; persist();
     (async function () {
@@ -340,8 +388,18 @@
         else fail(RETRY);
       } catch (err) { fail(request.stopped ? 'Stopped. Your question is saved if you want to retry.' : err && err.name === 'AbortError' ? RETRY : OFFLINE); }
       finally {
-        clearTimeout(request.timer);
-        if (active === request && generation === request.generation) { active = null; updateControls(); if (!panel.hidden && panel.contains(document.activeElement)) input.focus(); }
+        clearTimeout(request.timer); clearTimeout(request.slowTimer);
+        if (active === request && generation === request.generation) {
+          // Re-home focus only when the control in use (Stop, or the one that started this request) went away;
+          // never pull focus from something the visitor is reading. On touch, avoid raising the keyboard over the reply.
+          var a = document.activeElement, target = request.focusTarget;
+          var lost = !request.userMoved && !!target && (a === target || !a || a === document.body) && (target === stopBtn || !usable(target));
+          active = null; updateControls();
+          if (lost && !panel.hidden && !usable(document.activeElement)) {
+            var retry = failedText && failureRow && failureRow.querySelector('.mc-agent-retry');
+            (usable(retry) ? retry : coarse() ? (sendBtn.disabled ? resetBtn : sendBtn) : (input.disabled ? resetBtn : input)).focus({ preventScroll: true });
+          }
+        }
       }
     })();
     return true;
