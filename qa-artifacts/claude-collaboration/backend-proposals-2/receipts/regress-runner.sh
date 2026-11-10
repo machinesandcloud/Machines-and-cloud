@@ -11,6 +11,8 @@ while read -r s; do
   case "$n" in portal-revamp-ui-qa-check) o="scratchpad/portal-revamp-qa-bp08rg.json";; esac
   rm -f "$copy/$o"
   case "$n" in readiness-email-admission-qa-check|managed-email-budget-check|self-service-ai-proof-check|managed-delivery-proof-check) args=("$o");; *) args=(--output "$o");; esac
+  # Browser scripts: PLAYWRIGHT=<path to playwright/index.mjs> adds --playwright.
+  [ -n "$PLAYWRIGHT" ] && args+=(--playwright "$PLAYWRIGHT")
   start=$(date +%s)
   ( cd "$copy" && env -i PATH="$PATH" HOME="$HOME" NODE_OPTIONS="--import=file://$egress" perl -e 'alarm shift; exec @ARGV' 300 node "scripts/$s" "${args[@]}" ) > "$out/$n.log" 2>&1
   code=$?
