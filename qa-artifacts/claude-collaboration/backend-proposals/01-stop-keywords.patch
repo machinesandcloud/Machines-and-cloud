@@ -1,0 +1,150 @@
+--- a/netlify/functions/lib/managed-consent.mjs
++++ b/netlify/functions/lib/managed-consent.mjs
+@@ -1,12 +1,10 @@
+ import { atomicUpdate } from "./store.mjs";
+ import { strictRead } from "./accounts.mjs";
+ import { workspaceTenant } from './workspace-identity.mjs';
++import { classifySMSKeyword } from './sms-keywords.mjs';
+ export const deliveryTenant = workspaceTenant;
+ const key = (c, phone) => `${c.slug}/${deliveryTenant(c)}/${phone}`;
+ const validPhone = phone => typeof phone === "string" && /^\+1[2-9]\d{9}$/.test(phone);
+-const STOP = /^(STOP|STOPALL|UNSUBSCRIBE|CANCEL|END|QUIT|ALTO|PARAR)$/i;
+-const START = /^(START|UNSTOP|EMPEZAR)$/i;
+-const HELP = /^(HELP|INFO|AYUDA)$/i;
+ export const MANAGED_APPOINTMENT_CONSENT_VERSION = "ongoing_appointments_v2";
+ export function managedAppointmentConsentQuestion(c, language = 'en') {
+   if (language === 'es') return `${c.business.name}: ¿quiere confirmaciones, recordatorios y cancelaciones de citas por mensaje, incluidas visitas futuras? Responda SÍ para aceptar. Frecuencia variable. Pueden aplicarse tarifas de mensajes y datos. HELP para ayuda; STOP/ALTO/PARAR para terminar. Puede reservar sin mensajes.`;
+@@ -29,7 +27,9 @@
+     if (row.tenant !== deliveryTenant(c)) throw new Error("Consent identity mismatch");
+     if (row.seen?.[messageSid]) return { result: { ...row, keyword: row.seen[messageSid].keyword, duplicate: true } };
+     if (Object.keys(row.seen || {}).length >= 4096) throw new Error("Consent history needs archival before accepting more messages");
+-    const keyword = STOP.test(word) || providerOptOutType === "STOP" ? "stop" : START.test(word) || providerOptOutType === "START" ? "start" : HELP.test(word) || providerOptOutType === "HELP" ? "help" : "message";
++    // Same normalized vocabulary as the platform line (CTIA 5.1.3); YES/SÍ consent stays exact below.
++    const matched = classifySMSKeyword(word);
++    const keyword = matched === "stop" || providerOptOutType === "STOP" ? "stop" : matched === "start" || providerOptOutType === "START" ? "start" : matched === "help" || providerOptOutType === "HELP" ? "help" : "message";
+     const next = { ...row, transactional: currentProof(row), pendingAsk: currentAsk(row.pendingAsk) ? row.pendingAsk : null, seen: { ...row.seen, [messageSid]: { keyword, at: now } }, lastMessageSid: messageSid, lastInboundAt: now, lastKeyword: keyword, updatedAt: now };
+     const serviceControl=/^(?:APPOINTMENTS|CITAS|YES|SI|SÍ)$/i.test(word)||/^(?:YES\s+)?(?:QUOTE|REQUEST)\s+[a-zA-Z0-9_-]{1,80}$/i.test(word);
+     if(keyword==="message"&&!serviceControl){next.lastServiceReplyAt=now;next.lastServiceReplyMessageSid=messageSid;}
+--- a/netlify/functions/lib/messaging-provider.mjs
++++ b/netlify/functions/lib/messaging-provider.mjs
+@@ -44,7 +44,7 @@
+     case "campaign": return { ...messaging(`Services/${r("service")}/Compliance/Usa2p`, "compliance"), prefix: "QE", paid: true, fields: {
+       BrandRegistrationSid: r("brand"), Description: P.description, MessageFlow: P.messageFlow, MessageSamples: P.messageSamples, UsAppToPersonUsecase: "CUSTOMER_CARE", HasEmbeddedLinks: "true", HasEmbeddedPhone: "true",
+       PrivacyPolicyUrl: P.privacyPolicyUrl, TermsAndConditionsUrl: P.termsAndConditionsUrl, OptInMessage: P.optInMessage, OptOutMessage: P.optOutMessage, HelpMessage: P.helpMessage,
+-      OptInKeywords: ["START", "UNSTOP", "EMPEZAR"], OptOutKeywords: ["STOP", "STOPALL", "UNSUBSCRIBE", "CANCEL", "END", "QUIT", "ALTO", "PARAR"], HelpKeywords: ["HELP", "INFO", "AYUDA"], SubscriberOptIn: "true", AgeGated: "false", DirectLending: "false" },
++      OptInKeywords: ["START", "UNSTOP", "EMPEZAR"], OptOutKeywords: ["STOP", "STOPALL", "UNSUBSCRIBE", "CANCEL", "END", "QUIT", "REVOKE", "OPTOUT", "ALTO", "PARAR"], HelpKeywords: ["HELP", "INFO", "AYUDA"], SubscriberOptIn: "true", AgeGated: "false", DirectLending: "false" },
+       matches: data => data.messaging_service_sid === r("service") && data.brand_registration_sid === r("brand") };
+     case "sender": return { ...messaging(`Services/${r("service")}/PhoneNumbers`, "phone_numbers"), prefix: "PN", fields: { PhoneNumberSid: row.number.sid }, matches: data => data.sid === row.number.sid && data.service_sid === r("service") && data.phone_number === row.number.number };
+     case "number_webhook": return { host: "account", path: `IncomingPhoneNumbers/${row.number.sid}.json`, prefix: "PN", update: true, fields: { SmsUrl: row.inboundUrl, SmsMethod: "POST" }, matches: data => data.sid === row.number.sid && data.phone_number === row.number.number };
+--- a/netlify/functions/lib/platform-sms.mjs
++++ b/netlify/functions/lib/platform-sms.mjs
+@@ -2,12 +2,10 @@
+ import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
+ import { atomicUpdate } from './store.mjs';
+ import { strictRead } from './accounts.mjs';
++import { SMS_KEYWORDS, classifySMSKeyword } from './sms-keywords.mjs';
+ 
+ export const PLATFORM_SMS_WEBHOOK_URL = 'https://machinesandcloud.com/api/platform-sms';
+-export const PLATFORM_SMS_KEYWORDS = Object.freeze({
+-  stop: Object.freeze(['STOP','STOPALL','UNSUBSCRIBE','CANCEL','END','QUIT','REVOKE','OPTOUT','ALTO','PARAR']),
+-  start: Object.freeze(['START','UNSTOP','EMPEZAR']), help: Object.freeze(['HELP','INFO','AYUDA'])
+-});
++export const PLATFORM_SMS_KEYWORDS = SMS_KEYWORDS;
+ const STORE = 'platform_sms_messages', RECEIPTS = 'platform_sms_receipts', KEY = 'inbound_v1', CAPACITY = 500;
+ const phone = value => /^\+1[2-9]\d{9}$/.test(value || '');
+ const hash = value => createHash('sha256').update(value).digest('hex');
+@@ -33,10 +31,11 @@
+     .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g,'').slice(0,1600);
+ }
+ function keyword(body, type) {
+-  const word = body.trim().toUpperCase();
+-  if (PLATFORM_SMS_KEYWORDS.stop.includes(word) || type === 'STOP') return 'stop';
+-  if (PLATFORM_SMS_KEYWORDS.start.includes(word) || type === 'START') return 'start';
+-  if (PLATFORM_SMS_KEYWORDS.help.includes(word) || type === 'HELP') return 'help';
++  // Case, whitespace, punctuation and short polite opt-out phrases are normalized (CTIA 5.1.3).
++  const word = classifySMSKeyword(body);
++  if (word === 'stop' || type === 'STOP') return 'stop';
++  if (word === 'start' || type === 'START') return 'start';
++  if (word === 'help' || type === 'HELP') return 'help';
+   return 'question';
+ }
+ function guidance(body, kind) {
+--- /dev/null
++++ b/netlify/functions/lib/sms-keywords.mjs
+@@ -0,0 +1,76 @@
++// Shared inbound SMS keyword classifier for the platform line and supported shop numbers.
++// CTIA Messaging Principles (May 2023) 5.1.3: opt-out validity "should not be impacted by any
++// de minimis variances ... such as capitalization, punctuation, or any letter-case sensitivities",
++// and normal language ("stop", "end", "unsubscribe", "cancel", "quit", "please opt me out") should be
++// acted on "except where a specific word can result in unintentional opt-out".
++//
++// Rule (conservative; an HVAC/plumbing customer's "It quit" or "make it stop" must stay a conversation):
++// 1. Normalize: drop a trailing "Sent from my iPhone"-style signature line; Unicode NFKD, drop accents,
++//    uppercase; every character that is not a letter, digit or in-word apostrophe becomes a space;
++//    collapse spaces; join OPT [ME] OUT -> OPTOUT and STOP ALL -> STOPALL; a message made only of
++//    single letters is joined ("S T O P" -> STOP).
++// 2. Exact keyword: the whole normalized message is one keyword. STOP list below, plus CANCELAR and
++//    BAJA (Spanish; recognized but not part of the published keyword list). CANCEL, END, QUIT, REVOKE
++//    and CANCELAR count ONLY as the whole message ("cancel my appointment", "it quit", "quit working").
++// 3. Whole-message opt-out phrases (DON'T TEXT ME, DO NOT CONTACT ME, REMOVE MY NUMBER, TAKE ME OFF
++//    YOUR LIST, NO MORE TEXTS, NO MÁS MENSAJES, DEJEN DE ESCRIBIRME, ...), optionally with a leading
++//    PLEASE and trailing courtesy words or AGAIN/ANYMORE.
++// 4. Short polite opt-out: at most 6 words, at least one strong word (STOP, STOPALL, UNSUBSCRIBE,
++//    OPTOUT, ALTO, PARAR, BAJA), every other word from a strict courtesy/object list (PLEASE, ME,
++//    TEXTING, MESSAGES, NOW, THANKS, WRONG NUMBER, POR FAVOR, ...). IT, THE, MY, ALL, THIS and MAS are
++//    deliberately NOT courtesy words: "stop it", "the stop", "my stop", "Mas alto" stay conversations.
++// START and HELP are exact only ("help me", "help, my pipe burst" are conversations).
++// Consent-granting replies (YES, SI, SÍ) are deliberately not handled here and stay exact.
++export const SMS_KEYWORDS = Object.freeze({
++  stop: Object.freeze(['STOP','STOPALL','UNSUBSCRIBE','CANCEL','END','QUIT','REVOKE','OPTOUT','ALTO','PARAR']),
++  start: Object.freeze(['START','UNSTOP','EMPEZAR']), help: Object.freeze(['HELP','INFO','AYUDA'])
++});
++const EXTRA_STOP = new Set(['CANCELAR','BAJA']);
++const STRONG = new Set(['STOP','STOPALL','UNSUBSCRIBE','OPTOUT','ALTO','PARAR','BAJA']);
++const COURTESY = new Set([
++  'PLEASE','PLS','PLZ','NOW','JUST','ME','TEXT','TEXTS','TEXTING','MESSAGE','MESSAGES','MESSAGING','SENDING','SEND','CONTACTING',
++  'THANKS','THANK','YOU','THX','TY','OK','OKAY','WRONG','NUMBER',
++  'POR','FAVOR','YA','GRACIAS','MENSAJES','TEXTOS'
++]);
++const PHRASE_TAIL = new Set(['PLEASE','PLS','PLZ','NOW','THANKS','THANK','YOU','THX','TY','AGAIN','ANYMORE','EVER','POR','FAVOR','GRACIAS','YA']);
++const PHRASES = [
++  /^(?:DONT|DON'T|DO NOT) (?:TEXT|MESSAGE|CONTACT|TEXTING|MESSAGING) ME$/,
++  /^(?:QUIT|STOP) (?:TEXTING|MESSAGING|CONTACTING) ME$/,
++  /^REMOVE (?:ME|MY NUMBER)(?: FROM (?:YOUR|THE|THIS) (?:LIST|TEXTS|MESSAGES))?$/,
++  /^TAKE (?:ME|MY NUMBER) OFF (?:YOUR |THE |THIS )?LIST$/,
++  /^UNSUBSCRIBE (?:ME )?FROM (?:YOUR|THE|THIS) LIST$/,
++  /^NO MORE (?:TEXTS|MESSAGES)$/,
++  /^NO (?:QUIERO )?MAS MENSAJES$/,
++  /^NO ME (?:ESCRIBAN|MANDEN|ENVIEN|TEXTEEN)(?: MAS)?(?: MENSAJES)?$/,
++  /^DEJEN DE (?:ESCRIBIRME|ESCRIBIR|MANDARME MENSAJES|ENVIARME MENSAJES|MANDAR MENSAJES|ENVIAR MENSAJES)$/,
++];
++const MAX_PHRASE_WORDS = 6;
++const SIGNATURE = /^\s*(?:sent from my\b.{0,40}|sent from (?:yahoo|outlook|gmail|aol)\b.{0,40}|get outlook for\b.{0,40}|enviado desde mi\b.{0,40})\s*$/i;
++export function normalizeSMSKeywordText(text) {
++  const lines = String(text ?? '').slice(0, 1600).split(/\r?\n/);
++  while (lines.length > 1 && (SIGNATURE.test(lines.at(-1)) || !lines.at(-1).trim())) lines.pop();
++  const normal = lines.join(' ').normalize('NFKD').replace(/\p{M}+/gu, '').toUpperCase()
++    .replace(/[‘’ʼ]/g, "'")
++    .replace(/[^\p{L}\p{N}']+/gu, ' ').replace(/(^|\s)'+|'+(?=\s|$)/g, '$1')
++    .replace(/\bOPT(?:\s+ME)?\s+OUT\b/g, 'OPTOUT').replace(/\bSTOP\s+ALL\b/g, 'STOPALL').replace(/\s+/g, ' ').trim();
++  return /^(?:\p{L} ){2,}\p{L}$/u.test(normal) ? normal.replace(/ /g, '') : normal;
++}
++function phrase(words) {
++  let start = 0, end = words.length;
++  if (words[0] === 'PLEASE' || words[0] === 'PLS') start = 1;
++  while (end > start + 1 && PHRASE_TAIL.has(words[end - 1])) end--;
++  for (let cut = end; cut <= words.length; cut++) { const core = words.slice(start, cut).join(' '); if (PHRASES.some(rule => rule.test(core))) return true; }
++  return false;
++}
++// Returns 'stop' | 'start' | 'help' | null. STOP wins over START and HELP.
++export function classifySMSKeyword(text) {
++  const normal = normalizeSMSKeywordText(text);
++  if (!normal) return null;
++  if (SMS_KEYWORDS.stop.includes(normal) || EXTRA_STOP.has(normal)) return 'stop';
++  if (SMS_KEYWORDS.start.includes(normal)) return 'start';
++  if (SMS_KEYWORDS.help.includes(normal)) return 'help';
++  const words = normal.split(' ');
++  if (phrase(words)) return 'stop';
++  if (words.length <= MAX_PHRASE_WORDS && words.some(word => STRONG.has(word)) && words.every(word => STRONG.has(word) || COURTESY.has(word))) return 'stop';
++  return null;
++}

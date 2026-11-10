@@ -1,0 +1,138 @@
+{
+  "summary": {
+    "check": "missed-call-promise-check",
+    "repo": "/private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp2-copy/base",
+    "checks": 11,
+    "failed": 7,
+    "providerCalls": 13,
+    "physicalNetwork": 0,
+    "result": "FAIL"
+  },
+  "results": [
+    {
+      "name": "new caller: text accepted, promise spoken and kept, owner told it was sent",
+      "pass": true,
+      "spoken": "Thanks for calling Promise HVAC. We are on a job right now. We are texting you this second so we can get you scheduled. Gracias por llamar. Le enviamos un mensaje de texto ahora mismo.",
+      "owner": "Promise HVAC front desk: missed call from +17135552201. Text-back sent; I will take it from here and text you the lead."
+    },
+    {
+      "name": "new caller, Spanish shop: both promises spoken and kept",
+      "pass": true,
+      "spoken": "Thanks for calling Promise HVAC. We are on a job right now. We are texting you this second so we can get you scheduled. Gracias por llamar. Le enviamos un mensaje de texto ahora mismo."
+    },
+    {
+      "name": "opted-out caller: no text, no promise, owner told they opted out",
+      "pass": false,
+      "error": "promise spoken: Thanks for calling Promise HVAC. We are on a job right now. We are texting you this second so we can get you scheduled. Gracias por llamar. Le enviamos un mensaje de texto ahora mismo.",
+      "spoken": "Thanks for calling Promise HVAC. We are on a job right now. We are texting you this second so we can get you scheduled. Gracias por llamar. Le enviamos un mensaje de texto ahora mismo.",
+      "owner": "Promise HVAC front desk: missed call from +17135552203. They were texted recently or opted out, so no text-back.",
+      "providerCalls": [
+        {
+          "to": "+12815550199",
+          "body": "Promise HVAC front desk: missed call from +17135552203. They were texted recently or opted out, so no text-back.",
+          "mode": "ok"
+        }
+      ]
+    },
+    {
+      "name": "opted-out caller, Spanish shop: no promise in either language",
+      "pass": false,
+      "error": "promise spoken: Thanks for calling Promise HVAC. We are on a job right now. We are texting you this second so we can get you scheduled. Gracias por llamar. Le enviamos un mensaje de texto ahora mismo.",
+      "spoken": "Thanks for calling Promise HVAC. We are on a job right now. We are texting you this second so we can get you scheduled. Gracias por llamar. Le enviamos un mensaje de texto ahora mismo.",
+      "providerCalls": [
+        {
+          "to": "+12815550199",
+          "body": "Promise HVAC front desk: missed call from +17135552204. They were texted recently or opted out, so no text-back.",
+          "mode": "ok"
+        }
+      ]
+    },
+    {
+      "name": "text-back switched off: no text, no promise",
+      "pass": false,
+      "error": "promise spoken: Thanks for calling Promise HVAC. We are on a job right now. We are texting you this second so we can get you scheduled. Gracias por llamar. Le enviamos un mensaje de texto ahora mismo.",
+      "spoken": "Thanks for calling Promise HVAC. We are on a job right now. We are texting you this second so we can get you scheduled. Gracias por llamar. Le enviamos un mensaje de texto ahora mismo.",
+      "owner": "Promise HVAC front desk: missed call from +17135552205. No texting sender yet, so no text-back.",
+      "providerCalls": [
+        {
+          "to": "+12815550199",
+          "body": "Promise HVAC front desk: missed call from +17135552205. No texting sender yet, so no text-back.",
+          "mode": "ok"
+        }
+      ]
+    },
+    {
+      "name": "caller texted in the last 24 hours: second call sends nothing and promises nothing",
+      "pass": false,
+      "error": "promise spoken: Thanks for calling Promise HVAC. We are on a job right now. We are texting you this second so we can get you scheduled. Gracias por llamar. Le enviamos un mensaje de texto ahora mismo.",
+      "spoken": "Thanks for calling Promise HVAC. We are on a job right now. We are texting you this second so we can get you scheduled. Gracias por llamar. Le enviamos un mensaje de texto ahora mismo.",
+      "owner": "Promise HVAC front desk: missed call from +17135552206. They were texted recently or opted out, so no text-back.",
+      "providerCalls": [
+        {
+          "to": "+17135552206",
+          "body": "Hi, this is Promise HVAC. Sorry we missed your call. What can we help with, and is it urgent? / Hola, le saluda Promise HVAC. ¿En qué le podemos ayudar? Reply STOP to opt out. / Responda STOP o ALTO para no recibir mensajes.",
+          "mode": "ok"
+        },
+        {
+          "to": "+12815550199",
+          "body": "Promise HVAC front desk: missed call from +17135552206. Text-back sent; I will take it from here and text you the lead.",
+          "mode": "ok"
+        },
+        {
+          "to": "+12815550199",
+          "body": "Promise HVAC front desk: missed call from +17135552206. They were texted recently or opted out, so no text-back.",
+          "mode": "ok"
+        }
+      ]
+    },
+    {
+      "name": "provider refuses the text: no promise, owner gets the real reason (not 'No texting sender yet')",
+      "pass": false,
+      "error": "promise spoken: Thanks for calling Promise HVAC. We are on a job right now. We are texting you this second so we can get you scheduled. Gracias por llamar. Le enviamos un mensaje de texto ahora mismo.",
+      "spoken": "Thanks for calling Promise HVAC. We are on a job right now. We are texting you this second so we can get you scheduled. Gracias por llamar. Le enviamos un mensaje de texto ahora mismo.",
+      "owner": "Promise HVAC front desk: missed call from +17135552207. No texting sender yet, so no text-back.",
+      "providerCalls": [
+        {
+          "to": "+17135552207",
+          "body": "Hi, this is Promise HVAC. Sorry we missed your call. What can we help with, and is it urgent? / Hola, le saluda Promise HVAC. ¿En qué le podemos ayudar? Reply STOP to opt out. / Responda STOP o ALTO para no recibir mensajes.",
+          "mode": "fail"
+        },
+        {
+          "to": "+12815550199",
+          "body": "Promise HVAC front desk: missed call from +17135552207. No texting sender yet, so no text-back.",
+          "mode": "fail"
+        }
+      ]
+    },
+    {
+      "name": "no caller ID: no text, no promise, owner note does not mention a voicemail",
+      "pass": false,
+      "error": "The input was expected to not match the regular expression /texting you|Le enviamos un mensaje/i. Input:",
+      "spoken": "Thanks for calling Promise HVAC. We are on a job right now. We are texting you this second so we can get you scheduled. Gracias por llamar. Le enviamos un mensaje de texto ahora mismo.",
+      "owner": "Promise HVAC front desk: missed call from unknown. No texting sender yet, so no text-back.",
+      "providerCalls": [
+        {
+          "to": "+12815550199",
+          "body": "Promise HVAC front desk: missed call from unknown. No texting sender yet, so no text-back.",
+          "mode": "ok"
+        }
+      ]
+    },
+    {
+      "name": "no physical transport and no non-Twilio destination",
+      "pass": true
+    },
+    {
+      "name": "texting not configured (send only logged): no promise, owner told texting is not set up",
+      "pass": false,
+      "error": "promise spoken: Thanks for calling Promise HVAC. We are on a job right now. We are texting you this second so we can get you scheduled. Gracias por llamar. Le enviamos un mensaje de texto ahora mismo.",
+      "spoken": "Thanks for calling Promise HVAC. We are on a job right now. We are texting you this second so we can get you scheduled. Gracias por llamar. Le enviamos un mensaje de texto ahora mismo.",
+      "owner": "Promise HVAC front desk: missed call from +17135552208. Text-back sent; I will take it from here and text you the lead.",
+      "providerCalls": []
+    },
+    {
+      "name": "no physical transport and no non-Twilio destination",
+      "pass": true
+    }
+  ]
+}

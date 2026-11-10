@@ -1,0 +1,11 @@
+import net from 'node:net';
+import http from 'node:http';
+import https from 'node:https';
+import tls from 'node:tls';
+import {syncBuiltinESMExports} from 'node:module';
+import {writeFileSync} from 'node:fs';
+let attempts=0;
+const deny=()=>{attempts++;throw new Error('Offline SMS repair check denies physical network');};
+net.connect=net.createConnection=net.Socket.prototype.connect=http.request=http.get=https.request=https.get=tls.connect=deny;
+syncBuiltinESMExports();globalThis.fetch=async()=>deny();
+process.on('exit',()=>{if(process.env.MC_REVIEW_NETWORK_RECEIPT)writeFileSync(process.env.MC_REVIEW_NETWORK_RECEIPT,JSON.stringify({physicalNetworkAttempts:attempts})+'\n');});

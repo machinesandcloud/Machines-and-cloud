@@ -1,0 +1,84 @@
+{
+ "stripCors": true,
+ "requests": [
+  {
+   "method": "OPTIONS",
+   "status": 204,
+   "acao": "http://127.0.0.1:57988",
+   "body": ""
+  },
+  {
+   "method": "POST",
+   "status": 403,
+   "acao": null,
+   "body": "{\"error\":\"paused\",\"message\":\"Website chat is unavailable right now. Please use the shop’s contact details on this website.\",\"turnNotProcessed\":true}"
+  }
+ ],
+ "observed": {
+  "bubbles": [
+   "How can we help?",
+   "Please save my AC service request for tomorrow.",
+   "The reply was interrupted, so we couldn’t confirm the outcome. Please use the shop’s contact details on this website before sending the same request again."
+  ],
+  "pendingTurn": "kept",
+  "composerEnabled": false,
+  "recoveryVisible": true
+ },
+ "consoleErrors": [
+  "Access to fetch at 'http://127.0.0.1:57987/api/chat' from origin 'http://127.0.0.1:57988' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+  "Failed to load resource: net::ERR_FAILED"
+ ],
+ "other": []
+}
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: refused first send clears the pending receipt across origins
++ actual - expected
+
++ {
++   at: '2026-11-10T16:50:17.024Z',
++   id: 'd6ae721b9430a5e52da375fb7fc764b7',
++   request: {
++     client: 'stream-fixture',
++     contact: 'wzg5ala92mwaxemzh',
++     messages: [
++       {
++         content: 'Please save my AC service request for tomorrow.',
++         role: 'user'
++       }
++     ],
++     page: '/',
++     stream: true,
++     turnId: 'd6ae721b9430a5e52da375fb7fc764b7'
++   }
++ }
+- null
+
+    at file:///private/tmp/mc-claude-backend-proposals-20261110/qa-artifacts/claude-collaboration/backend-proposals/widget-403-cors-probe.mjs:68:8 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: {
+    id: 'd6ae721b9430a5e52da375fb7fc764b7',
+    at: '2026-11-10T16:50:17.024Z',
+    request: {
+      client: 'stream-fixture',
+      contact: 'wzg5ala92mwaxemzh',
+      turnId: 'd6ae721b9430a5e52da375fb7fc764b7',
+      messages: [
+        {
+          role: 'user',
+          content: 'Please save my AC service request for tomorrow.'
+        }
+      ],
+      page: '/',
+      stream: true
+    }
+  },
+  expected: null,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.13.0

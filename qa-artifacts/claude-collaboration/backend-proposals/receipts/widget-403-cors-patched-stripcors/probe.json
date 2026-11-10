@@ -1,0 +1,60 @@
+{
+  "repo": "/private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp-p2",
+  "stripCors": true,
+  "shop": "http://127.0.0.1:57988",
+  "platform": "http://127.0.0.1:57987",
+  "handled": [
+    {
+      "method": "OPTIONS",
+      "status": 204,
+      "headers": {
+        "access-control-allow-headers": "Content-Type, Authorization",
+        "access-control-allow-methods": "GET, POST, OPTIONS",
+        "access-control-allow-origin": "http://127.0.0.1:57988",
+        "vary": "Origin"
+      },
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "status": 403,
+      "headers": {
+        "cache-control": "no-store",
+        "content-type": "application/json",
+        "vary": "Origin"
+      },
+      "body": "{\"error\":\"paused\",\"message\":\"Website chat is unavailable right now. Please use the shop’s contact details on this website.\",\"turnNotProcessed\":true}"
+    }
+  ],
+  "observed": {
+    "bubbles": [
+      "How can we help?",
+      "Please save my AC service request for tomorrow.",
+      "The reply was interrupted, so we couldn’t confirm the outcome. Please use the shop’s contact details on this website before sending the same request again."
+    ],
+    "pendingTurn": {
+      "id": "d6ae721b9430a5e52da375fb7fc764b7",
+      "at": "2026-11-10T16:50:17.024Z",
+      "request": {
+        "client": "stream-fixture",
+        "contact": "wzg5ala92mwaxemzh",
+        "turnId": "d6ae721b9430a5e52da375fb7fc764b7",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Please save my AC service request for tomorrow."
+          }
+        ],
+        "page": "/",
+        "stream": true
+      }
+    },
+    "composerEnabled": false,
+    "recoveryVisible": true
+  },
+  "consoleErrors": [
+    "Access to fetch at 'http://127.0.0.1:57987/api/chat' from origin 'http://127.0.0.1:57988' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "Failed to load resource: net::ERR_FAILED"
+  ],
+  "other": []
+}

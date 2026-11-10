@@ -1,0 +1,8 @@
+Each control is the revision-2 patched tree with one change; owner-notes-check.mjs must exit 1 on every one.
+negative  base vs base (no patch at all)
+mutA      unrelated prompt wording: "the only prices you may state" -> "may quote" (lib/config.mjs)
+mutE      QA's mutant E: neutralOwnerNotes reduced to a case- and space-sensitive strip /<\/?owner_private_notes>/g
+mutN      neutraliser without the HTML/numeric entity mapping (&lt; &#60; &#x3c; ...)
+mutT      Thumbtack left unfenced (lib/platform-ai-proposal.mjs reverted to base)
+mutB      build-model system sentence ("never copy from those notes ...") removed (onboard-build-background.mjs)
+mutR1     revision 1 of this proposal (the committed 61e9184b patch) applied to base

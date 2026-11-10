@@ -1,0 +1,47 @@
+kept    "Have everyone leave now. What is the address?"  [have + everyone (prompt)]
+kept    "Address: get outside first. Then text me the street."  [label w/o have]
+kept    "Gas: leave immediately. What is the address?"  [label gas]
+DROPPED "Have address: get outside first. Ray is on it."  [LABEL_NOTE + safety]
+        sent: "Ray is on it."
+DROPPED "Got issue: gas leak, leave the house now. Ray has your request."  [LABEL_NOTE recap + safety]
+        sent: "Ray has your request."
+DROPPED "Have issue: gas smell. Leave now and call 911 from outside. Ray has it."  [label then safety (2nd sentence must stay)]
+        sent: "Leave now and call 911 from outside. Ray has it."
+DROPPED "Got address: 12 Oak St\nGet everyone out now and call 911 from outside. Ray has your request."  [newline, no period after label]
+        sent: "Ray has your request."
+kept    "Have address\nLeave the house now and call 911 from outside. What is your name?"  [newline after field]
+DROPPED "Got address, head next door. Ray has your request."  [field-value: head next door]
+        sent: "Ray has your request."
+DROPPED "Got address, avoid the basement. Ray has your request."  [field-value: avoid basement]
+        sent: "Ray has your request."
+DROPPED "Have name, vacate the house. Ray has your request."  [field-value: vacate]
+        sent: "Ray has your request."
+DROPPED "Got address, walk next door. Ray is notified."  [field-value: walk]
+        sent: "Ray is notified."
+DROPPED "Have address, unplug nothing. Ray has your request."  [field-value: unplug nothing]
+        sent: "Ray has your request."
+kept    "Got phone, head across the street. Ray will follow up."  [field-value: across street]
+kept    "Got address, wait across the street. Ray will follow up."  [field-value: wait]
+DROPPED "Have address, flee the smoke. Ray will follow up."  [field-value: flee]
+        sent: "Ray will follow up."
+DROPPED "Notify owner of the building and leave the unit now. What is the address?"  [TOOL_PHRASE: notify owner (renter)]
+        sent: "What is the address?"
+DROPPED "Then notify owner of the property right away. Get outside first. What is the address?"  [TOOL_PHRASE then safety]
+        sent: "Get outside first. What is the address?"
+DROPPED "Call 911; notify_owner done. Ray has your request."  [documented mixed-sentence risk]
+        sent: "Ray has your request."
+kept    "Gas leak noted. Leave now and call 911 from outside. What is the address?"  [status segment then safety]
+kept    "Address noted, leave now. Ray has your request."  [status + leave]
+DROPPED "Need address and phone. Leave the house first though. What is the address?"  [checklist then safety]
+        sent: "Leave the house first though. What is the address?"
+DROPPED "Have address. Now get out. Ray has it."  [checklist then short safety]
+        sent: "Now get out. Ray has it."
+kept    "Have everyone out. Ray has it."  [have everyone out]
+kept    "Got everyone outside? Good, Ray has it."  [question]
+DROPPED "Ok, address and phone confirmed. Please stay outside until the fire department clears it."  [checklist then safety]
+        sent: "Please stay outside until the fire department clears it."
+kept    "Phone: 911. Then text me the address."  [label phone 911]
+kept    "Tengo dirección: salga de la casa ya. Ray tiene su solicitud."  [spanish label]
+DROPPED "Have phone: call 911 from outside now. Ray has your request."  [LABEL_NOTE phone instruction]
+        sent: "Ray has your request."
+{"check":"qa3-sms-trim-probe","repo":"/private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bpqa3-copy/all","cases":29,"safetyAltered":17,"netAttempts":0}

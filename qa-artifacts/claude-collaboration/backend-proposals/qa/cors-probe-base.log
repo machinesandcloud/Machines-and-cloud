@@ -1,0 +1,84 @@
+{
+ "stripCors": false,
+ "requests": [
+  {
+   "method": "OPTIONS",
+   "status": 204,
+   "acao": "http://127.0.0.1:57723",
+   "body": ""
+  },
+  {
+   "method": "POST",
+   "status": 403,
+   "acao": null,
+   "body": "{\"error\":\"paused\"}"
+  }
+ ],
+ "observed": {
+  "bubbles": [
+   "How can we help?",
+   "Please save my AC service request for tomorrow.",
+   "The reply was interrupted, so we couldn’t confirm the outcome. Please use the shop’s contact details on this website before sending the same request again."
+  ],
+  "pendingTurn": "kept",
+  "composerEnabled": false,
+  "recoveryVisible": true
+ },
+ "consoleErrors": [
+  "Access to fetch at 'http://127.0.0.1:57722/api/chat' from origin 'http://127.0.0.1:57723' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+  "Failed to load resource: net::ERR_FAILED"
+ ],
+ "other": []
+}
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: refused first send clears the pending receipt across origins
++ actual - expected
+
++ {
++   at: '2026-11-10T16:43:35.050Z',
++   id: 'd51f3773843f3b352d746086f879e313',
++   request: {
++     client: 'stream-fixture',
++     contact: 'wwiyfec91mwax60t7',
++     messages: [
++       {
++         content: 'Please save my AC service request for tomorrow.',
++         role: 'user'
++       }
++     ],
++     page: '/',
++     stream: true,
++     turnId: 'd51f3773843f3b352d746086f879e313'
++   }
++ }
+- null
+
+    at file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bpqa-copy/base/qa-probe.mjs:68:8 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: {
+    id: 'd51f3773843f3b352d746086f879e313',
+    at: '2026-11-10T16:43:35.050Z',
+    request: {
+      client: 'stream-fixture',
+      contact: 'wwiyfec91mwax60t7',
+      turnId: 'd51f3773843f3b352d746086f879e313',
+      messages: [
+        {
+          role: 'user',
+          content: 'Please save my AC service request for tomorrow.'
+        }
+      ],
+      page: '/',
+      stream: true
+    }
+  },
+  expected: null,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.13.0

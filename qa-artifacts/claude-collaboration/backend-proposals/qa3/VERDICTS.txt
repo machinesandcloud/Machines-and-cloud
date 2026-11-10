@@ -1,0 +1,57 @@
+QA3 re-review of proposals 03, 04, 05, 07 (revision 2). Base dfb0ae78; worktree HEAD 87e2aba7. Offline: fake/scripted model, env -i, sockets denied, fetch doubles.
+Copies: base, p03, p04, p05, p07, all (01-07) in scratchpad/bpqa3-copy (deleted after the run).
+
+03 REJECT (narrow; a small change would make it acceptable)
+ - runAgent (lib/agent.mjs) withholds text from any turn with stop_reason "tool_use". But text from a turn that stops on "max_tokens" or "refusal" is still delivered, even when that turn holds a tool_use block.
+   qa3-pretool-leak-probe.log: with max_tokens, p03 sends the whole S1-21 note ("Have name, address, issue, window. Phone filled automatically. Book.") because of the 10-character guard. Base sends 2 of its 3 sentences. Rare edge case.
+ - The claim of 0 safety drops is false on new phrasings. qa3-sms-trim-probe-p03.log: 11 safety instructions lost.
+   - LABEL_NOTE: "Have address: get outside first.", "Got issue: gas leak, leave the house now.", "Have phone: call 911 from outside now."
+   - LABEL_NOTE with a newline and no limit on length: "Got address: 12 Oak St\nGet everyone out now and call 911 from outside." Base KEEPS this one (it has 12 or more words), so this is a regression.
+   - field-value word list: "Got address, head next door.", "... avoid the basement.", "Have name, vacate the house.", "... walk next door.", "... flee the smoke."
+   - TOOL_PHRASE with no prefix: "Notify owner of the building and leave the unit now." Base keeps it, so this is a regression.
+   - known risk: "Call 911; notify_owner done."
+   Plain checklist shapes are not dropped: "Have everyone leave now.", "Address: get outside first.", "Gas: leave immediately.", "Phone: 911."
+ - Experiment (experiment-p03b-*.log), 3 changes:
+   - remove LABEL_NOTE and isFieldValueNote;
+   - TOOL_PHRASE needs a now/next/then or call/use/run prefix;
+   - also split sentences on newlines.
+   Result: only the documented "Call 911; notify_owner done." is lost. Cost: 2 more harmless notes leak ("Got address, gas furnace.", "Have issue: water heater leaking outside."). The author's check reads noteLeaked=2.
+ - The 9 narration leaks are acceptable. "Call us back. You're booked..." is the only confusing one.
+ - Reproduced:
+   - author check: base safetyDropped 48, p03/all 0 (checks/sms-trim-safety-check-*.log);
+   - QA2 probe: base 24 FAIL, p03/all 7 FAIL, all 7 on trim rows (qa2-probes/sms-trim-*.log).
+
+04 ACCEPT WITH NOTES
+ - Store-level check (qa3-consent-reminder-probe-*.log):
+   - a failed confirmation for booking C clears C.consent, sets textsHeld and removes only C's reminder_24h and reminder_1h;
+   - booking A (same phone, earlier) keeps its consent and both reminders;
+   - booking B (another phone) is untouched.
+   Consent lives on each booking and cancelTasks filters by bookingId, so nothing that applies to a phone as a whole is touched.
+ - Reminder note matches the tasks scheduled at 15:36 CST:
+   - +3 days: 24h+1h;
+   - tomorrow 8-12: 1h only;
+   - today 4-6: "too soon", no tasks.
+ - Throw gap (case D): the stored booking HAS consent and both reminders.
+   - PROPOSALS.md says QA2's probe shows consent is not kept. That is an artifact of the probe, which reads b from a call that threw.
+   - Also, the owner is NOT alerted: notifyOwner is never reached. The same happens at base.
+   - Severity: medium-low and pre-existing. Recommend a try/catch that treats a throw as "not sent" and still runs notifyOwner.
+ - Minor: rescheduleVisit (SMS update_visit) calls scheduleReminders again on a booking with textsHeld, so its reminders return while consent stays null.
+ - Author check: base 40/40 FAIL, p04/all 40/40 PASS.
+
+05 ACCEPT WITH NOTES
+ - RUBRIC text and labels are consistent. The fake classifier agrees with no_callback_window 5/5 on p05/all (base 3/5) (regress/*-rubric-eval-fake.log).
+ - Real failure: the new RUBRIC wording ("never said the owner gets the details and will follow up") covers a person request answered with nothing. But:
+   - neither the labelled set nor the fake classifier has such a case;
+   - 4 of the 5 vague-handoff examples (31, 33, 34, 35) were turned into timed promises, so only id 32 still covers a vague handoff.
+   qa3-audit-rubric-probe-p05.log: the fake classifier misses "ignored entirely", "Ray will call you today", "reach out in 20 minutes" and "le llamará pronto". The fake model is used only offline. Recommend adding the vague and ignored cases back as new ids.
+ - Escalation text: en "Bayou Air: we have your request and Ray has your details and will follow up."; es "recibimos su solicitud; Ray tiene sus datos y le dará seguimiento." No time is promised in either.
+ - Author check: base 29/30 FAIL, p05/all 30/30 PASS. QA2 audit probe: base flags no_callback_window, p05/all flag none.
+
+07 ACCEPT WITH NOTES
+ - "Reply to our earlier text" is never said after a refused text: a refused text is not stored, so the next call is not "recent" and a new text is sent.
+ - It is never said after an opt-out: the optedOut check runs first, so the caller hears "Please call back" (sent, then STOP, then call).
+ - It IS said wrongly when the earlier send was only "logged" (texting not configured): UNCONFIGURED rows, 0 texts ever sent. In production that is only a global SMS outage or a shop with no sender. Twilio "accepted" also does not mean delivered (for example a landline). Low harm, because the line also says "or call back".
+ - TwiML: 19 of 19 responses pass xmllint, with names A&B "Pro" <Plumbing> O'Neil, Tom & Jerry's HVAC and <script>&amp; Co, in every branch (qa3-missed-call-xmllint.log).
+ - Author check: base 7 of 11 checks fail, p07/all 11/11 PASS.
+
+Regressions (regress/SUMMARY.tsv): smoke, voice-activation, managed-voice-handoff, customer-account-qa, audit-policy and the fake rubric-eval all exit 0 on base, p03, p04, p05, p07 and all, with identical verdict tokens. No egress attempts.

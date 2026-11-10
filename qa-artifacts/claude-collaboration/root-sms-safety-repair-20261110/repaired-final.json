@@ -1,0 +1,278 @@
+{
+  "repo": "/tmp/mc-root-sms-safety-repair-20261110",
+  "sourceBefore": {
+    "netlify/functions/sms-agent-background.mjs": "bc2f2402ef66285d97729c7076d735c0f86c3e81d080c5c2bdb9469f1d905e81",
+    "netlify/functions/lib/agent.mjs": "e9647fa2a377d0dbd53cd05aa8178e680f7bf66be749df06c20c58ac8af3f868"
+  },
+  "sourceAfter": {
+    "netlify/functions/sms-agent-background.mjs": "bc2f2402ef66285d97729c7076d735c0f86c3e81d080c5c2bdb9469f1d905e81",
+    "netlify/functions/lib/agent.mjs": "e9647fa2a377d0dbd53cd05aa8178e680f7bf66be749df06c20c58ac8af3f868"
+  },
+  "sourceStable": true,
+  "sms": [
+    {
+      "id": "bare_property_owner_instruction",
+      "input": "Notify owner. Leave the building now.",
+      "status": 200,
+      "want": "Notify owner. Leave the building now.",
+      "delivered": "Notify owner. Leave the building now.",
+      "stored": "Notify owner. Leave the building now.",
+      "remainingModelSteps": 0,
+      "pass": true
+    },
+    {
+      "id": "prefixed_property_owner_instruction",
+      "input": "Now notify owner. Leave the building now.",
+      "status": 200,
+      "want": "Now notify owner. Leave the building now.",
+      "delivered": "Now notify owner. Leave the building now.",
+      "stored": "Now notify owner. Leave the building now.",
+      "remainingModelSteps": 0,
+      "pass": true
+    },
+    {
+      "id": "semicolon_safety",
+      "input": "Call 911; notify_owner done. Ray has your request.",
+      "status": 200,
+      "want": "Call 911. Ray has your request.",
+      "delivered": "Call 911. Ray has your request.",
+      "stored": "Call 911. Ray has your request.",
+      "remainingModelSteps": 0,
+      "pass": true
+    },
+    {
+      "id": "comma_safety",
+      "input": "Call 911, notify_owner done. Ray has your request.",
+      "status": 200,
+      "want": "Call 911. Ray has your request.",
+      "delivered": "Call 911. Ray has your request.",
+      "stored": "Call 911. Ray has your request.",
+      "remainingModelSteps": 0,
+      "pass": true
+    },
+    {
+      "id": "conjunction_safety",
+      "input": "Leave the house now and notify_owner done. Ray has your request.",
+      "status": 200,
+      "want": "Leave the house now. Ray has your request.",
+      "delivered": "Leave the house now. Ray has your request.",
+      "stored": "Leave the house now. Ray has your request.",
+      "remainingModelSteps": 0,
+      "pass": true
+    },
+    {
+      "id": "property_owner_safety",
+      "input": "Now notify owner of the building and leave the unit. Ray has your request.",
+      "status": 200,
+      "want": "Now notify owner of the building and leave the unit. Ray has your request.",
+      "delivered": "Now notify owner of the building and leave the unit. Ray has your request.",
+      "stored": "Now notify owner of the building and leave the unit. Ray has your request.",
+      "remainingModelSteps": 0,
+      "pass": true
+    },
+    {
+      "id": "property_owner_original_suite_correction",
+      "input": "Then notify owner of the property right away. Get outside first. What is the address?",
+      "status": 200,
+      "want": "Then notify owner of the property right away. Get outside first. What is the address?",
+      "delivered": "Then notify owner of the property right away. Get outside first. What is the address?",
+      "stored": "Then notify owner of the property right away. Get outside first. What is the address?",
+      "remainingModelSteps": 0,
+      "pass": true
+    },
+    {
+      "id": "tool_name_inside_instruction",
+      "input": "Leave now even if notify_owner is not working. Ray has your request.",
+      "status": 200,
+      "want": "Leave now even if notify_owner is not working. Ray has your request.",
+      "delivered": "Leave now even if notify_owner is not working. Ray has your request.",
+      "stored": "Leave now even if notify_owner is not working. Ray has your request.",
+      "remainingModelSteps": 0,
+      "pass": true
+    },
+    {
+      "id": "unknown_clause_preserved",
+      "input": "Leave the house now, notify_owner might not work. Ray has your request.",
+      "status": 200,
+      "want": "Leave the house now, notify_owner might not work. Ray has your request.",
+      "delivered": "Leave the house now, notify_owner might not work. Ray has your request.",
+      "stored": "Leave the house now, notify_owner might not work. Ray has your request.",
+      "remainingModelSteps": 0,
+      "pass": true
+    },
+    {
+      "id": "ordinary_safety",
+      "input": "Please leave the house and call 911 from outside. Ray has your request.",
+      "status": 200,
+      "want": "Please leave the house and call 911 from outside. Ray has your request.",
+      "delivered": "Please leave the house and call 911 from outside. Ray has your request.",
+      "stored": "Please leave the house and call 911 from outside. Ray has your request.",
+      "remainingModelSteps": 0,
+      "pass": true
+    },
+    {
+      "id": "spanish_safety",
+      "input": "Salga de la casa, notify_owner done. Ray tiene su solicitud.",
+      "status": 200,
+      "want": "Salga de la casa. Ray tiene su solicitud.",
+      "delivered": "Salga de la casa. Ray tiene su solicitud.",
+      "stored": "Salga de la casa. Ray tiene su solicitud.",
+      "remainingModelSteps": 0,
+      "pass": true
+    },
+    {
+      "id": "planning_tool_prefix",
+      "input": "Now call book_visit. You are booked for tomorrow.",
+      "status": 200,
+      "want": "You are booked for tomorrow.",
+      "delivered": "You are booked for tomorrow.",
+      "stored": "You are booked for tomorrow.",
+      "remainingModelSteps": 0,
+      "pass": true
+    },
+    {
+      "id": "planning_tool_urgency",
+      "input": "Call notify_owner with urgency emergency. Please leave the house now.",
+      "status": 200,
+      "want": "Please leave the house now.",
+      "delivered": "Please leave the house now.",
+      "stored": "Please leave the house now.",
+      "remainingModelSteps": 0,
+      "pass": true
+    },
+    {
+      "id": "planning_checklist",
+      "input": "Have name, address, issue, window. Please leave the house now.",
+      "status": 200,
+      "want": "Please leave the house now.",
+      "delivered": "Please leave the house now.",
+      "stored": "Please leave the house now.",
+      "remainingModelSteps": 0,
+      "pass": true
+    },
+    {
+      "id": "planning_double_prefix",
+      "input": "Have phone. Calling bookVisit next. Please leave the house now.",
+      "status": 200,
+      "want": "Please leave the house now.",
+      "delivered": "Please leave the house now.",
+      "stored": "Please leave the house now.",
+      "remainingModelSteps": 0,
+      "pass": true
+    },
+    {
+      "id": "short_safety_after_checklist",
+      "input": "Have phone. Run!",
+      "status": 200,
+      "want": "Run!",
+      "delivered": "Run!",
+      "stored": "Run!",
+      "remainingModelSteps": 0,
+      "pass": true
+    },
+    {
+      "id": "single_exact_tool_note",
+      "input": "Now call book_visit.",
+      "status": 200,
+      "want": "Sorry, could you say that again?",
+      "delivered": "Sorry, could you say that again?",
+      "stored": "Sorry, could you say that again?",
+      "remainingModelSteps": 0,
+      "pass": true
+    },
+    {
+      "id": "max_tokens_internal",
+      "input": "Need to invoke notify_owner for emergency",
+      "status": 200,
+      "want": "Sorry, could you say that again?",
+      "delivered": "Sorry, could you say that again?",
+      "stored": "Sorry, could you say that again?",
+      "remainingModelSteps": 0,
+      "pass": true
+    },
+    {
+      "id": "refusal_internal",
+      "input": "Need to invoke notify_owner for emergency",
+      "status": 200,
+      "want": "I can't help with that one. Anything else, ask away.",
+      "delivered": "I can't help with that one. Anything else, ask away.",
+      "stored": "I can't help with that one. Anything else, ask away.",
+      "remainingModelSteps": 0,
+      "pass": true
+    },
+    {
+      "id": "actual_tool_loop",
+      "input": [],
+      "status": 200,
+      "want": "Please leave the house and call 911 from outside.",
+      "delivered": "Please leave the house and call 911 from outside.",
+      "stored": "Please leave the house and call 911 from outside.",
+      "remainingModelSteps": 0,
+      "pass": true
+    }
+  ],
+  "agent": [
+    {
+      "opts": {
+        "dropToolPreamble": true
+      },
+      "stop": "end_turn",
+      "reply": "Internal planning CANARY before a possible tool",
+      "streamed": "Internal planning CANARY before a possible tool",
+      "want": "Internal planning CANARY before a possible tool",
+      "pass": true
+    },
+    {
+      "opts": {
+        "dropToolPreamble": true
+      },
+      "stop": "max_tokens",
+      "reply": "Sorry, could you say that again?",
+      "streamed": "Sorry, could you say that again?",
+      "want": "Sorry, could you say that again?",
+      "pass": true
+    },
+    {
+      "opts": {
+        "dropToolPreamble": true
+      },
+      "stop": "refusal",
+      "reply": "I can't help with that one. Anything else, ask away.",
+      "streamed": "I can't help with that one. Anything else, ask away.",
+      "want": "I can't help with that one. Anything else, ask away.",
+      "pass": true
+    },
+    {
+      "opts": {
+        "withholdToolText": true
+      },
+      "stop": "end_turn",
+      "reply": "Internal planning CANARY before a possible tool",
+      "streamed": "Internal planning CANARY before a possible tool",
+      "want": "Internal planning CANARY before a possible tool",
+      "pass": true
+    },
+    {
+      "opts": {
+        "withholdToolText": true
+      },
+      "stop": "max_tokens",
+      "reply": "Sorry, could you say that again?",
+      "streamed": "Sorry, could you say that again?",
+      "want": "Sorry, could you say that again?",
+      "pass": true
+    },
+    {
+      "opts": {
+        "withholdToolText": true
+      },
+      "stop": "refusal",
+      "reply": "I can't help with that one. Anything else, ask away.",
+      "streamed": "I can't help with that one. Anything else, ask away.",
+      "want": "I can't help with that one. Anything else, ask away.",
+      "pass": true
+    }
+  ],
+  "physicalNetwork": 0,
+  "pass": true
+}

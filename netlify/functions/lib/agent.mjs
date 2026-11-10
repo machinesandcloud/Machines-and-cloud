@@ -114,9 +114,9 @@ export async function runAgent({ system, tools, messages, onText, execTool, maxT
     usage.cacheWriteTokens += response.usage?.cache_creation_input_tokens || 0;
     if (requireComplete && !["end_turn", "tool_use", "refusal"].includes(response.stop_reason)) throw new Error("The assistant response did not complete");
     if (dropToolPreamble || withholdToolText) {
-      // The customer sees only the final turn. Tool-use text remains in model history, with an
-      // explicit delivery contract so a necessary instruction there is not assumed to be delivered.
-      if (response.stop_reason !== "tool_use") { reply += iterText; if (onText) onText(iterText); }
+      // Release buffered text only after a completed final turn. Tool-use, truncated and refused
+      // turns can contain internal planning; refusal and incomplete turns use the fallbacks below.
+      if (response.stop_reason === "end_turn") { reply += iterText; if (onText) onText(iterText); }
     }
     if (response.stop_reason === "refusal") {
       const t = "I can't help with that one. Anything else, ask away.";

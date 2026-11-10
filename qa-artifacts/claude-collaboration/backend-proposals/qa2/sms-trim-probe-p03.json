@@ -1,0 +1,394 @@
+{
+  "summary": {
+    "check": "qa2-sms-trim-probe",
+    "repo": "/private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bpqa2-copy/p03",
+    "cases": 39,
+    "keep": 26,
+    "trim": 13,
+    "failed": 29,
+    "netAttempts": 0,
+    "result": "FAIL"
+  },
+  "results": [
+    {
+      "client": "default",
+      "expect": "keep",
+      "note": "now + switches",
+      "reply": "Now don't touch any light switches. What is the address?",
+      "sentToCustomer": "What is the address?",
+      "storedTurn": "What is the address?",
+      "pass": false,
+      "wanted": "Now don't touch any light switches. What is the address?"
+    },
+    {
+      "client": "default",
+      "expect": "keep",
+      "note": "no trigger word (control)",
+      "reply": "Don't use any switches. What is the address?",
+      "sentToCustomer": "Don't use any switches. What is the address?",
+      "storedTurn": "Don't use any switches. What is the address?",
+      "pass": true
+    },
+    {
+      "client": "default",
+      "expect": "keep",
+      "note": "no trigger word (control)",
+      "reply": "Get out now. Then text me the address.",
+      "sentToCustomer": "Get out now. Then text me the address.",
+      "storedTurn": "Get out now. Then text me the address.",
+      "pass": true
+    },
+    {
+      "client": "default",
+      "expect": "keep",
+      "note": "gas keyword",
+      "reply": "Now turn off the gas at the meter if safe. Then text me the address.",
+      "sentToCustomer": "Now turn off the gas at the meter if safe. Then text me the address.",
+      "storedTurn": "Now turn off the gas at the meter if safe. Then text me the address.",
+      "pass": true
+    },
+    {
+      "client": "default",
+      "expect": "keep",
+      "note": "electrical, no keyword",
+      "reply": "Now shut the main breaker off if it is dry. Then text me the address.",
+      "sentToCustomer": "Then text me the address.",
+      "storedTurn": "Then text me the address.",
+      "pass": false,
+      "wanted": "Now shut the main breaker off if it is dry. Then text me the address."
+    },
+    {
+      "client": "default",
+      "expect": "keep",
+      "note": "sparks, no keyword",
+      "reply": "Need you to stay away from the sparking panel. What is the address so Ray can follow up?",
+      "sentToCustomer": "What is the address so Ray can follow up?",
+      "storedTurn": "What is the address so Ray can follow up?",
+      "pass": false,
+      "wanted": "Need you to stay away from the sparking panel. What is the address so Ray can follow up?"
+    },
+    {
+      "client": "default",
+      "expect": "keep",
+      "note": "downed line",
+      "reply": "Now stay clear of the downed line. What is the address so Ray can follow up?",
+      "sentToCustomer": "What is the address so Ray can follow up?",
+      "storedTurn": "What is the address so Ray can follow up?",
+      "pass": false,
+      "wanted": "Now stay clear of the downed line. What is the address so Ray can follow up?"
+    },
+    {
+      "client": "default",
+      "expect": "keep",
+      "note": "utility, no keyword",
+      "reply": "Call the utility from a neighbor's phone. What is the address so Ray can follow up?",
+      "sentToCustomer": "What is the address so Ray can follow up?",
+      "storedTurn": "What is the address so Ray can follow up?",
+      "pass": false,
+      "wanted": "Call the utility from a neighbor's phone. What is the address so Ray can follow up?"
+    },
+    {
+      "client": "default",
+      "expect": "keep",
+      "note": "go next door",
+      "reply": "Have everyone go next door right now. What is the address so Ray can follow up?",
+      "sentToCustomer": "What is the address so Ray can follow up?",
+      "storedTurn": "What is the address so Ray can follow up?",
+      "pass": false,
+      "wanted": "Have everyone go next door right now. What is the address so Ray can follow up?"
+    },
+    {
+      "client": "default",
+      "expect": "keep",
+      "note": "ventilate, no keyword",
+      "reply": "Now open the windows and do not light anything. What is the address?",
+      "sentToCustomer": "What is the address?",
+      "storedTurn": "What is the address?",
+      "pass": false,
+      "wanted": "Now open the windows and do not light anything. What is the address?"
+    },
+    {
+      "client": "default",
+      "expect": "keep",
+      "note": "water main (flood)",
+      "reply": "Now shut off the water main. Then text me the address so Ray can come.",
+      "sentToCustomer": "Then text me the address so Ray can come.",
+      "storedTurn": "Then text me the address so Ray can come.",
+      "pass": false,
+      "wanted": "Now shut off the water main. Then text me the address so Ray can come."
+    },
+    {
+      "client": "default",
+      "expect": "keep",
+      "note": "water heater",
+      "reply": "Need everyone away from the water heater now. What is the address?",
+      "sentToCustomer": "What is the address?",
+      "storedTurn": "What is the address?",
+      "pass": false,
+      "wanted": "Need everyone away from the water heater now. What is the address?"
+    },
+    {
+      "client": "default",
+      "expect": "keep",
+      "note": "911 written with dashes",
+      "reply": "Call 9-1-1 right away. What is the address?",
+      "sentToCustomer": "What is the address?",
+      "storedTurn": "What is the address?",
+      "pass": false,
+      "wanted": "Call 9-1-1 right away. What is the address?"
+    },
+    {
+      "client": "default",
+      "expect": "keep",
+      "note": "get the family out",
+      "reply": "Now get the family out. What is the address?",
+      "sentToCustomer": "What is the address?",
+      "storedTurn": "What is the address?",
+      "pass": false,
+      "wanted": "Now get the family out. What is the address?"
+    },
+    {
+      "client": "default",
+      "expect": "keep",
+      "note": "exit",
+      "reply": "Have everybody exit the house. What is the address?",
+      "sentToCustomer": "What is the address?",
+      "storedTurn": "What is the address?",
+      "pass": false,
+      "wanted": "Have everybody exit the house. What is the address?"
+    },
+    {
+      "client": "default",
+      "expect": "keep",
+      "note": "outdoors",
+      "reply": "Now please go outdoors. What is the address?",
+      "sentToCustomer": "What is the address?",
+      "storedTurn": "What is the address?",
+      "pass": false,
+      "wanted": "Now please go outdoors. What is the address?"
+    },
+    {
+      "client": "default",
+      "expect": "keep",
+      "note": "CO symptom",
+      "reply": "Call your doctor if anyone has a headache. Then text me the address.",
+      "sentToCustomer": "Then text me the address.",
+      "storedTurn": "Then text me the address.",
+      "pass": false,
+      "wanted": "Call your doctor if anyone has a headache. Then text me the address."
+    },
+    {
+      "client": "default",
+      "expect": "keep",
+      "note": "Spanish salga",
+      "reply": "Now, salga de la casa. ¿Cuál es su dirección?",
+      "sentToCustomer": "Now, salga de la casa. ¿Cuál es su dirección?",
+      "storedTurn": "Now, salga de la casa. ¿Cuál es su dirección?",
+      "pass": true
+    },
+    {
+      "client": "default",
+      "expect": "keep",
+      "note": "Spanish apague el gas",
+      "reply": "Now apague el gas si es seguro. ¿Cuál es su dirección?",
+      "sentToCustomer": "Now apague el gas si es seguro. ¿Cuál es su dirección?",
+      "storedTurn": "Now apague el gas si es seguro. ¿Cuál es su dirección?",
+      "pass": true
+    },
+    {
+      "client": "default",
+      "expect": "keep",
+      "note": "Spanish switches",
+      "reply": "Now no toque los interruptores. ¿Cuál es su dirección?",
+      "sentToCustomer": "¿Cuál es su dirección?",
+      "storedTurn": "¿Cuál es su dirección?",
+      "pass": false,
+      "wanted": "Now no toque los interruptores. ¿Cuál es su dirección?"
+    },
+    {
+      "client": "default",
+      "expect": "keep",
+      "note": "Spanish vayanse",
+      "reply": "Now váyanse de la casa ya. ¿Cuál es su dirección?",
+      "sentToCustomer": "¿Cuál es su dirección?",
+      "storedTurn": "¿Cuál es su dirección?",
+      "pass": false,
+      "wanted": "Now váyanse de la casa ya. ¿Cuál es su dirección?"
+    },
+    {
+      "client": "default",
+      "expect": "keep",
+      "note": "Spanish 911",
+      "reply": "Call al 911 ahora. ¿Cuál es su dirección?",
+      "sentToCustomer": "Call al 911 ahora. ¿Cuál es su dirección?",
+      "storedTurn": "Call al 911 ahora. ¿Cuál es su dirección?",
+      "pass": true
+    },
+    {
+      "client": "ownerA",
+      "expect": "keep",
+      "note": "owner A partial (5 words)",
+      "reply": "Now walk away from the house. We will follow up once you are safe. What is the address?",
+      "sentToCustomer": "Now walk away from the house. We will follow up once you are safe. What is the address?",
+      "storedTurn": "Now walk away from the house. We will follow up once you are safe. What is the address?",
+      "pass": true
+    },
+    {
+      "client": "ownerA",
+      "expect": "keep",
+      "note": "owner A paraphrase",
+      "reply": "Now walk away and phone Atmos. We will follow up once you are safe.",
+      "sentToCustomer": "We will follow up once you are safe.",
+      "storedTurn": "We will follow up once you are safe.",
+      "pass": false,
+      "wanted": "Now walk away and phone Atmos. We will follow up once you are safe."
+    },
+    {
+      "client": "ownerB",
+      "expect": "keep",
+      "note": "owner B paraphrase",
+      "reply": "Call Atmos now and stay off the property. What is the address?",
+      "sentToCustomer": "What is the address?",
+      "storedTurn": "What is the address?",
+      "pass": false,
+      "wanted": "Call Atmos now and stay off the property. What is the address?"
+    },
+    {
+      "client": "ownerB",
+      "expect": "keep",
+      "note": "owner B partial w/ phone",
+      "reply": "Call Atmos at 888-286-6700 right away. What is the address?",
+      "sentToCustomer": "What is the address?",
+      "storedTurn": "What is the address?",
+      "pass": false,
+      "wanted": "Call Atmos at 888-286-6700 right away. What is the address?"
+    },
+    {
+      "client": "default",
+      "expect": "trim",
+      "note": "S1-21 style (2nd sentence leaks on base too)",
+      "reply": "Have name, address. Next ask window. Thanks, what window works for you?",
+      "sentToCustomer": "Next ask window. Thanks, what window works for you?",
+      "storedTurn": "Next ask window. Thanks, what window works for you?",
+      "pass": true
+    },
+    {
+      "client": "default",
+      "expect": "trim",
+      "note": "planning + emergency",
+      "reply": "Have address; emergency flagged. Ray has your request.",
+      "sentToCustomer": "Have address; emergency flagged. Ray has your request.",
+      "storedTurn": "Have address; emergency flagged. Ray has your request.",
+      "pass": false,
+      "wanted": "Ray has your request."
+    },
+    {
+      "client": "default",
+      "expect": "trim",
+      "note": "planning + emergency",
+      "reply": "Now flag emergency. Ray has your request; please stay safe.",
+      "sentToCustomer": "Now flag emergency. Ray has your request; please stay safe.",
+      "storedTurn": "Now flag emergency. Ray has your request; please stay safe.",
+      "pass": false,
+      "wanted": "Ray has your request; please stay safe."
+    },
+    {
+      "client": "default",
+      "expect": "trim",
+      "note": "planning + gas",
+      "reply": "Need gas leak details before notifying. What do you smell and where?",
+      "sentToCustomer": "Need gas leak details before notifying. What do you smell and where?",
+      "storedTurn": "Need gas leak details before notifying. What do you smell and where?",
+      "pass": false,
+      "wanted": "What do you smell and where?"
+    },
+    {
+      "client": "default",
+      "expect": "trim",
+      "note": "planning + emergency, tool name without underscore",
+      "reply": "Now notify owner as emergency. Ray has your request.",
+      "sentToCustomer": "Now notify owner as emergency. Ray has your request.",
+      "storedTurn": "Now notify owner as emergency. Ray has your request.",
+      "pass": false,
+      "wanted": "Ray has your request."
+    },
+    {
+      "client": "default",
+      "expect": "trim",
+      "note": "planning + gas furnace",
+      "reply": "Got address, gas furnace. You're booked for tomorrow 8 to 12.",
+      "sentToCustomer": "Got address, gas furnace. You're booked for tomorrow 8 to 12.",
+      "storedTurn": "Got address, gas furnace. You're booked for tomorrow 8 to 12.",
+      "pass": false,
+      "wanted": "You're booked for tomorrow 8 to 12."
+    },
+    {
+      "client": "default",
+      "expect": "trim",
+      "note": "planning + outside",
+      "reply": "Have issue: water heater leaking outside. You're booked for tomorrow 8 to 12.",
+      "sentToCustomer": "Have issue: water heater leaking outside. You're booked for tomorrow 8 to 12.",
+      "storedTurn": "Have issue: water heater leaking outside. You're booked for tomorrow 8 to 12.",
+      "pass": false,
+      "wanted": "You're booked for tomorrow 8 to 12."
+    },
+    {
+      "client": "default",
+      "expect": "trim",
+      "note": "planning + leave (documented)",
+      "reply": "Need to leave a note for Ray. Thanks, he will see your request.",
+      "sentToCustomer": "Need to leave a note for Ray. Thanks, he will see your request.",
+      "storedTurn": "Need to leave a note for Ray. Thanks, he will see your request.",
+      "pass": false,
+      "wanted": "Thanks, he will see your request."
+    },
+    {
+      "client": "default",
+      "expect": "trim",
+      "note": "3-word span of default script",
+      "reply": "Call us back. You're booked for tomorrow 8 to 12.",
+      "sentToCustomer": "Call us back. You're booked for tomorrow 8 to 12.",
+      "storedTurn": "Call us back. You're booked for tomorrow 8 to 12.",
+      "pass": false,
+      "wanted": "You're booked for tomorrow 8 to 12."
+    },
+    {
+      "client": "default",
+      "expect": "trim",
+      "note": "planning + fire",
+      "reply": "OK, I have the fire pit job. You're booked for tomorrow 8 to 12.",
+      "sentToCustomer": "OK, I have the fire pit job. You're booked for tomorrow 8 to 12.",
+      "storedTurn": "OK, I have the fire pit job. You're booked for tomorrow 8 to 12.",
+      "pass": false,
+      "wanted": "You're booked for tomorrow 8 to 12."
+    },
+    {
+      "client": "default",
+      "expect": "trim",
+      "note": "planning + smoke",
+      "reply": "Booking smoke detector install now. You're booked for tomorrow 8 to 12.",
+      "sentToCustomer": "Booking smoke detector install now. You're booked for tomorrow 8 to 12.",
+      "storedTurn": "Booking smoke detector install now. You're booked for tomorrow 8 to 12.",
+      "pass": false,
+      "wanted": "You're booked for tomorrow 8 to 12."
+    },
+    {
+      "client": "default",
+      "expect": "trim",
+      "note": "tool name with space",
+      "reply": "Now call book visit. You're booked for tomorrow 8 to 12.",
+      "sentToCustomer": "You're booked for tomorrow 8 to 12.",
+      "storedTurn": "You're booked for tomorrow 8 to 12.",
+      "pass": true
+    },
+    {
+      "client": "default",
+      "expect": "trim",
+      "note": "camelCase tool",
+      "reply": "Have phone. Calling bookVisit next. You're booked for tomorrow 8 to 12.",
+      "sentToCustomer": "Calling bookVisit next. You're booked for tomorrow 8 to 12.",
+      "storedTurn": "Calling bookVisit next. You're booked for tomorrow 8 to 12.",
+      "pass": true
+    }
+  ]
+}

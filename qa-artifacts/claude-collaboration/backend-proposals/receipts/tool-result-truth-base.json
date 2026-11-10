@@ -1,0 +1,866 @@
+{
+  "summary": {
+    "check": "tool-result-truth-check",
+    "repo": "/private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp3-copy/base",
+    "cases": 45,
+    "failed": 45,
+    "falseClaimCases": 22,
+    "otherRequests": 0,
+    "result": "FAIL"
+  },
+  "results": [
+    {
+      "mode": "unconfigured",
+      "channel": "web",
+      "case": "notify_owner: sends disabled (no provider env)",
+      "sends": {
+        "sms": "refuse",
+        "email": "refuse"
+      },
+      "providerSaw": [],
+      "toolResult": "Ray has been texted. Ref f769f97bc9.\n\nDelivery reminder: Your text in the preceding tool-use turn was not shown to the customer. Include all necessary customer-facing instructions in your final reply; required immediate safety guidance comes first, before the tool outcome or next steps.",
+      "pass": false,
+      "problems": [
+        "claims the owner was alerted although no alert was accepted",
+        "does not say the owner could not be alerted yet",
+        "does not tell the model not to claim the alert"
+      ]
+    },
+    {
+      "mode": "unconfigured",
+      "channel": "web",
+      "case": "book_visit: sends disabled (no provider env)",
+      "sends": {
+        "sms": "refuse",
+        "email": "refuse"
+      },
+      "providerSaw": [],
+      "toolResult": "Booked. Ref 7ce7460f73. Ray has the details and the customer will get a text reminder.\n\nDelivery reminder: Your text in the preceding tool-use turn was not shown to the customer. Include all necessary customer-facing instructions in your final reply; required immediate safety guidance comes first, before the tool outcome or next steps.",
+      "pass": false,
+      "problems": [
+        "claims the owner was alerted although no alert was accepted",
+        "does not say the owner could not be alerted yet",
+        "does not tell the model not to claim the alert",
+        "claims a customer text/reminder although the confirmation text was not accepted",
+        "does not say the confirmation text was not sent",
+        "texting consent recorded although the disclosure (confirmation text) was not sent",
+        "reminder texts still scheduled after the confirmation failed: reminder_1h,reminder_24h"
+      ]
+    },
+    {
+      "mode": "unconfigured",
+      "channel": "voice",
+      "case": "notify_owner: sends disabled (no provider env)",
+      "sends": {
+        "sms": "refuse",
+        "email": "refuse"
+      },
+      "providerSaw": [],
+      "toolResult": "The owner has been texted, reference 10edda2584.",
+      "pass": false,
+      "problems": [
+        "claims the owner was alerted although no alert was accepted",
+        "does not say the owner could not be alerted yet",
+        "does not tell the model not to claim the alert"
+      ]
+    },
+    {
+      "mode": "unconfigured",
+      "channel": "voice",
+      "case": "book_visit: sends disabled (no provider env)",
+      "sends": {
+        "sms": "refuse",
+        "email": "refuse"
+      },
+      "providerSaw": [],
+      "toolResult": "Booked, reference dddcee0263. The owner has the details and the customer will get a text reminder.",
+      "pass": false,
+      "problems": [
+        "claims the owner was alerted although no alert was accepted",
+        "does not say the owner could not be alerted yet",
+        "does not tell the model not to claim the alert",
+        "claims a customer text/reminder although the confirmation text was not accepted",
+        "does not say the confirmation text was not sent",
+        "texting consent recorded although the disclosure (confirmation text) was not sent",
+        "reminder texts still scheduled after the confirmation failed: reminder_1h,reminder_24h"
+      ]
+    },
+    {
+      "mode": "unconfigured",
+      "channel": "sms",
+      "case": "notify_owner: sends disabled (no provider env)",
+      "sends": {
+        "sms": "refuse",
+        "email": "refuse"
+      },
+      "providerSaw": [],
+      "toolResult": "Owner texted. Ref d4ba6d5cbd.\n\nDelivery reminder: Your text in the preceding tool-use turn was not shown to the customer. Include all necessary customer-facing instructions in your final reply; required immediate safety guidance comes first, before the tool outcome or next steps.",
+      "pass": false,
+      "problems": [
+        "claims the owner was alerted although no alert was accepted",
+        "does not say the owner could not be alerted yet",
+        "does not tell the model not to claim the alert"
+      ]
+    },
+    {
+      "mode": "unconfigured",
+      "channel": "sms",
+      "case": "book_visit: sends disabled (no provider env)",
+      "sends": {
+        "sms": "refuse",
+        "email": "refuse"
+      },
+      "providerSaw": [],
+      "toolResult": "Booked. Ref ac9486793b.\n\nDelivery reminder: Your text in the preceding tool-use turn was not shown to the customer. Include all necessary customer-facing instructions in your final reply; required immediate safety guidance comes first, before the tool outcome or next steps.",
+      "pass": false,
+      "problems": [
+        "does not say the owner could not be alerted yet",
+        "does not tell the model not to claim the alert"
+      ]
+    },
+    {
+      "mode": "unconfigured",
+      "channel": "sms",
+      "case": "reschedule: sends disabled (no provider env)",
+      "sends": {
+        "sms": "refuse",
+        "email": "refuse"
+      },
+      "providerSaw": [],
+      "toolResult": "Moved ref ac9486793b to 2026-11-15 12 to 5. The owner has been told.\n\nDelivery reminder: Your text in the preceding tool-use turn was not shown to the customer. Include all necessary customer-facing instructions in your final reply; required immediate safety guidance comes first, before the tool outcome or next steps.",
+      "pass": false,
+      "problems": [
+        "claims the owner was alerted although no alert was accepted",
+        "does not say the owner could not be alerted yet",
+        "does not tell the model not to claim the alert"
+      ]
+    },
+    {
+      "mode": "unconfigured",
+      "channel": "sms",
+      "case": "cancel_request: sends disabled (no provider env)",
+      "sends": {
+        "sms": "refuse",
+        "email": "refuse"
+      },
+      "providerSaw": [],
+      "toolResult": "Cancel request sent to the owner for ref ac9486793b; the visit stays until they confirm.\n\nDelivery reminder: Your text in the preceding tool-use turn was not shown to the customer. Include all necessary customer-facing instructions in your final reply; required immediate safety guidance comes first, before the tool outcome or next steps.",
+      "pass": false,
+      "problems": [
+        "claims the owner was alerted although no alert was accepted",
+        "does not say the owner could not be alerted yet",
+        "does not tell the model not to claim the alert"
+      ]
+    },
+    {
+      "mode": "unconfigured",
+      "channel": "web",
+      "case": "notify_owner repeat, nothing changed",
+      "sends": {
+        "sms": "accept",
+        "email": "accept"
+      },
+      "providerSaw": [],
+      "toolResult": "Ray has been texted. Ref 8430dfbf49.\n\nDelivery reminder: Your text in the preceding tool-use turn was not shown to the customer. Include all necessary customer-facing instructions in your final reply; required immediate safety guidance comes first, before the tool outcome or next steps.",
+      "pass": false,
+      "problems": [
+        "claims the owner was texted although no alert was sent",
+        "does not say no new alert was sent"
+      ]
+    },
+    {
+      "mode": "unconfigured",
+      "channel": "web",
+      "case": "notify_owner, no owner contact",
+      "sends": {
+        "sms": "accept",
+        "email": "accept"
+      },
+      "providerSaw": [],
+      "toolResult": "Ray has been texted. Ref 0e8f23cbd5.\n\nDelivery reminder: Your text in the preceding tool-use turn was not shown to the customer. Include all necessary customer-facing instructions in your final reply; required immediate safety guidance comes first, before the tool outcome or next steps.",
+      "pass": false,
+      "problems": [
+        "claims the owner was texted with no owner contact on file",
+        "does not say no owner contact is on file"
+      ]
+    },
+    {
+      "mode": "unconfigured",
+      "channel": "voice",
+      "case": "notify_owner spam",
+      "sends": {
+        "sms": "accept",
+        "email": "accept"
+      },
+      "providerSaw": [],
+      "toolResult": "The owner has been texted, reference 36586ff4b4.",
+      "pass": false,
+      "problems": [
+        "claims the owner was texted for spam"
+      ]
+    },
+    {
+      "mode": "unconfigured",
+      "channel": "web",
+      "case": "prompt: consent line conditional",
+      "sends": {},
+      "providerSaw": [],
+      "toolResult": "When book_visit succeeds, say this once: \"You'll get appointment texts from Bayou Air at this number. Reply STOP any time to end them.\" (in Spanish: \"Recibirá mensajes de texto sobre su cita de Bayou Air en este número. Responda STOP o ALTO cuando quiera para dejar de recibirlos.\"). Never say it twice in one conversation.",
+      "pass": false,
+      "problems": [
+        "the prompt still orders the texting consent line even when the confirmation text was not sent"
+      ]
+    },
+    {
+      "mode": "provider",
+      "channel": "web",
+      "case": "notify_owner: provider refuses text and email",
+      "sends": {
+        "sms": "refuse",
+        "email": "refuse"
+      },
+      "providerSaw": [
+        "sms:owner:refused",
+        "email:owner:refused"
+      ],
+      "toolResult": "Ray has been texted. Ref 815419d0d5.\n\nDelivery reminder: Your text in the preceding tool-use turn was not shown to the customer. Include all necessary customer-facing instructions in your final reply; required immediate safety guidance comes first, before the tool outcome or next steps.",
+      "pass": false,
+      "problems": [
+        "claims the owner was alerted although no alert was accepted",
+        "does not say the owner could not be alerted yet",
+        "does not tell the model not to claim the alert"
+      ]
+    },
+    {
+      "mode": "provider",
+      "channel": "web",
+      "case": "book_visit: provider refuses text and email",
+      "sends": {
+        "sms": "refuse",
+        "email": "refuse"
+      },
+      "providerSaw": [
+        "sms:customer:refused",
+        "sms:owner:refused",
+        "email:owner:refused"
+      ],
+      "toolResult": "Booked. Ref ff1a4ee822. Ray has the details and the customer will get a text reminder.\n\nDelivery reminder: Your text in the preceding tool-use turn was not shown to the customer. Include all necessary customer-facing instructions in your final reply; required immediate safety guidance comes first, before the tool outcome or next steps.",
+      "pass": false,
+      "problems": [
+        "claims the owner was alerted although no alert was accepted",
+        "does not say the owner could not be alerted yet",
+        "does not tell the model not to claim the alert",
+        "claims a customer text/reminder although the confirmation text was not accepted",
+        "does not say the confirmation text was not sent",
+        "texting consent recorded although the disclosure (confirmation text) was not sent",
+        "reminder texts still scheduled after the confirmation failed: reminder_1h,reminder_24h"
+      ]
+    },
+    {
+      "mode": "provider",
+      "channel": "voice",
+      "case": "notify_owner: provider refuses text and email",
+      "sends": {
+        "sms": "refuse",
+        "email": "refuse"
+      },
+      "providerSaw": [
+        "sms:owner:refused",
+        "email:owner:refused"
+      ],
+      "toolResult": "The owner has been texted, reference 4ba3cc0c80.",
+      "pass": false,
+      "problems": [
+        "claims the owner was alerted although no alert was accepted",
+        "does not say the owner could not be alerted yet",
+        "does not tell the model not to claim the alert"
+      ]
+    },
+    {
+      "mode": "provider",
+      "channel": "voice",
+      "case": "book_visit: provider refuses text and email",
+      "sends": {
+        "sms": "refuse",
+        "email": "refuse"
+      },
+      "providerSaw": [
+        "sms:customer:refused",
+        "sms:owner:refused",
+        "email:owner:refused"
+      ],
+      "toolResult": "Booked, reference de974748d6. The owner has the details and the customer will get a text reminder.",
+      "pass": false,
+      "problems": [
+        "claims the owner was alerted although no alert was accepted",
+        "does not say the owner could not be alerted yet",
+        "does not tell the model not to claim the alert",
+        "claims a customer text/reminder although the confirmation text was not accepted",
+        "does not say the confirmation text was not sent",
+        "texting consent recorded although the disclosure (confirmation text) was not sent",
+        "reminder texts still scheduled after the confirmation failed: reminder_1h,reminder_24h"
+      ]
+    },
+    {
+      "mode": "provider",
+      "channel": "sms",
+      "case": "notify_owner: provider refuses text and email",
+      "sends": {
+        "sms": "refuse",
+        "email": "refuse"
+      },
+      "providerSaw": [
+        "sms:owner:refused",
+        "email:owner:refused",
+        "sms:customer:refused"
+      ],
+      "toolResult": "Owner texted. Ref 65775da835.\n\nDelivery reminder: Your text in the preceding tool-use turn was not shown to the customer. Include all necessary customer-facing instructions in your final reply; required immediate safety guidance comes first, before the tool outcome or next steps.",
+      "pass": false,
+      "problems": [
+        "claims the owner was alerted although no alert was accepted",
+        "does not say the owner could not be alerted yet",
+        "does not tell the model not to claim the alert"
+      ]
+    },
+    {
+      "mode": "provider",
+      "channel": "sms",
+      "case": "book_visit: provider refuses text and email",
+      "sends": {
+        "sms": "refuse",
+        "email": "refuse"
+      },
+      "providerSaw": [
+        "sms:owner:refused",
+        "email:owner:refused",
+        "sms:customer:refused"
+      ],
+      "toolResult": "Booked. Ref 0485978733.\n\nDelivery reminder: Your text in the preceding tool-use turn was not shown to the customer. Include all necessary customer-facing instructions in your final reply; required immediate safety guidance comes first, before the tool outcome or next steps.",
+      "pass": false,
+      "problems": [
+        "does not say the owner could not be alerted yet",
+        "does not tell the model not to claim the alert"
+      ]
+    },
+    {
+      "mode": "provider",
+      "channel": "sms",
+      "case": "reschedule: provider refuses text and email",
+      "sends": {
+        "sms": "refuse",
+        "email": "refuse"
+      },
+      "providerSaw": [
+        "sms:owner:refused",
+        "email:owner:refused",
+        "sms:customer:refused"
+      ],
+      "toolResult": "Moved ref 0485978733 to 2026-11-15 12 to 5. The owner has been told.\n\nDelivery reminder: Your text in the preceding tool-use turn was not shown to the customer. Include all necessary customer-facing instructions in your final reply; required immediate safety guidance comes first, before the tool outcome or next steps.",
+      "pass": false,
+      "problems": [
+        "claims the owner was alerted although no alert was accepted",
+        "does not say the owner could not be alerted yet",
+        "does not tell the model not to claim the alert"
+      ]
+    },
+    {
+      "mode": "provider",
+      "channel": "sms",
+      "case": "cancel_request: provider refuses text and email",
+      "sends": {
+        "sms": "refuse",
+        "email": "refuse"
+      },
+      "providerSaw": [
+        "sms:owner:refused",
+        "email:owner:refused",
+        "sms:customer:refused"
+      ],
+      "toolResult": "Cancel request sent to the owner for ref 0485978733; the visit stays until they confirm.\n\nDelivery reminder: Your text in the preceding tool-use turn was not shown to the customer. Include all necessary customer-facing instructions in your final reply; required immediate safety guidance comes first, before the tool outcome or next steps.",
+      "pass": false,
+      "problems": [
+        "claims the owner was alerted although no alert was accepted",
+        "does not say the owner could not be alerted yet",
+        "does not tell the model not to claim the alert"
+      ]
+    },
+    {
+      "mode": "provider",
+      "channel": "web",
+      "case": "notify_owner: provider accepts text and email",
+      "sends": {
+        "sms": "accept",
+        "email": "accept"
+      },
+      "providerSaw": [
+        "sms:owner:accepted",
+        "email:owner:accepted"
+      ],
+      "toolResult": "Ray has been texted. Ref fdda9f1175.\n\nDelivery reminder: Your text in the preceding tool-use turn was not shown to the customer. Include all necessary customer-facing instructions in your final reply; required immediate safety guidance comes first, before the tool outcome or next steps.",
+      "pass": false,
+      "problems": [
+        "does not say Ray was sent a text and an email (accepted by the provider)"
+      ]
+    },
+    {
+      "mode": "provider",
+      "channel": "web",
+      "case": "book_visit: provider accepts text and email",
+      "sends": {
+        "sms": "accept",
+        "email": "accept"
+      },
+      "providerSaw": [
+        "sms:customer:accepted",
+        "sms:owner:accepted",
+        "email:owner:accepted"
+      ],
+      "toolResult": "Booked. Ref 5398766994. Ray has the details and the customer will get a text reminder.\n\nDelivery reminder: Your text in the preceding tool-use turn was not shown to the customer. Include all necessary customer-facing instructions in your final reply; required immediate safety guidance comes first, before the tool outcome or next steps.",
+      "pass": false,
+      "problems": [
+        "does not say Ray was sent a text and an email (accepted by the provider)",
+        "does not say the confirmation text was accepted",
+        "reminder wording does not match the scheduled tasks (reminder_1h,reminder_24h)"
+      ]
+    },
+    {
+      "mode": "provider",
+      "channel": "voice",
+      "case": "notify_owner: provider accepts text and email",
+      "sends": {
+        "sms": "accept",
+        "email": "accept"
+      },
+      "providerSaw": [
+        "sms:owner:accepted",
+        "email:owner:accepted"
+      ],
+      "toolResult": "The owner has been texted, reference 16329bce5f.",
+      "pass": false,
+      "problems": [
+        "does not say Ray was sent a text and an email (accepted by the provider)"
+      ]
+    },
+    {
+      "mode": "provider",
+      "channel": "voice",
+      "case": "book_visit: provider accepts text and email",
+      "sends": {
+        "sms": "accept",
+        "email": "accept"
+      },
+      "providerSaw": [
+        "sms:customer:accepted",
+        "sms:owner:accepted",
+        "email:owner:accepted"
+      ],
+      "toolResult": "Booked, reference 881612cabd. The owner has the details and the customer will get a text reminder.",
+      "pass": false,
+      "problems": [
+        "does not say Ray was sent a text and an email (accepted by the provider)",
+        "does not say the confirmation text was accepted",
+        "reminder wording does not match the scheduled tasks (reminder_1h,reminder_24h)"
+      ]
+    },
+    {
+      "mode": "provider",
+      "channel": "sms",
+      "case": "notify_owner: provider accepts text and email",
+      "sends": {
+        "sms": "accept",
+        "email": "accept"
+      },
+      "providerSaw": [
+        "sms:owner:accepted",
+        "email:owner:accepted",
+        "sms:customer:accepted"
+      ],
+      "toolResult": "Owner texted. Ref 2eba6d3b9a.\n\nDelivery reminder: Your text in the preceding tool-use turn was not shown to the customer. Include all necessary customer-facing instructions in your final reply; required immediate safety guidance comes first, before the tool outcome or next steps.",
+      "pass": false,
+      "problems": [
+        "does not say Ray was sent a text and an email (accepted by the provider)"
+      ]
+    },
+    {
+      "mode": "provider",
+      "channel": "sms",
+      "case": "book_visit: provider accepts text and email",
+      "sends": {
+        "sms": "accept",
+        "email": "accept"
+      },
+      "providerSaw": [
+        "sms:owner:accepted",
+        "email:owner:accepted",
+        "sms:customer:accepted"
+      ],
+      "toolResult": "Booked. Ref 7aadd8f27f.\n\nDelivery reminder: Your text in the preceding tool-use turn was not shown to the customer. Include all necessary customer-facing instructions in your final reply; required immediate safety guidance comes first, before the tool outcome or next steps.",
+      "pass": false,
+      "problems": [
+        "does not say Ray was sent a text and an email (accepted by the provider)"
+      ]
+    },
+    {
+      "mode": "provider",
+      "channel": "sms",
+      "case": "reschedule: provider accepts text and email",
+      "sends": {
+        "sms": "accept",
+        "email": "accept"
+      },
+      "providerSaw": [
+        "sms:owner:accepted",
+        "email:owner:accepted",
+        "sms:customer:accepted"
+      ],
+      "toolResult": "Moved ref 7aadd8f27f to 2026-11-15 12 to 5. The owner has been told.\n\nDelivery reminder: Your text in the preceding tool-use turn was not shown to the customer. Include all necessary customer-facing instructions in your final reply; required immediate safety guidance comes first, before the tool outcome or next steps.",
+      "pass": false,
+      "problems": [
+        "does not say Ray was sent a text and an email (accepted by the provider)"
+      ]
+    },
+    {
+      "mode": "provider",
+      "channel": "sms",
+      "case": "cancel_request: provider accepts text and email",
+      "sends": {
+        "sms": "accept",
+        "email": "accept"
+      },
+      "providerSaw": [
+        "sms:owner:accepted",
+        "email:owner:accepted",
+        "sms:customer:accepted"
+      ],
+      "toolResult": "Cancel request sent to the owner for ref 7aadd8f27f; the visit stays until they confirm.\n\nDelivery reminder: Your text in the preceding tool-use turn was not shown to the customer. Include all necessary customer-facing instructions in your final reply; required immediate safety guidance comes first, before the tool outcome or next steps.",
+      "pass": false,
+      "problems": [
+        "does not say Ray was sent a text and an email (accepted by the provider)"
+      ]
+    },
+    {
+      "mode": "provider",
+      "channel": "web",
+      "case": "notify_owner: text refused, email accepted",
+      "sends": {
+        "sms": "refuse",
+        "email": "accept"
+      },
+      "providerSaw": [
+        "sms:owner:refused",
+        "email:owner:accepted"
+      ],
+      "toolResult": "Ray has been texted. Ref ad6b965c5f.\n\nDelivery reminder: Your text in the preceding tool-use turn was not shown to the customer. Include all necessary customer-facing instructions in your final reply; required immediate safety guidance comes first, before the tool outcome or next steps.",
+      "pass": false,
+      "problems": [
+        "does not say Ray was sent an email (accepted by the provider)"
+      ]
+    },
+    {
+      "mode": "provider",
+      "channel": "web",
+      "case": "book_visit: text refused, email accepted",
+      "sends": {
+        "sms": "refuse",
+        "email": "accept"
+      },
+      "providerSaw": [
+        "sms:customer:refused",
+        "sms:owner:refused",
+        "email:owner:accepted"
+      ],
+      "toolResult": "Booked. Ref 7110050927. Ray has the details and the customer will get a text reminder.\n\nDelivery reminder: Your text in the preceding tool-use turn was not shown to the customer. Include all necessary customer-facing instructions in your final reply; required immediate safety guidance comes first, before the tool outcome or next steps.",
+      "pass": false,
+      "problems": [
+        "does not say Ray was sent an email (accepted by the provider)",
+        "claims a customer text/reminder although the confirmation text was not accepted",
+        "does not say the confirmation text was not sent",
+        "texting consent recorded although the disclosure (confirmation text) was not sent",
+        "reminder texts still scheduled after the confirmation failed: reminder_1h,reminder_24h"
+      ]
+    },
+    {
+      "mode": "provider",
+      "channel": "voice",
+      "case": "notify_owner: text refused, email accepted",
+      "sends": {
+        "sms": "refuse",
+        "email": "accept"
+      },
+      "providerSaw": [
+        "sms:owner:refused",
+        "email:owner:accepted"
+      ],
+      "toolResult": "The owner has been texted, reference 1e294a8162.",
+      "pass": false,
+      "problems": [
+        "does not say Ray was sent an email (accepted by the provider)"
+      ]
+    },
+    {
+      "mode": "provider",
+      "channel": "voice",
+      "case": "book_visit: text refused, email accepted",
+      "sends": {
+        "sms": "refuse",
+        "email": "accept"
+      },
+      "providerSaw": [
+        "sms:customer:refused",
+        "sms:owner:refused",
+        "email:owner:accepted"
+      ],
+      "toolResult": "Booked, reference 04ad5683f7. The owner has the details and the customer will get a text reminder.",
+      "pass": false,
+      "problems": [
+        "does not say Ray was sent an email (accepted by the provider)",
+        "claims a customer text/reminder although the confirmation text was not accepted",
+        "does not say the confirmation text was not sent",
+        "texting consent recorded although the disclosure (confirmation text) was not sent",
+        "reminder texts still scheduled after the confirmation failed: reminder_1h,reminder_24h"
+      ]
+    },
+    {
+      "mode": "provider",
+      "channel": "sms",
+      "case": "notify_owner: text refused, email accepted",
+      "sends": {
+        "sms": "refuse",
+        "email": "accept"
+      },
+      "providerSaw": [
+        "sms:owner:refused",
+        "email:owner:accepted",
+        "sms:customer:refused"
+      ],
+      "toolResult": "Owner texted. Ref 8f65fb254c.\n\nDelivery reminder: Your text in the preceding tool-use turn was not shown to the customer. Include all necessary customer-facing instructions in your final reply; required immediate safety guidance comes first, before the tool outcome or next steps.",
+      "pass": false,
+      "problems": [
+        "does not say Ray was sent an email (accepted by the provider)"
+      ]
+    },
+    {
+      "mode": "provider",
+      "channel": "sms",
+      "case": "book_visit: text refused, email accepted",
+      "sends": {
+        "sms": "refuse",
+        "email": "accept"
+      },
+      "providerSaw": [
+        "sms:owner:refused",
+        "email:owner:accepted",
+        "sms:customer:refused"
+      ],
+      "toolResult": "Booked. Ref cc95848b3e.\n\nDelivery reminder: Your text in the preceding tool-use turn was not shown to the customer. Include all necessary customer-facing instructions in your final reply; required immediate safety guidance comes first, before the tool outcome or next steps.",
+      "pass": false,
+      "problems": [
+        "does not say Ray was sent an email (accepted by the provider)"
+      ]
+    },
+    {
+      "mode": "provider",
+      "channel": "sms",
+      "case": "reschedule: text refused, email accepted",
+      "sends": {
+        "sms": "refuse",
+        "email": "accept"
+      },
+      "providerSaw": [
+        "sms:owner:refused",
+        "email:owner:accepted",
+        "sms:customer:refused"
+      ],
+      "toolResult": "Moved ref cc95848b3e to 2026-11-15 12 to 5. The owner has been told.\n\nDelivery reminder: Your text in the preceding tool-use turn was not shown to the customer. Include all necessary customer-facing instructions in your final reply; required immediate safety guidance comes first, before the tool outcome or next steps.",
+      "pass": false,
+      "problems": [
+        "does not say Ray was sent an email (accepted by the provider)"
+      ]
+    },
+    {
+      "mode": "provider",
+      "channel": "sms",
+      "case": "cancel_request: text refused, email accepted",
+      "sends": {
+        "sms": "refuse",
+        "email": "accept"
+      },
+      "providerSaw": [
+        "sms:owner:refused",
+        "email:owner:accepted",
+        "sms:customer:refused"
+      ],
+      "toolResult": "Cancel request sent to the owner for ref cc95848b3e; the visit stays until they confirm.\n\nDelivery reminder: Your text in the preceding tool-use turn was not shown to the customer. Include all necessary customer-facing instructions in your final reply; required immediate safety guidance comes first, before the tool outcome or next steps.",
+      "pass": false,
+      "problems": [
+        "does not say Ray was sent an email (accepted by the provider)"
+      ]
+    },
+    {
+      "mode": "provider",
+      "channel": "web",
+      "case": "book_visit tomorrow 8 to 12 (reminder wording)",
+      "sends": {
+        "sms": "accept",
+        "email": "accept"
+      },
+      "providerSaw": [
+        "sms:customer:accepted",
+        "sms:owner:accepted",
+        "email:owner:accepted"
+      ],
+      "toolResult": "Booked. Ref 751cd8b8b6. Ray has the details and the customer will get a text reminder.\n\nDelivery reminder: Your text in the preceding tool-use turn was not shown to the customer. Include all necessary customer-facing instructions in your final reply; required immediate safety guidance comes first, before the tool outcome or next steps.",
+      "pass": false,
+      "problems": [
+        "does not say Ray was sent a text and an email (accepted by the provider)",
+        "does not say the confirmation text was accepted",
+        "reminder wording does not match the scheduled tasks (reminder_1h)"
+      ]
+    },
+    {
+      "mode": "provider",
+      "channel": "web",
+      "case": "book_visit: customer text throws, owner alert accepted",
+      "sends": {
+        "sms": "throwCustomer",
+        "email": "accept"
+      },
+      "providerSaw": [
+        "sms:customer:refused"
+      ],
+      "toolResult": "The action's outcome is unconfirmed because a valid tool result was not received. Do not claim it succeeded or failed, and do not repeat the action. Keep the request available for review and offer a direct contact option.\n\nDelivery reminder: Your text in the preceding tool-use turn was not shown to the customer. Include all necessary customer-facing instructions in your final reply; required immediate safety guidance comes first, before the tool outcome or next steps.",
+      "pass": false,
+      "problems": [
+        "does not say Ray was sent a text and an email (accepted by the provider)",
+        "fixture: the provider double saw no accepted owner alert",
+        "does not say the confirmation text was not sent",
+        "fixture: booking not found"
+      ]
+    },
+    {
+      "mode": "provider",
+      "channel": "voice",
+      "case": "book_visit: customer text throws (voice)",
+      "sends": {
+        "sms": "throwCustomer",
+        "email": "accept"
+      },
+      "providerSaw": [
+        "sms:customer:refused"
+      ],
+      "toolResult": "The tool failed. Apologize and take the caller's number for a callback.",
+      "pass": false,
+      "problems": [
+        "does not say Ray was sent a text and an email (accepted by the provider)",
+        "fixture: the provider double saw no accepted owner alert",
+        "does not say the confirmation text was not sent",
+        "fixture: booking not found"
+      ]
+    },
+    {
+      "mode": "provider",
+      "channel": "web",
+      "case": "book_visit: every send throws",
+      "sends": {
+        "sms": "throw",
+        "email": "throw"
+      },
+      "providerSaw": [
+        "sms:customer:refused"
+      ],
+      "toolResult": "The action's outcome is unconfirmed because a valid tool result was not received. Do not claim it succeeded or failed, and do not repeat the action. Keep the request available for review and offer a direct contact option.\n\nDelivery reminder: Your text in the preceding tool-use turn was not shown to the customer. Include all necessary customer-facing instructions in your final reply; required immediate safety guidance comes first, before the tool outcome or next steps.",
+      "pass": false,
+      "problems": [
+        "does not say the owner could not be alerted yet",
+        "does not tell the model not to claim the alert",
+        "does not say the confirmation text was not sent",
+        "fixture: booking not found"
+      ]
+    },
+    {
+      "mode": "provider",
+      "channel": "web",
+      "case": "notify_owner: every send throws",
+      "sends": {
+        "sms": "throw",
+        "email": "throw"
+      },
+      "providerSaw": [
+        "sms:owner:refused"
+      ],
+      "toolResult": "The action's outcome is unconfirmed because a valid tool result was not received. Do not claim it succeeded or failed, and do not repeat the action. Keep the request available for review and offer a direct contact option.\n\nDelivery reminder: Your text in the preceding tool-use turn was not shown to the customer. Include all necessary customer-facing instructions in your final reply; required immediate safety guidance comes first, before the tool outcome or next steps.",
+      "pass": false,
+      "problems": [
+        "does not say the owner could not be alerted yet",
+        "does not tell the model not to claim the alert"
+      ]
+    },
+    {
+      "mode": "provider",
+      "channel": "sms",
+      "case": "reschedule by SMS of a held booking: no reminders return",
+      "sends": {
+        "sms": "refuse",
+        "email": "accept"
+      },
+      "providerSaw": [
+        "sms:owner:refused",
+        "email:owner:accepted",
+        "sms:customer:refused"
+      ],
+      "toolResult": "Moved ref b8594a71dc to 2026-11-16 12 to 5. The owner has been told.\n\nDelivery reminder: Your text in the preceding tool-use turn was not shown to the customer. Include all necessary customer-facing instructions in your final reply; required immediate safety guidance comes first, before the tool outcome or next steps.",
+      "pass": false,
+      "problems": [
+        "fixture: booking was not held",
+        "reminders re-scheduled for a booking with texts held: reminder_24h,reminder_1h"
+      ]
+    },
+    {
+      "mode": "provider",
+      "channel": "web",
+      "case": "notify_owner repeat, nothing changed",
+      "sends": {
+        "sms": "accept",
+        "email": "accept"
+      },
+      "providerSaw": [],
+      "toolResult": "Ray has been texted. Ref 7353667bd9.\n\nDelivery reminder: Your text in the preceding tool-use turn was not shown to the customer. Include all necessary customer-facing instructions in your final reply; required immediate safety guidance comes first, before the tool outcome or next steps.",
+      "pass": false,
+      "problems": [
+        "claims the owner was texted although no alert was sent",
+        "does not say no new alert was sent"
+      ]
+    },
+    {
+      "mode": "provider",
+      "channel": "web",
+      "case": "notify_owner, no owner contact",
+      "sends": {
+        "sms": "accept",
+        "email": "accept"
+      },
+      "providerSaw": [],
+      "toolResult": "Ray has been texted. Ref f22fe24ead.\n\nDelivery reminder: Your text in the preceding tool-use turn was not shown to the customer. Include all necessary customer-facing instructions in your final reply; required immediate safety guidance comes first, before the tool outcome or next steps.",
+      "pass": false,
+      "problems": [
+        "claims the owner was texted with no owner contact on file",
+        "does not say no owner contact is on file"
+      ]
+    },
+    {
+      "mode": "provider",
+      "channel": "voice",
+      "case": "notify_owner spam",
+      "sends": {
+        "sms": "accept",
+        "email": "accept"
+      },
+      "providerSaw": [],
+      "toolResult": "The owner has been texted, reference 85a6050dbc.",
+      "pass": false,
+      "problems": [
+        "claims the owner was texted for spam"
+      ]
+    }
+  ]
+}

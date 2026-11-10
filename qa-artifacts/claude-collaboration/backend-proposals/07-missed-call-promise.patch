@@ -1,0 +1,60 @@
+diff --git a/netlify/functions/voice.mjs b/netlify/functions/voice.mjs
+index 8303922..7c62624 100644
+--- a/netlify/functions/voice.mjs
++++ b/netlify/functions/voice.mjs
+@@ -81,29 +81,47 @@ export default async (req) => {
+     return xml(inner);
+   }
+ 
+-  // Missed-call text-back
+-  const say = c.business?.spanish
+-    ? `<Say voice="Polly.Joanna">Thanks for calling ${esc(name)}. We are on a job right now. We are texting you this second so we can get you scheduled.</Say><Say voice="Polly.Lupe" language="es-US">Gracias por llamar. Le enviamos un mensaje de texto ahora mismo.</Say>`
+-    : `<Say voice="Polly.Joanna">Thanks for calling ${esc(name)}. We are on a job right now. We are texting you this second so we can get you scheduled.</Say>`;
+-  let textBack = "not attempted";
++  // Missed-call text-back. The spoken line is chosen after the send, so the caller is only told
++  // "we are texting you" when the provider accepted the text.
++  let textBack = "not attempted", skipReason = "", sendError = "";
+   if (c.phone?.textBack !== false && from) {
+     const conv = await getConversation(c, "sms", from);
+     const recent = [...conv.messages].reverse().find((m) => m.system === "missed-call text-back");
+-    if (await optedOut(from)) { textBack = "skipped"; await logEvent(c, "text_back_skipped", { from, reason: "opted_out" }); }
+-    else if (recent && Date.now() - new Date(recent.at).getTime() < 24 * 3600 * 1000) { textBack = "skipped"; await logEvent(c, "text_back_skipped", { from, reason: "recent" }); }
++    if (await optedOut(from)) { textBack = "skipped"; skipReason = "opted_out"; await logEvent(c, "text_back_skipped", { from, reason: "opted_out" }); }
++    else if (recent && Date.now() - new Date(recent.at).getTime() < 24 * 3600 * 1000) { textBack = "skipped"; skipReason = "recent"; await logEvent(c, "text_back_skipped", { from, reason: "recent" }); }
+     else {
+       const text = c.business?.spanish
+         ? `Hi, this is ${name}. Sorry we missed your call. What can we help with, and is it urgent? / Hola, le saluda ${name}. ¿En qué le podemos ayudar? Reply STOP to opt out. / Responda STOP o ALTO para no recibir mensajes.`
+         : `Hi, this is ${name}. Sorry we missed your call. What can we help with, and is it urgent? Reply here and we will get you scheduled. Reply STOP to opt out.`;
+       const r = await sendSMS({ to: from, client: c, type: "text_back", body: text });
+       textBack = r.ok ? "sent" : r.logged ? "logged" : "failed";
++      if (!r.ok) sendError = String(r.error || r.reason || "").slice(0, 120);
+       if (r.ok || r.logged) {
+         conv.messages.push({ role: "assistant", content: text, at: new Date().toISOString(), system: "missed-call text-back" });
+         await saveConversation(conv);
+       }
+     }
+   }
+-  await notifyOwner(c, `${name} front desk: missed call from ${from || "unknown"}. ${textBack === "sent" || textBack === "logged" ? "Text-back sent; I will take it from here and text you the lead." : textBack === "skipped" ? "They were texted recently or opted out, so no text-back." : "No texting sender yet, so no text-back."}`, { type: "owner_note" });
++  const ownerLine = textBack === "sent" ? "Text-back sent; I will take it from here and text you the lead."
++    : textBack === "logged" ? "Texting is not set up yet, so no text-back was sent. Please call them back."
++    : textBack === "failed" ? `The text-back could not be sent${sendError ? ` (${sendError})` : ""}. Please call them back.`
++    : skipReason === "opted_out" ? "They opted out, so no text-back. Please call them back."
++    : skipReason === "recent" ? "They were already sent a text-back in the last 24 hours, so no new one."
++    : !from ? "No caller ID, so no text-back and no number to call back." : "Text-back is off for this line, so no text-back. Please call them back.";
++  await notifyOwner(c, `${name} front desk: missed call from ${from || "unknown"}. ${ownerLine}`, { type: "owner_note" });
++  const say = textBack === "sent"
++    ? (c.business?.spanish
++      ? `<Say voice="Polly.Joanna">Thanks for calling ${esc(name)}. We are on a job right now. We are texting you this second so we can get you scheduled.</Say><Say voice="Polly.Lupe" language="es-US">Gracias por llamar. Le enviamos un mensaje de texto ahora mismo.</Say>`
++      : `<Say voice="Polly.Joanna">Thanks for calling ${esc(name)}. We are on a job right now. We are texting you this second so we can get you scheduled.</Say>`)
++    : skipReason === "recent"
++    // Texted in the last 24 hours and not opted out: the earlier text is the one thing we know reached them.
++    ? (c.business?.spanish
++      ? `<Say voice="Polly.Joanna">Thanks for calling ${esc(name)}. We are on a job right now. Please reply to our earlier text or call back, and we will get you scheduled.</Say><Say voice="Polly.Lupe" language="es-US">Gracias por llamar. Por favor responda a nuestro mensaje anterior o vuelva a llamar.</Say>`
++      : `<Say voice="Polly.Joanna">Thanks for calling ${esc(name)}. We are on a job right now. Please reply to our earlier text or call back, and we will get you scheduled.</Say>`)
++    // Opted out, text-back off, texting not set up, provider refusal or no caller ID: offer no texting at all.
++    : (c.business?.spanish
++      ? `<Say voice="Polly.Joanna">Thanks for calling ${esc(name)}. We are on a job right now. Please call back, and we will get you scheduled.</Say><Say voice="Polly.Lupe" language="es-US">Gracias por llamar. Por favor vuelva a llamar.</Say>`
++      : `<Say voice="Polly.Joanna">Thanks for calling ${esc(name)}. We are on a job right now. Please call back, and we will get you scheduled.</Say>`);
+   await logEvent(c, "missed_call", { from, textBack }); await noteInbound(c, "call");
+   return xml(`${say}<Hangup/>`);
+ };

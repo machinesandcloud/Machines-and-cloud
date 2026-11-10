@@ -1,0 +1,17 @@
+node:fs:439
+    return binding.readFileUtf8(path, stringToFlags(options.flag));
+                   ^
+
+Error: ENOENT: no such file or directory, open 'scratchpad/launch-webhook-isolation-source-bridge.json'
+    at readFileSync (node:fs:439:20)
+    at file:///private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp08-copy/base/scripts/launch-webhook-isolation-qa-check.mjs:9:24
+    at ModuleJob.run (node:internal/modules/esm/module_job:413:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:660:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'scratchpad/launch-webhook-isolation-source-bridge.json'
+}
+
+Node.js v24.13.0
