@@ -21,6 +21,8 @@ const output = arg('--output'), playwrightPath = arg('--playwright') || '/Users/
 if (!output || !/^scratchpad\/claude-lead-[\w-]+\.json$/.test(output)) throw new Error('Choose --output scratchpad/claude-lead-<name>.json');
 if (existsSync(output)) throw new Error('Refusing to overwrite retained QA evidence: ' + output);
 const prefix = output.slice(0, -5);
+// Optional: serve a proposed desk-lead-sources.js (e.g. a scratch copy with Codex's patch) and assert focus lands on Check.
+const overrideLeadJs = arg('--override-lead-js') ? resolve(arg('--override-lead-js')) : null;
 const sha = value => createHash('sha256').update(value).digest('hex');
 const watched = ['desk.html', 'desk.js', 'desk.css', 'desk-lead-sources.js', 'desk-lead-sources.css', 'desk-setup-guide.js', 'desk-setup-guide.css', 'netlify/functions/client.mjs'];
 const report = { at: new Date().toISOString(), mode: 'Actual owner handlers in-process, memory store, fake model, Playwright-served worktree files; physical transport denied', sourceHashes: Object.fromEntries(watched.map(f => [f, sha(readFileSync(f))])), checks: [], screenshots: [], requests: [], pageErrors: [], forbidden: [], physicalNetwork: 0 };
@@ -41,12 +43,13 @@ for (const file of ['client', 'access', 'onboard', 'workspace-billing', 'angi', 
   const mod = await import('../../netlify/functions/' + file + '.mjs');
   if (mod.config?.path) handlers[mod.config.path] = mod.default;
 }
-report.handlers = Object.keys(handlers); report.browser = process.env.MC_PLAYWRIGHT_EXECUTABLE || 'channel:chrome';
+report.handlers = Object.keys(handlers); report.overrideLeadJs = overrideLeadJs; report.browser = process.env.MC_PLAYWRIGHT_EXECUTABLE || 'channel:chrome';
 
 const browser = await playwright.chromium.launch({ ...(process.env.MC_PLAYWRIGHT_EXECUTABLE ? { executablePath: process.env.MC_PLAYWRIGHT_EXECUTABLE } : { channel: 'chrome' }), headless: true, args: ['--disable-background-networking', '--disable-component-update', '--disable-sync', '--no-first-run', '--host-resolver-rules=MAP * ~NOTFOUND'] });
 let serial = 0; const contexts = [];
 
-async function fixture(width, height) {
+async function fixture(width, height, site = origin) {
+  const origin = site;
   const slug = 'lead-ui-' + ++serial + '-' + width, token = sha('lead-token-' + slug);
   const c = newClient({ slug, ownerKey: 'PRIVATE-FIXTURE-' + serial, owner: { name: 'Alex Fixture', email: slug + '@example.test', phone: '+17135550198' }, business: { name: 'Fixture Lead Shop', trade: 'HVAC', serviceArea: ['Katy'], hours: 'Mon-Fri 8am-5pm' } });
   Object.assign(c, { onboarding: { version: 1, verifiedEmail: c.owner.email, desiredChannels: ['web', 'angi', 'thumbtack'] }, services: ['AC repair'], windows: ['8 to 12', '12 to 5'], status: 'testing', build: { status: 'built', source: 'owner_answers' } });
@@ -55,7 +58,7 @@ async function fixture(width, height) {
   await store.put('access_sessions', accessHash(token), { scope: 'onboarding', status: 'active', email: c.owner.email, expiresAt: new Date(Date.now() + 3600000).toISOString() });
   const context = await browser.newContext({ viewport: { width, height }, serviceWorkers: 'block', reducedMotion: 'reduce' }); contexts.push(context); context.setDefaultTimeout(7000);
   await context.addInitScript(({ origin, slug, token }) => { if (location.origin !== origin) return; sessionStorage.setItem('mc-onboarding-session-v1', token); localStorage.setItem('mc-walkthrough-v1:' + slug, 'seen'); }, { origin, slug, token });
-  const state = { loseNext: null, requests: [] };
+  const state = { loseNext: null, holdNext: null, requests: [] };
   await context.routeWebSocket('**/*', socket => socket.close());
   await context.route('**/*', async route => {
     const request = route.request(), url = new URL(request.url());
@@ -66,11 +69,14 @@ async function fixture(width, height) {
       const item = { slug, path: url.pathname, method, action, operation: body?.operation, source: body?.source, operationId: body?.operationId };
       state.requests.push(item); report.requests.push(item);
       const response = await handlers[url.pathname](new Request(url, { method, headers: request.headers(), ...(body ? { body: JSON.stringify(body) } : {}) }), { ip: '192.0.2.71' });
-      item.status = response.status; const bytes = Buffer.from(await response.arrayBuffer());
+      item.status = response.status; const bytes = Buffer.from(await response.arrayBuffer()); if (response.status >= 400) item.errorBody = bytes.toString('utf8').slice(0, 300);
       // Lost response: the actual handler has already processed (and saved) the change.
+      // Held response: the handler has processed it; the browser waits until the check releases it.
+      if (state.holdNext && state.holdNext(method, body)) { state.holdNext = null; item.held = true; await new Promise(release => { state.release = release; }); state.release = null; }
       if (method === 'POST' && state.loseNext && state.loseNext(body)) { state.loseNext = null; item.lostAfterEffect = true; return route.abort('failed'); }
       return route.fulfill({ status: response.status, headers: Object.fromEntries(response.headers), body: bytes });
     }
+    if (overrideLeadJs && url.pathname === '/desk-lead-sources.js') return route.fulfill({ contentType: 'text/javascript', body: readFileSync(overrideLeadJs) });
     const path = resolve(root, decodeURIComponent(url.pathname).replace(/^\//, ''));
     if (!path.startsWith(root + '/') || !existsSync(path) || statSync(path).isDirectory()) return route.fulfill({ status: 404, body: '' });
     return route.fulfill({ contentType: ({ '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.svg': 'image/svg+xml', '.webp': 'image/webp', '.ico': 'image/x-icon' })[extname(path)] || 'application/octet-stream', body: readFileSync(path) });
@@ -95,7 +101,7 @@ async function dialogState(page) {
   return page.evaluate(() => {
     const d = document.getElementById('leadSourceDialog'), check = document.getElementById('leadSourceCheck'), retry = document.getElementById('leadSourceRetry'), status = document.getElementById('leadSourceStatus');
     const visible = n => !!n && n.getClientRects().length > 0 && getComputedStyle(n).visibility !== 'hidden';
-    return { open: !!d?.open, stage: d?.dataset.connectorStage, busy: d?.getAttribute('aria-busy'), check: { visible: visible(check), disabled: !!check?.disabled, hiddenAttr: !!check?.hidden, display: check && getComputedStyle(check).display }, retry: { visible: visible(retry), disabled: !!retry?.disabled }, status: { visible: visible(status), text: status?.textContent || '' }, enabledVisibleButtons: [...(d?.querySelectorAll('button') || [])].filter(b => visible(b) && !b.disabled).map(b => b.textContent.trim()), scroll: { doc: document.documentElement.scrollWidth, vw: innerWidth } };
+    return { focus: document.activeElement?.id || document.activeElement?.tagName, open: !!d?.open, stage: d?.dataset.connectorStage, busy: d?.getAttribute('aria-busy'), check: { visible: visible(check), disabled: !!check?.disabled, hiddenAttr: !!check?.hidden, display: check && getComputedStyle(check).display }, retry: { visible: visible(retry), disabled: !!retry?.disabled }, status: { visible: visible(status), text: status?.textContent || '' }, enabledVisibleButtons: [...(d?.querySelectorAll('button') || [])].filter(b => visible(b) && !b.disabled).map(b => b.textContent.trim()), scroll: { doc: document.documentElement.scrollWidth, vw: innerWidth } };
   });
 }
 async function noHorizontalScroll(page) { const v = await page.evaluate(() => ({ doc: document.documentElement.scrollWidth, vw: innerWidth, dialog: (() => { const d = document.getElementById('leadSourceDialog'); return d?.open ? { scroll: d.scrollWidth, client: d.clientWidth } : null; })() })); assert.ok(v.doc <= v.vw + 1 && (!v.dialog || v.dialog.scroll <= v.dialog.client + 1), 'Horizontal scroll ' + JSON.stringify(v)); }
@@ -208,6 +214,87 @@ for (const [width, height] of [[1440, 900], [390, 844]]) {
     if (!await page.locator('#leadSourceDialog[open]').count()) await openConnector(x, 'Thumbtack');
     await dialogOpen(page); await page.waitForFunction(() => document.getElementById('leadSourceDialog').getAttribute('aria-busy') === 'false');
     await assertRecoverable(x, 'thumbtack-reload', { expectSavedSource: 'thumbtack' });
+  });
+}
+
+// --- In-flight, spacing, focus-observation and permission-stage cases (QA round 2) ---
+async function holdThen(x, predicate, click, label) {
+  const { page } = x; x.state.holdNext = predicate;
+  await click();
+  await page.waitForFunction(() => document.getElementById('leadSourceDialog').getAttribute('aria-busy') === 'true');
+  for (let i = 0; i < 50 && !x.state.release; i++) await page.waitForTimeout(20);
+  assert.ok(x.state.release, 'response was not held');
+  const s = await dialogState(page); (report.observations ||= []).push({ label, width: x.width, state: s });
+  await shot(page, label + '-' + x.width);
+  x.state.release(); await page.waitForFunction(() => document.getElementById('leadSourceDialog').getAttribute('aria-busy') === 'false');
+  return s;
+}
+async function linkGap(page) {
+  return page.evaluate(() => { const a = document.getElementById('leadSourceCheck').getBoundingClientRect(), b = document.getElementById('leadSourceConnectionReview').getBoundingClientRect(); const sameLine = Math.abs(a.top - b.top) < Math.min(a.height, b.height) / 2; return { sameLine, gap: sameLine ? b.left - a.right : b.top - a.bottom, check: [a.left, a.right, a.top], review: [b.left, b.right, b.top] }; });
+}
+for (const [width, height] of [[1440, 900], [390, 844]]) {
+  await check(`normal in-flight saves keep Check saved status hidden (account and request stages) (${width})`, async () => {
+    const x = await fixture(width, height), { page } = x;
+    await openConnector(x, 'Angi'); await dialogOpen(page); await waitStage(page, 'account');
+    await page.fill('#leadSourceBusiness', '55501234');
+    const a = await holdThen(x, (m, b) => m === 'POST' && b?.operation === 'prepare', () => page.locator('#leadSourcePrepare').click(), 'inflight-account');
+    assert.ok(!a.check.visible, 'Check saved status flashes during a normal Prepare save: ' + JSON.stringify(a));
+    await waitStage(page, 'request'); await assertConfirmedHidden(page, 'Angi request after normal save');
+    const r = await holdThen(x, (m, b) => m === 'POST' && b?.operation === 'report_request_sent', () => page.locator('#leadSourceReportSent').click(), 'inflight-request');
+    assert.ok(!r.check.visible, 'Check saved status flashes during a normal "I sent this request" save: ' + JSON.stringify(r));
+    assert.ok(!r.status.visible, 'Request-stage status line (hidden by design) flashes during a normal save: ' + JSON.stringify(r.status));
+    assert.ok(x.state.requests.filter(q => q.held).length === 2);
+  });
+  await check(`unconfirmed request stage: links are spaced and check-in-flight is observed (${width})`, async () => {
+    const x = await fixture(width, height), { page } = x;
+    await openConnector(x, 'Angi'); await dialogOpen(page); await waitStage(page, 'account');
+    await page.fill('#leadSourceBusiness', '55501234'); await page.locator('#leadSourcePrepare').click(); await waitStage(page, 'request');
+    x.state.loseNext = b => b?.operation === 'report_request_sent';
+    await page.locator('#leadSourceReportSent').click();
+    await page.waitForFunction(() => /couldn.t confirm/.test(document.getElementById('leadSourceStatus').textContent) && document.getElementById('leadSourceDialog').getAttribute('aria-busy') === 'false');
+    const focusAfterLoss = await page.evaluate(() => document.activeElement?.id || document.activeElement?.tagName);
+    (report.focusAfterLostResponse ||= []).push({ width, stage: 'request', activeElement: focusAfterLoss });
+    if (overrideLeadJs) assert.equal(focusAfterLoss, 'leadSourceCheck', 'Focus did not move to Check saved status after the lost response');
+    const s = await dialogState(page); assert.ok(s.check.visible && !s.check.disabled, JSON.stringify(s));
+    const review = await page.locator('#leadSourceConnectionReview').isVisible();
+    if (review) { const g = await linkGap(page); (report.linkGaps ||= []).push({ width, ...g }); assert.ok(g.gap >= 8, 'Check saved status and the review link run together: ' + JSON.stringify(g)); }
+    await shot(page, 'request-unconfirmed-links-' + width);
+    // Observe (not assert) what the owner sees while their own status check is in flight.
+    await page.locator('#leadSourceCheck').focus();
+    const during = await holdThen(x, (m) => m === 'GET', () => page.keyboard.press('Enter'), 'check-inflight');
+    (report.checkInFlight ||= []).push({ width, checkVisible: during.check.visible, checkDisabled: during.check.disabled, focusDuring: during.focus, focusAfter: await page.evaluate(() => document.activeElement?.id || document.activeElement?.tagName), statusAfter: (await dialogState(page)).status });
+  });
+}
+
+// Permission stage: Thumbtack partner access is only "ready" when process.env.URL is the production
+// origin and partner credentials exist (thumbtack-environment.mjs). Synthetic, non-secret placeholder
+// values are set only for this case; start_thumbtack_connection builds an authorization address and
+// makes no provider call. The browser never navigates to Thumbtack (any attempt is counted as forbidden).
+const production = 'https://machinesandcloud.com';
+const partnerEnv = { PUBLIC_SITE_URL: undefined, THUMBTACK_PARTNER_ENABLED: '1', THUMBTACK_CLIENT_ID: 'synthetic-qa-client', THUMBTACK_CLIENT_SECRET: 'synthetic-qa-placeholder', THUMBTACK_SCOPES: 'offline_access supply::messages.read', THUMBTACK_CLIENT_AUTH_METHOD: 'client_secret_basic', THUMBTACK_TOKEN_ENCRYPTION_KEY: 'a'.repeat(64), URL: production };
+for (const [width, height] of [[1440, 900], [390, 844]]) {
+  await check(`thumbtack permission stage lost authorization request recovers (${width})`, async () => {
+    const saved = Object.fromEntries(Object.keys(partnerEnv).map(k => [k, process.env[k]]));
+    for (const [k, v] of Object.entries(partnerEnv)) if (v === undefined) delete process.env[k]; else process.env[k] = v;
+    try {
+      // The page is served (by route interception only) at the production origin, because access.mjs only
+      // accepts an http origin when URL is local, while partner readiness requires URL to be production.
+      const x = await fixture(width, height, production), { page } = x;
+      await openConnector(x, 'Thumbtack'); await dialogOpen(page);
+      if (await page.locator('#selfServeNative').isVisible().catch(() => false)) await page.locator('#selfServeNative').click();
+      x.state.loseNext = b => b?.action === 'start_thumbtack_connection';
+      await page.waitForFunction(() => { const d = document.getElementById('leadSourceDialog'); return d.getAttribute('aria-busy') === 'false' && (d.dataset.connectorStage === 'permission' || /couldn.t confirm/.test(document.getElementById('leadSourceStatus').textContent)); });
+      let stage = await page.evaluate(() => document.getElementById('leadSourceDialog').dataset.connectorStage);
+      (report.permissionStage ||= []).push({ width, stageReached: stage });
+      assert.equal(stage, 'permission', 'permission stage not reached');
+      if (!/couldn.t confirm/.test(await page.locator('#leadSourceStatus').textContent())) {
+        await assertConfirmedHidden(page, 'Thumbtack permission');
+        await page.locator('#leadSourceAuthorize').click();
+        await page.waitForFunction(() => /couldn.t confirm/.test(document.getElementById('leadSourceStatus').textContent) && document.getElementById('leadSourceDialog').getAttribute('aria-busy') === 'false');
+      }
+      assert.ok(x.state.requests.some(r => r.lostAfterEffect && r.action === 'start_thumbtack_connection' && r.status === 200), 'actual handler did not process the lost authorization request');
+      await assertRecoverable(x, 'thumbtack-permission', { expectSavedSource: 'thumbtack' });
+    } finally { for (const [k, v] of Object.entries(saved)) if (v === undefined) delete process.env[k]; else process.env[k] = v; }
   });
 }
 

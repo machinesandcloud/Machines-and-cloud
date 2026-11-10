@@ -1,0 +1,2080 @@
+{
+  "at": "2026-11-10T03:44:21.455Z",
+  "mode": "Actual owner handlers in-process, memory store, fake model, Playwright-served worktree files; physical transport denied",
+  "sourceHashes": {
+    "desk.html": "5fb1a9be91dc46a0f16ead29691ca693329244b8d624de9ae82db7af4da8ad13",
+    "desk.js": "0d784bbbd1903bb51084afdda17a76cf9769dd34f7fc9c93e14f365996665df8",
+    "desk.css": "40bc6c92580591703346f97449d926b0c275245ba8c040cc86968a3f40988502",
+    "desk-lead-sources.js": "2df249163f4c14e3eee8b483b97f253f06a202fd93fa005e42f10af2d2b6b079",
+    "desk-lead-sources.css": "5b290deb61d8777f51daff8941c7769ff78bc8e8795bfbca3edcee048d26379a",
+    "desk-setup-guide.js": "0d174d012643cc6789a5c7c851f9620e426c715ebaee2ff887b832a1c5144733",
+    "desk-setup-guide.css": "5a6ea915296b23338ce746dd7bd13d9e82bc72f6d5e7716499d07160257cc64a",
+    "netlify/functions/client.mjs": "eafa4e54aae9adcf7e882f09f7daf3797486791178b88ebc1c2e3954cf4a7391"
+  },
+  "checks": [
+    {
+      "name": "angi account stage lost response recovers (1440)",
+      "pass": true
+    },
+    {
+      "name": "angi account stage lost response recovers after reload (1440)",
+      "pass": true
+    },
+    {
+      "name": "angi request stage \"I sent this request\" lost response recovers, with reload (1440)",
+      "pass": true
+    },
+    {
+      "name": "thumbtack partner request lost response recovers, with reload (1440)",
+      "pass": true
+    },
+    {
+      "name": "angi account stage lost response recovers (390)",
+      "pass": true
+    },
+    {
+      "name": "angi account stage lost response recovers after reload (390)",
+      "pass": true
+    },
+    {
+      "name": "angi request stage \"I sent this request\" lost response recovers, with reload (390)",
+      "pass": true
+    },
+    {
+      "name": "thumbtack partner request lost response recovers, with reload (390)",
+      "pass": true
+    },
+    {
+      "name": "normal in-flight saves keep Check saved status hidden (account and request stages) (1440)",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: Check saved status flashes during a normal Prepare save: {\"focus\":\"BODY\",\"open\":true,\"stage\":\"account\",\"busy\":\"true\",\"check\":{\"visible\":true,\"disabled\":true,\"hiddenAttr\":false,\"display\":\"inline-flex\"},\"retry\":{\"visible\":false,\"disabled\":true},\"status\":{\"visible\":true,\"text\":\"Saving connection setup…\"},\"enabledVisibleButtons\":[],\"scroll\":{\"doc\":1440,\"vw\":1440}}\n    at file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/lead-source-unconfirmed-ui-check.mjs:241:12\n    at runNextTicks (node:internal/process/task_queues:64:5)\n    at process.processImmediate (node:internal/timers:472:9)\n    at async check (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/lead-source-unconfirmed-ui-check.mjs:92:9)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/lead-source-unconfirmed-ui-check.mjs:236:3",
+      "dialog": {
+        "focus": "leadSourceSetupTitle",
+        "open": true,
+        "stage": "request",
+        "busy": "false",
+        "check": {
+          "visible": false,
+          "disabled": false,
+          "hiddenAttr": false,
+          "display": "none"
+        },
+        "retry": {
+          "visible": false,
+          "disabled": false
+        },
+        "status": {
+          "visible": false,
+          "text": "Connection details are ready. Follow the steps above; the first received lead will confirm intake."
+        },
+        "enabledVisibleButtons": [
+          "Exit setup",
+          "Previous instruction",
+          "Next instruction",
+          "Show",
+          "Copy email instead",
+          "I sent this request",
+          "Get help with this connection"
+        ],
+        "scroll": {
+          "doc": 1440,
+          "vw": 1440
+        }
+      }
+    },
+    {
+      "name": "unconfirmed request stage: links are spaced and check-in-flight is observed (1440)",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: Check saved status and the review link run together: {\"sameLine\":true,\"gap\":0,\"check\":[328,429.953125,688.109375],\"review\":[429.953125,581.140625,688.109375]}\n    at file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/lead-source-unconfirmed-ui-check.mjs:260:105\n    at async check (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/lead-source-unconfirmed-ui-check.mjs:92:9)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/lead-source-unconfirmed-ui-check.mjs:248:3",
+      "dialog": {
+        "focus": "BODY",
+        "open": true,
+        "stage": "request",
+        "busy": "false",
+        "check": {
+          "visible": true,
+          "disabled": false,
+          "hiddenAttr": false,
+          "display": "inline-block"
+        },
+        "retry": {
+          "visible": false,
+          "disabled": false
+        },
+        "status": {
+          "visible": true,
+          "text": "We couldn’t confirm whether this setup change was saved. Check saved status before trying again."
+        },
+        "enabledVisibleButtons": [
+          "Exit setup",
+          "Check saved status"
+        ],
+        "scroll": {
+          "doc": 1440,
+          "vw": 1440
+        }
+      }
+    },
+    {
+      "name": "normal in-flight saves keep Check saved status hidden (account and request stages) (390)",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: Check saved status flashes during a normal Prepare save: {\"focus\":\"BODY\",\"open\":true,\"stage\":\"account\",\"busy\":\"true\",\"check\":{\"visible\":true,\"disabled\":true,\"hiddenAttr\":false,\"display\":\"inline-flex\"},\"retry\":{\"visible\":false,\"disabled\":true},\"status\":{\"visible\":true,\"text\":\"Saving connection setup…\"},\"enabledVisibleButtons\":[],\"scroll\":{\"doc\":390,\"vw\":390}}\n    at file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/lead-source-unconfirmed-ui-check.mjs:241:12\n    at runNextTicks (node:internal/process/task_queues:64:5)\n    at process.processImmediate (node:internal/timers:472:9)\n    at async check (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/lead-source-unconfirmed-ui-check.mjs:92:9)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/lead-source-unconfirmed-ui-check.mjs:236:3",
+      "dialog": {
+        "focus": "leadSourceSetupTitle",
+        "open": true,
+        "stage": "request",
+        "busy": "false",
+        "check": {
+          "visible": false,
+          "disabled": false,
+          "hiddenAttr": false,
+          "display": "none"
+        },
+        "retry": {
+          "visible": false,
+          "disabled": false
+        },
+        "status": {
+          "visible": false,
+          "text": "Connection details are ready. Follow the steps above; the first received lead will confirm intake."
+        },
+        "enabledVisibleButtons": [
+          "Exit setup",
+          "Previous instruction",
+          "Next instruction",
+          "Show",
+          "Copy email instead",
+          "I sent this request",
+          "Get help with this connection"
+        ],
+        "scroll": {
+          "doc": 390,
+          "vw": 390
+        }
+      }
+    },
+    {
+      "name": "unconfirmed request stage: links are spaced and check-in-flight is observed (390)",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: Check saved status and the review link run together: {\"sameLine\":true,\"gap\":0,\"check\":[29,130.953125,699.09375],\"review\":[130.953125,282.140625,699.09375]}\n    at file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/lead-source-unconfirmed-ui-check.mjs:260:105\n    at async check (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/lead-source-unconfirmed-ui-check.mjs:92:9)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/lead-source-unconfirmed-ui-check.mjs:248:3",
+      "dialog": {
+        "focus": "BODY",
+        "open": true,
+        "stage": "request",
+        "busy": "false",
+        "check": {
+          "visible": true,
+          "disabled": false,
+          "hiddenAttr": false,
+          "display": "inline-block"
+        },
+        "retry": {
+          "visible": false,
+          "disabled": false
+        },
+        "status": {
+          "visible": true,
+          "text": "We couldn’t confirm whether this setup change was saved. Check saved status before trying again."
+        },
+        "enabledVisibleButtons": [
+          "Exit setup",
+          "Check saved status"
+        ],
+        "scroll": {
+          "doc": 390,
+          "vw": 390
+        }
+      }
+    },
+    {
+      "name": "thumbtack permission stage lost authorization request recovers (1440)",
+      "pass": true
+    },
+    {
+      "name": "thumbtack permission stage lost authorization request recovers (390)",
+      "pass": true
+    },
+    {
+      "name": "no physical, forbidden requests or page errors",
+      "pass": true
+    }
+  ],
+  "screenshots": [
+    "scratchpad/claude-lead-r2-before-614b0db5-angi-account-1440.png",
+    "scratchpad/claude-lead-r2-before-614b0db5-angi-account-after-check-1440.png",
+    "scratchpad/claude-lead-r2-before-614b0db5-angi-account-reload-1440.png",
+    "scratchpad/claude-lead-r2-before-614b0db5-angi-account-reload-after-check-1440.png",
+    "scratchpad/claude-lead-r2-before-614b0db5-angi-request-confirmed-1440.png",
+    "scratchpad/claude-lead-r2-before-614b0db5-angi-request-lost-1440.png",
+    "scratchpad/claude-lead-r2-before-614b0db5-angi-request-reload-1440.png",
+    "scratchpad/claude-lead-r2-before-614b0db5-angi-request-reload-after-check-1440.png",
+    "scratchpad/claude-lead-r2-before-614b0db5-thumbtack-lost-1440.png",
+    "scratchpad/claude-lead-r2-before-614b0db5-thumbtack-reload-1440.png",
+    "scratchpad/claude-lead-r2-before-614b0db5-thumbtack-reload-after-check-1440.png",
+    "scratchpad/claude-lead-r2-before-614b0db5-angi-account-390.png",
+    "scratchpad/claude-lead-r2-before-614b0db5-angi-account-after-check-390.png",
+    "scratchpad/claude-lead-r2-before-614b0db5-angi-account-reload-390.png",
+    "scratchpad/claude-lead-r2-before-614b0db5-angi-account-reload-after-check-390.png",
+    "scratchpad/claude-lead-r2-before-614b0db5-angi-request-confirmed-390.png",
+    "scratchpad/claude-lead-r2-before-614b0db5-angi-request-lost-390.png",
+    "scratchpad/claude-lead-r2-before-614b0db5-angi-request-reload-390.png",
+    "scratchpad/claude-lead-r2-before-614b0db5-angi-request-reload-after-check-390.png",
+    "scratchpad/claude-lead-r2-before-614b0db5-thumbtack-lost-390.png",
+    "scratchpad/claude-lead-r2-before-614b0db5-thumbtack-reload-390.png",
+    "scratchpad/claude-lead-r2-before-614b0db5-thumbtack-reload-after-check-390.png",
+    "scratchpad/claude-lead-r2-before-614b0db5-inflight-account-1440.png",
+    "scratchpad/claude-lead-r2-before-614b0db5-failure-9.png",
+    "scratchpad/claude-lead-r2-before-614b0db5-failure-10.png",
+    "scratchpad/claude-lead-r2-before-614b0db5-inflight-account-390.png",
+    "scratchpad/claude-lead-r2-before-614b0db5-failure-11.png",
+    "scratchpad/claude-lead-r2-before-614b0db5-failure-12.png",
+    "scratchpad/claude-lead-r2-before-614b0db5-thumbtack-permission-1440.png",
+    "scratchpad/claude-lead-r2-before-614b0db5-thumbtack-permission-after-check-1440.png",
+    "scratchpad/claude-lead-r2-before-614b0db5-thumbtack-permission-390.png",
+    "scratchpad/claude-lead-r2-before-614b0db5-thumbtack-permission-after-check-390.png"
+  ],
+  "requests": [
+    {
+      "slug": "lead-ui-1-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-1-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-1-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-1-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-1-1440",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "lead_connection",
+      "operation": "prepare",
+      "source": "angi",
+      "operationId": "394ad2e5c225ea3f948553224e8cb431",
+      "status": 200,
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "lead-ui-1-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-1-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-1-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-2-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-2-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-2-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-2-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-2-1440",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "lead_connection",
+      "operation": "prepare",
+      "source": "angi",
+      "operationId": "8629e0f9f7f546c7192589deea965d2b",
+      "status": 200,
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "lead-ui-2-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-2-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-2-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-2-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-2-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-3-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-3-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-3-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-3-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-3-1440",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "lead_connection",
+      "operation": "prepare",
+      "source": "angi",
+      "operationId": "2b3bb1aa93d1af27f0bf962355716ded",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-3-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-3-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-3-1440",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "lead_connection",
+      "operation": "report_request_sent",
+      "source": "angi",
+      "operationId": "2a0d5d772b83b484c71fb844308e5369",
+      "status": 200,
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "lead-ui-3-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-3-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-3-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-3-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-3-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-4-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-4-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-4-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-4-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-4-1440",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "lead_connection",
+      "operation": "prepare",
+      "source": "thumbtack",
+      "operationId": "f382bd5971a127d9afd5a74f31419aa7",
+      "status": 200,
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "lead-ui-4-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-4-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-4-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-4-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-4-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-5-390",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-5-390",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-5-390",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-5-390",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-5-390",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "lead_connection",
+      "operation": "prepare",
+      "source": "angi",
+      "operationId": "6f31acb0426dfe8431eaff8007e05fe1",
+      "status": 200,
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "lead-ui-5-390",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-5-390",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-5-390",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-6-390",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-6-390",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-6-390",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-6-390",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-6-390",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "lead_connection",
+      "operation": "prepare",
+      "source": "angi",
+      "operationId": "66997a7d0fcf8979994b08a85865087a",
+      "status": 200,
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "lead-ui-6-390",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-6-390",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-6-390",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-6-390",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-6-390",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-7-390",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-7-390",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-7-390",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-7-390",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-7-390",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "lead_connection",
+      "operation": "prepare",
+      "source": "angi",
+      "operationId": "507ad47639fc77568b3af45280f6841e",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-7-390",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-7-390",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-7-390",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "lead_connection",
+      "operation": "report_request_sent",
+      "source": "angi",
+      "operationId": "182a3283fab92b645cd28a1c1f45259f",
+      "status": 200,
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "lead-ui-7-390",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-7-390",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-7-390",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-7-390",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-7-390",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-8-390",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-8-390",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-8-390",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-8-390",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-8-390",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "lead_connection",
+      "operation": "prepare",
+      "source": "thumbtack",
+      "operationId": "a598b355d1360c4f3818a5cd54cce0bd",
+      "status": 200,
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "lead-ui-8-390",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-8-390",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-8-390",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-8-390",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-8-390",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-9-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-9-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-9-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-9-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-9-1440",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "lead_connection",
+      "operation": "prepare",
+      "source": "angi",
+      "operationId": "d9fdcf76b6b35bc236be6ecf2dfc0f9b",
+      "status": 200,
+      "held": true
+    },
+    {
+      "slug": "lead-ui-9-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-9-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-10-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-10-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-10-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-10-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-10-1440",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "lead_connection",
+      "operation": "prepare",
+      "source": "angi",
+      "operationId": "33b8dfa5706fb4513ae7628b9114aead",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-10-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-10-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-10-1440",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "lead_connection",
+      "operation": "report_request_sent",
+      "source": "angi",
+      "operationId": "8f1c63ccc95fb8973a0c63ab12795c3c",
+      "status": 200,
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "lead-ui-11-390",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-11-390",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-11-390",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-11-390",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-11-390",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "lead_connection",
+      "operation": "prepare",
+      "source": "angi",
+      "operationId": "5fbffd48ee90c9f78bc6f7cd6f17a642",
+      "status": 200,
+      "held": true
+    },
+    {
+      "slug": "lead-ui-11-390",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-11-390",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-12-390",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-12-390",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-12-390",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-12-390",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-12-390",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "lead_connection",
+      "operation": "prepare",
+      "source": "angi",
+      "operationId": "cc7624a2bd15e5ebc16ba9f8a157ae7c",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-12-390",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-12-390",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-12-390",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "lead_connection",
+      "operation": "report_request_sent",
+      "source": "angi",
+      "operationId": "a33623ce5e56f22995f956f66d464155",
+      "status": 200,
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "lead-ui-13-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-13-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-13-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-13-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-13-1440",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "start_thumbtack_connection",
+      "source": "thumbtack",
+      "operationId": "7ba2ad7bbd73abba2ef42a2746c09999",
+      "status": 200,
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "lead-ui-13-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-13-1440",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-13-1440",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-14-390",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-14-390",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-14-390",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-14-390",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-14-390",
+      "path": "/api/client",
+      "method": "POST",
+      "action": "start_thumbtack_connection",
+      "source": "thumbtack",
+      "operationId": "8a21d5d7c8db3fb742eb52d7617035c0",
+      "status": 200,
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "lead-ui-14-390",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-14-390",
+      "path": "/api/client",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "lead-ui-14-390",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "status": 200
+    }
+  ],
+  "pageErrors": [],
+  "forbidden": [],
+  "physicalNetwork": 0,
+  "handlers": [
+    "/api/client",
+    "/api/access",
+    "/api/onboard",
+    "/api/workspace-billing",
+    "/api/angi",
+    "/api/thumbtack",
+    "/api/thumbtack/self-serve"
+  ],
+  "overrideLeadJs": null,
+  "browser": "/Users/stevengoumnai/Library/Caches/ms-playwright/chromium_headless_shell-1223/chrome-headless-shell-mac-arm64/chrome-headless-shell",
+  "observations": [
+    {
+      "label": "angi-account",
+      "width": 1440,
+      "state": {
+        "focus": "BODY",
+        "open": true,
+        "stage": "account",
+        "busy": "false",
+        "check": {
+          "visible": true,
+          "disabled": false,
+          "hiddenAttr": false,
+          "display": "inline-flex"
+        },
+        "retry": {
+          "visible": false,
+          "disabled": false
+        },
+        "status": {
+          "visible": true,
+          "text": "We couldn’t confirm whether this setup change was saved. Check saved status before trying again."
+        },
+        "enabledVisibleButtons": [
+          "Exit setup",
+          "Check saved status"
+        ],
+        "scroll": {
+          "doc": 1440,
+          "vw": 1440
+        }
+      }
+    },
+    {
+      "label": "angi-account-after-check",
+      "width": 1440,
+      "state": {
+        "focus": "BODY",
+        "open": true,
+        "stage": "request",
+        "busy": "false",
+        "check": {
+          "visible": false,
+          "disabled": false,
+          "hiddenAttr": false,
+          "display": "none"
+        },
+        "retry": {
+          "visible": false,
+          "disabled": false
+        },
+        "status": {
+          "visible": false,
+          "text": "Your connection setup is saved. Its current status is shown above."
+        },
+        "enabledVisibleButtons": [
+          "Exit setup",
+          "Previous instruction",
+          "Next instruction",
+          "Show",
+          "Copy email instead",
+          "I sent this request",
+          "Get help with this connection"
+        ],
+        "scroll": {
+          "doc": 1440,
+          "vw": 1440
+        }
+      }
+    },
+    {
+      "label": "angi-account-reload",
+      "width": 1440,
+      "state": {
+        "focus": "leadSourceTitle",
+        "open": true,
+        "stage": "request",
+        "busy": "false",
+        "check": {
+          "visible": true,
+          "disabled": false,
+          "hiddenAttr": false,
+          "display": "inline-block"
+        },
+        "retry": {
+          "visible": false,
+          "disabled": false
+        },
+        "status": {
+          "visible": true,
+          "text": "An earlier setup request needs confirmation. Check its saved status before making another change."
+        },
+        "enabledVisibleButtons": [
+          "Exit setup",
+          "Check saved status"
+        ],
+        "scroll": {
+          "doc": 1440,
+          "vw": 1440
+        }
+      }
+    },
+    {
+      "label": "angi-account-reload-after-check",
+      "width": 1440,
+      "state": {
+        "focus": "BODY",
+        "open": true,
+        "stage": "request",
+        "busy": "false",
+        "check": {
+          "visible": false,
+          "disabled": false,
+          "hiddenAttr": false,
+          "display": "none"
+        },
+        "retry": {
+          "visible": false,
+          "disabled": false
+        },
+        "status": {
+          "visible": false,
+          "text": "Your connection setup is saved. Its current status is shown above."
+        },
+        "enabledVisibleButtons": [
+          "Exit setup",
+          "Previous instruction",
+          "Next instruction",
+          "Show",
+          "Copy email instead",
+          "I sent this request",
+          "Get help with this connection"
+        ],
+        "scroll": {
+          "doc": 1440,
+          "vw": 1440
+        }
+      }
+    },
+    {
+      "label": "angi-request-lost-no-reload",
+      "width": 1440,
+      "state": {
+        "focus": "BODY",
+        "open": true,
+        "stage": "request",
+        "busy": "false",
+        "check": {
+          "visible": true,
+          "disabled": false,
+          "hiddenAttr": false,
+          "display": "inline-block"
+        },
+        "retry": {
+          "visible": false,
+          "disabled": false
+        },
+        "status": {
+          "visible": true,
+          "text": "We couldn’t confirm whether this setup change was saved. Check saved status before trying again."
+        },
+        "enabledVisibleButtons": [
+          "Exit setup",
+          "Check saved status"
+        ],
+        "scroll": {
+          "doc": 1440,
+          "vw": 1440
+        }
+      }
+    },
+    {
+      "label": "angi-request-reload",
+      "width": 1440,
+      "state": {
+        "focus": "leadSourceTitle",
+        "open": true,
+        "stage": "waiting",
+        "busy": "false",
+        "check": {
+          "visible": true,
+          "disabled": false,
+          "hiddenAttr": false,
+          "display": "inline-block"
+        },
+        "retry": {
+          "visible": false,
+          "disabled": false
+        },
+        "status": {
+          "visible": true,
+          "text": "An earlier setup request needs confirmation. Check its saved status before making another change."
+        },
+        "enabledVisibleButtons": [
+          "Exit setup",
+          "Check saved status"
+        ],
+        "scroll": {
+          "doc": 1440,
+          "vw": 1440
+        }
+      }
+    },
+    {
+      "label": "angi-request-reload-after-check",
+      "width": 1440,
+      "state": {
+        "focus": "BODY",
+        "open": true,
+        "stage": "waiting",
+        "busy": "false",
+        "check": {
+          "visible": true,
+          "disabled": false,
+          "hiddenAttr": false,
+          "display": "inline-block"
+        },
+        "retry": {
+          "visible": false,
+          "disabled": false
+        },
+        "status": {
+          "visible": false,
+          "text": "Your connection setup is saved. Its current status is shown above."
+        },
+        "enabledVisibleButtons": [
+          "Exit setup",
+          "Check saved status",
+          "Request connection review"
+        ],
+        "scroll": {
+          "doc": 1440,
+          "vw": 1440
+        }
+      }
+    },
+    {
+      "label": "thumbtack-lost-no-reload",
+      "width": 1440,
+      "state": {
+        "focus": "BODY",
+        "open": true,
+        "stage": "account",
+        "busy": "false",
+        "check": {
+          "visible": true,
+          "disabled": false,
+          "hiddenAttr": false,
+          "display": "inline-flex"
+        },
+        "retry": {
+          "visible": false,
+          "disabled": false
+        },
+        "status": {
+          "visible": true,
+          "text": "We couldn’t confirm whether this setup change was saved. Check saved status before trying again."
+        },
+        "enabledVisibleButtons": [
+          "Exit setup",
+          "Check saved status"
+        ],
+        "scroll": {
+          "doc": 1440,
+          "vw": 1440
+        }
+      }
+    },
+    {
+      "label": "thumbtack-reload",
+      "width": 1440,
+      "state": {
+        "focus": "leadSourceTitle",
+        "open": true,
+        "stage": "self-serve",
+        "busy": "false",
+        "check": {
+          "visible": true,
+          "disabled": false,
+          "hiddenAttr": false,
+          "display": "inline-block"
+        },
+        "retry": {
+          "visible": false,
+          "disabled": false
+        },
+        "status": {
+          "visible": true,
+          "text": "An earlier setup request needs confirmation. Check its saved status before making another change."
+        },
+        "enabledVisibleButtons": [
+          "Exit setup",
+          "Check notification status"
+        ],
+        "scroll": {
+          "doc": 1440,
+          "vw": 1440
+        }
+      }
+    },
+    {
+      "label": "thumbtack-reload-after-check",
+      "width": 1440,
+      "state": {
+        "focus": "BODY",
+        "open": true,
+        "stage": "self-serve",
+        "busy": "false",
+        "check": {
+          "visible": false,
+          "disabled": false,
+          "hiddenAttr": true,
+          "display": "none"
+        },
+        "retry": {
+          "visible": false,
+          "disabled": false
+        },
+        "status": {
+          "visible": true,
+          "text": "Your connection setup is saved. Its current status is shown above."
+        },
+        "enabledVisibleButtons": [
+          "Exit setup",
+          "Set up lead notifications",
+          "Review partner conversation setup instead"
+        ],
+        "scroll": {
+          "doc": 1440,
+          "vw": 1440
+        }
+      }
+    },
+    {
+      "label": "angi-account",
+      "width": 390,
+      "state": {
+        "focus": "BODY",
+        "open": true,
+        "stage": "account",
+        "busy": "false",
+        "check": {
+          "visible": true,
+          "disabled": false,
+          "hiddenAttr": false,
+          "display": "inline-flex"
+        },
+        "retry": {
+          "visible": false,
+          "disabled": false
+        },
+        "status": {
+          "visible": true,
+          "text": "We couldn’t confirm whether this setup change was saved. Check saved status before trying again."
+        },
+        "enabledVisibleButtons": [
+          "Exit setup",
+          "Check saved status"
+        ],
+        "scroll": {
+          "doc": 390,
+          "vw": 390
+        }
+      }
+    },
+    {
+      "label": "angi-account-after-check",
+      "width": 390,
+      "state": {
+        "focus": "BODY",
+        "open": true,
+        "stage": "request",
+        "busy": "false",
+        "check": {
+          "visible": false,
+          "disabled": false,
+          "hiddenAttr": false,
+          "display": "none"
+        },
+        "retry": {
+          "visible": false,
+          "disabled": false
+        },
+        "status": {
+          "visible": false,
+          "text": "Your connection setup is saved. Its current status is shown above."
+        },
+        "enabledVisibleButtons": [
+          "Exit setup",
+          "Previous instruction",
+          "Next instruction",
+          "Show",
+          "Copy email instead",
+          "I sent this request",
+          "Get help with this connection"
+        ],
+        "scroll": {
+          "doc": 390,
+          "vw": 390
+        }
+      }
+    },
+    {
+      "label": "angi-account-reload",
+      "width": 390,
+      "state": {
+        "focus": "leadSourceTitle",
+        "open": true,
+        "stage": "request",
+        "busy": "false",
+        "check": {
+          "visible": true,
+          "disabled": false,
+          "hiddenAttr": false,
+          "display": "inline-block"
+        },
+        "retry": {
+          "visible": false,
+          "disabled": false
+        },
+        "status": {
+          "visible": true,
+          "text": "An earlier setup request needs confirmation. Check its saved status before making another change."
+        },
+        "enabledVisibleButtons": [
+          "Exit setup",
+          "Check saved status"
+        ],
+        "scroll": {
+          "doc": 390,
+          "vw": 390
+        }
+      }
+    },
+    {
+      "label": "angi-account-reload-after-check",
+      "width": 390,
+      "state": {
+        "focus": "BODY",
+        "open": true,
+        "stage": "request",
+        "busy": "false",
+        "check": {
+          "visible": false,
+          "disabled": false,
+          "hiddenAttr": false,
+          "display": "none"
+        },
+        "retry": {
+          "visible": false,
+          "disabled": false
+        },
+        "status": {
+          "visible": false,
+          "text": "Your connection setup is saved. Its current status is shown above."
+        },
+        "enabledVisibleButtons": [
+          "Exit setup",
+          "Previous instruction",
+          "Next instruction",
+          "Show",
+          "Copy email instead",
+          "I sent this request",
+          "Get help with this connection"
+        ],
+        "scroll": {
+          "doc": 390,
+          "vw": 390
+        }
+      }
+    },
+    {
+      "label": "angi-request-lost-no-reload",
+      "width": 390,
+      "state": {
+        "focus": "BODY",
+        "open": true,
+        "stage": "request",
+        "busy": "false",
+        "check": {
+          "visible": true,
+          "disabled": false,
+          "hiddenAttr": false,
+          "display": "inline-block"
+        },
+        "retry": {
+          "visible": false,
+          "disabled": false
+        },
+        "status": {
+          "visible": true,
+          "text": "We couldn’t confirm whether this setup change was saved. Check saved status before trying again."
+        },
+        "enabledVisibleButtons": [
+          "Exit setup",
+          "Check saved status"
+        ],
+        "scroll": {
+          "doc": 390,
+          "vw": 390
+        }
+      }
+    },
+    {
+      "label": "angi-request-reload",
+      "width": 390,
+      "state": {
+        "focus": "leadSourceTitle",
+        "open": true,
+        "stage": "waiting",
+        "busy": "false",
+        "check": {
+          "visible": true,
+          "disabled": false,
+          "hiddenAttr": false,
+          "display": "inline-block"
+        },
+        "retry": {
+          "visible": false,
+          "disabled": false
+        },
+        "status": {
+          "visible": true,
+          "text": "An earlier setup request needs confirmation. Check its saved status before making another change."
+        },
+        "enabledVisibleButtons": [
+          "Exit setup",
+          "Check saved status"
+        ],
+        "scroll": {
+          "doc": 390,
+          "vw": 390
+        }
+      }
+    },
+    {
+      "label": "angi-request-reload-after-check",
+      "width": 390,
+      "state": {
+        "focus": "BODY",
+        "open": true,
+        "stage": "waiting",
+        "busy": "false",
+        "check": {
+          "visible": true,
+          "disabled": false,
+          "hiddenAttr": false,
+          "display": "inline-block"
+        },
+        "retry": {
+          "visible": false,
+          "disabled": false
+        },
+        "status": {
+          "visible": false,
+          "text": "Your connection setup is saved. Its current status is shown above."
+        },
+        "enabledVisibleButtons": [
+          "Exit setup",
+          "Check saved status",
+          "Request connection review"
+        ],
+        "scroll": {
+          "doc": 390,
+          "vw": 390
+        }
+      }
+    },
+    {
+      "label": "thumbtack-lost-no-reload",
+      "width": 390,
+      "state": {
+        "focus": "BODY",
+        "open": true,
+        "stage": "account",
+        "busy": "false",
+        "check": {
+          "visible": true,
+          "disabled": false,
+          "hiddenAttr": false,
+          "display": "inline-flex"
+        },
+        "retry": {
+          "visible": false,
+          "disabled": false
+        },
+        "status": {
+          "visible": true,
+          "text": "We couldn’t confirm whether this setup change was saved. Check saved status before trying again."
+        },
+        "enabledVisibleButtons": [
+          "Exit setup",
+          "Check saved status"
+        ],
+        "scroll": {
+          "doc": 390,
+          "vw": 390
+        }
+      }
+    },
+    {
+      "label": "thumbtack-reload",
+      "width": 390,
+      "state": {
+        "focus": "leadSourceTitle",
+        "open": true,
+        "stage": "self-serve",
+        "busy": "false",
+        "check": {
+          "visible": true,
+          "disabled": false,
+          "hiddenAttr": false,
+          "display": "inline-block"
+        },
+        "retry": {
+          "visible": false,
+          "disabled": false
+        },
+        "status": {
+          "visible": true,
+          "text": "An earlier setup request needs confirmation. Check its saved status before making another change."
+        },
+        "enabledVisibleButtons": [
+          "Exit setup",
+          "Check notification status"
+        ],
+        "scroll": {
+          "doc": 390,
+          "vw": 390
+        }
+      }
+    },
+    {
+      "label": "thumbtack-reload-after-check",
+      "width": 390,
+      "state": {
+        "focus": "BODY",
+        "open": true,
+        "stage": "self-serve",
+        "busy": "false",
+        "check": {
+          "visible": false,
+          "disabled": false,
+          "hiddenAttr": true,
+          "display": "none"
+        },
+        "retry": {
+          "visible": false,
+          "disabled": false
+        },
+        "status": {
+          "visible": true,
+          "text": "Your connection setup is saved. Its current status is shown above."
+        },
+        "enabledVisibleButtons": [
+          "Exit setup",
+          "Set up lead notifications",
+          "Review partner conversation setup instead"
+        ],
+        "scroll": {
+          "doc": 390,
+          "vw": 390
+        }
+      }
+    },
+    {
+      "label": "inflight-account",
+      "width": 1440,
+      "state": {
+        "focus": "BODY",
+        "open": true,
+        "stage": "account",
+        "busy": "true",
+        "check": {
+          "visible": true,
+          "disabled": true,
+          "hiddenAttr": false,
+          "display": "inline-flex"
+        },
+        "retry": {
+          "visible": false,
+          "disabled": true
+        },
+        "status": {
+          "visible": true,
+          "text": "Saving connection setup…"
+        },
+        "enabledVisibleButtons": [],
+        "scroll": {
+          "doc": 1440,
+          "vw": 1440
+        }
+      }
+    },
+    {
+      "label": "inflight-account",
+      "width": 390,
+      "state": {
+        "focus": "BODY",
+        "open": true,
+        "stage": "account",
+        "busy": "true",
+        "check": {
+          "visible": true,
+          "disabled": true,
+          "hiddenAttr": false,
+          "display": "inline-flex"
+        },
+        "retry": {
+          "visible": false,
+          "disabled": true
+        },
+        "status": {
+          "visible": true,
+          "text": "Saving connection setup…"
+        },
+        "enabledVisibleButtons": [],
+        "scroll": {
+          "doc": 390,
+          "vw": 390
+        }
+      }
+    },
+    {
+      "label": "thumbtack-permission",
+      "width": 1440,
+      "state": {
+        "focus": "BODY",
+        "open": true,
+        "stage": "permission",
+        "busy": "false",
+        "check": {
+          "visible": true,
+          "disabled": false,
+          "hiddenAttr": false,
+          "display": "inline-flex"
+        },
+        "retry": {
+          "visible": false,
+          "disabled": false
+        },
+        "status": {
+          "visible": true,
+          "text": "We couldn’t confirm whether this setup change was saved. Check saved status before trying again."
+        },
+        "enabledVisibleButtons": [
+          "Exit setup",
+          "Check saved status"
+        ],
+        "scroll": {
+          "doc": 1440,
+          "vw": 1440
+        }
+      }
+    },
+    {
+      "label": "thumbtack-permission-after-check",
+      "width": 1440,
+      "state": {
+        "focus": "BODY",
+        "open": true,
+        "stage": "permission",
+        "busy": "false",
+        "check": {
+          "visible": true,
+          "disabled": false,
+          "hiddenAttr": false,
+          "display": "inline-flex"
+        },
+        "retry": {
+          "visible": true,
+          "disabled": false
+        },
+        "status": {
+          "visible": true,
+          "text": "Your Thumbtack sign-in request is saved. Continue the same sign-in below to open its authorization page."
+        },
+        "enabledVisibleButtons": [
+          "Exit setup",
+          "Check saved status",
+          "Continue saved Thumbtack sign-in"
+        ],
+        "scroll": {
+          "doc": 1440,
+          "vw": 1440
+        }
+      }
+    },
+    {
+      "label": "thumbtack-permission",
+      "width": 390,
+      "state": {
+        "focus": "BODY",
+        "open": true,
+        "stage": "permission",
+        "busy": "false",
+        "check": {
+          "visible": true,
+          "disabled": false,
+          "hiddenAttr": false,
+          "display": "inline-flex"
+        },
+        "retry": {
+          "visible": false,
+          "disabled": false
+        },
+        "status": {
+          "visible": true,
+          "text": "We couldn’t confirm whether this setup change was saved. Check saved status before trying again."
+        },
+        "enabledVisibleButtons": [
+          "Exit setup",
+          "Check saved status"
+        ],
+        "scroll": {
+          "doc": 390,
+          "vw": 390
+        }
+      }
+    },
+    {
+      "label": "thumbtack-permission-after-check",
+      "width": 390,
+      "state": {
+        "focus": "BODY",
+        "open": true,
+        "stage": "permission",
+        "busy": "false",
+        "check": {
+          "visible": true,
+          "disabled": false,
+          "hiddenAttr": false,
+          "display": "inline-flex"
+        },
+        "retry": {
+          "visible": true,
+          "disabled": false
+        },
+        "status": {
+          "visible": true,
+          "text": "Your Thumbtack sign-in request is saved. Continue the same sign-in below to open its authorization page."
+        },
+        "enabledVisibleButtons": [
+          "Exit setup",
+          "Check saved status",
+          "Continue saved Thumbtack sign-in"
+        ],
+        "scroll": {
+          "doc": 390,
+          "vw": 390
+        }
+      }
+    }
+  ],
+  "savedMessageVisibility": [
+    {
+      "label": "angi-account",
+      "width": 1440,
+      "stage": "request",
+      "visible": false
+    },
+    {
+      "label": "angi-account-reload",
+      "width": 1440,
+      "stage": "request",
+      "visible": false
+    },
+    {
+      "label": "angi-request-reload",
+      "width": 1440,
+      "stage": "waiting",
+      "visible": false
+    },
+    {
+      "label": "thumbtack-reload",
+      "width": 1440,
+      "stage": "self-serve",
+      "visible": true
+    },
+    {
+      "label": "angi-account",
+      "width": 390,
+      "stage": "request",
+      "visible": false
+    },
+    {
+      "label": "angi-account-reload",
+      "width": 390,
+      "stage": "request",
+      "visible": false
+    },
+    {
+      "label": "angi-request-reload",
+      "width": 390,
+      "stage": "waiting",
+      "visible": false
+    },
+    {
+      "label": "thumbtack-reload",
+      "width": 390,
+      "stage": "self-serve",
+      "visible": true
+    }
+  ],
+  "focusAfterLostResponse": [
+    {
+      "width": 1440,
+      "stage": "request",
+      "activeElement": "BODY"
+    },
+    {
+      "width": 390,
+      "stage": "request",
+      "activeElement": "BODY"
+    }
+  ],
+  "linkGaps": [
+    {
+      "width": 1440,
+      "sameLine": true,
+      "gap": 0,
+      "check": [
+        328,
+        429.953125,
+        688.109375
+      ],
+      "review": [
+        429.953125,
+        581.140625,
+        688.109375
+      ]
+    },
+    {
+      "width": 390,
+      "sameLine": true,
+      "gap": 0,
+      "check": [
+        29,
+        130.953125,
+        699.09375
+      ],
+      "review": [
+        130.953125,
+        282.140625,
+        699.09375
+      ]
+    }
+  ],
+  "permissionStage": [
+    {
+      "width": 1440,
+      "stageReached": "permission"
+    },
+    {
+      "width": 390,
+      "stageReached": "permission"
+    }
+  ],
+  "sourceHashesAfter": {
+    "desk.html": "5fb1a9be91dc46a0f16ead29691ca693329244b8d624de9ae82db7af4da8ad13",
+    "desk.js": "0d784bbbd1903bb51084afdda17a76cf9769dd34f7fc9c93e14f365996665df8",
+    "desk.css": "40bc6c92580591703346f97449d926b0c275245ba8c040cc86968a3f40988502",
+    "desk-lead-sources.js": "2df249163f4c14e3eee8b483b97f253f06a202fd93fa005e42f10af2d2b6b079",
+    "desk-lead-sources.css": "5b290deb61d8777f51daff8941c7769ff78bc8e8795bfbca3edcee048d26379a",
+    "desk-setup-guide.js": "0d174d012643cc6789a5c7c851f9620e426c715ebaee2ff887b832a1c5144733",
+    "desk-setup-guide.css": "5a6ea915296b23338ce746dd7bd13d9e82bc72f6d5e7716499d07160257cc64a",
+    "netlify/functions/client.mjs": "eafa4e54aae9adcf7e882f09f7daf3797486791178b88ebc1c2e3954cf4a7391"
+  },
+  "globalAssertions": {
+    "physicalNetwork": 0,
+    "forbidden": 0,
+    "pageErrors": 0,
+    "sourceStable": true
+  },
+  "passed": 11,
+  "total": 15
+}
