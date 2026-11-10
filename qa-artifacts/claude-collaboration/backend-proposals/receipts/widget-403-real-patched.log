@@ -1,0 +1,28 @@
+bodies {"first":{"status":403,"body":{"error":"paused","message":"Website chat is unavailable right now. Please use the shop’s contact details on this website.","turnNotProcessed":true},"accessControlAllowOrigin":"https://shop.example.test"},"recover":{"status":403,"body":{"error":"paused","message":"Website chat is unavailable right now. Please use the shop’s contact details on this website.","turnNotProcessed":false},"accessControlAllowOrigin":"https://shop.example.test"}}
+PASS delta_then_clean_eof
+PASS saved_request_then_delta_eof
+PASS complete_done_with_saved_request
+PASS empty_eof
+PASS delta_then_explicit_error
+PASS delta_then_transport_error
+PASS saved_request_then_transport_error
+PASS complete_done_without_trailing_newline
+PASS delta_then_truncated_done
+PASS done_before_connection_closes
+PASS malformed_packet_followed_by_done
+PASS terminal_done_missing_reply
+PASS terminal_done_blank_reply
+PASS terminal_done_wrong_reply_type
+PASS terminal_error_cannot_be_replaced_by_later_done
+PASS packets_after_done_do_not_change_answer
+PASS wrong_delta_type
+PASS unknown_packet_type
+PASS no_response_headers_times_out_once
+PASS body_without_packets_times_out_once
+PASS saved_request_then_body_hang_times_out_once
+PASS json_without_terminal_done_is_not_completion
+PASS json_explicit_done_is_completion
+PASS daily_limit_keeps_composer_disabled
+PASS denied_request_recovers_composer
+PASS interrupted_then_recover_denied_keeps_turn
+{"checks":{"passed":26,"total":26,"unexpectedBrowserRequests":0,"actualExternalRequests":0,"actualModelCalls":0,"actualProviderCalls":0,"actualSavedRequests":0},"failed":[],"sourceHash":"43cc96c98ff22f79ccc873b779d2414cf01682cdc3dea62d5f4d2ca21595634d"}

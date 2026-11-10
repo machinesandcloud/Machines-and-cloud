@@ -1,0 +1,102 @@
+--- /tmp/mc-claude-suite-refresh-20261110/qa-artifacts/claude-collaboration/suite-refresh/widget-stream-check.mjs	2026-11-10 08:55:46
++++ /tmp/mc-claude-backend-proposals-20261110/qa-artifacts/claude-collaboration/backend-proposals/widget-stream-403-real.mjs	2026-11-10 10:33:19
+@@ -1,4 +1,11 @@
+ // Actual customer embed + browser DOM. Every request is fulfilled by a fixture or denied.
++// backend-proposals variant of suite-refresh/widget-stream-check.mjs (see widget-stream-403-real.diff).
++// Changes: (1) the 403 fixture body is the REAL chat.mjs 403 body captured by chat-403-check.mjs
++// (--bodies <json>, first send / recoverTurn probe); (2) a 403 that carries a server message expects that
++// message instead of the "couldn't confirm" copy, and a first-send 403 must clear pendingTurn; (3) new
++// scenario: interrupted reply, then "Check previous reply" gets the real recover 403, which must keep
++// pendingTurn and the held composer; (4) bundled Chromium; per-scenario log; receipts under --out.
++// Usage: node widget-stream-403-real.mjs --repo <repo root> --bodies <chat-403 real bodies json> --out <dir>
+ // Scripted saved-request receipts below are not actual backend, model or provider evidence.
+ import assert from 'node:assert/strict';
+ import { readFile, writeFile, mkdir } from 'node:fs/promises';
+@@ -13,7 +20,9 @@
+ globalThis.fetch = net.connect = net.createConnection = http.request = http.get = https.request = https.get = deny;
+ syncBuiltinESMExports();
+ const { chromium } = await import('/Users/stevengoumnai/.npm/_npx/e41f203b7505f1fb/node_modules/playwright/index.mjs');
+-const repo = resolve(import.meta.dirname, '../../..'), scratch = resolve(import.meta.dirname, 'receipts', 'widget-stream'); // refreshed: ENV, repo root relative to suite-refresh/ copy; receipts kept out of tracked scratchpad/
++const argOf = name => { const i = process.argv.indexOf(name); if (i < 0) throw new Error('Missing ' + name); return process.argv[i + 1]; };
++const repo = resolve(argOf('--repo')), scratch = resolve(argOf('--out'));
++const realBodies = JSON.parse(await readFile(resolve(argOf('--bodies')), 'utf8')); // refreshed: ENV, repo root relative to suite-refresh/ copy; receipts kept out of tracked scratchpad/
+ await mkdir(scratch, { recursive: true });
+ const source = await readFile(resolve(repo, 'embed.js'), 'utf8');
+ const sourceHash = createHash('sha256').update(source).digest('hex');
+@@ -50,12 +59,14 @@
+   { name: 'json_without_terminal_done_is_not_completion', json: { reply: final }, fail: true },
+   { name: 'json_explicit_done_is_completion', json: complete, saved: true, final: true },
+   { name: 'daily_limit_keeps_composer_disabled', status: 429, fail: true, unavailable: true },
+-  { name: 'denied_request_recovers_composer', status: 403, fail: true },
++  { name: 'denied_request_recovers_composer', status: 403, body: realBodies.first.body, fail: true },
++  { name: 'interrupted_then_recover_denied_keeps_turn', chunks: [delta], fail: true, recoverDenied: realBodies.recover.body },
+ ];
+-const browser = await chromium.launch({ channel: 'chrome', headless: true, args: ['--disable-background-networking', '--disable-component-update', '--disable-sync', '--no-first-run', '--disable-default-apps', '--host-resolver-rules=MAP * ~NOTFOUND'] });
+-const results = [], unexpected = [];
++console.log('bodies', JSON.stringify(realBodies));
++const browser = await chromium.launch({ executablePath: '/Users/stevengoumnai/Library/Caches/ms-playwright/chromium_headless_shell-1223/chrome-headless-shell-mac-arm64/chrome-headless-shell', headless: true, args: ['--disable-background-networking', '--disable-component-update', '--disable-sync', '--no-first-run', '--disable-default-apps', '--host-resolver-rules=MAP * ~NOTFOUND'] });
++const results = [], unexpected = [], failures = [];
+ try {
+-  for (const scenario of scenarios) {
++  for (const scenario of scenarios) { try {
+     const context = await browser.newContext({ viewport: { width: 390, height: 844 }, serviceWorkers: 'block' });
+     await context.route('**/*', async route => {
+       const req = route.request();
+@@ -81,10 +92,11 @@
+         if (url !== 'https://platform.fixture.test/api/chat') return fetchBefore(input, init);
+         fixture.requests.push(JSON.parse(init.body));
+         if (init.signal) init.signal.addEventListener('abort', () => { fixture.aborted = true; });
++        if (fixture.requests.length > 1 && scenario.recoverDenied) return new Response(JSON.stringify(scenario.recoverDenied), { status: 403, headers: { 'content-type': 'application/json' } });
+         if (fixture.requests.length > 1) return new Response(JSON.stringify({ t: 'done', reply: 'This is the synthetic follow-up response.' }), { status: 200, headers: { 'content-type': 'application/json' } });
+         if (scenario.saved) fixture.savedRequests.push({ id: 'fixture-request-1', evidence: 'scripted fixture only' });
+         if (scenario.hangFetch) return new Promise(() => {});
+-        if (scenario.status) return new Response(JSON.stringify({ error: 'fixture_denied' }), { status: scenario.status, headers: { 'content-type': 'application/json' } });
++        if (scenario.status) return new Response(JSON.stringify(scenario.body || { error: 'fixture_denied' }), { status: scenario.status, headers: { 'content-type': 'application/json' } });
+         if (scenario.json) return new Response(JSON.stringify(scenario.json), { status: 200, headers: { 'content-type': 'application/json' } });
+         const encoder = new TextEncoder(); let cancelled = false;
+         const stream = new ReadableStream({ start(controller) {
+@@ -128,7 +140,9 @@
+     assert.ok(!assistants.some(row => row.content === partial));
+     assert.ok(!observed.bubbles.some(row => row.text === partial || row.text.includes('MUST NOT APPEAR')), scenario.name + ': incomplete/late answer is not displayed as complete');
+     if (scenario.final) assert.equal(assistants[0].content, final);
+-    if (scenario.fail && !scenario.unavailable) assert.ok(observed.bubbles.some(row => /couldn’t confirm the outcome/.test(row.text)), scenario.name + ': honest unconfirmed-outcome message is visible');
++    if (scenario.body?.message) { assert.ok(observed.bubbles.some(row => row.text === scenario.body.message), scenario.name + ': the server refusal message is shown'); assert.ok(!observed.bubbles.some(row => /couldn’t confirm the outcome/.test(row.text)), scenario.name + ': a definite refusal is not described as interrupted'); }
++    else if (scenario.fail && !scenario.unavailable) assert.ok(observed.bubbles.some(row => /couldn’t confirm the outcome/.test(row.text)), scenario.name + ': honest unconfirmed-outcome message is visible');
++    if (scenario.status === 403) assert.equal(observed.stored.pendingTurn ?? null, null, scenario.name + ': a refused first send clears the pending receipt');
+     assert.equal(observed.composerEnabled, !scenario.unavailable && !held); // refreshed: STALE, held after an unconfirmed reply (dfa3fcd5, embed.js:100)
+     assert.equal(observed.sendEnabled, !scenario.unavailable && !held); // refreshed: STALE, held after an unconfirmed reply (dfa3fcd5, embed.js:100)
+     if (held) assert.equal(observed.recoveryVisible, true, scenario.name + ': held composer offers Check previous reply'); // refreshed: STALE, recovery control (dfa3fcd5, embed.js:62,100)
+@@ -145,6 +159,17 @@
+       result.screenshot = resolve(scratch, 'website-stream-fixed-' + scenario.name + '-390.png'); // refreshed: ENV, receipts kept out of tracked scratchpad/
+       await page.screenshot({ path: result.screenshot, fullPage: true }); // refreshed: ENV, receipts kept out of tracked scratchpad/
+     }
++    if (scenario.recoverDenied) {
++      await page.locator('#mcDesk .recover-reply').click();
++      await page.waitForFunction(() => window.__streamFixture.requests.length === 2 && [...document.querySelectorAll('#mcDesk .m .b.a[role=status]')].length >= 2, null, { timeout: 2500 });
++      await page.waitForTimeout(150);
++      result.recover = await page.evaluate(() => ({ request: window.__streamFixture.requests[1], stored: JSON.parse(sessionStorage.getItem('mc_desk_stream-fixture')), composerEnabled: !document.querySelector('#mcDesk textarea').disabled, sendEnabled: !document.querySelector('#mcDesk button.s').disabled, recoveryVisible: !document.querySelector('#mcDesk .recovery').hidden, bubbles: [...document.querySelectorAll('#mcDesk .m .b')].map(node => node.textContent) }));
++      assert.equal(result.recover.request.recoverTurn, true); assert.equal(result.recover.request.turnId, observed.fixture.requests[0].turnId);
++      assert.ok(result.recover.stored.pendingTurn && result.recover.stored.pendingTurn.id === observed.fixture.requests[0].turnId, scenario.name + ': a refused recovery probe keeps the pending receipt');
++      assert.equal(result.recover.composerEnabled, false, scenario.name + ': composer stays held'); assert.equal(result.recover.sendEnabled, false);
++      assert.ok(result.recover.bubbles.includes(scenario.recoverDenied.message || '\u0000'), scenario.name + ': the refusal message is shown');
++      result.recoveryStillOffered = result.recover.recoveryVisible;
++    }
+     if (scenario.followup) {
+       // refreshed: STALE, the next turn first checks the previous reply (recoverTurn with the same turnId), then the follow-up is sent (dfa3fcd5, embed.js:138,163,194)
+       await page.locator('#mcDesk .recover-reply').click();
+@@ -157,10 +182,12 @@
+       assert.ok(!result.followup.messages.some(row => row.role === 'assistant' && row.content === partial));
+       assert.equal(result.followup.messages.filter(row => row.role === 'user').length, 2);
+     }
+-    results.push(result); await context.close();
+-  }
++    results.push(result); console.log('PASS ' + scenario.name); await context.close();
++  } catch (error) { console.log('FAIL ' + scenario.name + ' -- ' + String(error.message).split('\n')[0]); failures.push({ name: scenario.name, error: error.message }); } }
+   assert.deepEqual(unexpected, []);
+ } finally { await browser.close(); }
+ const report = { scope: 'Offline actual-DOM proposed-repair acceptance, not production or provider delivery proof.', source: { path: 'embed.js', sha256: sourceHash, baselineSha256: baselineHash }, fixtureCaveat: 'Saved-request receipts are independently scripted fixture outcomes, not actual tool/storage saves. No AI/provider call or real saved request occurred.', counts: { passed: results.length, total: scenarios.length, unexpectedBrowserRequests: unexpected.length, actualExternalRequests: 0, actualModelCalls: 0, actualProviderCalls: 0, actualSavedRequests: 0 }, results };
+ await writeFile(resolve(scratch, 'website-stream-fixed.json'), JSON.stringify(report, null, 2) + '\n');
+-console.log(JSON.stringify({ checks: report.counts, sourceHash, result: 'scratchpad/website-stream-fixed.json' }));
++report.failures = failures; await writeFile(resolve(scratch, 'website-stream-fixed.json'), JSON.stringify(report, null, 2) + '\n');
++console.log(JSON.stringify({ checks: report.counts, failed: failures.map(row => row.name), sourceHash }));
++assert.deepEqual(failures, []);

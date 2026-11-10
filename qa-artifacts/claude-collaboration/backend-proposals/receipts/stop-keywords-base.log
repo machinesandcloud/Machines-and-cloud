@@ -1,0 +1,110 @@
+PASS  "STOP"                                       expected=stop  platform=stop  shop=stop
+PASS  "stop"                                       expected=stop  platform=stop  shop=stop
+FAIL  "Stop."                                      expected=stop  platform=none  shop=none
+PASS  "stop "                                      expected=stop  platform=stop  shop=stop
+PASS  "  STOP  "                                   expected=stop  platform=stop  shop=stop
+FAIL  "STOP!"                                      expected=stop  platform=none  shop=none
+FAIL  "Stop!!!"                                    expected=stop  platform=none  shop=none
+FAIL  "stop?"                                      expected=stop  platform=none  shop=none
+FAIL  "\"STOP\""                                   expected=stop  platform=none  shop=none
+PASS  "stop\n"                                     expected=stop  platform=stop  shop=stop
+FAIL  "STOP 🛑"                                    expected=stop  platform=none  shop=none
+FAIL  "Stop, thanks"                               expected=stop  platform=none  shop=none
+PASS  "STOPALL"                                    expected=stop  platform=stop  shop=stop
+FAIL  "Stop all"                                   expected=stop  platform=none  shop=none
+FAIL  "Unsubscribe."                               expected=stop  platform=none  shop=none
+FAIL  "unsubscribe me"                             expected=stop  platform=none  shop=none
+FAIL  "Cancel."                                    expected=stop  platform=none  shop=none
+PASS  "CANCEL"                                     expected=stop  platform=stop  shop=stop
+PASS  "end"                                        expected=stop  platform=stop  shop=stop
+FAIL  "End."                                       expected=stop  platform=none  shop=none
+FAIL  "QUIT!"                                      expected=stop  platform=none  shop=none
+FAIL  "Revoke"                                     expected=stop  platform=stop  shop=none
+FAIL  "OPTOUT"                                     expected=stop  platform=stop  shop=none
+FAIL  "opt out"                                    expected=stop  platform=none  shop=none
+FAIL  "Opt-out"                                    expected=stop  platform=none  shop=none
+FAIL  "please opt me out"                          expected=stop  platform=none  shop=none
+FAIL  "Stop please"                                expected=stop  platform=none  shop=none
+FAIL  "Please stop"                                expected=stop  platform=none  shop=none
+FAIL  "please stop texting me"                     expected=stop  platform=none  shop=none
+FAIL  "STOP NOW"                                   expected=stop  platform=none  shop=none
+FAIL  "stop it"                                    expected=stop  platform=none  shop=none
+FAIL  "Stop sending me messages"                   expected=stop  platform=none  shop=none
+FAIL  "Quit texting me"                            expected=stop  platform=none  shop=none
+FAIL  "Remove me"                                  expected=stop  platform=none  shop=none
+FAIL  "No more texts."                             expected=stop  platform=none  shop=none
+FAIL  "stop the texts"                             expected=stop  platform=none  shop=none
+PASS  "ALTO"                                       expected=stop  platform=stop  shop=stop
+FAIL  "Alto."                                      expected=stop  platform=none  shop=none
+FAIL  "¡Alto!"                                     expected=stop  platform=none  shop=none
+FAIL  "alto por favor"                             expected=stop  platform=none  shop=none
+PASS  "PARAR"                                      expected=stop  platform=stop  shop=stop
+FAIL  "Parar."                                     expected=stop  platform=none  shop=none
+FAIL  "No más mensajes"                            expected=stop  platform=none  shop=none
+FAIL  "no mas mensajes"                            expected=stop  platform=none  shop=none
+FAIL  "No me escriban"                             expected=stop  platform=none  shop=none
+FAIL  "No me manden más mensajes"                  expected=stop  platform=none  shop=none
+PASS  "START"                                      expected=start platform=start shop=start
+FAIL  "start."                                     expected=start platform=none  shop=none
+FAIL  "Start!"                                     expected=start platform=none  shop=none
+PASS  "UNSTOP"                                     expected=start platform=start shop=start
+PASS  "unstop "                                    expected=start platform=start shop=start
+PASS  "EMPEZAR"                                    expected=start platform=start shop=start
+FAIL  "Empezar."                                   expected=start platform=none  shop=none
+FAIL  "¡Empezar!"                                  expected=start platform=none  shop=none
+PASS  "HELP"                                       expected=help  platform=help  shop=help
+FAIL  "help?"                                      expected=help  platform=none  shop=none
+FAIL  "Help!"                                      expected=help  platform=none  shop=none
+PASS  "INFO"                                       expected=help  platform=help  shop=help
+FAIL  "info."                                      expected=help  platform=none  shop=none
+PASS  "AYUDA"                                      expected=help  platform=help  shop=help
+FAIL  "¿Ayuda?"                                    expected=help  platform=none  shop=none
+PASS  "the leak won't stop"                        expected=none  platform=none  shop=none
+PASS  "The leak won’t stop dripping"               expected=none  platform=none  shop=none
+PASS  "Can you stop by tomorrow?"                  expected=none  platform=none  shop=none
+PASS  "stop by at 3"                               expected=none  platform=none  shop=none
+PASS  "My AC stopped working"                      expected=none  platform=none  shop=none
+PASS  "Please stop the water leak"                 expected=none  platform=none  shop=none
+PASS  "Don't stop the service"                     expected=none  platform=none  shop=none
+PASS  "The alarm won't stop, can you come?"        expected=none  platform=none  shop=none
+PASS  "Stop! Water everywhere in the basement"     expected=none  platform=none  shop=none
+PASS  "stopwatch"                                  expected=none  platform=none  shop=none
+PASS  "unstoppable"                                expected=none  platform=none  shop=none
+PASS  "Cancel my appointment"                      expected=none  platform=none  shop=none
+PASS  "Can I cancel my 3pm?"                       expected=none  platform=none  shop=none
+PASS  "end of the day works"                       expected=none  platform=none  shop=none
+PASS  "At the end of the driveway"                 expected=none  platform=none  shop=none
+PASS  "Help me with my furnace"                    expected=none  platform=none  shop=none
+PASS  "I need help"                                expected=none  platform=none  shop=none
+PASS  "start time?"                                expected=none  platform=none  shop=none
+PASS  "When does the tech start?"                  expected=none  platform=none  shop=none
+PASS  "Info on pricing please"                     expected=none  platform=none  shop=none
+PASS  "Yes"                                        expected=none  platform=none  shop=none
+PASS  "Sí"                                         expected=none  platform=none  shop=none
+PASS  "APPOINTMENTS"                               expected=none  platform=none  shop=none
+PASS  "Quote abc123"                               expected=none  platform=none  shop=none
+PASS  "please stop texting me, I already booked"   expected=none  platform=none  shop=none
+PASS  "Stop the service visit"                     expected=none  platform=none  shop=none
+PASS  "Para mañana por favor"                      expected=none  platform=none  shop=none
+PASS  "Necesito ayuda con mi aire"                 expected=none  platform=none  shop=none
+PASS  "No paren el servicio"                       expected=none  platform=none  shop=none
+PASS  ""                                           expected=none  platform=none  shop=none
+{"repo":"/private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/bp-base","cases":91,"passed":47,"failed":44,"providerReads":91,"otherRequests":0}
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: 44 keyword case(s) misclassified
+
+44 !== 0
+
+    at file:///private/tmp/mc-claude-backend-proposals-20261110/qa-artifacts/claude-collaboration/backend-proposals/stop-keywords-check.mjs:93:8 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: 44,
+  expected: 0,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.13.0
