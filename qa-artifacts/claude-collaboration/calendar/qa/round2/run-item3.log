@@ -1,0 +1,43 @@
+PASS R2-A Retry -> slow success; owner moves focus to a grid day INSIDE the calendar during reload: focus stays on that day, not moved to Refresh
+PASS R2-B Retry -> slow success; owner moves focus OUTSIDE the calendar during reload: focus is not stolen
+PASS R2-C Retry -> reload FAILS again: Retry kept with focus, one read, new error shown in the status region
+PASS R2-D Retry -> success with focus left on Retry: focus lands on Refresh (claimed behaviour)
+FAIL R2-E notice lifetime: remove whole-day block, then re-block the same day via Block time: notice must not still say "Block removed": stale notice while the block is back: Block removed: Sunday, January 3, 2027 · Whole day. Existing visits stay booked.
+PASS No physical transport, forbidden destinations or page errors
+{
+ "output": "scratchpad/claude-calendar-qa2-item3.json",
+ "passed": 5,
+ "failed": 1,
+ "total": 6,
+ "physicalNetwork": 0,
+ "pageErrors": 0,
+ "browser": {
+  "engine": "Google Chrome (channel:chrome, headless, temp profile)",
+  "executablePath": null,
+  "version": "156.0.8078.82"
+ },
+ "served": {
+  "desk.html": [
+   "5fb1a9be91dc46a0f16ead29691ca693329244b8d624de9ae82db7af4da8ad13"
+  ],
+  "desk-calendar.css": [
+   "03bd586488157d31e366b022f6172e30dede1ccb38a85cc82a4352ae95002d45"
+  ],
+  "desk.js": [
+   "f4017bc4745bca629f36159c05973b6e7c76c4961fa49ea9cb21dd77bbf428ee"
+  ],
+  "desk-visits.js": [
+   "95c718fa8cb251c8e36b794d1bccb52e2db5b36098b6120a0040a10125b3139b"
+  ],
+  "desk-calendar.js": [
+   "18fae63271d8d3efaa24890e9d71e6bf95c5237a4d861408e00929c77740a2cd"
+  ]
+ },
+ "sourceStable": true,
+ "failures": [
+  {
+   "name": "R2-E notice lifetime: remove whole-day block, then re-block the same day via Block time: notice must not still say \"Block removed\"",
+   "error": "AssertionError [ERR_ASSERTION]: stale notice while the block is back: Block removed: Sunday, January 3, 2027 · Whole day. Existing visits stay booked."
+  }
+ ]
+}

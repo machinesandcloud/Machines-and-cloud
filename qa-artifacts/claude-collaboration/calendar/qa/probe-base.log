@@ -1,0 +1,77 @@
+PASS QA P1 removal answered 500: calendar never says "Block removed", block still shown, Refresh does not resurrect a notice
+PASS QA P2 removal response lost (transport abort): no "Block removed"
+PASS QA P2b server COMMITTED the removal but the response was lost: no "Block removed" claim; after Refresh the grid reflects the server
+PASS QA P3 200 ok but server list still contains the block: no "Block removed"
+PASS QA P4 owner moves focus OUTSIDE the calendar during a slow removal: focus is not stolen back
+PASS QA P4b owner moves focus to Next-month INSIDE the calendar during a slow removal: focus stays on Next
+FAIL QA P5 Refresh pressed repeatedly while busy: exactly one schedule read; aria-disabled exposed; focus kept: Expected values to be strictly equal:
+FAIL QA P5b Retry pressed repeatedly while busy after a failed read: exactly one schedule read: Expected values to be strictly equal:
+PASS QA P6 "Block removed" notice must not hide an incomplete-records warning
+PASS QA P7 "Block removed" notice cleared on Today and on Go-to-date navigation
+FAIL QA P8 connection state disconnected is worded from the server record: locator.innerText: Timeout 8000ms exceeded.
+FAIL QA P8 connection state connected-old-consent is worded from the server record: locator.innerText: Timeout 8000ms exceeded.
+FAIL QA P8 connection state foreign-tenant is worded from the server record: locator.innerText: Timeout 8000ms exceeded.
+FAIL QA P8b server delivery enabled (mutated response) is the ONLY path to "sync enabled"; connections absent renders no line: locator.innerText: Timeout 8000ms exceeded.
+FAIL QA P9 dark colour scheme: no dark theme exists, calendar contrast sweep still clean: Expected values to be strictly deep-equal:
+PASS No physical transport, forbidden destinations or page errors
+{
+ "output": "scratchpad/claude-calendar-qa-probe-base.json",
+ "passed": 9,
+ "failed": 7,
+ "total": 16,
+ "physicalNetwork": 0,
+ "pageErrors": 0,
+ "browser": {
+  "engine": "Google Chrome (channel:chrome, headless, temp profile)",
+  "executablePath": null,
+  "version": "156.0.8078.82"
+ },
+ "served": {
+  "desk.html": [
+   "5fb1a9be91dc46a0f16ead29691ca693329244b8d624de9ae82db7af4da8ad13"
+  ],
+  "desk-calendar.css": [
+   "fa3b4383ba86b9fe0f5556a9db063f7a96989a19cb25f95360f73dfeada075e4"
+  ],
+  "desk.js": [
+   "f4017bc4745bca629f36159c05973b6e7c76c4961fa49ea9cb21dd77bbf428ee"
+  ],
+  "desk-visits.js": [
+   "95c718fa8cb251c8e36b794d1bccb52e2db5b36098b6120a0040a10125b3139b"
+  ],
+  "desk-calendar.js": [
+   "fadc233f1f8df7603cf88a0d506dbcd214679cbcb64f1fbec0ab4fe7ebaf3bd6"
+  ]
+ },
+ "sourceStable": true,
+ "failures": [
+  {
+   "name": "QA P5 Refresh pressed repeatedly while busy: exactly one schedule read; aria-disabled exposed; focus kept",
+   "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:"
+  },
+  {
+   "name": "QA P5b Retry pressed repeatedly while busy after a failed read: exactly one schedule read",
+   "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:"
+  },
+  {
+   "name": "QA P8 connection state disconnected is worded from the server record",
+   "error": "locator.innerText: Timeout 8000ms exceeded."
+  },
+  {
+   "name": "QA P8 connection state connected-old-consent is worded from the server record",
+   "error": "locator.innerText: Timeout 8000ms exceeded."
+  },
+  {
+   "name": "QA P8 connection state foreign-tenant is worded from the server record",
+   "error": "locator.innerText: Timeout 8000ms exceeded."
+  },
+  {
+   "name": "QA P8b server delivery enabled (mutated response) is the ONLY path to \"sync enabled\"; connections absent renders no line",
+   "error": "locator.innerText: Timeout 8000ms exceeded."
+  },
+  {
+   "name": "QA P9 dark colour scheme: no dark theme exists, calendar contrast sweep still clean",
+   "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:"
+  }
+ ]
+}

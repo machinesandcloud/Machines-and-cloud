@@ -1,0 +1,101 @@
+FAIL 1440px month view shows saved visits and blocked time from the actual schedule handler; next-month days meet 4.5:1: adjacent-month day contrast {"text":"29","ratio":2.87,"color":"rgb(137, 150, 169)","background":"rgb(248,250,252)","fontSize":"12px","fontWeight":"400"}
+FAIL 1440px every visible text run in the calendar meets WCAG contrast (cancelled visits, empty states, legend): low-contrast text
+PASS 1440px opening a visit from the calendar shows that visit, and closing returns focus to it
+PASS 1440px moving between months loads that month from the handler and keeps visits and blocks in their own month
+PASS 1440px keyboard only: reach the selected day, arrow and PageDown across months, open a visit, block time and return
+FAIL 1440px keyboard only: removing a block from the day panel keeps focus on that day: focus stays on the selected day after removing a block (not the page body): {"id":"","day":"","visit":"","block":"","text":"Skip to workspace\n\nFixture Calendar ShopHomeInboxScheduleFront deskAccountQuick tourContact support\n  Customer workspace","inCalendar":false}
+FAIL 1440px keyboard only: Refresh keeps focus on Refresh while the schedule reloads: focus stays on Refresh after reloading: {"id":"","day":"","visit":"","block":"","text":"Skip to workspace\n\nFixture Calendar ShopHomeInboxScheduleFront deskAccountQuick tourContact support\n  Customer workspace","inCalendar":false}
+FAIL 1440px Google Calendar status on Schedule is truthful: not connected says so, and nothing claims sync: Schedule names the Google Calendar state: ""
+FAIL 390px month view shows saved visits and blocked time from the actual schedule handler; next-month days meet 4.5:1: adjacent-month day contrast {"text":"29","ratio":2.87,"color":"rgb(137, 150, 169)","background":"rgb(248,250,252)","fontSize":"12px","fontWeight":"400"}
+FAIL 390px every visible text run in the calendar meets WCAG contrast (cancelled visits, empty states, legend): low-contrast text
+PASS 390px opening a visit from the calendar shows that visit, and closing returns focus to it
+PASS 390px moving between months loads that month from the handler and keeps visits and blocks in their own month
+PASS 390px keyboard only: reach the selected day, arrow and PageDown across months, open a visit, block time and return
+FAIL 390px keyboard only: removing a block from the day panel keeps focus on that day: focus stays on the selected day after removing a block (not the page body): {"id":"","day":"","visit":"","block":"","text":"Skip to workspace\n\nFixture Calendar ShopHomeInboxScheduleFront deskAccountQuick tourContact support\n  Customer workspace","inCalendar":false}
+FAIL 390px keyboard only: Refresh keeps focus on Refresh while the schedule reloads: focus stays on Refresh after reloading: {"id":"","day":"","visit":"","block":"","text":"Skip to workspace\n\nFixture Calendar ShopHomeInboxScheduleFront deskAccountQuick tourContact support\n  Customer workspace","inCalendar":false}
+FAIL 390px Google Calendar status on Schedule is truthful: not connected says so, and nothing claims sync: Schedule names the Google Calendar state: ""
+FAIL 1440px Google Calendar permission saved on the server is shown only with that evidence, and sync stays waiting: locator.innerText: Timeout 8000ms exceeded.
+FAIL 1440px Google Calendar needing reconnection is not shown as connected: locator.innerText: Timeout 8000ms exceeded.
+PASS No physical transport, forbidden destinations or page errors
+{
+ "output": "scratchpad/claude-calendar-qa-base.json",
+ "passed": 7,
+ "failed": 12,
+ "total": 19,
+ "physicalNetwork": 0,
+ "pageErrors": 0,
+ "browser": {
+  "engine": "Google Chrome (channel:chrome, headless, temp profile)",
+  "executablePath": null,
+  "version": "156.0.8078.82"
+ },
+ "served": {
+  "desk.html": [
+   "5fb1a9be91dc46a0f16ead29691ca693329244b8d624de9ae82db7af4da8ad13"
+  ],
+  "desk-calendar.css": [
+   "fa3b4383ba86b9fe0f5556a9db063f7a96989a19cb25f95360f73dfeada075e4"
+  ],
+  "desk.js": [
+   "f4017bc4745bca629f36159c05973b6e7c76c4961fa49ea9cb21dd77bbf428ee"
+  ],
+  "desk-visits.js": [
+   "95c718fa8cb251c8e36b794d1bccb52e2db5b36098b6120a0040a10125b3139b"
+  ],
+  "desk-calendar.js": [
+   "fadc233f1f8df7603cf88a0d506dbcd214679cbcb64f1fbec0ab4fe7ebaf3bd6"
+  ]
+ },
+ "sourceStable": true,
+ "failures": [
+  {
+   "name": "1440px month view shows saved visits and blocked time from the actual schedule handler; next-month days meet 4.5:1",
+   "error": "AssertionError [ERR_ASSERTION]: adjacent-month day contrast {\"text\":\"29\",\"ratio\":2.87,\"color\":\"rgb(137, 150, 169)\",\"background\":\"rgb(248,250,252)\",\"fontSize\":\"12px\",\"fontWeight\":\"400\"}"
+  },
+  {
+   "name": "1440px every visible text run in the calendar meets WCAG contrast (cancelled visits, empty states, legend)",
+   "error": "AssertionError [ERR_ASSERTION]: low-contrast text"
+  },
+  {
+   "name": "1440px keyboard only: removing a block from the day panel keeps focus on that day",
+   "error": "AssertionError [ERR_ASSERTION]: focus stays on the selected day after removing a block (not the page body): {\"id\":\"\",\"day\":\"\",\"visit\":\"\",\"block\":\"\",\"text\":\"Skip to workspace\\n\\nFixture Calendar ShopHomeInboxScheduleFront deskAccountQuick tourContact support\\n  Customer workspace\",\"inCalendar\":false}"
+  },
+  {
+   "name": "1440px keyboard only: Refresh keeps focus on Refresh while the schedule reloads",
+   "error": "AssertionError [ERR_ASSERTION]: focus stays on Refresh after reloading: {\"id\":\"\",\"day\":\"\",\"visit\":\"\",\"block\":\"\",\"text\":\"Skip to workspace\\n\\nFixture Calendar ShopHomeInboxScheduleFront deskAccountQuick tourContact support\\n  Customer workspace\",\"inCalendar\":false}"
+  },
+  {
+   "name": "1440px Google Calendar status on Schedule is truthful: not connected says so, and nothing claims sync",
+   "error": "AssertionError [ERR_ASSERTION]: Schedule names the Google Calendar state: \"\""
+  },
+  {
+   "name": "390px month view shows saved visits and blocked time from the actual schedule handler; next-month days meet 4.5:1",
+   "error": "AssertionError [ERR_ASSERTION]: adjacent-month day contrast {\"text\":\"29\",\"ratio\":2.87,\"color\":\"rgb(137, 150, 169)\",\"background\":\"rgb(248,250,252)\",\"fontSize\":\"12px\",\"fontWeight\":\"400\"}"
+  },
+  {
+   "name": "390px every visible text run in the calendar meets WCAG contrast (cancelled visits, empty states, legend)",
+   "error": "AssertionError [ERR_ASSERTION]: low-contrast text"
+  },
+  {
+   "name": "390px keyboard only: removing a block from the day panel keeps focus on that day",
+   "error": "AssertionError [ERR_ASSERTION]: focus stays on the selected day after removing a block (not the page body): {\"id\":\"\",\"day\":\"\",\"visit\":\"\",\"block\":\"\",\"text\":\"Skip to workspace\\n\\nFixture Calendar ShopHomeInboxScheduleFront deskAccountQuick tourContact support\\n  Customer workspace\",\"inCalendar\":false}"
+  },
+  {
+   "name": "390px keyboard only: Refresh keeps focus on Refresh while the schedule reloads",
+   "error": "AssertionError [ERR_ASSERTION]: focus stays on Refresh after reloading: {\"id\":\"\",\"day\":\"\",\"visit\":\"\",\"block\":\"\",\"text\":\"Skip to workspace\\n\\nFixture Calendar ShopHomeInboxScheduleFront deskAccountQuick tourContact support\\n  Customer workspace\",\"inCalendar\":false}"
+  },
+  {
+   "name": "390px Google Calendar status on Schedule is truthful: not connected says so, and nothing claims sync",
+   "error": "AssertionError [ERR_ASSERTION]: Schedule names the Google Calendar state: \"\""
+  },
+  {
+   "name": "1440px Google Calendar permission saved on the server is shown only with that evidence, and sync stays waiting",
+   "error": "locator.innerText: Timeout 8000ms exceeded."
+  },
+  {
+   "name": "1440px Google Calendar needing reconnection is not shown as connected",
+   "error": "locator.innerText: Timeout 8000ms exceeded."
+  }
+ ]
+}
+exit=1
