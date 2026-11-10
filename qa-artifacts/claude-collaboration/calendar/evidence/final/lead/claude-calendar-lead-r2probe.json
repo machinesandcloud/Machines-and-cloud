@@ -1,0 +1,343 @@
+{
+  "at": "2026-11-10T08:49:54.244Z",
+  "card": "AUTO-REVIEW-94A9EAF863227106",
+  "mode": "Actual owner handlers in-process, memory store, fake model, Playwright-served worktree files; provider env deleted; physical transport denied",
+  "serveFrom": null,
+  "sourceBefore": {
+    "desk.html": "5fb1a9be91dc46a0f16ead29691ca693329244b8d624de9ae82db7af4da8ad13",
+    "desk.js": "f4017bc4745bca629f36159c05973b6e7c76c4961fa49ea9cb21dd77bbf428ee",
+    "desk-calendar.js": "aea67633cff4bf4e1e886e43088cf6dd3a2ccccddf8b3affc169295eb32a9aaf",
+    "desk-calendar.css": "03bd586488157d31e366b022f6172e30dede1ccb38a85cc82a4352ae95002d45",
+    "desk-visits.js": "95c718fa8cb251c8e36b794d1bccb52e2db5b36098b6120a0040a10125b3139b",
+    "netlify/functions/client.mjs": "eafa4e54aae9adcf7e882f09f7daf3797486791178b88ebc1c2e3954cf4a7391",
+    "netlify/functions/lib/owner-schedule.mjs": "72693283aa2598644bd12416e5f19853fa2b0f4033be36c2bf6ae4ef0ee07766",
+    "qa-artifacts/claude-collaboration/calendar/schedule-calendar-ui-check.mjs": "24ba4b6cd58c58c3b9361cd9fbcde6bf6a9f9d84c56daa406e524f620f5a0c7e"
+  },
+  "served": {
+    "desk.html": [
+      "5fb1a9be91dc46a0f16ead29691ca693329244b8d624de9ae82db7af4da8ad13"
+    ],
+    "desk-calendar.css": [
+      "03bd586488157d31e366b022f6172e30dede1ccb38a85cc82a4352ae95002d45"
+    ],
+    "desk.js": [
+      "f4017bc4745bca629f36159c05973b6e7c76c4961fa49ea9cb21dd77bbf428ee"
+    ],
+    "desk-visits.js": [
+      "95c718fa8cb251c8e36b794d1bccb52e2db5b36098b6120a0040a10125b3139b"
+    ],
+    "desk-calendar.js": [
+      "aea67633cff4bf4e1e886e43088cf6dd3a2ccccddf8b3affc169295eb32a9aaf"
+    ]
+  },
+  "checks": [
+    {
+      "name": "R2-A Retry -> slow success; owner moves focus to a grid day INSIDE the calendar during reload: focus stays on that day, not moved to Refresh",
+      "pass": true,
+      "ms": 2627
+    },
+    {
+      "name": "R2-B Retry -> slow success; owner moves focus OUTSIDE the calendar during reload: focus is not stolen",
+      "pass": true,
+      "ms": 2450
+    },
+    {
+      "name": "R2-C Retry -> reload FAILS again: Retry kept with focus, one read, new error shown in the status region",
+      "pass": true,
+      "ms": 2355
+    },
+    {
+      "name": "R2-D Retry -> success with focus left on Retry: focus lands on Refresh (claimed behaviour)",
+      "pass": true,
+      "ms": 2199
+    },
+    {
+      "name": "R2-E notice lifetime: remove whole-day block, then re-block the same day via Block time: notice must not still say \"Block removed\"",
+      "pass": true,
+      "ms": 907
+    },
+    {
+      "name": "No physical transport, forbidden destinations or page errors",
+      "pass": true,
+      "ms": 0
+    }
+  ],
+  "screenshots": [
+    "scratchpad/claude-calendar-lead-r2probe-retry-fails-again.png",
+    "scratchpad/claude-calendar-lead-r2probe-reblock-same-day.png"
+  ],
+  "measurements": {},
+  "requests": [
+    {
+      "slug": "cal-ui-1-1440",
+      "path": "/api/client",
+      "query": "?c=cal-ui-1-1440",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "cal-ui-1-1440",
+      "path": "/api/workspace-billing",
+      "query": "?c=cal-ui-1-1440",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "cal-ui-1-1440",
+      "path": "/api/client",
+      "query": "?c=cal-ui-1-1440&schedule=1&from=2026-11-29&to=2027-01-02",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "cal-ui-1-1440",
+      "path": "/api/client",
+      "query": "?c=cal-ui-1-1440&schedule=1&from=2026-11-29&to=2027-01-02",
+      "method": "GET"
+    },
+    {
+      "slug": "cal-ui-1-1440",
+      "path": "/api/client",
+      "query": "?c=cal-ui-1-1440&schedule=1&from=2026-11-29&to=2027-01-02",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "cal-ui-2-1440",
+      "path": "/api/client",
+      "query": "?c=cal-ui-2-1440",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "cal-ui-2-1440",
+      "path": "/api/workspace-billing",
+      "query": "?c=cal-ui-2-1440",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "cal-ui-2-1440",
+      "path": "/api/client",
+      "query": "?c=cal-ui-2-1440&schedule=1&from=2026-11-29&to=2027-01-02",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "cal-ui-2-1440",
+      "path": "/api/client",
+      "query": "?c=cal-ui-2-1440&schedule=1&from=2026-11-29&to=2027-01-02",
+      "method": "GET"
+    },
+    {
+      "slug": "cal-ui-2-1440",
+      "path": "/api/client",
+      "query": "?c=cal-ui-2-1440&schedule=1&from=2026-11-29&to=2027-01-02",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "cal-ui-3-1440",
+      "path": "/api/client",
+      "query": "?c=cal-ui-3-1440",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "cal-ui-3-1440",
+      "path": "/api/workspace-billing",
+      "query": "?c=cal-ui-3-1440",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "cal-ui-3-1440",
+      "path": "/api/client",
+      "query": "?c=cal-ui-3-1440&schedule=1&from=2026-11-29&to=2027-01-02",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "cal-ui-3-1440",
+      "path": "/api/client",
+      "query": "?c=cal-ui-3-1440&schedule=1&from=2026-11-29&to=2027-01-02",
+      "method": "GET"
+    },
+    {
+      "slug": "cal-ui-3-1440",
+      "path": "/api/client",
+      "query": "?c=cal-ui-3-1440&schedule=1&from=2026-11-29&to=2027-01-02",
+      "method": "GET"
+    },
+    {
+      "slug": "cal-ui-4-1440",
+      "path": "/api/client",
+      "query": "?c=cal-ui-4-1440",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "cal-ui-4-1440",
+      "path": "/api/workspace-billing",
+      "query": "?c=cal-ui-4-1440",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "cal-ui-4-1440",
+      "path": "/api/client",
+      "query": "?c=cal-ui-4-1440&schedule=1&from=2026-11-29&to=2027-01-02",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "cal-ui-4-1440",
+      "path": "/api/client",
+      "query": "?c=cal-ui-4-1440&schedule=1&from=2026-11-29&to=2027-01-02",
+      "method": "GET"
+    },
+    {
+      "slug": "cal-ui-4-1440",
+      "path": "/api/client",
+      "query": "?c=cal-ui-4-1440&schedule=1&from=2026-11-29&to=2027-01-02",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "cal-ui-5-1440",
+      "path": "/api/client",
+      "query": "?c=cal-ui-5-1440",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "cal-ui-5-1440",
+      "path": "/api/workspace-billing",
+      "query": "?c=cal-ui-5-1440",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "cal-ui-5-1440",
+      "path": "/api/client",
+      "query": "?c=cal-ui-5-1440&schedule=1&from=2026-12-27&to=2027-02-06",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "cal-ui-5-1440",
+      "path": "/api/client",
+      "query": "?c=cal-ui-5-1440",
+      "method": "POST",
+      "action": "availability_unblock",
+      "date": "2027-01-03",
+      "window": "",
+      "status": 200
+    },
+    {
+      "slug": "cal-ui-5-1440",
+      "path": "/api/client",
+      "query": "?c=cal-ui-5-1440&schedule=1&from=2026-12-27&to=2027-02-06",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "slug": "cal-ui-5-1440",
+      "path": "/api/client",
+      "query": "?c=cal-ui-5-1440",
+      "method": "POST",
+      "action": "availability_block",
+      "date": "2027-01-03",
+      "window": "",
+      "status": 200
+    },
+    {
+      "slug": "cal-ui-5-1440",
+      "path": "/api/client",
+      "query": "?c=cal-ui-5-1440&schedule=1&from=2026-12-27&to=2027-02-06",
+      "method": "GET",
+      "status": 200
+    }
+  ],
+  "pageErrors": [],
+  "forbidden": [],
+  "physicalNetwork": 0,
+  "handlers": [
+    "/api/client",
+    "/api/access",
+    "/api/workspace-billing",
+    "/api/google/auth",
+    "/api/google/callback",
+    "/api/chat"
+  ],
+  "browser": {
+    "engine": "Google Chrome (channel:chrome, headless, temp profile)",
+    "executablePath": null,
+    "version": "156.0.8078.82"
+  },
+  "sourceAfter": {
+    "desk.html": "5fb1a9be91dc46a0f16ead29691ca693329244b8d624de9ae82db7af4da8ad13",
+    "desk.js": "f4017bc4745bca629f36159c05973b6e7c76c4961fa49ea9cb21dd77bbf428ee",
+    "desk-calendar.js": "aea67633cff4bf4e1e886e43088cf6dd3a2ccccddf8b3affc169295eb32a9aaf",
+    "desk-calendar.css": "03bd586488157d31e366b022f6172e30dede1ccb38a85cc82a4352ae95002d45",
+    "desk-visits.js": "95c718fa8cb251c8e36b794d1bccb52e2db5b36098b6120a0040a10125b3139b",
+    "netlify/functions/client.mjs": "eafa4e54aae9adcf7e882f09f7daf3797486791178b88ebc1c2e3954cf4a7391",
+    "netlify/functions/lib/owner-schedule.mjs": "72693283aa2598644bd12416e5f19853fa2b0f4033be36c2bf6ae4ef0ee07766",
+    "qa-artifacts/claude-collaboration/calendar/schedule-calendar-ui-check.mjs": "24ba4b6cd58c58c3b9361cd9fbcde6bf6a9f9d84c56daa406e524f620f5a0c7e"
+  },
+  "sourceStable": true,
+  "qa": {
+    "a_during": {
+      "label": "Retry schedule",
+      "focus": "calendarRetry"
+    },
+    "a_after": {
+      "id": "",
+      "day": "2026-12-12",
+      "visit": "",
+      "block": "",
+      "text": "Saturday, December 12, 2026, 1 cancelled visit",
+      "inCalendar": true
+    },
+    "b": {
+      "outsideId": "qaOutsideTarget",
+      "after": "qaOutsideTarget"
+    },
+    "c": {
+      "focus": "calendarRetry",
+      "reads": 1,
+      "sameNode": false,
+      "role": "status",
+      "live": "polite",
+      "cls": "calendar-status calendar-status-error",
+      "texts": [
+        "Updating your schedule…",
+        "Schedule still unavailable (QA)."
+      ],
+      "retry": true,
+      "refresh": false,
+      "ariaDisabled": null
+    },
+    "d": {
+      "id": "calendarRefresh",
+      "day": "",
+      "visit": "",
+      "block": "",
+      "text": "Refresh",
+      "inCalendar": true
+    },
+    "e_before": "Block removed: Sunday, January 3, 2027 · Whole day. Existing visits stay booked.",
+    "e_after": {
+      "status": "Saved visits and blocked time. Houston time.",
+      "panel": "Sunday\nJanuary 3, 2027\nAdd visit\nBlock time\nBlocked time\nWhole day\n\nNew visit requests are limited. Existing visits stay booked.\n\nRemove block\n●\nMorgan Nextmonth\n8 to 12 · Booked\n\nKitchen drain clog\n\n",
+      "selected": "2027-01-03"
+    }
+  },
+  "summary": {
+    "passed": 6,
+    "failed": 0,
+    "total": 6,
+    "physicalNetwork": 0,
+    "pageErrors": 0
+  }
+}
