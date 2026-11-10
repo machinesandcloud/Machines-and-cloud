@@ -1,0 +1,2357 @@
+{
+  "at": "2026-11-10T08:29:02.684Z",
+  "card": "AUTO-REVIEW-6F92E1DED504D2D7",
+  "serve": "fix",
+  "base": "dfb0ae7846e66871d849c67566bf9d3b475f46ae",
+  "head": "dfb0ae7846e66871d849c67566bf9d3b475f46ae",
+  "mode": "Actual owner handlers in-process via context.route, memory store, fake model, empty provider env, physical transport denied",
+  "intakeServedSha256": "b4ce91a54111ba66f6521ef162cf96c184cb7a9ed9be55b6c85e475215ca6a27",
+  "intakeBaseSha256": "f8005c3ce72202e28d6436c3f9e140e57cccdbb7129548f3115df4ee4540cdd7",
+  "intakeWorktreeSha256": "b4ce91a54111ba66f6521ef162cf96c184cb7a9ed9be55b6c85e475215ca6a27",
+  "servedJs": {
+    "brand-marks.js": "0ad46b72e9f5a42174df67cff8e361ce47adf414a01dde615feb0ddc4d60b8aa",
+    "desk-connections.js": "e5518ea2229c91f8c7c71603d88264214fe1fdf446a3dcc15268e23ba5a68a95",
+    "desk-billing.js": "a2e3a33c7ae0ad4808ed8a403b7785207817bf4f5481d82fe9c0becd1b77732f",
+    "desk.js": "f4017bc4745bca629f36159c05973b6e7c76c4961fa49ea9cb21dd77bbf428ee",
+    "desk-visits.js": "95c718fa8cb251c8e36b794d1bccb52e2db5b36098b6120a0040a10125b3139b",
+    "desk-calendar.js": "fadc233f1f8df7603cf88a0d506dbcd214679cbcb64f1fbec0ab4fe7ebaf3bd6",
+    "desk-requests.js": "392b7bd34defb652dc4e7bd7eeee3e3c93e53a34a2fa49793d16078547335281",
+    "desk-activity.js": "c2346a03e98471542f0350e9b6360e66719e8d43b8b427c9a6fd939b9458c99b",
+    "desk-conversations.js": "cdd96f99a65c23d28e1e6de5a49a9bff452df1ca7f96c63c82120f67a9eb0012",
+    "desk-manual-guide.js": "c8cf8f6f3e03ccdad6d1427672289d5307220c615e6893dd35e8d3c51bc63dc4",
+    "desk-website-install.js": "cd4212527b7cd33d630cb06fcd474d41da9da1beaccc220277c4976359a6631f",
+    "desk-lead-sources.js": "d9c09539110f5b58aba041bb8e3fe53af10aadbd4dbfd7b9a6dda3902aabdc0f",
+    "desk-guide-visuals.js": "c4fe4a632aa15501050c8a52391a2358db2b2856137d2a4e2a542fa2eea576d0",
+    "desk-service-intake.js": "b4ce91a54111ba66f6521ef162cf96c184cb7a9ed9be55b6c85e475215ca6a27",
+    "desk-setup-guide.js": "bc6c0a20089093dda1f79b0b325a7f6bcfb534c57b43a2e12ee14ff999fa62c7"
+  },
+  "sourceBefore": {
+    "desk.html": "5fb1a9be91dc46a0f16ead29691ca693329244b8d624de9ae82db7af4da8ad13",
+    "desk.js": "f4017bc4745bca629f36159c05973b6e7c76c4961fa49ea9cb21dd77bbf428ee",
+    "desk-setup-guide.js": "bc6c0a20089093dda1f79b0b325a7f6bcfb534c57b43a2e12ee14ff999fa62c7",
+    "desk-connections.js": "e5518ea2229c91f8c7c71603d88264214fe1fdf446a3dcc15268e23ba5a68a95",
+    "desk-website-install.js": "cd4212527b7cd33d630cb06fcd474d41da9da1beaccc220277c4976359a6631f",
+    "desk-service-intake.js": "b4ce91a54111ba66f6521ef162cf96c184cb7a9ed9be55b6c85e475215ca6a27",
+    "netlify/functions/client.mjs": "eafa4e54aae9adcf7e882f09f7daf3797486791178b88ebc1c2e3954cf4a7391",
+    "qa-artifacts/claude-collaboration/website-intake-storage/website-intake-storage-ui-check.mjs": "68c97cf453b42ae8e4a79a9e40180075e63b497085e61028eee8ae379d07ea49"
+  },
+  "checks": [
+    {
+      "name": "security: storage fails after sign-in, owner enters website/builder and saves; continues to installation (1440)",
+      "pass": true,
+      "ms": 438
+    },
+    {
+      "name": "security: storage fails while the details form is open (editable fields), save still completes (1440)",
+      "pass": true,
+      "ms": 314
+    },
+    {
+      "name": "methods: storage fails after sign-in, owner enters website/builder and saves; continues to installation (1440)",
+      "pass": true,
+      "ms": 363
+    },
+    {
+      "name": "methods: storage fails while the details form is open (editable fields), save still completes (1440)",
+      "pass": true,
+      "ms": 302
+    },
+    {
+      "name": "security: lost save response, Check saved details is GET only and recovers; no duplicate write (1440)",
+      "pass": true,
+      "ms": 396
+    },
+    {
+      "name": "security: failed save (422) keeps the draft and shows field errors (1440)",
+      "pass": true,
+      "ms": 262
+    },
+    {
+      "name": "security: return/resume in the same page after Save and exit reopens the saved installation step (1440)",
+      "pass": true,
+      "ms": 457
+    },
+    {
+      "name": "comparison: collapsed Website installation settings save works with storage throwing (1440)",
+      "pass": true,
+      "ms": 187
+    },
+    {
+      "name": "control (quota): setItem throws QuotaExceededError from load; guided save completes (1440)",
+      "pass": true,
+      "ms": 303
+    },
+    {
+      "name": "identity guard: readable storage without the session (signed out in this tab) blocks the save; no write (1440)",
+      "pass": true,
+      "ms": 1039
+    },
+    {
+      "name": "identity guard: session expiry while storage throws clears the workbench; no later write (1440)",
+      "pass": true,
+      "ms": 1054
+    },
+    {
+      "name": "security: storage fails after sign-in, owner enters website/builder and saves; continues to installation (390)",
+      "pass": true,
+      "ms": 355
+    },
+    {
+      "name": "security: storage fails while the details form is open (editable fields), save still completes (390)",
+      "pass": true,
+      "ms": 298
+    },
+    {
+      "name": "methods: storage fails after sign-in, owner enters website/builder and saves; continues to installation (390)",
+      "pass": true,
+      "ms": 352
+    },
+    {
+      "name": "methods: storage fails while the details form is open (editable fields), save still completes (390)",
+      "pass": true,
+      "ms": 303
+    },
+    {
+      "name": "security: lost save response, Check saved details is GET only and recovers; no duplicate write (390)",
+      "pass": true,
+      "ms": 399
+    },
+    {
+      "name": "security: failed save (422) keeps the draft and shows field errors (390)",
+      "pass": true,
+      "ms": 262
+    },
+    {
+      "name": "security: return/resume in the same page after Save and exit reopens the saved installation step (390)",
+      "pass": true,
+      "ms": 427
+    },
+    {
+      "name": "comparison: collapsed Website installation settings save works with storage throwing (390)",
+      "pass": true,
+      "ms": 184
+    },
+    {
+      "name": "control (quota): setItem throws QuotaExceededError from load; guided save completes (390)",
+      "pass": true,
+      "ms": 300
+    },
+    {
+      "name": "identity guard: readable storage without the session (signed out in this tab) blocks the save; no write (390)",
+      "pass": true,
+      "ms": 1037
+    },
+    {
+      "name": "identity guard: session expiry while storage throws clears the workbench; no later write (390)",
+      "pass": true,
+      "ms": 1063
+    },
+    {
+      "name": "observe: fresh load with storage blocked from the start shows the sign-in recovery (recorded)",
+      "pass": true,
+      "ms": 139
+    },
+    {
+      "name": "hygiene: no physical or forbidden requests and no page errors (all checks)",
+      "pass": true
+    },
+    {
+      "name": "source unchanged during the run",
+      "pass": true
+    },
+    {
+      "name": "served desk-service-intake.js matches --serve fix",
+      "pass": true
+    }
+  ],
+  "screenshots": [
+    "scratchpad/claude-webstore-qa-fix-security-saved-1440.png",
+    "scratchpad/claude-webstore-qa-fix-methods-saved-1440.png",
+    "scratchpad/claude-webstore-qa-fix-security-lost-1440.png",
+    "scratchpad/claude-webstore-qa-fix-security-lost-recovered-1440.png",
+    "scratchpad/claude-webstore-qa-fix-security-resumed-1440.png",
+    "scratchpad/claude-webstore-qa-fix-security-saved-390.png",
+    "scratchpad/claude-webstore-qa-fix-methods-saved-390.png",
+    "scratchpad/claude-webstore-qa-fix-security-lost-390.png",
+    "scratchpad/claude-webstore-qa-fix-security-lost-recovered-390.png",
+    "scratchpad/claude-webstore-qa-fix-security-resumed-390.png",
+    "scratchpad/claude-webstore-qa-fix-fresh-blocked-390.png"
+  ],
+  "requests": [
+    {
+      "slug": "webstore-1-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-1-1440",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-1-1440",
+      "path": "/api/workspace-billing",
+      "query": "?c=webstore-1-1440",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-1-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-1-1440&service_intake=1",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-1-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-1-1440",
+      "method": "POST",
+      "action": "save_service_intake",
+      "service": "web",
+      "auth": "owner",
+      "submissionId": "7a2c2eeaad3b6a1c89ae7e656b067d7c",
+      "status": 200
+    },
+    {
+      "slug": "webstore-1-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-1-1440",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-1-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-1-1440",
+      "method": "POST",
+      "action": "apply_service_intake",
+      "service": "web",
+      "auth": "owner",
+      "submissionId": "c9f957ed30823af9240f24c428abe102",
+      "status": 200
+    },
+    {
+      "slug": "webstore-1-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-1-1440",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-1-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-1-1440&service_intake=1",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-2-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-2-1440",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-2-1440",
+      "path": "/api/workspace-billing",
+      "query": "?c=webstore-2-1440",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-2-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-2-1440&service_intake=1",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-2-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-2-1440",
+      "method": "POST",
+      "action": "save_service_intake",
+      "service": "web",
+      "auth": "owner",
+      "submissionId": "d24392700d9c8a299cf756c8896239e3",
+      "status": 200
+    },
+    {
+      "slug": "webstore-2-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-2-1440",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-2-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-2-1440",
+      "method": "POST",
+      "action": "apply_service_intake",
+      "service": "web",
+      "auth": "owner",
+      "submissionId": "f7f766a5cefc52bb61e950a923dbd6c9",
+      "status": 200
+    },
+    {
+      "slug": "webstore-2-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-2-1440",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-2-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-2-1440&service_intake=1",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-3-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-3-1440",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-3-1440",
+      "path": "/api/workspace-billing",
+      "query": "?c=webstore-3-1440",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-3-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-3-1440&service_intake=1",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-3-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-3-1440",
+      "method": "POST",
+      "action": "save_service_intake",
+      "service": "web",
+      "auth": "owner",
+      "submissionId": "197db10b82b453c12ca30c3e44caf70c",
+      "status": 200
+    },
+    {
+      "slug": "webstore-3-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-3-1440",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-3-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-3-1440",
+      "method": "POST",
+      "action": "apply_service_intake",
+      "service": "web",
+      "auth": "owner",
+      "submissionId": "a27de6d6019da9a6999fc3cf5f7cfb26",
+      "status": 200
+    },
+    {
+      "slug": "webstore-3-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-3-1440",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-3-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-3-1440&service_intake=1",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-4-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-4-1440",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-4-1440",
+      "path": "/api/workspace-billing",
+      "query": "?c=webstore-4-1440",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-4-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-4-1440&service_intake=1",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-4-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-4-1440",
+      "method": "POST",
+      "action": "save_service_intake",
+      "service": "web",
+      "auth": "owner",
+      "submissionId": "59df576c99be02507744c0e61e3bc0d0",
+      "status": 200
+    },
+    {
+      "slug": "webstore-4-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-4-1440",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-4-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-4-1440",
+      "method": "POST",
+      "action": "apply_service_intake",
+      "service": "web",
+      "auth": "owner",
+      "submissionId": "6d32bdd7b4d53544227bb553816fc5d3",
+      "status": 200
+    },
+    {
+      "slug": "webstore-4-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-4-1440",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-4-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-4-1440&service_intake=1",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-5-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-5-1440",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-5-1440",
+      "path": "/api/workspace-billing",
+      "query": "?c=webstore-5-1440",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-5-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-5-1440&service_intake=1",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-5-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-5-1440",
+      "method": "POST",
+      "action": "save_service_intake",
+      "service": "web",
+      "auth": "owner",
+      "submissionId": "e094f63d01055bb4eb2e85c01ad28a96",
+      "status": 200,
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "webstore-5-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-5-1440",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-5-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-5-1440",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-5-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-5-1440",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-5-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-5-1440",
+      "method": "POST",
+      "action": "apply_service_intake",
+      "service": "web",
+      "auth": "owner",
+      "submissionId": "1633b4475a8a2fab214dfc7385f53f75",
+      "status": 200
+    },
+    {
+      "slug": "webstore-5-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-5-1440",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-5-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-5-1440&service_intake=1",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-6-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-6-1440",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-6-1440",
+      "path": "/api/workspace-billing",
+      "query": "?c=webstore-6-1440",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-6-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-6-1440&service_intake=1",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-6-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-6-1440",
+      "method": "POST",
+      "action": "save_service_intake",
+      "service": "web",
+      "auth": "owner",
+      "submissionId": "1e12022b144d77c272e951ae7d7a55a5",
+      "status": 422
+    },
+    {
+      "slug": "webstore-7-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-7-1440",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-7-1440",
+      "path": "/api/workspace-billing",
+      "query": "?c=webstore-7-1440",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-7-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-7-1440&service_intake=1",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-7-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-7-1440",
+      "method": "POST",
+      "action": "save_service_intake",
+      "service": "web",
+      "auth": "owner",
+      "submissionId": "e12a4159270f83cc5d3293ba5aa5134c",
+      "status": 200
+    },
+    {
+      "slug": "webstore-7-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-7-1440",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-7-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-7-1440",
+      "method": "POST",
+      "action": "apply_service_intake",
+      "service": "web",
+      "auth": "owner",
+      "submissionId": "af3cfed0afa2f96d9b0b4797f186d311",
+      "status": 200
+    },
+    {
+      "slug": "webstore-7-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-7-1440",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-7-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-7-1440&service_intake=1",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-7-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-7-1440&service_intake=1",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-8-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-8-1440",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-8-1440",
+      "path": "/api/workspace-billing",
+      "query": "?c=webstore-8-1440",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-8-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-8-1440",
+      "method": "PUT",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-8-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-8-1440",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-9-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-9-1440",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-9-1440",
+      "path": "/api/workspace-billing",
+      "query": "?c=webstore-9-1440",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-9-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-9-1440&service_intake=1",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-9-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-9-1440",
+      "method": "POST",
+      "action": "save_service_intake",
+      "service": "web",
+      "auth": "owner",
+      "submissionId": "5f26e3072b955271d55e4af0aa634ec8",
+      "status": 200
+    },
+    {
+      "slug": "webstore-9-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-9-1440",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-9-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-9-1440",
+      "method": "POST",
+      "action": "apply_service_intake",
+      "service": "web",
+      "auth": "owner",
+      "submissionId": "1d4ed43f716fb2928267f6630a843abd",
+      "status": 200
+    },
+    {
+      "slug": "webstore-9-1440",
+      "path": "/api/workspace-billing",
+      "query": "?c=webstore-9-1440",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-9-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-9-1440",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-9-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-9-1440&service_intake=1",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-9-1440",
+      "path": "/api/workspace-billing",
+      "query": "?c=webstore-9-1440",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-10-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-10-1440",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-10-1440",
+      "path": "/api/workspace-billing",
+      "query": "?c=webstore-10-1440",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-10-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-10-1440&service_intake=1",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-11-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-11-1440",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-11-1440",
+      "path": "/api/workspace-billing",
+      "query": "?c=webstore-11-1440",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-11-1440",
+      "path": "/api/client",
+      "query": "?c=webstore-11-1440&service_intake=1",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-12-390",
+      "path": "/api/client",
+      "query": "?c=webstore-12-390",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-12-390",
+      "path": "/api/workspace-billing",
+      "query": "?c=webstore-12-390",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-12-390",
+      "path": "/api/client",
+      "query": "?c=webstore-12-390&service_intake=1",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-12-390",
+      "path": "/api/client",
+      "query": "?c=webstore-12-390",
+      "method": "POST",
+      "action": "save_service_intake",
+      "service": "web",
+      "auth": "owner",
+      "submissionId": "267b4f3ff0424906a9dec6ad0f22e601",
+      "status": 200
+    },
+    {
+      "slug": "webstore-12-390",
+      "path": "/api/client",
+      "query": "?c=webstore-12-390",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-12-390",
+      "path": "/api/client",
+      "query": "?c=webstore-12-390",
+      "method": "POST",
+      "action": "apply_service_intake",
+      "service": "web",
+      "auth": "owner",
+      "submissionId": "f87dba82ccf4cde39e7fd93587ca2c78",
+      "status": 200
+    },
+    {
+      "slug": "webstore-12-390",
+      "path": "/api/client",
+      "query": "?c=webstore-12-390",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-12-390",
+      "path": "/api/client",
+      "query": "?c=webstore-12-390&service_intake=1",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-13-390",
+      "path": "/api/client",
+      "query": "?c=webstore-13-390",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-13-390",
+      "path": "/api/workspace-billing",
+      "query": "?c=webstore-13-390",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-13-390",
+      "path": "/api/client",
+      "query": "?c=webstore-13-390&service_intake=1",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-13-390",
+      "path": "/api/client",
+      "query": "?c=webstore-13-390",
+      "method": "POST",
+      "action": "save_service_intake",
+      "service": "web",
+      "auth": "owner",
+      "submissionId": "81ff96e1194e0b6f0278ca76d6f61f2a",
+      "status": 200
+    },
+    {
+      "slug": "webstore-13-390",
+      "path": "/api/client",
+      "query": "?c=webstore-13-390",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-13-390",
+      "path": "/api/client",
+      "query": "?c=webstore-13-390",
+      "method": "POST",
+      "action": "apply_service_intake",
+      "service": "web",
+      "auth": "owner",
+      "submissionId": "6211aac278b8e11380387f5aa7e23a1e",
+      "status": 200
+    },
+    {
+      "slug": "webstore-13-390",
+      "path": "/api/client",
+      "query": "?c=webstore-13-390",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-13-390",
+      "path": "/api/client",
+      "query": "?c=webstore-13-390&service_intake=1",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-14-390",
+      "path": "/api/client",
+      "query": "?c=webstore-14-390",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-14-390",
+      "path": "/api/workspace-billing",
+      "query": "?c=webstore-14-390",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-14-390",
+      "path": "/api/client",
+      "query": "?c=webstore-14-390&service_intake=1",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-14-390",
+      "path": "/api/client",
+      "query": "?c=webstore-14-390",
+      "method": "POST",
+      "action": "save_service_intake",
+      "service": "web",
+      "auth": "owner",
+      "submissionId": "af3487fb9c9ce6184fb8259b8f05802a",
+      "status": 200
+    },
+    {
+      "slug": "webstore-14-390",
+      "path": "/api/client",
+      "query": "?c=webstore-14-390",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-14-390",
+      "path": "/api/client",
+      "query": "?c=webstore-14-390",
+      "method": "POST",
+      "action": "apply_service_intake",
+      "service": "web",
+      "auth": "owner",
+      "submissionId": "b2ff0673423d2decd20e74d576cae5b4",
+      "status": 200
+    },
+    {
+      "slug": "webstore-14-390",
+      "path": "/api/client",
+      "query": "?c=webstore-14-390",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-14-390",
+      "path": "/api/client",
+      "query": "?c=webstore-14-390&service_intake=1",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-15-390",
+      "path": "/api/client",
+      "query": "?c=webstore-15-390",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-15-390",
+      "path": "/api/workspace-billing",
+      "query": "?c=webstore-15-390",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-15-390",
+      "path": "/api/client",
+      "query": "?c=webstore-15-390&service_intake=1",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-15-390",
+      "path": "/api/client",
+      "query": "?c=webstore-15-390",
+      "method": "POST",
+      "action": "save_service_intake",
+      "service": "web",
+      "auth": "owner",
+      "submissionId": "9c08bc3fddc30397ea2a6788bd817cc0",
+      "status": 200
+    },
+    {
+      "slug": "webstore-15-390",
+      "path": "/api/client",
+      "query": "?c=webstore-15-390",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-15-390",
+      "path": "/api/client",
+      "query": "?c=webstore-15-390",
+      "method": "POST",
+      "action": "apply_service_intake",
+      "service": "web",
+      "auth": "owner",
+      "submissionId": "11ccb289b377e31231ff2f39b696d065",
+      "status": 200
+    },
+    {
+      "slug": "webstore-15-390",
+      "path": "/api/client",
+      "query": "?c=webstore-15-390",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-15-390",
+      "path": "/api/client",
+      "query": "?c=webstore-15-390&service_intake=1",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-16-390",
+      "path": "/api/client",
+      "query": "?c=webstore-16-390",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-16-390",
+      "path": "/api/workspace-billing",
+      "query": "?c=webstore-16-390",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-16-390",
+      "path": "/api/client",
+      "query": "?c=webstore-16-390&service_intake=1",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-16-390",
+      "path": "/api/client",
+      "query": "?c=webstore-16-390",
+      "method": "POST",
+      "action": "save_service_intake",
+      "service": "web",
+      "auth": "owner",
+      "submissionId": "2282b08f257f6a8354278bd9073e802b",
+      "status": 200,
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "webstore-16-390",
+      "path": "/api/client",
+      "query": "?c=webstore-16-390",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-16-390",
+      "path": "/api/client",
+      "query": "?c=webstore-16-390",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-16-390",
+      "path": "/api/client",
+      "query": "?c=webstore-16-390",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-16-390",
+      "path": "/api/client",
+      "query": "?c=webstore-16-390",
+      "method": "POST",
+      "action": "apply_service_intake",
+      "service": "web",
+      "auth": "owner",
+      "submissionId": "19f0241b4e77994fa4a6c1b2789ceb1d",
+      "status": 200
+    },
+    {
+      "slug": "webstore-16-390",
+      "path": "/api/client",
+      "query": "?c=webstore-16-390",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-16-390",
+      "path": "/api/client",
+      "query": "?c=webstore-16-390&service_intake=1",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-17-390",
+      "path": "/api/client",
+      "query": "?c=webstore-17-390",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-17-390",
+      "path": "/api/workspace-billing",
+      "query": "?c=webstore-17-390",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-17-390",
+      "path": "/api/client",
+      "query": "?c=webstore-17-390&service_intake=1",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-17-390",
+      "path": "/api/client",
+      "query": "?c=webstore-17-390",
+      "method": "POST",
+      "action": "save_service_intake",
+      "service": "web",
+      "auth": "owner",
+      "submissionId": "c0445985702345fdf68f812be727b96f",
+      "status": 422
+    },
+    {
+      "slug": "webstore-18-390",
+      "path": "/api/client",
+      "query": "?c=webstore-18-390",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-18-390",
+      "path": "/api/workspace-billing",
+      "query": "?c=webstore-18-390",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-18-390",
+      "path": "/api/client",
+      "query": "?c=webstore-18-390&service_intake=1",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-18-390",
+      "path": "/api/client",
+      "query": "?c=webstore-18-390",
+      "method": "POST",
+      "action": "save_service_intake",
+      "service": "web",
+      "auth": "owner",
+      "submissionId": "349c9e7eda844ee2d9992dea4973d058",
+      "status": 200
+    },
+    {
+      "slug": "webstore-18-390",
+      "path": "/api/client",
+      "query": "?c=webstore-18-390",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-18-390",
+      "path": "/api/client",
+      "query": "?c=webstore-18-390",
+      "method": "POST",
+      "action": "apply_service_intake",
+      "service": "web",
+      "auth": "owner",
+      "submissionId": "f50714cbfdbd51af60d319827c6b4e3d",
+      "status": 200
+    },
+    {
+      "slug": "webstore-18-390",
+      "path": "/api/client",
+      "query": "?c=webstore-18-390",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-18-390",
+      "path": "/api/client",
+      "query": "?c=webstore-18-390&service_intake=1",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-18-390",
+      "path": "/api/client",
+      "query": "?c=webstore-18-390&service_intake=1",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-19-390",
+      "path": "/api/client",
+      "query": "?c=webstore-19-390",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-19-390",
+      "path": "/api/workspace-billing",
+      "query": "?c=webstore-19-390",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-19-390",
+      "path": "/api/client",
+      "query": "?c=webstore-19-390",
+      "method": "PUT",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-19-390",
+      "path": "/api/client",
+      "query": "?c=webstore-19-390",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-20-390",
+      "path": "/api/client",
+      "query": "?c=webstore-20-390",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-20-390",
+      "path": "/api/workspace-billing",
+      "query": "?c=webstore-20-390",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-20-390",
+      "path": "/api/client",
+      "query": "?c=webstore-20-390&service_intake=1",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-20-390",
+      "path": "/api/client",
+      "query": "?c=webstore-20-390",
+      "method": "POST",
+      "action": "save_service_intake",
+      "service": "web",
+      "auth": "owner",
+      "submissionId": "061ffbbc7f1f61b8dca112e17a8be98e",
+      "status": 200
+    },
+    {
+      "slug": "webstore-20-390",
+      "path": "/api/client",
+      "query": "?c=webstore-20-390",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-20-390",
+      "path": "/api/client",
+      "query": "?c=webstore-20-390",
+      "method": "POST",
+      "action": "apply_service_intake",
+      "service": "web",
+      "auth": "owner",
+      "submissionId": "514687505beafaf072b195abdcb1cad8",
+      "status": 200
+    },
+    {
+      "slug": "webstore-20-390",
+      "path": "/api/workspace-billing",
+      "query": "?c=webstore-20-390",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-20-390",
+      "path": "/api/client",
+      "query": "?c=webstore-20-390",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-20-390",
+      "path": "/api/client",
+      "query": "?c=webstore-20-390&service_intake=1",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-20-390",
+      "path": "/api/workspace-billing",
+      "query": "?c=webstore-20-390",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-21-390",
+      "path": "/api/client",
+      "query": "?c=webstore-21-390",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-21-390",
+      "path": "/api/workspace-billing",
+      "query": "?c=webstore-21-390",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-21-390",
+      "path": "/api/client",
+      "query": "?c=webstore-21-390&service_intake=1",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-22-390",
+      "path": "/api/client",
+      "query": "?c=webstore-22-390",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-22-390",
+      "path": "/api/workspace-billing",
+      "query": "?c=webstore-22-390",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "webstore-22-390",
+      "path": "/api/client",
+      "query": "?c=webstore-22-390&service_intake=1",
+      "method": "GET",
+      "auth": "owner",
+      "status": 200
+    }
+  ],
+  "pageErrors": [],
+  "forbidden": [],
+  "physicalNetwork": 0,
+  "observations": [
+    {
+      "check": "webstore-1-1440",
+      "step": "details-0 opened",
+      "mode": "security",
+      "when": "before-open",
+      "hash": "#setup/web/details-0",
+      "workspace": "ready",
+      "focus": "intakeStepTitle",
+      "intakeTitle": "Where will your website chat live?",
+      "intakeStatus": "",
+      "storageMode": "security",
+      "storageEvents": [
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage"
+      ],
+      "text": "Website chat setup\nWebsite chat · Website details\nSave and exit\n\nStep 1 of 9\n\nWhere will your website chat live?\nYour business website\n\nChoose your website builder so we can show the right installation steps.\n\nWebsite builder\nChoose…\nWordPress\nWix\nSquarespace\nWebflow\nShopify\nAnother website builder\nWho manages your website?\nChoose…\nI do\nMy web person or agency\n\nSave website and continue"
+    },
+    {
+      "check": "webstore-1-1440",
+      "step": "after save",
+      "where": "security before-open 1440",
+      "hash": "#setup/web/details-1-0",
+      "workspace": "ready",
+      "focus": "intakeStepTitle",
+      "intakeTitle": "Open your website settings",
+      "intakeStatus": "Details saved securely.",
+      "storageMode": "security",
+      "storageEvents": [
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage"
+      ],
+      "text": "Website chat setup\nWebsite chat · Install and check\nSave and exit\n\nStep 4 of 9\n\nOpen your website settings\n\nUse a published Wix site with a connected domain, and sign in to its dashboard.\n\nWix\nUse a published Wix site with a connected domain, and sign in to its dashboard.\nOpen your website settings\n↖\nIllustrated instruction\nWix instructions\n\nDetails saved securely.\n\nBack\nNext",
+      "posts": [
+        "save_service_intake:200:owner",
+        "apply_service_intake:200:owner"
+      ]
+    },
+    {
+      "check": "webstore-2-1440",
+      "step": "details-0 opened",
+      "mode": "security",
+      "when": "after-open",
+      "hash": "#setup/web/details-0",
+      "workspace": "ready",
+      "focus": "intakeStepTitle",
+      "intakeTitle": "Where will your website chat live?",
+      "intakeStatus": "",
+      "storageEvents": [],
+      "text": "Website chat setup\nWebsite chat · Website details\nSave and exit\n\nStep 1 of 9\n\nWhere will your website chat live?\nYour business website\n\nChoose your website builder so we can show the right installation steps.\n\nWebsite builder\nChoose…\nWordPress\nWix\nSquarespace\nWebflow\nShopify\nAnother website builder\nWho manages your website?\nChoose…\nI do\nMy web person or agency\n\nSave website and continue"
+    },
+    {
+      "check": "webstore-2-1440",
+      "step": "after save",
+      "where": "security after-open 1440",
+      "hash": "#setup/web/details-1-0",
+      "workspace": "ready",
+      "focus": "p-setup",
+      "storageMode": "security",
+      "storageEvents": [
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage"
+      ],
+      "text": "Website chat setup\n← All connections\nWebsite chat\nStep 4 of 9\nOpening your saved details…\nBack\nExit setup\nContinue website setup",
+      "posts": [
+        "save_service_intake:200:owner",
+        "apply_service_intake:200:owner"
+      ]
+    },
+    {
+      "check": "webstore-3-1440",
+      "step": "details-0 opened",
+      "mode": "methods",
+      "when": "before-open",
+      "hash": "#setup/web/details-0",
+      "workspace": "ready",
+      "focus": "intakeStepTitle",
+      "intakeTitle": "Where will your website chat live?",
+      "intakeStatus": "",
+      "storageMode": "methods",
+      "storageEvents": [
+        "getItem",
+        "getItem",
+        "getItem",
+        "getItem",
+        "getItem"
+      ],
+      "text": "Website chat setup\nWebsite chat · Website details\nSave and exit\n\nStep 1 of 9\n\nWhere will your website chat live?\nYour business website\n\nChoose your website builder so we can show the right installation steps.\n\nWebsite builder\nChoose…\nWordPress\nWix\nSquarespace\nWebflow\nShopify\nAnother website builder\nWho manages your website?\nChoose…\nI do\nMy web person or agency\n\nSave website and continue"
+    },
+    {
+      "check": "webstore-3-1440",
+      "step": "after save",
+      "where": "methods before-open 1440",
+      "hash": "#setup/web/details-1-0",
+      "workspace": "ready",
+      "focus": "intakeStepTitle",
+      "intakeTitle": "Open your website settings",
+      "intakeStatus": "Details saved securely.",
+      "storageMode": "methods",
+      "storageEvents": [
+        "getItem",
+        "getItem",
+        "getItem",
+        "getItem",
+        "getItem",
+        "getItem",
+        "getItem",
+        "getItem",
+        "getItem",
+        "getItem",
+        "getItem",
+        "getItem"
+      ],
+      "text": "Website chat setup\nWebsite chat · Install and check\nSave and exit\n\nStep 4 of 9\n\nOpen your website settings\n\nUse a published Wix site with a connected domain, and sign in to its dashboard.\n\nWix\nUse a published Wix site with a connected domain, and sign in to its dashboard.\nOpen your website settings\n↖\nIllustrated instruction\nWix instructions\n\nDetails saved securely.\n\nBack\nNext",
+      "posts": [
+        "save_service_intake:200:owner",
+        "apply_service_intake:200:owner"
+      ]
+    },
+    {
+      "check": "webstore-4-1440",
+      "step": "details-0 opened",
+      "mode": "methods",
+      "when": "after-open",
+      "hash": "#setup/web/details-0",
+      "workspace": "ready",
+      "focus": "intakeStepTitle",
+      "intakeTitle": "Where will your website chat live?",
+      "intakeStatus": "",
+      "storageEvents": [],
+      "text": "Website chat setup\nWebsite chat · Website details\nSave and exit\n\nStep 1 of 9\n\nWhere will your website chat live?\nYour business website\n\nChoose your website builder so we can show the right installation steps.\n\nWebsite builder\nChoose…\nWordPress\nWix\nSquarespace\nWebflow\nShopify\nAnother website builder\nWho manages your website?\nChoose…\nI do\nMy web person or agency\n\nSave website and continue"
+    },
+    {
+      "check": "webstore-4-1440",
+      "step": "after save",
+      "where": "methods after-open 1440",
+      "hash": "#setup/web/details-1-0",
+      "workspace": "ready",
+      "focus": "p-setup",
+      "storageMode": "methods",
+      "storageEvents": [
+        "getItem",
+        "getItem",
+        "getItem",
+        "getItem",
+        "getItem",
+        "getItem",
+        "getItem",
+        "getItem",
+        "getItem",
+        "getItem",
+        "getItem",
+        "getItem"
+      ],
+      "text": "Website chat setup\n← All connections\nWebsite chat\nStep 4 of 9\nOpening your saved details…\nBack\nExit setup\nContinue website setup",
+      "posts": [
+        "save_service_intake:200:owner",
+        "apply_service_intake:200:owner"
+      ]
+    },
+    {
+      "check": "webstore-5-1440",
+      "step": "details-0 opened",
+      "mode": "security",
+      "when": "before-open",
+      "hash": "#setup/web/details-0",
+      "workspace": "ready",
+      "focus": "intakeStepTitle",
+      "intakeTitle": "Where will your website chat live?",
+      "intakeStatus": "",
+      "storageMode": "security",
+      "storageEvents": [
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage"
+      ],
+      "text": "Website chat setup\nWebsite chat · Website details\nSave and exit\n\nStep 1 of 9\n\nWhere will your website chat live?\nYour business website\n\nChoose your website builder so we can show the right installation steps.\n\nWebsite builder\nChoose…\nWordPress\nWix\nSquarespace\nWebflow\nShopify\nAnother website builder\nWho manages your website?\nChoose…\nI do\nMy web person or agency\n\nSave website and continue"
+    },
+    {
+      "check": "webstore-5-1440",
+      "step": "after reconcile",
+      "hash": "#setup/web/details-1-0",
+      "workspace": "ready",
+      "focus": "p-setup",
+      "storageMode": "security",
+      "storageEvents": [
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage"
+      ],
+      "text": "Website chat setup\n← All connections\nWebsite chat\nStep 4 of 9\nOpening your saved details…\nBack\nExit setup\nContinue website setup"
+    },
+    {
+      "check": "webstore-6-1440",
+      "step": "details-0 opened",
+      "mode": "security",
+      "when": "before-open",
+      "hash": "#setup/web/details-0",
+      "workspace": "ready",
+      "focus": "intakeStepTitle",
+      "intakeTitle": "Where will your website chat live?",
+      "intakeStatus": "",
+      "storageMode": "security",
+      "storageEvents": [
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage"
+      ],
+      "text": "Website chat setup\nWebsite chat · Website details\nSave and exit\n\nStep 1 of 9\n\nWhere will your website chat live?\nYour business website\n\nChoose your website builder so we can show the right installation steps.\n\nWebsite builder\nChoose…\nWordPress\nWix\nSquarespace\nWebflow\nShopify\nAnother website builder\nWho manages your website?\nChoose…\nI do\nMy web person or agency\n\nSave website and continue"
+    },
+    {
+      "check": "webstore-6-1440",
+      "step": "invalid save",
+      "hash": "#setup/web/details-0",
+      "workspace": "ready",
+      "focus": "intake-website",
+      "intakeTitle": "Where will your website chat live?",
+      "intakeStatus": "Check the highlighted connection information.",
+      "storageMode": "security",
+      "storageEvents": [
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage"
+      ],
+      "text": "Website chat setup\nWebsite chat · Website details\nSave and exit\n\nStep 1 of 9\n\nWhere will your website chat live?\nYour business website\n\nEnter your public HTTPS business website.\n\nChoose your website builder so we can show the right installation steps.\n\nWebsite builder\nChoose…\nWordPress\nWix\nSquarespace\nWebflow\nShopify\nAnother website builder\nWho manages your website?\nChoose…\nI do\nMy web person or agency\n\nCheck the highlighted connection information.\n\nSave website and continue",
+      "posts": [
+        "save_service_intake:422"
+      ]
+    },
+    {
+      "check": "webstore-7-1440",
+      "step": "details-0 opened",
+      "mode": "security",
+      "when": "before-open",
+      "hash": "#setup/web/details-0",
+      "workspace": "ready",
+      "focus": "intakeStepTitle",
+      "intakeTitle": "Where will your website chat live?",
+      "intakeStatus": "",
+      "storageMode": "security",
+      "storageEvents": [
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage"
+      ],
+      "text": "Website chat setup\nWebsite chat · Website details\nSave and exit\n\nStep 1 of 9\n\nWhere will your website chat live?\nYour business website\n\nChoose your website builder so we can show the right installation steps.\n\nWebsite builder\nChoose…\nWordPress\nWix\nSquarespace\nWebflow\nShopify\nAnother website builder\nWho manages your website?\nChoose…\nI do\nMy web person or agency\n\nSave website and continue"
+    },
+    {
+      "check": "webstore-7-1440",
+      "step": "after save",
+      "where": "resume 1440",
+      "hash": "#setup/web/details-1-0",
+      "workspace": "ready",
+      "focus": "p-setup",
+      "storageMode": "security",
+      "storageEvents": [
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage"
+      ],
+      "text": "Website chat setup\n← All connections\nWebsite chat\nStep 4 of 9\nOpening your saved details…\nBack\nExit setup\nContinue website setup",
+      "posts": [
+        "save_service_intake:200:owner",
+        "apply_service_intake:200:owner"
+      ]
+    },
+    {
+      "check": "webstore-7-1440",
+      "step": "resumed",
+      "hash": "#setup/web/details-1-0",
+      "workspace": "ready",
+      "focus": "intakeStepTitle",
+      "intakeTitle": "Open your website settings",
+      "intakeStatus": "Details saved securely.",
+      "storageMode": "security",
+      "storageEvents": [
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage"
+      ],
+      "text": "Website chat setup\nWebsite chat · Install and check\nSave and exit\n\nStep 4 of 9\n\nOpen your website settings\n\nUse a published Wix site with a connected domain, and sign in to its dashboard.\n\nWix\nUse a published Wix site with a connected domain, and sign in to its dashboard.\nOpen your website settings\n↖\nIllustrated instruction\nWix instructions\n\nDetails saved securely.\n\nBack\nNext"
+    },
+    {
+      "check": "webstore-8-1440",
+      "step": "collapsed settings",
+      "message": "Website saved. Continue with the next step below.",
+      "writes": [
+        "PUT:200:owner"
+      ]
+    },
+    {
+      "check": "webstore-9-1440",
+      "step": "details-0 opened",
+      "mode": "quota",
+      "when": "none",
+      "hash": "#setup/web/details-0",
+      "workspace": "ready",
+      "focus": "intakeStepTitle",
+      "intakeTitle": "Where will your website chat live?",
+      "intakeStatus": "",
+      "storageMode": "quota",
+      "storageEvents": [
+        "setItem"
+      ],
+      "text": "Website chat setup\nWebsite chat · Website details\nSave and exit\n\nStep 1 of 9\n\nWhere will your website chat live?\nYour business website\n\nChoose your website builder so we can show the right installation steps.\n\nWebsite builder\nChoose…\nWordPress\nWix\nSquarespace\nWebflow\nShopify\nAnother website builder\nWho manages your website?\nChoose…\nI do\nMy web person or agency\n\nSave website and continue"
+    },
+    {
+      "check": "webstore-9-1440",
+      "step": "after save",
+      "where": "quota 1440",
+      "hash": "#setup/web/details-1-0",
+      "workspace": "ready",
+      "focus": "p-setup",
+      "storageMode": "quota",
+      "storageEvents": [
+        "setItem"
+      ],
+      "text": "Website chat setup\n← All connections\nWebsite chat\nStep 4 of 9\nOpening your saved details…\nBack\nExit setup\nContinue website setup",
+      "posts": [
+        "save_service_intake:200:owner",
+        "apply_service_intake:200:owner"
+      ]
+    },
+    {
+      "check": "webstore-10-1440",
+      "step": "details-0 opened",
+      "mode": "none",
+      "when": "none",
+      "hash": "#setup/web/details-0",
+      "workspace": "ready",
+      "focus": "intakeStepTitle",
+      "intakeTitle": "Where will your website chat live?",
+      "intakeStatus": "",
+      "storageEvents": [],
+      "text": "Website chat setup\nWebsite chat · Website details\nSave and exit\n\nStep 1 of 9\n\nWhere will your website chat live?\nYour business website\n\nChoose your website builder so we can show the right installation steps.\n\nWebsite builder\nChoose…\nWordPress\nWix\nSquarespace\nWebflow\nShopify\nAnother website builder\nWho manages your website?\nChoose…\nI do\nMy web person or agency\n\nSave website and continue"
+    },
+    {
+      "check": "webstore-11-1440",
+      "step": "details-0 opened",
+      "mode": "security",
+      "when": "after-open",
+      "hash": "#setup/web/details-0",
+      "workspace": "ready",
+      "focus": "intakeStepTitle",
+      "intakeTitle": "Where will your website chat live?",
+      "intakeStatus": "",
+      "storageEvents": [],
+      "text": "Website chat setup\nWebsite chat · Website details\nSave and exit\n\nStep 1 of 9\n\nWhere will your website chat live?\nYour business website\n\nChoose your website builder so we can show the right installation steps.\n\nWebsite builder\nChoose…\nWordPress\nWix\nSquarespace\nWebflow\nShopify\nAnother website builder\nWho manages your website?\nChoose…\nI do\nMy web person or agency\n\nSave website and continue"
+    },
+    {
+      "check": "webstore-12-390",
+      "step": "details-0 opened",
+      "mode": "security",
+      "when": "before-open",
+      "hash": "#setup/web/details-0",
+      "workspace": "ready",
+      "focus": "intakeStepTitle",
+      "intakeTitle": "Where will your website chat live?",
+      "intakeStatus": "",
+      "storageMode": "security",
+      "storageEvents": [
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage"
+      ],
+      "text": "Website chat setup\nWebsite chat · Website details\nSave and exit\n\nStep 1 of 9\n\nWhere will your website chat live?\nYour business website\n\nChoose your website builder so we can show the right installation steps.\n\nWebsite builder\nChoose…\nWordPress\nWix\nSquarespace\nWebflow\nShopify\nAnother website builder\nWho manages your website?\nChoose…\nI do\nMy web person or agency\n\nSave website and continue"
+    },
+    {
+      "check": "webstore-12-390",
+      "step": "after save",
+      "where": "security before-open 390",
+      "hash": "#setup/web/details-1-0",
+      "workspace": "ready",
+      "focus": "p-setup",
+      "storageMode": "security",
+      "storageEvents": [
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage"
+      ],
+      "text": "Website chat setup\n← All connections\nWebsite chat\nStep 4 of 9\nOpening your saved details…\nBack\nExit setup\nContinue website setup",
+      "posts": [
+        "save_service_intake:200:owner",
+        "apply_service_intake:200:owner"
+      ]
+    },
+    {
+      "check": "webstore-13-390",
+      "step": "details-0 opened",
+      "mode": "security",
+      "when": "after-open",
+      "hash": "#setup/web/details-0",
+      "workspace": "ready",
+      "focus": "intakeStepTitle",
+      "intakeTitle": "Where will your website chat live?",
+      "intakeStatus": "",
+      "storageEvents": [],
+      "text": "Website chat setup\nWebsite chat · Website details\nSave and exit\n\nStep 1 of 9\n\nWhere will your website chat live?\nYour business website\n\nChoose your website builder so we can show the right installation steps.\n\nWebsite builder\nChoose…\nWordPress\nWix\nSquarespace\nWebflow\nShopify\nAnother website builder\nWho manages your website?\nChoose…\nI do\nMy web person or agency\n\nSave website and continue"
+    },
+    {
+      "check": "webstore-13-390",
+      "step": "after save",
+      "where": "security after-open 390",
+      "hash": "#setup/web/details-1-0",
+      "workspace": "ready",
+      "focus": "p-setup",
+      "storageMode": "security",
+      "storageEvents": [
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage"
+      ],
+      "text": "Website chat setup\n← All connections\nWebsite chat\nStep 4 of 9\nOpening your saved details…\nBack\nExit setup\nContinue website setup",
+      "posts": [
+        "save_service_intake:200:owner",
+        "apply_service_intake:200:owner"
+      ]
+    },
+    {
+      "check": "webstore-14-390",
+      "step": "details-0 opened",
+      "mode": "methods",
+      "when": "before-open",
+      "hash": "#setup/web/details-0",
+      "workspace": "ready",
+      "focus": "intakeStepTitle",
+      "intakeTitle": "Where will your website chat live?",
+      "intakeStatus": "",
+      "storageMode": "methods",
+      "storageEvents": [
+        "getItem",
+        "getItem",
+        "getItem",
+        "getItem",
+        "getItem"
+      ],
+      "text": "Website chat setup\nWebsite chat · Website details\nSave and exit\n\nStep 1 of 9\n\nWhere will your website chat live?\nYour business website\n\nChoose your website builder so we can show the right installation steps.\n\nWebsite builder\nChoose…\nWordPress\nWix\nSquarespace\nWebflow\nShopify\nAnother website builder\nWho manages your website?\nChoose…\nI do\nMy web person or agency\n\nSave website and continue"
+    },
+    {
+      "check": "webstore-14-390",
+      "step": "after save",
+      "where": "methods before-open 390",
+      "hash": "#setup/web/details-1-0",
+      "workspace": "ready",
+      "focus": "intakeStepTitle",
+      "intakeTitle": "Open your website settings",
+      "intakeStatus": "Details saved securely.",
+      "storageMode": "methods",
+      "storageEvents": [
+        "getItem",
+        "getItem",
+        "getItem",
+        "getItem",
+        "getItem",
+        "getItem",
+        "getItem",
+        "getItem",
+        "getItem",
+        "getItem",
+        "getItem",
+        "getItem"
+      ],
+      "text": "Website chat setup\nWebsite chat · Install and check\nSave and exit\n\nStep 4 of 9\n\nOpen your website settings\n\nUse a published Wix site with a connected domain, and sign in to its dashboard.\n\nWix\nUse a published Wix site with a connected domain, and sign in to its dashboard.\nOpen your website settings\n↖\nIllustrated instruction\nWix instructions\n\nDetails saved securely.\n\nBack\nNext",
+      "posts": [
+        "save_service_intake:200:owner",
+        "apply_service_intake:200:owner"
+      ]
+    },
+    {
+      "check": "webstore-15-390",
+      "step": "details-0 opened",
+      "mode": "methods",
+      "when": "after-open",
+      "hash": "#setup/web/details-0",
+      "workspace": "ready",
+      "focus": "intakeStepTitle",
+      "intakeTitle": "Where will your website chat live?",
+      "intakeStatus": "",
+      "storageEvents": [],
+      "text": "Website chat setup\nWebsite chat · Website details\nSave and exit\n\nStep 1 of 9\n\nWhere will your website chat live?\nYour business website\n\nChoose your website builder so we can show the right installation steps.\n\nWebsite builder\nChoose…\nWordPress\nWix\nSquarespace\nWebflow\nShopify\nAnother website builder\nWho manages your website?\nChoose…\nI do\nMy web person or agency\n\nSave website and continue"
+    },
+    {
+      "check": "webstore-15-390",
+      "step": "after save",
+      "where": "methods after-open 390",
+      "hash": "#setup/web/details-1-0",
+      "workspace": "ready",
+      "focus": "p-setup",
+      "storageMode": "methods",
+      "storageEvents": [
+        "getItem",
+        "getItem",
+        "getItem",
+        "getItem",
+        "getItem",
+        "getItem",
+        "getItem",
+        "getItem",
+        "getItem",
+        "getItem",
+        "getItem",
+        "getItem"
+      ],
+      "text": "Website chat setup\n← All connections\nWebsite chat\nStep 4 of 9\nOpening your saved details…\nBack\nExit setup\nContinue website setup",
+      "posts": [
+        "save_service_intake:200:owner",
+        "apply_service_intake:200:owner"
+      ]
+    },
+    {
+      "check": "webstore-16-390",
+      "step": "details-0 opened",
+      "mode": "security",
+      "when": "before-open",
+      "hash": "#setup/web/details-0",
+      "workspace": "ready",
+      "focus": "intakeStepTitle",
+      "intakeTitle": "Where will your website chat live?",
+      "intakeStatus": "",
+      "storageMode": "security",
+      "storageEvents": [
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage"
+      ],
+      "text": "Website chat setup\nWebsite chat · Website details\nSave and exit\n\nStep 1 of 9\n\nWhere will your website chat live?\nYour business website\n\nChoose your website builder so we can show the right installation steps.\n\nWebsite builder\nChoose…\nWordPress\nWix\nSquarespace\nWebflow\nShopify\nAnother website builder\nWho manages your website?\nChoose…\nI do\nMy web person or agency\n\nSave website and continue"
+    },
+    {
+      "check": "webstore-16-390",
+      "step": "after reconcile",
+      "hash": "#setup/web/details-1-0",
+      "workspace": "ready",
+      "focus": "intakeStepTitle",
+      "intakeTitle": "Open your website settings",
+      "intakeStatus": "Details saved securely.",
+      "storageMode": "security",
+      "storageEvents": [
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage"
+      ],
+      "text": "Website chat setup\nWebsite chat · Install and check\nSave and exit\n\nStep 4 of 9\n\nOpen your website settings\n\nUse a published Wix site with a connected domain, and sign in to its dashboard.\n\nWix\nUse a published Wix site with a connected domain, and sign in to its dashboard.\nOpen your website settings\n↖\nIllustrated instruction\nWix instructions\n\nDetails saved securely.\n\nBack\nNext"
+    },
+    {
+      "check": "webstore-17-390",
+      "step": "details-0 opened",
+      "mode": "security",
+      "when": "before-open",
+      "hash": "#setup/web/details-0",
+      "workspace": "ready",
+      "focus": "intakeStepTitle",
+      "intakeTitle": "Where will your website chat live?",
+      "intakeStatus": "",
+      "storageMode": "security",
+      "storageEvents": [
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage"
+      ],
+      "text": "Website chat setup\nWebsite chat · Website details\nSave and exit\n\nStep 1 of 9\n\nWhere will your website chat live?\nYour business website\n\nChoose your website builder so we can show the right installation steps.\n\nWebsite builder\nChoose…\nWordPress\nWix\nSquarespace\nWebflow\nShopify\nAnother website builder\nWho manages your website?\nChoose…\nI do\nMy web person or agency\n\nSave website and continue"
+    },
+    {
+      "check": "webstore-17-390",
+      "step": "invalid save",
+      "hash": "#setup/web/details-0",
+      "workspace": "ready",
+      "focus": "intake-website",
+      "intakeTitle": "Where will your website chat live?",
+      "intakeStatus": "Check the highlighted connection information.",
+      "storageMode": "security",
+      "storageEvents": [
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage"
+      ],
+      "text": "Website chat setup\nWebsite chat · Website details\nSave and exit\n\nStep 1 of 9\n\nWhere will your website chat live?\nYour business website\n\nEnter your public HTTPS business website.\n\nChoose your website builder so we can show the right installation steps.\n\nWebsite builder\nChoose…\nWordPress\nWix\nSquarespace\nWebflow\nShopify\nAnother website builder\nWho manages your website?\nChoose…\nI do\nMy web person or agency\n\nCheck the highlighted connection information.\n\nSave website and continue",
+      "posts": [
+        "save_service_intake:422"
+      ]
+    },
+    {
+      "check": "webstore-18-390",
+      "step": "details-0 opened",
+      "mode": "security",
+      "when": "before-open",
+      "hash": "#setup/web/details-0",
+      "workspace": "ready",
+      "focus": "intakeStepTitle",
+      "intakeTitle": "Where will your website chat live?",
+      "intakeStatus": "",
+      "storageMode": "security",
+      "storageEvents": [
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage"
+      ],
+      "text": "Website chat setup\nWebsite chat · Website details\nSave and exit\n\nStep 1 of 9\n\nWhere will your website chat live?\nYour business website\n\nChoose your website builder so we can show the right installation steps.\n\nWebsite builder\nChoose…\nWordPress\nWix\nSquarespace\nWebflow\nShopify\nAnother website builder\nWho manages your website?\nChoose…\nI do\nMy web person or agency\n\nSave website and continue"
+    },
+    {
+      "check": "webstore-18-390",
+      "step": "after save",
+      "where": "resume 390",
+      "hash": "#setup/web/details-1-0",
+      "workspace": "ready",
+      "focus": "p-setup",
+      "storageMode": "security",
+      "storageEvents": [
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage"
+      ],
+      "text": "Website chat setup\n← All connections\nWebsite chat\nStep 4 of 9\nOpening your saved details…\nBack\nExit setup\nContinue website setup",
+      "posts": [
+        "save_service_intake:200:owner",
+        "apply_service_intake:200:owner"
+      ]
+    },
+    {
+      "check": "webstore-18-390",
+      "step": "resumed",
+      "hash": "#setup/web/details-1-0",
+      "workspace": "ready",
+      "focus": "intakeStepTitle",
+      "intakeTitle": "Open your website settings",
+      "intakeStatus": "Details saved securely.",
+      "storageMode": "security",
+      "storageEvents": [
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage"
+      ],
+      "text": "Website chat setup\nWebsite chat · Install and check\nSave and exit\n\nStep 4 of 9\n\nOpen your website settings\n\nUse a published Wix site with a connected domain, and sign in to its dashboard.\n\nWix\nUse a published Wix site with a connected domain, and sign in to its dashboard.\nOpen your website settings\n↖\nIllustrated instruction\nWix instructions\n\nDetails saved securely.\n\nBack\nNext"
+    },
+    {
+      "check": "webstore-19-390",
+      "step": "collapsed settings",
+      "message": "Website saved. Continue with the next step below.",
+      "writes": [
+        "PUT:200:owner"
+      ]
+    },
+    {
+      "check": "webstore-20-390",
+      "step": "details-0 opened",
+      "mode": "quota",
+      "when": "none",
+      "hash": "#setup/web/details-0",
+      "workspace": "ready",
+      "focus": "intakeStepTitle",
+      "intakeTitle": "Where will your website chat live?",
+      "intakeStatus": "",
+      "storageMode": "quota",
+      "storageEvents": [
+        "setItem"
+      ],
+      "text": "Website chat setup\nWebsite chat · Website details\nSave and exit\n\nStep 1 of 9\n\nWhere will your website chat live?\nYour business website\n\nChoose your website builder so we can show the right installation steps.\n\nWebsite builder\nChoose…\nWordPress\nWix\nSquarespace\nWebflow\nShopify\nAnother website builder\nWho manages your website?\nChoose…\nI do\nMy web person or agency\n\nSave website and continue"
+    },
+    {
+      "check": "webstore-20-390",
+      "step": "after save",
+      "where": "quota 390",
+      "hash": "#setup/web/details-1-0",
+      "workspace": "ready",
+      "focus": "p-setup",
+      "storageMode": "quota",
+      "storageEvents": [
+        "setItem"
+      ],
+      "text": "Website chat setup\n← All connections\nWebsite chat\nStep 4 of 9\nOpening your saved details…\nBack\nExit setup\nContinue website setup",
+      "posts": [
+        "save_service_intake:200:owner",
+        "apply_service_intake:200:owner"
+      ]
+    },
+    {
+      "check": "webstore-21-390",
+      "step": "details-0 opened",
+      "mode": "none",
+      "when": "none",
+      "hash": "#setup/web/details-0",
+      "workspace": "ready",
+      "focus": "intakeStepTitle",
+      "intakeTitle": "Where will your website chat live?",
+      "intakeStatus": "",
+      "storageEvents": [],
+      "text": "Website chat setup\nWebsite chat · Website details\nSave and exit\n\nStep 1 of 9\n\nWhere will your website chat live?\nYour business website\n\nChoose your website builder so we can show the right installation steps.\n\nWebsite builder\nChoose…\nWordPress\nWix\nSquarespace\nWebflow\nShopify\nAnother website builder\nWho manages your website?\nChoose…\nI do\nMy web person or agency\n\nSave website and continue"
+    },
+    {
+      "check": "webstore-22-390",
+      "step": "details-0 opened",
+      "mode": "security",
+      "when": "after-open",
+      "hash": "#setup/web/details-0",
+      "workspace": "ready",
+      "focus": "intakeStepTitle",
+      "intakeTitle": "Where will your website chat live?",
+      "intakeStatus": "",
+      "storageEvents": [],
+      "text": "Website chat setup\nWebsite chat · Website details\nSave and exit\n\nStep 1 of 9\n\nWhere will your website chat live?\nYour business website\n\nChoose your website builder so we can show the right installation steps.\n\nWebsite builder\nChoose…\nWordPress\nWix\nSquarespace\nWebflow\nShopify\nAnother website builder\nWho manages your website?\nChoose…\nI do\nMy web person or agency\n\nSave website and continue"
+    },
+    {
+      "check": "webstore-23-390",
+      "step": "fresh blocked load",
+      "hash": "#setup",
+      "workspace": "recovery",
+      "focus": "BODY",
+      "storageMode": "security",
+      "storageEvents": [
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage",
+        "get sessionStorage"
+      ],
+      "text": "",
+      "status": "Sign in to continue"
+    }
+  ],
+  "handlers": [
+    "/api/client",
+    "/api/access",
+    "/api/onboard",
+    "/api/workspace-billing",
+    "/api/angi",
+    "/api/thumbtack",
+    "/api/thumbtack/self-serve",
+    "/api/thumbtack/connect",
+    "/api/google/auth",
+    "/api/google/callback",
+    "/api/chat",
+    "/api/website-installation"
+  ],
+  "browser": {
+    "engine": "chromium",
+    "launch": "executablePath /Users/stevengoumnai/Library/Caches/ms-playwright/chromium_headless_shell-1223/chrome-headless-shell-mac-arm64/chrome-headless-shell",
+    "version": "148.0.7778.96",
+    "profile": "Playwright temporary profile (browser.newContext)"
+  },
+  "sourceAfter": {
+    "desk.html": "5fb1a9be91dc46a0f16ead29691ca693329244b8d624de9ae82db7af4da8ad13",
+    "desk.js": "f4017bc4745bca629f36159c05973b6e7c76c4961fa49ea9cb21dd77bbf428ee",
+    "desk-setup-guide.js": "bc6c0a20089093dda1f79b0b325a7f6bcfb534c57b43a2e12ee14ff999fa62c7",
+    "desk-connections.js": "e5518ea2229c91f8c7c71603d88264214fe1fdf446a3dcc15268e23ba5a68a95",
+    "desk-website-install.js": "cd4212527b7cd33d630cb06fcd474d41da9da1beaccc220277c4976359a6631f",
+    "desk-service-intake.js": "b4ce91a54111ba66f6521ef162cf96c184cb7a9ed9be55b6c85e475215ca6a27",
+    "netlify/functions/client.mjs": "eafa4e54aae9adcf7e882f09f7daf3797486791178b88ebc1c2e3954cf4a7391",
+    "qa-artifacts/claude-collaboration/website-intake-storage/website-intake-storage-ui-check.mjs": "68c97cf453b42ae8e4a79a9e40180075e63b497085e61028eee8ae379d07ea49"
+  },
+  "passed": 26,
+  "total": 26,
+  "durationMs": 10847
+}
