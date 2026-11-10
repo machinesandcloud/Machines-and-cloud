@@ -21,7 +21,7 @@ const lib = path => pathToFileURL(resolve(root, path)).href;
 const files = ['desk.js', 'qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs'];
 const sha = value => createHash('sha256').update(value).digest('hex');
 const hashes = () => Object.fromEntries(files.map(file => [file, sha(readFileSync(resolve(root, file)))]));
-const report = { at: new Date().toISOString(), browser: process.env.MC_PLAYWRIGHT_EXECUTABLE || 'channel:chrome', deskSource: option('--desk-source') || 'desk.js', qualifications: 'Synthetic workspace and session; actual local /api/client and /api/access handlers and browser assets; memory storage; fake model. Lost responses are simulated with route.abort after (or before) the actual handler runs. No model/provider/email/OAuth/purchase/deployment performed.', sourceBefore: hashes(), checks: [], requests: [], pageErrors: [], forbidden: [], physicalNetwork: 0 };
+const report = { at: new Date().toISOString(), browser: process.env.MC_PLAYWRIGHT_EXECUTABLE || 'channel:chrome', deskSource: option('--desk-source') || 'desk.js', servedDeskSha256: [], qualifications: 'Synthetic workspace and session; actual local /api/client and /api/access handlers and browser assets; memory storage; fake model. Lost responses are simulated with route.abort after (or before) the actual handler runs. No model/provider/email/OAuth/purchase/deployment performed.', sourceBefore: hashes(), checks: [], requests: [], pageErrors: [], forbidden: [], physicalNetwork: 0 };
 for (const key of Object.keys(process.env)) if (/^(ANTHROPIC_|TWILIO_|MC_TWILIO_|MC_MESSAGING_|VAPI_|RESEND_|GOOGLE_|STRIPE_|PHONE_|VOICE_|MESSAGING_|CALENDAR_|SERVICE_|STEVE_|MC_SELF_SERVICE_AI_|NETLIFY_)/.test(key)) delete process.env[key];
 Object.assign(process.env, { MC_MEMORY_STORE: '1', MC_FAKE_MODEL: '1', NODE_ENV: 'test', URL: origin, PUBLIC_SITE_URL: origin });
 const deny = () => { report.physicalNetwork++; throw new Error('Save recovery check forbids physical transport'); };
@@ -41,7 +41,7 @@ async function fixture(viewport, options = {}) {
   await store.put('clients', slug, c); await store.put('access_sessions', accessHash(token), { scope: 'onboarding', status: 'active', email: c.owner.email, expiresAt: new Date(Date.now() + 3600000).toISOString() });
   const context = await browser.newContext({ viewport, serviceWorkers: 'block', reducedMotion: 'reduce' }); contexts.push(context); context.setDefaultTimeout(8000);
   await context.addInitScript(({ origin, slug, token }) => { if (location.origin !== origin) return; sessionStorage.setItem('mc-onboarding-session-v1', token); localStorage.setItem('mc-walkthrough-v1:' + slug, 'seen'); }, { origin, slug, token });
-  const state = { requests: [], putFault: null, getHook: null };
+  const state = { requests: [], putFault: null, getHook: null, heldCommit: null };
   await context.routeWebSocket('**/*', socket => socket.close());
   await context.route('**/*', async route => {
     const request = route.request(), url = new URL(request.url());
@@ -51,15 +51,20 @@ async function fixture(viewport, options = {}) {
       if (!handlers[url.pathname] || ['request_link', 'exchange'].includes(action)) { report.forbidden.push({ path: url.pathname, action }); return route.fulfill({ status: 403, body: '{}' }); }
       const item = { slug, path: url.pathname, method, action, at: state.requests.length }; state.requests.push(item); report.requests.push(item);
       // Lost before the handler: the save never reaches the backend.
+      // Held in flight: the browser loses the response at once, the server finishes the PUT only after the next re-read GET has been answered.
+      if (method === 'PUT' && state.putFault === 'held') { state.putFault = null; item.fixture = 'held-in-flight'; item.status = 'aborted'; const held = new Request(url, { method, headers: request.headers(), body: JSON.stringify(body) }); state.heldCommit = async () => { const r = await handlers[url.pathname](held, { ip: '192.0.2.71' }); item.lateCommitStatus = r.status; }; return route.abort('failed'); }
       if (method === 'PUT' && state.putFault === 'before') { state.putFault = null; item.fixture = 'lost-before-handler'; item.status = 'aborted'; return route.abort('failed'); }
       if (method === 'GET' && url.pathname === '/api/client' && state.getHook) { const hook = state.getHook; state.getHook = null; await hook(); }
       const response = await handlers[url.pathname](new Request(url, { method, headers: request.headers(), ...(body ? { body: JSON.stringify(body) } : {}) }), { ip: '192.0.2.71' }); item.status = response.status;
       const buffer = Buffer.from(await response.arrayBuffer());
       // Lost after the handler: the backend saved it, the browser never sees the response.
       if (method === 'PUT' && state.putFault === 'after') { state.putFault = null; item.fixture = 'lost-after-handler'; item.lostAfterEffect = true; return route.abort('failed'); }
-      return route.fulfill({ status: response.status, headers: Object.fromEntries(response.headers), body: buffer });
+      const fulfilled = route.fulfill({ status: response.status, headers: Object.fromEntries(response.headers), body: buffer });
+      if (method === 'GET' && url.pathname === '/api/client' && state.heldCommit) { await fulfilled; const commit = state.heldCommit; state.heldCommit = null; item.answeredBeforeLateCommit = true; await commit(); }
+      return fulfilled;
     }
-    if (deskSource && url.pathname === '/desk.js') return route.fulfill({ contentType: 'text/javascript', body: readFileSync(deskSource) });
+    // Bind the receipt to the exact desk.js bytes the browser ran.
+    if (url.pathname === '/desk.js') { const bytes = readFileSync(deskSource || resolve(root, 'desk.js')), digest = sha(bytes); if (!report.servedDeskSha256.includes(digest)) report.servedDeskSha256.push(digest); return route.fulfill({ contentType: 'text/javascript', body: bytes }); }
     const path = resolve(root, decodeURIComponent(url.pathname).replace(/^\//, ''));
     if (!path.startsWith(root + '/') || !existsSync(path) || statSync(path).isDirectory()) return route.fulfill({ status: 404, body: '' });
     return route.fulfill({ contentType: ({ '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.svg': 'image/svg+xml', '.webp': 'image/webp', '.jpg': 'image/jpeg' })[extname(path)] || 'application/octet-stream', body: readFileSync(path) });
@@ -128,7 +133,7 @@ try {
       assert.equal((await stored(x)).owner.name, 'Alex Fixture Jr');
       assert.equal(await x.page.locator('#cfgConflictPanel').isVisible(), false);
     });
-    await check(w + 'px lost response before the save reports not saved and keeps the edits', async () => {
+    await check(w + 'px lost response before the save reports an unconfirmed save and keeps the edits', async () => {
       const x = await fixture(viewport);
       await x.page.locator('#phoneBusinessNumber').fill('(713) 555-0110');
       x.state.putFault = 'before';
@@ -136,7 +141,7 @@ try {
       assert.equal((await stored(x)).phone.businessNumber || '', '', 'nothing was saved');
       await noRawTransport(x.page);
       assert.equal(await x.page.locator('#phoneBusinessNumber').inputValue(), '(713) 555-0110', 'edits kept');
-      assert.match(await saveMsg(x.page), /not saved/i, 'honest not-saved message');
+      assert.match(await saveMsg(x.page), /couldn.t confirm this save yet/i, 'uncertain wording'); assert.doesNotMatch(await saveMsg(x.page), /not saved/i, 'an older read cannot prove not saved');
       assert.equal(await x.page.locator('#cfgConflictPanel').isVisible(), false, 'no conflict for an unsaved change');
       assert.equal(await x.page.locator('#saveCfg').isDisabled(), false, 'owner can save again');
       await noHorizontalScroll(x.page); await x.page.locator('#saveMsg').scrollIntoViewIfNeeded(); await shot(x.page, 'not-saved-' + w);
@@ -165,12 +170,12 @@ try {
       const x = await fixture(viewport);
       await canonicalSaved(x, 'fees', 'Diagnostic - $89', 'Diagnostic: $89', c => assert.deepEqual(c.fees.map(f => [f.label, f.amount]), [['Diagnostic', '$89']]), 'price-confirmed-' + w);
     });
-    await check(w + 'px whitespace-only edit lost before the server reports not saved and keeps the text', async () => {
+    await check(w + 'px whitespace-only edit lost before the server is not reported saved and keeps the text', async () => {
       const x = await fixture(viewport);
       await setField(x.page, 'services', 'AC  repair'); x.state.putFault = 'before'; await saveAfter(x, 1);
       assert.deepEqual((await stored(x)).services, ['AC repair'], 'nothing was written');
       await noRawTransport(x.page);
-      assert.match(await saveMsg(x.page), /not saved/i); assert.doesNotMatch(await saveMsg(x.page), /All changes saved|Saved as a draft/);
+      assert.match(await saveMsg(x.page), /couldn.t confirm this save yet/i); assert.doesNotMatch(await saveMsg(x.page), /All changes saved|Saved as a draft|not saved/);
       assert.equal(await fieldValue(x.page, 'services'), 'AC  repair', 'owner text kept');
       assert.equal(await x.page.locator('#cfgConflictPanel').isVisible(), false);
       await x.page.locator('#saveMsg').scrollIntoViewIfNeeded(); await shot(x.page, 'whitespace-not-saved-' + w);
@@ -185,15 +190,32 @@ try {
       await noHorizontalScroll(x.page); await x.page.locator('#acctMsg').scrollIntoViewIfNeeded(); await shot(x.page, 'acct-confirmed-' + w);
       await x.page.locator('#avgTicket').fill('375'); await acctSave(x, 2); assert.equal(puts(x)[1].status, 200, 'next save accepted, not 409');
     });
-    await check(w + 'px average job value lost before the server reports not saved and keeps the value', async () => {
+    await check(w + 'px average job value lost before the server reports an unconfirmed save and keeps the value', async () => {
       const x = await fixture(viewport, { legacy: true }); await toAccount(x);
       await x.page.locator('#avgTicket').fill('350'); x.state.putFault = 'before'; await acctSave(x, 1);
       assert.ok(!(await stored(x)).rules.avgTicket, 'nothing was written');
       await noRawTransport(x.page);
-      assert.match(await acctMsg(x.page), /not saved/i); assert.equal(await x.page.locator('#avgTicket').inputValue(), '350');
+      // Legacy saves carry no revision check, so the wording must not promise that a repeat cannot apply twice.
+      assert.match(await acctMsg(x.page), /couldn.t confirm this save yet/i); assert.doesNotMatch(await acctMsg(x.page), /not saved|can.t apply twice/i); assert.equal(await x.page.locator('#avgTicket').inputValue(), '350');
       assert.equal(await x.page.locator('#acctConflictPanel').isVisible(), false); assert.equal(await x.page.locator('#saveAcct').isDisabled(), false);
       await noHorizontalScroll(x.page); await x.page.locator('#acctMsg').scrollIntoViewIfNeeded(); await shot(x.page, 'acct-not-saved-' + w);
       await acctSave(x, 2); assert.equal(puts(x)[1].status, 200); assert.equal(String((await stored(x)).rules.avgTicket), '350');
+    });
+    await check(w + 'px save held in flight commits after the re-read: no not-saved claim, next save reconciles to already saved', async () => {
+      const x = await fixture(viewport);
+      await x.page.locator('#phoneBusinessNumber').fill('(713) 555-0110'); x.state.putFault = 'held'; await saveAfter(x, 1);
+      assert.equal(puts(x)[0].lateCommitStatus, 200, 'held PUT committed late'); assert.ok(gets(x).some(r => r.answeredBeforeLateCommit), 'the re-read was answered before the commit');
+      assert.equal((await stored(x)).phone.businessNumber, '+17135550110');
+      await noRawTransport(x.page);
+      assert.match(await saveMsg(x.page), /couldn.t confirm this save yet/i); assert.doesNotMatch(await saveMsg(x.page), /not saved|All changes saved/i);
+      assert.equal(await x.page.locator('#phoneBusinessNumber').inputValue(), '(713) 555-0110', 'edits kept');
+      await noHorizontalScroll(x.page); await x.page.locator('#saveMsg').scrollIntoViewIfNeeded(); await shot(x.page, 'held-unconfirmed-' + w);
+      await saveAfter(x, 2); assert.equal(puts(x)[1].status, 409, 'the repeat carries the old revision and cannot apply twice');
+      await x.page.locator('#cfgCheckLatest').click(); await settled(x.page);
+      assert.ok(['saved', 'incomplete'].includes(await saveState(x.page)), await saveMsg(x.page)); assert.match(await saveMsg(x.page), /already saved/i);
+      assert.equal(await x.page.locator('#cfgConflictPanel').isVisible(), false);
+      await x.page.locator('#saveMsg').scrollIntoViewIfNeeded(); await shot(x.page, 'held-reconciled-' + w);
+      await setField(x.page, 'owner.name', 'Alex After Held'); await saveAfter(x, 3); assert.equal(puts(x)[2].status, 200, 'next save accepted');
     });
     await check(w + 'px a real concurrent change still shows a conflict with both values', async () => {
       const x = await fixture(viewport);
@@ -221,10 +243,10 @@ try {
     const x = await fixture(vp);
     await canonicalSaved(x, 'widget.allowedOrigins', 'https://shop.example/', 'https://shop.example', c => assert.deepEqual(c.widget.allowedOrigins, ['https://shop.example']));
   });
-  await check('1440px lost-before save plus another write reports not saved and shows a conflict', async () => {
+  await check('1440px lost-before save plus another write stays unconfirmed with a conflict and the edits kept', async () => {
     const x = await fixture(vp);
     await setField(x.page, 'services', 'AC repair\nZoning'); x.state.putFault = 'before'; x.state.getHook = () => concurrentWrite(x, '+17135550177'); await saveAfter(x, 1);
-    assert.equal(await saveState(x.page), 'conflict'); assert.match(await saveMsg(x.page), /not saved/i); assert.equal(await fieldValue(x.page, 'services'), 'AC repair\nZoning');
+    assert.equal(await saveState(x.page), 'conflict'); assert.match(await saveMsg(x.page), /couldn.t confirm/i); assert.doesNotMatch(await saveMsg(x.page), /not saved/i); assert.equal(await fieldValue(x.page, 'services'), 'AC repair\nZoning');
     assert.deepEqual((await stored(x)).services, ['AC repair']);
   });
   await check('1440px lost-after save plus another write keeps the edits for review without claiming either outcome', async () => {
@@ -234,6 +256,48 @@ try {
     assert.equal(await saveState(x.page), 'conflict'); assert.doesNotMatch(await saveMsg(x.page), /not saved|All changes saved/i, await saveMsg(x.page));
     await x.page.locator('#cfgCheckLatest').click(); await settled(x.page);
     const rows = await x.page.locator('#cfgConflictFields').innerText(); assert.match(rows, /Existing business line/); assert.doesNotMatch(rows, /Services/);
+  });
+  // QA R2-P: the same field saved to another value elsewhere during reconciliation must never read as our save.
+  await check('1440px R2-P lost-before save while another tab saves the same field differently is not called saved and keeps the edit', async () => {
+    const x = await fixture(vp);
+    await setField(x.page, 'services', 'AC repair\nMine'); x.state.putFault = 'before'; x.state.getHook = () => store.atomicUpdate('clients', x.c.slug, c => ({ value: { ...c, services: ['AC repair', 'Theirs'], updatedAt: new Date().toISOString() } })); await saveAfter(x, 1);
+    await noRawTransport(x.page);
+    assert.doesNotMatch(await saveMsg(x.page), /All changes saved|Saved as a draft|not saved/i, await saveMsg(x.page)); assert.match(await saveMsg(x.page), /couldn.t confirm/i);
+    assert.equal(await fieldValue(x.page, 'services'), 'AC repair\nMine', 'owner edit kept'); assert.equal(await x.page.locator('#cfgCheckLatest').isVisible(), true);
+    await x.page.locator('#cfgCheckLatest').click(); await settled(x.page); assert.match(await x.page.locator('#cfgConflictFields').innerText(), /Theirs/);
+  });
+  // QA R2-Q: two fields, one already stored in the server's form, lost after the save landed.
+  await check('1440px R2-Q two fields, one already stored in canonical form, lost after the server is confirmed saved', async () => {
+    const x = await fixture(vp);
+    await setField(x.page, 'fees', 'Diagnostic: $89'); await saveAfter(x, 1); assert.equal(puts(x)[0].status, 200);
+    await setField(x.page, 'fees', 'Diagnostic - $89'); await setField(x.page, 'services', 'AC repair\nFurnace'); x.state.putFault = 'after'; await saveAfter(x, 2);
+    assert.equal(puts(x)[1].status, 200); assert.deepEqual((await stored(x)).services, ['AC repair', 'Furnace']);
+    assert.ok(['saved', 'incomplete'].includes(await saveState(x.page)), await saveMsg(x.page)); assert.doesNotMatch(await saveMsg(x.page), /not saved|changed elsewhere|couldn.t/i);
+    assert.equal(await fieldValue(x.page, 'fees'), 'Diagnostic: $89');
+  });
+  // QA R2-R: the server re-derives the hours table from the hours text; that is not a change elsewhere.
+  await check('1440px R2-R hours text alone lost after the server is confirmed saved despite the derived hours table', async () => {
+    const x = await fixture(vp);
+    await setField(x.page, 'business.hours', 'Mon-Sat 7am-7pm'); x.state.putFault = 'after'; await saveAfter(x, 1);
+    assert.equal(puts(x)[0].status, 200); const c = await stored(x); assert.equal(c.business.hours, 'Mon-Sat 7am-7pm'); assert.ok(c.rules.hours?.sat, 'server derived Saturday hours');
+    assert.ok(['saved', 'incomplete'].includes(await saveState(x.page)), await saveMsg(x.page)); assert.doesNotMatch(await saveMsg(x.page), /changed elsewhere|couldn.t/i);
+  });
+  // QA R2-V: legacy average job value, another tab saves a different value during reconciliation.
+  await check('1440px R2-V average job value lost before while another tab saves a different value is not called saved', async () => {
+    const x = await fixture(vp, { legacy: true }); await toAccount(x);
+    await x.page.locator('#avgTicket').fill('350'); x.state.putFault = 'before'; x.state.getHook = () => store.atomicUpdate('clients', x.c.slug, c => ({ value: { ...c, rules: { ...c.rules, avgTicket: 999 }, updatedAt: new Date().toISOString() } })); await acctSave(x, 1);
+    await noRawTransport(x.page);
+    assert.doesNotMatch(await acctMsg(x.page), /All changes saved|not saved/i, await acctMsg(x.page)); assert.match(await acctMsg(x.page), /couldn.t confirm/i);
+    assert.equal(await x.page.locator('#avgTicket').inputValue(), '350', 'owner value kept'); assert.equal(await x.page.locator('#acctConflictPanel').isVisible(), true);
+  });
+  for (const fault of ['before', 'after']) await check('1440px owner types during reconciliation of a save lost ' + fault + ' the server: newer typing kept and unsaved', async () => {
+    const x = await fixture(vp);
+    await setField(x.page, 'services', 'AC repair\nZoning'); x.state.putFault = fault; x.state.getHook = () => setField(x.page, 'owner.name', 'Typed During Check'); await saveAfter(x, 1);
+    await noRawTransport(x.page);
+    assert.equal(await fieldValue(x.page, 'owner.name'), 'Typed During Check'); assert.equal(await saveState(x.page), 'dirty', await saveMsg(x.page));
+    if (fault === 'after') { assert.match(await saveMsg(x.page), /newer edits are still unsaved/); assert.deepEqual((await stored(x)).services, ['AC repair', 'Zoning']); }
+    else { assert.match(await saveMsg(x.page), /couldn.t confirm this save yet/i); assert.equal(await fieldValue(x.page, 'services'), 'AC repair\nZoning'); }
+    assert.equal((await stored(x)).owner.name, 'Alex Fixture', 'newer typing not written');
   });
   await check('No physical transport, forbidden destinations or page errors', async () => { assert.equal(report.physicalNetwork, 0); assert.deepEqual(report.forbidden, []); assert.deepEqual(report.pageErrors, []); });
 } finally {

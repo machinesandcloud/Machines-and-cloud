@@ -1,0 +1,979 @@
+{
+  "at": "2026-11-10T03:55:46.982Z",
+  "browser": "/Users/stevengoumnai/Library/Caches/ms-playwright/chromium_headless_shell-1223/chrome-headless-shell-mac-arm64/chrome-headless-shell",
+  "deskSource": "/private/tmp/claude-501/-Users-stevengoumnai/bb2b640e-7b18-457e-a6a2-5f7dc74f6ad1/scratchpad/desk-base2.js",
+  "servedDeskSha256": [
+    "484237ac64865f6c1674b28118cf658112cceccca8cbc21674fa1e5ad41735fe"
+  ],
+  "qualifications": "Synthetic workspace and session; actual local /api/client and /api/access handlers and browser assets; memory storage; fake model. Lost responses are simulated with route.abort after (or before) the actual handler runs. No model/provider/email/OAuth/purchase/deployment performed.",
+  "sourceBefore": {
+    "desk.js": "7fec3922c17305ab22b7393ff4126dc6b1b9343171e53f36606313aa3abd7d0d",
+    "qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs": "b9ee0cd443bd0ae344c5eae7f4ee1b05f57ca2f1b8325ca4a60dd950dbe3184a"
+  },
+  "checks": [
+    {
+      "name": "1440px lost response after the save is confirmed by re-reading the saved workspace",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: Raw transport error text reached the owner\n    at noRawTransport (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:89:99)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:123:7\n    at async check (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:81:72)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:116:5",
+      "pageState": {
+        "saveState": "error",
+        "saveMsg": "Failed to fetch Your edits are still here.",
+        "conflict": null
+      }
+    },
+    {
+      "name": "1440px lost response before the save reports an unconfirmed save and keeps the edits",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: Raw transport error text reached the owner\n    at noRawTransport (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:89:99)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:142:7\n    at async check (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:81:72)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:136:5",
+      "pageState": {
+        "saveState": "error",
+        "saveMsg": "Failed to fetch Your edits are still here.",
+        "conflict": null
+      }
+    },
+    {
+      "name": "1440px a phone-format-only difference from the latest saved version is not a conflict",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: equivalent phone number shown as a conflict: Existing business line (optional for a new number) | Latest saved: +17135550110. Your current value: (713) 555-0110\n    at file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:161:14\n    at async check (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:81:72)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:152:5",
+      "pageState": {
+        "saveState": "conflict",
+        "saveMsg": "Latest saved version checked. Your draft is unchanged; review the differences before continuing.",
+        "conflict": "Review the latest saved details\n\nCompare these updates with your draft. Keeping your edits saves only the fields you changed.\n\nExisting business line (optional for a new number) | Latest saved: +17135550110. Your current value: (713) 555-0110\n\nCheck latest saved version Keep my edits and save"
+      }
+    },
+    {
+      "name": "1440px lost-after price line is confirmed and shows the stored price",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: Raw transport error text reached the owner\n    at noRawTransport (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:89:99)\n    at async canonicalSaved (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:103:3)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:171:7\n    at async check (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:81:72)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:169:5",
+      "pageState": {
+        "saveState": "error",
+        "saveMsg": "Failed to fetch Your edits are still here.",
+        "conflict": null
+      }
+    },
+    {
+      "name": "1440px whitespace-only edit lost before the server is not reported saved and keeps the text",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: Raw transport error text reached the owner\n    at noRawTransport (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:89:99)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:177:7\n    at async check (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:81:72)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:173:5",
+      "pageState": {
+        "saveState": "error",
+        "saveMsg": "Failed to fetch Your edits are still here.",
+        "conflict": null
+      }
+    },
+    {
+      "name": "1440px average job value lost after the server is confirmed by re-reading",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: Raw transport error text reached the owner\n    at noRawTransport (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:89:99)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:187:7\n    at async check (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:81:72)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:183:5",
+      "pageState": {
+        "saveState": "saved",
+        "saveMsg": "All changes saved. Connections shows any review, practice or permission needed for each service.",
+        "conflict": null
+      }
+    },
+    {
+      "name": "1440px average job value lost before the server reports an unconfirmed save and keeps the value",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: Raw transport error text reached the owner\n    at noRawTransport (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:89:99)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:197:7\n    at async check (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:81:72)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:193:5",
+      "pageState": {
+        "saveState": "saved",
+        "saveMsg": "All changes saved. Connections shows any review, practice or permission needed for each service.",
+        "conflict": null
+      }
+    },
+    {
+      "name": "1440px save held in flight commits after the re-read: no not-saved claim, next save reconciles to already saved",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: held PUT committed late\n\nundefined !== 200\n\n    at file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:207:14\n    at runNextTicks (node:internal/process/task_queues:64:5)\n    at process.processImmediate (node:internal/timers:472:9)\n    at async check (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:81:72)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:204:5",
+      "pageState": {
+        "saveState": "error",
+        "saveMsg": "Failed to fetch Your edits are still here.",
+        "conflict": null
+      }
+    },
+    {
+      "name": "1440px a real concurrent change still shows a conflict with both values",
+      "pass": true
+    },
+    {
+      "name": "390px lost response after the save is confirmed by re-reading the saved workspace",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: Raw transport error text reached the owner\n    at noRawTransport (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:89:99)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:123:7\n    at async check (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:81:72)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:116:5",
+      "pageState": {
+        "saveState": "error",
+        "saveMsg": "Failed to fetch Your edits are still here.",
+        "conflict": null
+      }
+    },
+    {
+      "name": "390px lost response before the save reports an unconfirmed save and keeps the edits",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: Raw transport error text reached the owner\n    at noRawTransport (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:89:99)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:142:7\n    at async check (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:81:72)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:136:5",
+      "pageState": {
+        "saveState": "error",
+        "saveMsg": "Failed to fetch Your edits are still here.",
+        "conflict": null
+      }
+    },
+    {
+      "name": "390px a phone-format-only difference from the latest saved version is not a conflict",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: equivalent phone number shown as a conflict: Existing business line (optional for a new number) | Latest saved: +17135550110. Your current value: (713) 555-0110\n    at file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:161:14\n    at async check (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:81:72)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:152:5",
+      "pageState": {
+        "saveState": "conflict",
+        "saveMsg": "Latest saved version checked. Your draft is unchanged; review the differences before continuing.",
+        "conflict": "Review the latest saved details\n\nCompare these updates with your draft. Keeping your edits saves only the fields you changed.\n\nExisting business line (optional for a new number) | Latest saved: +17135550110. Your current value: (713) 555-0110\n\nCheck latest saved version Keep my edits and save"
+      }
+    },
+    {
+      "name": "390px lost-after price line is confirmed and shows the stored price",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: Raw transport error text reached the owner\n    at noRawTransport (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:89:99)\n    at async canonicalSaved (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:103:3)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:171:7\n    at async check (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:81:72)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:169:5",
+      "pageState": {
+        "saveState": "error",
+        "saveMsg": "Failed to fetch Your edits are still here.",
+        "conflict": null
+      }
+    },
+    {
+      "name": "390px whitespace-only edit lost before the server is not reported saved and keeps the text",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: Raw transport error text reached the owner\n    at noRawTransport (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:89:99)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:177:7\n    at async check (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:81:72)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:173:5",
+      "pageState": {
+        "saveState": "error",
+        "saveMsg": "Failed to fetch Your edits are still here.",
+        "conflict": null
+      }
+    },
+    {
+      "name": "390px average job value lost after the server is confirmed by re-reading",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: Raw transport error text reached the owner\n    at noRawTransport (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:89:99)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:187:7\n    at async check (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:81:72)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:183:5",
+      "pageState": {
+        "saveState": "saved",
+        "saveMsg": "All changes saved. Connections shows any review, practice or permission needed for each service.",
+        "conflict": null
+      }
+    },
+    {
+      "name": "390px average job value lost before the server reports an unconfirmed save and keeps the value",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: Raw transport error text reached the owner\n    at noRawTransport (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:89:99)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:197:7\n    at async check (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:81:72)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:193:5",
+      "pageState": {
+        "saveState": "saved",
+        "saveMsg": "All changes saved. Connections shows any review, practice or permission needed for each service.",
+        "conflict": null
+      }
+    },
+    {
+      "name": "390px save held in flight commits after the re-read: no not-saved claim, next save reconciles to already saved",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: held PUT committed late\n\nundefined !== 200\n\n    at file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:207:14\n    at runNextTicks (node:internal/process/task_queues:64:5)\n    at process.processImmediate (node:internal/timers:472:9)\n    at async check (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:81:72)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:204:5",
+      "pageState": {
+        "saveState": "error",
+        "saveMsg": "Failed to fetch Your edits are still here.",
+        "conflict": null
+      }
+    },
+    {
+      "name": "390px a real concurrent change still shows a conflict with both values",
+      "pass": true
+    },
+    {
+      "name": "1440px lost-after FAQ line is confirmed and shows the stored question and answer",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: Raw transport error text reached the owner\n    at noRawTransport (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:89:99)\n    at async canonicalSaved (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:103:3)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:240:5\n    at async check (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:81:72)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:238:3",
+      "pageState": {
+        "saveState": "error",
+        "saveMsg": "Failed to fetch Your edits are still here.",
+        "conflict": null
+      }
+    },
+    {
+      "name": "1440px lost-after allowed website with a trailing slash is confirmed and shows the stored address",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: Raw transport error text reached the owner\n    at noRawTransport (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:89:99)\n    at async canonicalSaved (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:103:3)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:244:5\n    at async check (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:81:72)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:242:3",
+      "pageState": {
+        "saveState": "error",
+        "saveMsg": "Failed to fetch Your edits are still here.",
+        "conflict": null
+      }
+    },
+    {
+      "name": "1440px lost-before save plus another write stays unconfirmed with a conflict and the edits kept",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ 'error'\n- 'conflict'\n\n    at file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:249:12\n    at async check (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:81:72)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:246:3",
+      "pageState": {
+        "saveState": "error",
+        "saveMsg": "Failed to fetch Your edits are still here.",
+        "conflict": null
+      }
+    },
+    {
+      "name": "1440px lost-after save plus another write keeps the edits for review without claiming either outcome",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ 'error'\n- 'conflict'\n\n    at file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:256:12\n    at async check (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:81:72)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:252:3",
+      "pageState": {
+        "saveState": "error",
+        "saveMsg": "Failed to fetch Your edits are still here.",
+        "conflict": null
+      }
+    },
+    {
+      "name": "1440px R2-P lost-before save while another tab saves the same field differently is not called saved and keeps the edit",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: Raw transport error text reached the owner\n    at noRawTransport (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:89:99)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:264:5\n    at async check (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:81:72)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:261:3",
+      "pageState": {
+        "saveState": "error",
+        "saveMsg": "Failed to fetch Your edits are still here.",
+        "conflict": null
+      }
+    },
+    {
+      "name": "1440px R2-Q two fields, one already stored in canonical form, lost after the server is confirmed saved",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: Failed to fetch Your edits are still here.\n    at file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:275:12\n    at async check (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:81:72)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:270:3",
+      "pageState": {
+        "saveState": "error",
+        "saveMsg": "Failed to fetch Your edits are still here.",
+        "conflict": null
+      }
+    },
+    {
+      "name": "1440px R2-R hours text alone lost after the server is confirmed saved despite the derived hours table",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: Failed to fetch Your edits are still here.\n    at file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:283:12\n    at async check (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:81:72)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:279:3",
+      "pageState": {
+        "saveState": "error",
+        "saveMsg": "Failed to fetch Your edits are still here.",
+        "conflict": null
+      }
+    },
+    {
+      "name": "1440px R2-V average job value lost before while another tab saves a different value is not called saved",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: Raw transport error text reached the owner\n    at noRawTransport (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:89:99)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:289:5\n    at async check (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:81:72)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:286:3",
+      "pageState": {
+        "saveState": "saved",
+        "saveMsg": "All changes saved. Connections shows any review, practice or permission needed for each service.",
+        "conflict": null
+      }
+    },
+    {
+      "name": "1440px owner types during reconciliation of a save lost before the server: newer typing kept and unsaved",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: Raw transport error text reached the owner\n    at noRawTransport (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:89:99)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:296:5\n    at async check (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:81:72)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:293:44",
+      "pageState": {
+        "saveState": "error",
+        "saveMsg": "Failed to fetch Your edits are still here.",
+        "conflict": null
+      }
+    },
+    {
+      "name": "1440px owner types during reconciliation of a save lost after the server: newer typing kept and unsaved",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: Raw transport error text reached the owner\n    at noRawTransport (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:89:99)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:296:5\n    at async check (file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:81:72)\n    at async file:///private/tmp/mc-claude-customer-journey-20261109/qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs:293:44",
+      "pageState": {
+        "saveState": "error",
+        "saveMsg": "Failed to fetch Your edits are still here.",
+        "conflict": null
+      }
+    },
+    {
+      "name": "No physical transport, forbidden destinations or page errors",
+      "pass": true
+    }
+  ],
+  "requests": [
+    {
+      "slug": "details-save-1",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-1",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 1,
+      "status": 200
+    },
+    {
+      "slug": "details-save-1",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 2,
+      "status": 200,
+      "fixture": "lost-after-handler",
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "details-save-2",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-2",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 1,
+      "status": 200
+    },
+    {
+      "slug": "details-save-2",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 2,
+      "fixture": "lost-before-handler",
+      "status": "aborted"
+    },
+    {
+      "slug": "details-save-3",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-3",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 1,
+      "status": 200
+    },
+    {
+      "slug": "details-save-3",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 2,
+      "status": 409
+    },
+    {
+      "slug": "details-save-3",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 3,
+      "status": 200
+    },
+    {
+      "slug": "details-save-4",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-4",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 1,
+      "status": 200
+    },
+    {
+      "slug": "details-save-4",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 2,
+      "status": 200,
+      "fixture": "lost-after-handler",
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "details-save-5",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-5",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 1,
+      "status": 200
+    },
+    {
+      "slug": "details-save-5",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 2,
+      "fixture": "lost-before-handler",
+      "status": "aborted"
+    },
+    {
+      "slug": "details-save-6",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-6",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 1,
+      "status": 200,
+      "fixture": "lost-after-handler",
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "details-save-7",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-7",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 1,
+      "fixture": "lost-before-handler",
+      "status": "aborted"
+    },
+    {
+      "slug": "details-save-8",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-8",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 1,
+      "status": 200
+    },
+    {
+      "slug": "details-save-8",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 2,
+      "fixture": "held-in-flight",
+      "status": "aborted"
+    },
+    {
+      "slug": "details-save-9",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-9",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 1,
+      "status": 200
+    },
+    {
+      "slug": "details-save-9",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 2,
+      "status": 409
+    },
+    {
+      "slug": "details-save-9",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 3,
+      "status": 200
+    },
+    {
+      "slug": "details-save-10",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-10",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 1,
+      "status": 200
+    },
+    {
+      "slug": "details-save-10",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 2,
+      "status": 200,
+      "fixture": "lost-after-handler",
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "details-save-11",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-11",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 1,
+      "status": 200
+    },
+    {
+      "slug": "details-save-11",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 2,
+      "fixture": "lost-before-handler",
+      "status": "aborted"
+    },
+    {
+      "slug": "details-save-12",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-12",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 1,
+      "status": 200
+    },
+    {
+      "slug": "details-save-12",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 2,
+      "status": 409
+    },
+    {
+      "slug": "details-save-12",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 3,
+      "status": 200
+    },
+    {
+      "slug": "details-save-13",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-13",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 1,
+      "status": 200
+    },
+    {
+      "slug": "details-save-13",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 2,
+      "status": 200,
+      "fixture": "lost-after-handler",
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "details-save-14",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-14",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 1,
+      "status": 200
+    },
+    {
+      "slug": "details-save-14",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 2,
+      "fixture": "lost-before-handler",
+      "status": "aborted"
+    },
+    {
+      "slug": "details-save-15",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-15",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 1,
+      "status": 200,
+      "fixture": "lost-after-handler",
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "details-save-16",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-16",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 1,
+      "fixture": "lost-before-handler",
+      "status": "aborted"
+    },
+    {
+      "slug": "details-save-17",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-17",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 1,
+      "status": 200
+    },
+    {
+      "slug": "details-save-17",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 2,
+      "fixture": "held-in-flight",
+      "status": "aborted"
+    },
+    {
+      "slug": "details-save-18",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-18",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 1,
+      "status": 200
+    },
+    {
+      "slug": "details-save-18",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 2,
+      "status": 409
+    },
+    {
+      "slug": "details-save-18",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 3,
+      "status": 200
+    },
+    {
+      "slug": "details-save-19",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-19",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 1,
+      "status": 200
+    },
+    {
+      "slug": "details-save-19",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 2,
+      "status": 200,
+      "fixture": "lost-after-handler",
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "details-save-20",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-20",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 1,
+      "status": 200
+    },
+    {
+      "slug": "details-save-20",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 2,
+      "status": 200,
+      "fixture": "lost-after-handler",
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "details-save-21",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-21",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 1,
+      "status": 200
+    },
+    {
+      "slug": "details-save-21",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 2,
+      "fixture": "lost-before-handler",
+      "status": "aborted"
+    },
+    {
+      "slug": "details-save-22",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-22",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 1,
+      "status": 200
+    },
+    {
+      "slug": "details-save-22",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 2,
+      "status": 200,
+      "fixture": "lost-after-handler",
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "details-save-23",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-23",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 1,
+      "status": 200
+    },
+    {
+      "slug": "details-save-23",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 2,
+      "fixture": "lost-before-handler",
+      "status": "aborted"
+    },
+    {
+      "slug": "details-save-24",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-24",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 1,
+      "status": 200
+    },
+    {
+      "slug": "details-save-24",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 2,
+      "status": 200
+    },
+    {
+      "slug": "details-save-24",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 3,
+      "status": 200
+    },
+    {
+      "slug": "details-save-24",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 4,
+      "status": 200
+    },
+    {
+      "slug": "details-save-24",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 5,
+      "status": 200
+    },
+    {
+      "slug": "details-save-24",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 6,
+      "status": 200,
+      "fixture": "lost-after-handler",
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "details-save-25",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-25",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 1,
+      "status": 200
+    },
+    {
+      "slug": "details-save-25",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 2,
+      "status": 200,
+      "fixture": "lost-after-handler",
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "details-save-26",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-26",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 1,
+      "fixture": "lost-before-handler",
+      "status": "aborted"
+    },
+    {
+      "slug": "details-save-27",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-27",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 1,
+      "status": 200
+    },
+    {
+      "slug": "details-save-27",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 2,
+      "fixture": "lost-before-handler",
+      "status": "aborted"
+    },
+    {
+      "slug": "details-save-28",
+      "path": "/api/client",
+      "method": "GET",
+      "at": 0,
+      "status": 200
+    },
+    {
+      "slug": "details-save-28",
+      "path": "/api/workspace-billing",
+      "method": "GET",
+      "at": 1,
+      "status": 200
+    },
+    {
+      "slug": "details-save-28",
+      "path": "/api/client",
+      "method": "PUT",
+      "at": 2,
+      "status": 200,
+      "fixture": "lost-after-handler",
+      "lostAfterEffect": true
+    }
+  ],
+  "pageErrors": [],
+  "forbidden": [],
+  "physicalNetwork": 0,
+  "screenshots": [
+    "scratchpad/claude-save-r6-base-failure-1.png",
+    "scratchpad/claude-save-r6-base-failure-2.png",
+    "scratchpad/claude-save-r6-base-failure-3.png",
+    "scratchpad/claude-save-r6-base-failure-4.png",
+    "scratchpad/claude-save-r6-base-failure-5.png",
+    "scratchpad/claude-save-r6-base-failure-6.png",
+    "scratchpad/claude-save-r6-base-failure-7.png",
+    "scratchpad/claude-save-r6-base-failure-8.png",
+    "scratchpad/claude-save-r6-base-real-conflict-1440.png",
+    "scratchpad/claude-save-r6-base-failure-10.png",
+    "scratchpad/claude-save-r6-base-failure-11.png",
+    "scratchpad/claude-save-r6-base-failure-12.png",
+    "scratchpad/claude-save-r6-base-failure-13.png",
+    "scratchpad/claude-save-r6-base-failure-14.png",
+    "scratchpad/claude-save-r6-base-failure-15.png",
+    "scratchpad/claude-save-r6-base-failure-16.png",
+    "scratchpad/claude-save-r6-base-failure-17.png",
+    "scratchpad/claude-save-r6-base-real-conflict-390.png",
+    "scratchpad/claude-save-r6-base-failure-19.png",
+    "scratchpad/claude-save-r6-base-failure-20.png",
+    "scratchpad/claude-save-r6-base-failure-21.png",
+    "scratchpad/claude-save-r6-base-failure-22.png",
+    "scratchpad/claude-save-r6-base-failure-23.png",
+    "scratchpad/claude-save-r6-base-failure-24.png",
+    "scratchpad/claude-save-r6-base-failure-25.png",
+    "scratchpad/claude-save-r6-base-failure-26.png",
+    "scratchpad/claude-save-r6-base-failure-27.png",
+    "scratchpad/claude-save-r6-base-failure-28.png"
+  ],
+  "sourceAfter": {
+    "desk.js": "7fec3922c17305ab22b7393ff4126dc6b1b9343171e53f36606313aa3abd7d0d",
+    "qa-artifacts/claude-collaboration/desk-details-save-recovery-ui-check.mjs": "b9ee0cd443bd0ae344c5eae7f4ee1b05f57ca2f1b8325ca4a60dd950dbe3184a"
+  },
+  "sourceStable": true,
+  "summary": {
+    "passed": 3,
+    "failed": 26,
+    "total": 29,
+    "physicalNetwork": 0,
+    "pageErrors": 0
+  }
+}
