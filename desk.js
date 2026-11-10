@@ -1368,7 +1368,7 @@
       if (current()) {
         // An unanswered question leaves the conversation and returns to the input, so the next send stays a normal user/assistant exchange.
         var message = error.name === 'AbortError' ? 'The reply took too long and did not arrive.' : error instanceof TypeError ? 'The reply did not arrive.' : error.message;
-        if (!finished) { if (question.isConnected) question.remove(); if (bubble && bubble.isConnected) bubble.remove(); if (!$('chatIn').value.trim()) $('chatIn').value = text; message += ' Your question is back in the message box; send it again' + (/allowance|unavailable/.test(message) ? ' when replies are available.' : '.'); }
+        if (!finished) { if (question.isConnected) question.remove(); if (bubble && bubble.isConnected) bubble.remove(); var later = /allowance|unavailable/.test(message); if (!$('chatIn').value.trim()) { $('chatIn').value = text; message += ' Your question is back in the message box; send it again' + (later ? ' when replies are available.' : '.'); } else message = (/did not arrive/.test(message) ? '' : message + ' ') + 'The reply to “' + (text.length > 80 ? text.slice(0, 79) + '…' : text) + '” did not arrive. Send it again when ' + (later ? 'replies are available.' : 'you’re ready.'); }
         add('sys', message); practiceStatus(message); $('testPreview').textContent = message;
       }
     }

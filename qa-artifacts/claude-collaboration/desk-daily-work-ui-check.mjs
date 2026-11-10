@@ -42,7 +42,7 @@ async function fixture(viewport, hash = '#today') {
   await store.put('clients', slug, c); await store.put('access_sessions', accessHash(token), { scope: 'onboarding', status: 'active', email: c.owner.email, expiresAt: new Date(Date.now() + 3600000).toISOString() });
   const context = await browser.newContext({ viewport, serviceWorkers: 'block', reducedMotion: 'reduce' }); contexts.push(context); context.setDefaultTimeout(10000);
   await context.addInitScript(({ origin, slug, token }) => { if (location.origin !== origin) return; sessionStorage.setItem('mc-onboarding-session-v1', token); localStorage.setItem('mc-walkthrough-v1:' + slug, 'seen'); }, { origin, slug, token });
-  const state = { requests: [], chats: [], chatFault: null };
+  const state = { requests: [], chats: [], chatFault: null, chatGate: null };
   await context.routeWebSocket('**/*', socket => socket.close());
   await context.route('**/*', async route => {
     const request = route.request(), url = new URL(request.url());
@@ -53,6 +53,8 @@ async function fixture(viewport, hash = '#today') {
       const item = { slug, path: url.pathname, method, action }; state.requests.push(item); report.requests.push(item);
       if (url.pathname === '/api/chat') { item.roles = (body.messages || []).map(m => m.role); state.chats.push(item); }
       const fault = url.pathname === '/api/chat' ? state.chatFault : null; if (fault) state.chatFault = null;
+      // Held, then refused: the owner can type while the reply is pending.
+      if (fault === 'held-503') { item.fixture = 'chat-held-503'; await new Promise(release => { state.chatGate = release; }); item.status = 503; return route.fulfill({ status: 503, contentType: 'application/json', body: JSON.stringify({ error: 'offline', message: 'Synthetic AI service unavailable.' }) }); }
       if (typeof fault === 'number') { item.status = fault; item.fixture = 'chat-' + fault; return route.fulfill({ status: fault, contentType: 'application/json', body: JSON.stringify({ error: fault === 429 ? 'rate_limited' : 'offline', message: fault === 429 ? 'Synthetic practice allowance used.' : 'Synthetic AI service unavailable.' }) }); }
       const response = await handlers[url.pathname](new Request(url, { method, headers: request.headers(), ...(body ? { body: JSON.stringify(body) } : {}) }), { ip: '192.0.2.71' }); item.status = response.status;
       const buffer = Buffer.from(await response.arrayBuffer());
@@ -134,6 +136,19 @@ try {
     const w = viewport.width;
     await check(w + 'px a practice reply lost after the server answers returns the question and the conversation continues', async () => {
       const x = await practiceFixture(viewport); await failedReplyRecovers(x, 'lost', w);
+    });
+    await check(w + 'px a reply refused after the owner typed a newer question keeps that text and names the unanswered question', async () => {
+      const x = await practiceFixture(viewport); const first = 'Do you service Katy?', newer = 'What are your hours?';
+      x.state.chatFault = 'held-503'; await x.page.locator('#chatIn').fill(first); await x.page.locator('#chatIn').press('Enter');
+      for (let i = 0; i < 100 && !x.state.chatGate; i++) await x.page.waitForTimeout(50); assert.ok(x.state.chatGate, 'reply pending');
+      await x.page.locator('#chatIn').fill(newer); x.state.chatGate(); x.state.chatGate = null;
+      await x.page.waitForFunction(() => document.getElementById('chatForm').getAttribute('aria-busy') === 'false');
+      const text = await practiceText(x.page);
+      assert.equal(await x.page.locator('#chatIn').inputValue(), newer, 'newer typing untouched');
+      assert.doesNotMatch(text, /back in the message box/i, 'claims the first question is in the box: ' + text);
+      assert.ok(text.includes('The reply to “' + first + '” did not arrive'), 'names the unanswered question: ' + text); assert.doesNotMatch(text, /sign in/i);
+      await noHorizontalScroll(x.page); await x.page.locator('#chatIn').scrollIntoViewIfNeeded(); await shot(x.page, 'practice-newer-text-' + w);
+      const next = await ask(x, newer, { typed: false }); assert.equal(next.status, 200); assert.ok(alternates(next.roles), 'roles ' + next.roles);
     });
     await check(w + 'px request labels follow the follow-up state, and a completed request leaves Needs your attention', async () => {
       const x = await fixture(viewport); await seedLead(x);
