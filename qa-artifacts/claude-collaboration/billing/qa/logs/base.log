@@ -1,0 +1,35 @@
+PASS actual handler offline: GET reads status none with no offer; review/portal refuse with 503 billing_unavailable
+PASS guard: open Billing, free workspace, review and start checkout by keyboard; Stripe navigation intercepted (390)
+PASS guard: double click on checkout sends one request; lost checkout keeps the exact "may already be saved" wording and state (390)
+PASS guard: portal JSON 4xx shows the server message with focus (390)
+PASS guard: cancel renewal by keyboard; status claims the end only after the server confirms (390)
+FAIL status read: non-JSON 5xx on open reads couldn’t confirm, offers status check, then recovers (390): Raw: Unexpected token '<', "<!doctype "... is not valid JSON
+FAIL status check: abort before the handler reads couldn’t confirm with focus; state kept (390): Raw error at refresh abort 390: Failed to fetch
+FAIL checkout: lost after commit, then status check aborts, then succeeds; one checkout, saved URL offered, never paid (390): Raw error at checkout-then-refresh-abort 390: Failed to fetch
+FAIL review: non-JSON 5xx reads couldn’t confirm with focus and status check; retry reviews (390): Raw error at review 503 390: Unexpected token '<', "<!doctype "... is not valid JSON
+FAIL portal: lost after commit reads couldn’t confirm; retry reuses the requestId and opens the intercepted portal once (390): Raw error at portal lost 390: Failed to fetch
+FAIL portal: non-JSON 5xx reads couldn’t confirm with focus, no navigation (390): Raw error at portal 503 390: Unexpected token '<', "<!doctype "... is not valid JSON
+FAIL portal: slow reply past the 15 s timeout, with double click, reads couldn’t confirm; one request, no navigation (390): Raw error at portal slow 390: signal is aborted without reason
+FAIL cancel renewal: lost after commit keeps exact wording; status check non-JSON 5xx reads couldn’t confirm; then server confirms (390): Raw error at cancel-then-refresh-503 390: Unexpected token '<', "<!doctype "... is not valid JSON
+FAIL storage blocked after load: status check and desk refresh keep working with the loaded session (390): page.waitForFunction: Timeout 8000ms exceeded.
+FAIL storage mismatch sticks: a different stored session sends nothing and stays stopped after restore (390): No request carries a foreign session
+FAIL storage blocked then session expiry (401) clears billing for good (390): page.waitForFunction: Timeout 8000ms exceeded.
+PASS guard: storage blocked then sign-out clears billing (390)
+PASS guard: open Billing, free workspace, review and start checkout by keyboard; Stripe navigation intercepted (1440)
+PASS guard: double click on checkout sends one request; lost checkout keeps the exact "may already be saved" wording and state (1440)
+PASS guard: portal JSON 4xx shows the server message with focus (1440)
+PASS guard: cancel renewal by keyboard; status claims the end only after the server confirms (1440)
+FAIL status read: non-JSON 5xx on open reads couldn’t confirm, offers status check, then recovers (1440): Raw: Unexpected token '<', "<!doctype "... is not valid JSON
+FAIL status check: abort before the handler reads couldn’t confirm with focus; state kept (1440): Raw error at refresh abort 1440: Failed to fetch
+FAIL checkout: lost after commit, then status check aborts, then succeeds; one checkout, saved URL offered, never paid (1440): Raw error at checkout-then-refresh-abort 1440: Failed to fetch
+FAIL review: non-JSON 5xx reads couldn’t confirm with focus and status check; retry reviews (1440): Raw error at review 503 1440: Unexpected token '<', "<!doctype "... is not valid JSON
+FAIL portal: lost after commit reads couldn’t confirm; retry reuses the requestId and opens the intercepted portal once (1440): Raw error at portal lost 1440: Failed to fetch
+FAIL portal: non-JSON 5xx reads couldn’t confirm with focus, no navigation (1440): Raw error at portal 503 1440: Unexpected token '<', "<!doctype "... is not valid JSON
+FAIL portal: slow reply past the 15 s timeout, with double click, reads couldn’t confirm; one request, no navigation (1440): Raw error at portal slow 1440: signal is aborted without reason
+FAIL cancel renewal: lost after commit keeps exact wording; status check non-JSON 5xx reads couldn’t confirm; then server confirms (1440): Raw error at cancel-then-refresh-503 1440: Unexpected token '<', "<!doctype "... is not valid JSON
+FAIL storage blocked after load: status check and desk refresh keep working with the loaded session (1440): page.waitForFunction: Timeout 8000ms exceeded.
+FAIL storage mismatch sticks: a different stored session sends nothing and stays stopped after restore (1440): No request carries a foreign session
+FAIL storage blocked then session expiry (401) clears billing for good (1440): page.waitForFunction: Timeout 8000ms exceeded.
+PASS guard: storage blocked then sign-out clears billing (1440)
+13/35 in 78s -> scratchpad/claude-billing-qa-base.json (served desk-billing.js a2e3a33c7ae0ad4808ed8a403b7785207817bf4f5481d82fe9c0becd1b77732f)
+exit 1

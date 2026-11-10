@@ -1,0 +1,660 @@
+{
+  "probe": "independent QA probe (lost response + retry, URL validation, notSent truth)",
+  "at": "2026-11-10T09:27:13.397Z",
+  "mode": "Actual /api/client + /api/access in-process; /api/workspace-billing context.route fixture mirroring handler shapes; memory store; fake model; provider env deleted; physical transport denied; Stripe navigations stubbed",
+  "billingSource": "desk-billing.js",
+  "servedBillingSha256": [
+    "b574409468fdd54dd110b4b492f132764e6c329c4fe50a2c35ded82880e073ed"
+  ],
+  "sourceBefore": {
+    "desk.html": "5fb1a9be91dc46a0f16ead29691ca693329244b8d624de9ae82db7af4da8ad13",
+    "desk.js": "f4017bc4745bca629f36159c05973b6e7c76c4961fa49ea9cb21dd77bbf428ee",
+    "desk.css": "40bc6c92580591703346f97449d926b0c275245ba8c040cc86968a3f40988502",
+    "desk-billing.js": "b574409468fdd54dd110b4b492f132764e6c329c4fe50a2c35ded82880e073ed",
+    "desk-billing.css": "f6d66178bb2b19dfdff4b9b09a9c637b3b4bb14b39813f572f3c3eca817fdd11",
+    "netlify/functions/workspace-billing.mjs": "87e3e01084d6810f80d1f6d27a16630d63a939d2f3132b3b5ae30657af84f8db",
+    "netlify/functions/lib/workspace-billing.mjs": "d722b89b9a6efbf158869210f727a9d173bfb43ac2608ffb856c017811e51975",
+    "netlify/functions/client.mjs": "eafa4e54aae9adcf7e882f09f7daf3797486791178b88ebc1c2e3954cf4a7391",
+    "netlify/functions/access.mjs": "5141bce6641cdf35a3503f4de41021b313b7de1745c82e2101ac7bdf19c89b53",
+    "qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs": "eee8422b318c1870e82256f285b6043078949e53dcafb2ed64513c5d86dac378",
+    "qa-artifacts/claude-collaboration/billing/qa/desk-billing-qa-probe.mjs": "eacf07d21ac807ab1e1ef77554e6948d11349d8955ed4aeb02aa4110bf95e4b5"
+  },
+  "checks": [
+    {
+      "name": "P1 checkout: lost after commit, refresh lost after commit, refresh 503 JSON, refresh ok; one checkout created, one requestId, no navigation",
+      "pass": true,
+      "ms": 510
+    },
+    {
+      "name": "P2 checkout: committed then JSON 503 / JSON 409 replies keep \"may already be saved\"; retry after recheck reuses requestId",
+      "pass": true,
+      "ms": 479
+    },
+    {
+      "name": "P3 portal: lost, then committed+JSON 503, then lost again, then ok: one requestId, one portal created, one validated navigation",
+      "pass": true,
+      "ms": 367
+    },
+    {
+      "name": "P4 portal 200 with unvalidated URL never navigates: https://billing.stripe.com.evil.example/p/x",
+      "pass": true,
+      "ms": 640
+    },
+    {
+      "name": "P4 portal 200 with unvalidated URL never navigates: http://billing.stripe.com/p/x",
+      "pass": true,
+      "ms": 624
+    },
+    {
+      "name": "P4 portal 200 with unvalidated URL never navigates: https://user:pw@billing.stripe.com/p/x",
+      "pass": true,
+      "ms": 640
+    },
+    {
+      "name": "P4 portal 200 with unvalidated URL never navigates: https://billing.stripe.com:8443/p/x",
+      "pass": true,
+      "ms": 613
+    },
+    {
+      "name": "P4 portal 200 with unvalidated URL never navigates: javascript:alert(1)",
+      "pass": true,
+      "ms": 638
+    },
+    {
+      "name": "P4 portal 200 with unvalidated URL never navigates: https://evil.example/p/x",
+      "pass": true,
+      "ms": 616
+    },
+    {
+      "name": "P5 checkout 200 with non-Stripe URL never navigates nor exposes a link",
+      "pass": true,
+      "ms": 782
+    },
+    {
+      "name": "P6 portal billing_portal_expired (409) rotates requestId; other 4xx keeps it",
+      "pass": true,
+      "ms": 287
+    },
+    {
+      "name": "P7 \"Nothing was sent\" is only shown when no request left the page (mismatch, then every control)",
+      "pass": true,
+      "ms": 325
+    },
+    {
+      "name": "P8 in-flight checkout then storage swaps to another account: committed request is not later reported as \"Nothing was sent\"",
+      "pass": true,
+      "ms": 2665
+    },
+    {
+      "name": "P9 sign-out (storage readable) then a second account written to storage in the same tab: no request with either token",
+      "pass": true,
+      "ms": 1439
+    },
+    {
+      "name": "P10 storage blocked + sign-out, then storage unblocked still holding original token: billing does not resurrect",
+      "pass": true,
+      "ms": 1060
+    },
+    {
+      "name": "hygiene",
+      "pass": true,
+      "detail": {
+        "physical": 0,
+        "forbidden": [],
+        "pageErrors": []
+      }
+    },
+    {
+      "name": "source unchanged",
+      "pass": true
+    }
+  ],
+  "screenshots": [],
+  "requests": [
+    {
+      "slug": "bill-ui-1-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-1-390",
+      "method": "POST",
+      "action": "review",
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-1-390",
+      "method": "POST",
+      "action": "checkout",
+      "requestId": "b216a41ef3fda077e3626ebd1b6d198f",
+      "auth": "owner",
+      "fault": "lost-after",
+      "status": 200,
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "bill-ui-1-390",
+      "method": "POST",
+      "action": "refresh",
+      "requestId": null,
+      "auth": "owner",
+      "fault": "lost-after",
+      "status": 200,
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "bill-ui-1-390",
+      "method": "POST",
+      "action": "refresh",
+      "requestId": null,
+      "auth": "owner",
+      "fault": "after",
+      "status": 200,
+      "committedThen": "rewritten"
+    },
+    {
+      "slug": "bill-ui-1-390",
+      "method": "POST",
+      "action": "refresh",
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-2-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-2-390",
+      "method": "POST",
+      "action": "review",
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-2-390",
+      "method": "POST",
+      "action": "checkout",
+      "requestId": "ac5bf9132ae44e8dde4a2c8d9114c4cb",
+      "auth": "owner",
+      "fault": "after",
+      "status": 200,
+      "committedThen": "rewritten"
+    },
+    {
+      "slug": "bill-ui-2-390",
+      "method": "POST",
+      "action": "refresh",
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-2-390",
+      "method": "POST",
+      "action": "review",
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-2-390",
+      "method": "POST",
+      "action": "checkout",
+      "requestId": "ac5bf9132ae44e8dde4a2c8d9114c4cb",
+      "auth": "owner",
+      "fault": "after",
+      "status": 200,
+      "committedThen": "rewritten"
+    },
+    {
+      "slug": "bill-ui-3-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-3-390",
+      "method": "POST",
+      "action": "portal",
+      "requestId": "c20f25db0858e3b14bf83fae82f9bc58",
+      "auth": "owner",
+      "fault": "lost-after",
+      "status": 200,
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "bill-ui-3-390",
+      "method": "POST",
+      "action": "portal",
+      "requestId": "c20f25db0858e3b14bf83fae82f9bc58",
+      "auth": "owner",
+      "fault": "after",
+      "status": 200,
+      "committedThen": "rewritten"
+    },
+    {
+      "slug": "bill-ui-3-390",
+      "method": "POST",
+      "action": "portal",
+      "requestId": "c20f25db0858e3b14bf83fae82f9bc58",
+      "auth": "owner",
+      "fault": "lost-after",
+      "status": 200,
+      "lostAfterEffect": true
+    },
+    {
+      "slug": "bill-ui-3-390",
+      "method": "POST",
+      "action": "portal",
+      "requestId": "c20f25db0858e3b14bf83fae82f9bc58",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-4-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-4-390",
+      "method": "POST",
+      "action": "portal",
+      "requestId": "6c73f44290139b8ef9c86e01d86e2594",
+      "auth": "owner",
+      "fault": "after",
+      "status": 200,
+      "committedThen": "rewritten"
+    },
+    {
+      "slug": "bill-ui-5-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-5-390",
+      "method": "POST",
+      "action": "portal",
+      "requestId": "62c691c7fce0d70943ce1164a6654c9b",
+      "auth": "owner",
+      "fault": "after",
+      "status": 200,
+      "committedThen": "rewritten"
+    },
+    {
+      "slug": "bill-ui-6-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-6-390",
+      "method": "POST",
+      "action": "portal",
+      "requestId": "df1f40ee5579726a516918f92cc3ba8b",
+      "auth": "owner",
+      "fault": "after",
+      "status": 200,
+      "committedThen": "rewritten"
+    },
+    {
+      "slug": "bill-ui-7-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-7-390",
+      "method": "POST",
+      "action": "portal",
+      "requestId": "55dec7a17acae638f4c5a21058627d98",
+      "auth": "owner",
+      "fault": "after",
+      "status": 200,
+      "committedThen": "rewritten"
+    },
+    {
+      "slug": "bill-ui-8-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-8-390",
+      "method": "POST",
+      "action": "portal",
+      "requestId": "87ced17b6febb607996dde9ccc48d4fe",
+      "auth": "owner",
+      "fault": "after",
+      "status": 200,
+      "committedThen": "rewritten"
+    },
+    {
+      "slug": "bill-ui-9-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-9-390",
+      "method": "POST",
+      "action": "portal",
+      "requestId": "fd39f8b40a9ec1e21a1ffbc66114b155",
+      "auth": "owner",
+      "fault": "after",
+      "status": 200,
+      "committedThen": "rewritten"
+    },
+    {
+      "slug": "bill-ui-10-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-10-390",
+      "method": "POST",
+      "action": "review",
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-10-390",
+      "method": "POST",
+      "action": "checkout",
+      "requestId": "0e48b6daec1cc46d3fd9b2f99c795c55",
+      "auth": "owner",
+      "fault": "after",
+      "status": 200,
+      "committedThen": "rewritten"
+    },
+    {
+      "slug": "bill-ui-11-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-11-390",
+      "method": "POST",
+      "action": "portal",
+      "requestId": "07e88f4feb3122a01cb7ad2dd165776b",
+      "auth": "owner",
+      "fault": "json-4xx"
+    },
+    {
+      "slug": "bill-ui-11-390",
+      "method": "POST",
+      "action": "portal",
+      "requestId": "07e88f4feb3122a01cb7ad2dd165776b",
+      "auth": "owner",
+      "fault": "json-4xx"
+    },
+    {
+      "slug": "bill-ui-11-390",
+      "method": "POST",
+      "action": "portal",
+      "requestId": "1cbc45eb1b71feee123359631f396ba9",
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-12-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-13-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-13-390",
+      "method": "POST",
+      "action": "review",
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-13-390",
+      "method": "POST",
+      "action": "checkout",
+      "requestId": "0080bad1af7a9323b8982f0c8d6e2992",
+      "auth": "owner",
+      "fault": "slow",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-14-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    },
+    {
+      "slug": "bill-ui-15-390",
+      "method": "GET",
+      "action": null,
+      "requestId": null,
+      "auth": "owner",
+      "status": 200
+    }
+  ],
+  "stripeNavigations": [
+    {
+      "slug": "bill-ui-3-390",
+      "href": "https://billing.stripe.com/p/session/test_fixturebillui3390",
+      "navigation": true
+    },
+    {
+      "slug": "bill-ui-11-390",
+      "href": "https://billing.stripe.com/p/session/test_fixturebillui11390",
+      "navigation": true
+    }
+  ],
+  "pageErrors": [],
+  "forbidden": [],
+  "physicalNetwork": 0,
+  "browser": "/Users/stevengoumnai/Library/Caches/ms-playwright/chromium_headless_shell-1223/chrome-headless-shell-mac-arm64/chrome-headless-shell",
+  "probes": {
+    "P1": {
+      "m1": "We couldn’t confirm your billing status. Nothing was changed here. Check payment status to try again.",
+      "m2": "We couldn’t confirm your billing status. Nothing was changed here. Check payment status to try again.",
+      "checkoutRequestIds": [
+        "b216a41ef3fda077e3626ebd1b6d198f"
+      ],
+      "created": 1,
+      "navigations": 0,
+      "href": "https://checkout.stripe.com/c/pay/cs_test_fixturebillui1390"
+    },
+    "P2visible": [
+      "billingOfferForm",
+      "billingRefresh"
+    ],
+    "P2": {
+      "m409": "Checkout could not be confirmed. Your request may already be saved. Check payment status before continuing.",
+      "ids": [
+        "ac5bf9132ae44e8dde4a2c8d9114c4cb",
+        "ac5bf9132ae44e8dde4a2c8d9114c4cb"
+      ]
+    },
+    "P3": {
+      "ids": [
+        "c20f25db0858e3b14bf83fae82f9bc58",
+        "c20f25db0858e3b14bf83fae82f9bc58",
+        "c20f25db0858e3b14bf83fae82f9bc58",
+        "c20f25db0858e3b14bf83fae82f9bc58"
+      ],
+      "created": 1,
+      "navigations": 1
+    },
+    "P4": [
+      {
+        "bad": "https://billing.stripe.com.evil.example/p/x",
+        "message": "The secure payment link could not be confirmed.",
+        "navigated": null,
+        "pageUrl": "http://127.0.0.1:8932/desk.html?c=bill-ui-4-390#account"
+      },
+      {
+        "bad": "http://billing.stripe.com/p/x",
+        "message": "The secure payment link could not be confirmed.",
+        "navigated": null,
+        "pageUrl": "http://127.0.0.1:8932/desk.html?c=bill-ui-5-390#account"
+      },
+      {
+        "bad": "https://user:pw@billing.stripe.com/p/x",
+        "message": "The secure payment link could not be confirmed.",
+        "navigated": null,
+        "pageUrl": "http://127.0.0.1:8932/desk.html?c=bill-ui-6-390#account"
+      },
+      {
+        "bad": "https://billing.stripe.com:8443/p/x",
+        "message": "The secure payment link could not be confirmed.",
+        "navigated": null,
+        "pageUrl": "http://127.0.0.1:8932/desk.html?c=bill-ui-7-390#account"
+      },
+      {
+        "bad": "javascript:alert(1)",
+        "message": "The secure payment link could not be confirmed.",
+        "navigated": null,
+        "pageUrl": "http://127.0.0.1:8932/desk.html?c=bill-ui-8-390#account"
+      },
+      {
+        "bad": "https://evil.example/p/x",
+        "message": "The secure payment link could not be confirmed.",
+        "navigated": null,
+        "pageUrl": "http://127.0.0.1:8932/desk.html?c=bill-ui-9-390#account"
+      }
+    ],
+    "P5": {
+      "message": "Your checkout request is saved. Check payment status before trying again.",
+      "href": "#",
+      "url": "http://127.0.0.1:8932/desk.html?c=bill-ui-10-390#account"
+    },
+    "P6": {
+      "m1": "Your billing view changed. Open payment details again.",
+      "m2": "This secure payment link expired. Open payment details again.",
+      "ids": [
+        "07e88f4feb3122a01cb7ad2dd165776b",
+        "07e88f4feb3122a01cb7ad2dd165776b",
+        "1cbc45eb1b71feee123359631f396ba9"
+      ]
+    },
+    "P7": [
+      [
+        "#billingRefresh",
+        "Sign in again to manage billing. Nothing was sent.",
+        0
+      ],
+      [
+        "#billingPortal",
+        "Sign in again to manage billing. Nothing was sent.",
+        0
+      ],
+      [
+        "cancel",
+        "Sign in again to manage billing. Nothing was sent.",
+        0
+      ]
+    ],
+    "P8": {
+      "s": {
+        "status": "No subscription started",
+        "summary": "Your workspace is free to prepare. You review the full paid offer before entering payment details.",
+        "message": "Preparing secure checkout…",
+        "error": "false",
+        "focus": "BODY",
+        "busy": "false",
+        "hidden": false,
+        "visible": [
+          "billingOfferForm",
+          "billingReview"
+        ],
+        "dialog": false,
+        "workspace": "ready"
+      },
+      "created": 1,
+      "navigations": 0
+    },
+    "P9": {
+      "after": [],
+      "hidden": true
+    },
+    "P10": {
+      "storedStillOriginal": true,
+      "after": []
+    }
+  },
+  "syntheticProbeErrors": [
+    {
+      "slug": "bill-ui-14-390",
+      "message": "Cannot read properties of null (reading 'prepend')"
+    },
+    {
+      "slug": "bill-ui-14-390",
+      "message": "Cannot read properties of null (reading 'prepend')"
+    },
+    {
+      "slug": "bill-ui-15-390",
+      "message": "Cannot set properties of null (setting 'textContent')"
+    },
+    {
+      "slug": "bill-ui-15-390",
+      "message": "Cannot read properties of null (reading 'prepend')"
+    }
+  ],
+  "sourceAfter": {
+    "desk.html": "5fb1a9be91dc46a0f16ead29691ca693329244b8d624de9ae82db7af4da8ad13",
+    "desk.js": "f4017bc4745bca629f36159c05973b6e7c76c4961fa49ea9cb21dd77bbf428ee",
+    "desk.css": "40bc6c92580591703346f97449d926b0c275245ba8c040cc86968a3f40988502",
+    "desk-billing.js": "b574409468fdd54dd110b4b492f132764e6c329c4fe50a2c35ded82880e073ed",
+    "desk-billing.css": "f6d66178bb2b19dfdff4b9b09a9c637b3b4bb14b39813f572f3c3eca817fdd11",
+    "netlify/functions/workspace-billing.mjs": "87e3e01084d6810f80d1f6d27a16630d63a939d2f3132b3b5ae30657af84f8db",
+    "netlify/functions/lib/workspace-billing.mjs": "d722b89b9a6efbf158869210f727a9d173bfb43ac2608ffb856c017811e51975",
+    "netlify/functions/client.mjs": "eafa4e54aae9adcf7e882f09f7daf3797486791178b88ebc1c2e3954cf4a7391",
+    "netlify/functions/access.mjs": "5141bce6641cdf35a3503f4de41021b313b7de1745c82e2101ac7bdf19c89b53",
+    "qa-artifacts/claude-collaboration/billing/desk-billing-faults-ui-check.mjs": "eee8422b318c1870e82256f285b6043078949e53dcafb2ed64513c5d86dac378",
+    "qa-artifacts/claude-collaboration/billing/qa/desk-billing-qa-probe.mjs": "eacf07d21ac807ab1e1ef77554e6948d11349d8955ed4aeb02aa4110bf95e4b5"
+  },
+  "passed": 17,
+  "total": 17
+}
