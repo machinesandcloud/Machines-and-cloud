@@ -237,7 +237,9 @@ body[data-connector-flow] #setupDiagnostics,body[data-connector-flow] #legacyWeb
 body[data-connector-flow=step] #leadSourceDialog[data-connector-stage] #leadSourceInstructions{margin:18px 0;padding-left:18px;font-size:14px;line-height:1.7}
 body[data-connector-flow=step] #leadSourceDialog[data-connector-stage] #leadSourceSetupTitle{font-size:20px}
 body[data-connector-flow=step] #leadSourceDialog[data-connector-stage] #leadSourceCheck{margin-top:20px}
-body[data-connector-flow=step] #leadSourceDialog[data-connector-stage=request] #leadSourceCheck,body[data-connector-flow=step] #leadSourceDialog[data-connector-stage=account] #leadSourceCheck,body[data-connector-flow=step] #leadSourceDialog[data-connector-stage=permission] #leadSourceCheck{display:none}
+/* controls() disables #leadSourcePrepare only while a change is busy or unconfirmed, and keeps Check saved status enabled then: show it in those states so the owner can reconcile. */
+body[data-connector-flow=step] #leadSourceDialog[data-connector-stage=request]:not(:has(#leadSourcePrepare:disabled)) #leadSourceCheck,body[data-connector-flow=step] #leadSourceDialog[data-connector-stage=account]:not(:has(#leadSourcePrepare:disabled)) #leadSourceCheck,body[data-connector-flow=step] #leadSourceDialog[data-connector-stage=permission]:not(:has(#leadSourcePrepare:disabled)) #leadSourceCheck{display:none}
+body[data-connector-flow=step] #leadSourceDialog[data-connector-stage]:has(#leadSourcePrepare:disabled) #leadSourceStatus[hidden]:not(:empty){display:block!important}
 body[data-connector-flow=step] #leadSourceDialog[data-connector-stage] #leadSourceStatus:empty{display:none}
 body[data-connector-flow=step] #leadSourceDialog[data-connector-stage] .lead-source-close{float:none;margin:0 0 22px;font-size:13px}
 body[data-connector-flow=step] #leadSourceDialog[data-connector-stage] #leadSourceHelp{margin:22px 0;font-size:13px}
