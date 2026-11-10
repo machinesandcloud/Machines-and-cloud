@@ -254,7 +254,8 @@ for (const [width, height] of [[1440, 900], [390, 844]]) {
     await page.waitForFunction(() => /couldn.t confirm/.test(document.getElementById('leadSourceStatus').textContent) && document.getElementById('leadSourceDialog').getAttribute('aria-busy') === 'false');
     const focusAfterLoss = await page.evaluate(() => document.activeElement?.id || document.activeElement?.tagName);
     (report.focusAfterLostResponse ||= []).push({ width, stage: 'request', activeElement: focusAfterLoss });
-    if (overrideLeadJs) assert.equal(focusAfterLoss, 'leadSourceCheck', 'Focus did not move to Check saved status after the lost response');
+    // Required since the lead reconnect batch applied the focus patch's intent to desk-lead-sources.js.
+    assert.equal(focusAfterLoss, 'leadSourceCheck', 'Focus did not move to Check saved status after the lost response');
     const s = await dialogState(page); assert.ok(s.check.visible && !s.check.disabled, JSON.stringify(s));
     const review = await page.locator('#leadSourceConnectionReview').isVisible();
     if (review) { const g = await linkGap(page); (report.linkGaps ||= []).push({ width, ...g }); assert.ok(g.gap >= 8, 'Check saved status and the review link run together: ' + JSON.stringify(g)); }

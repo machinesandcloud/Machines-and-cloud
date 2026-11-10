@@ -7,9 +7,11 @@
 // saved in memory; it is not a provider credential. Lost responses are simulated after the actual handler has saved.
 // Covered: list (1440/390/320), page opens, honest provider gating, save persistence across reload, lost response +
 // recovery (website, phone/text review, lead source), return via hash in a fresh context, hygiene.
-// Deliberately NOT asserted (known open defects): text messaging Home "Next: You"; reconnect after a lead-source
-// disconnect; focus after a lost lead-source response; Quick tour returning to Home. New defects found are
+// Deliberately NOT asserted (known open defects): text messaging Home "Next: You"; Quick tour returning to Home.
+// Reconnect after a lead-source disconnect is covered by lead-source-reconnect-ui-check.mjs. New defects found are
 // expectedFail() entries: they pass while the defect reproduces and FAIL once it is fixed, so they get promoted.
+// Promoted 2026-11-09 (lead reconnect batch): focus after "Request connection review", after Thumbtack "Set up lead
+// notifications", and after a lost Angi save are now required passes.
 // Usage (from the worktree root):
 //   MC_PLAYWRIGHT_EXECUTABLE=<chrome-headless-shell> node qa-artifacts/claude-collaboration/connector-pages-ui-check.mjs \
 //     --playwright <playwright/index.mjs> --output scratchpad/claude-connector-pages-<name>.json [--only <substring>]
@@ -473,7 +475,7 @@ for (const [width, height] of WIDTHS) {
     assert.equal(await page.locator('#leadSourceStatus').textContent(), 'We couldn’t confirm whether this setup change was saved. Check saved status before trying again.');
     assert.ok(await page.locator('#leadSourceCheck').isVisible() && await page.locator('#leadSourceCheck').isEnabled(), 'Check saved status offered');
     assert.ok(!SUCCESS_TEXT.test(await page.locator('#leadSourceDialog').innerText()), 'No success while unconfirmed');
-    // Focus after a lost lead-source response is a known open defect: deliberately not asserted.
+    assert.equal(await page.evaluate(() => document.activeElement?.id), 'leadSourceCheck', 'Focus moves to Check saved status after the lost response');
     await noHorizontalScroll(page, 'angi lost ' + width);
     await shot(page, 'angi-lost-' + width);
     const gets = x.state.requests.filter(r => r.method === 'GET').length;
@@ -523,22 +525,24 @@ for (const [width, height] of WIDTHS) {
   });
 }
 
-// Defects found while writing this suite (not on the known list). Asserted as expected failures with evidence.
+// Defects found while writing this suite, first recorded as expected failures; fixed and promoted to required passes.
+const evidence = (name, focus) => (report.observations ||= []).push({ check: name, focus });
 for (const [width, height] of WIDTHS) {
-  await expectedFail(`focus stays on a control after a successful "Request connection review" (voice, ${width})`, 'voice', 'expected-fail', 'After the review is received, the review section re-renders via innerHTML and keyboard focus falls to <body>.', async evidence => {
+  await check(`focus stays on a control after a successful "Request connection review" (voice, ${width})`, 'voice', 'focus', async () => {
     const x = await open(await seed(width), { height, hash: '#setup' }); const { page } = x;
     await openService(page, 'voice'); await page.locator('#connectorRequestReview').focus(); await page.keyboard.press('Enter');
     await page.locator('#connectionReviewReference').waitFor(); await page.waitForTimeout(400);
     const focus = await page.evaluate(() => ({ tag: document.activeElement?.tagName, id: document.activeElement?.id || null, inGuide: !!document.activeElement?.closest('#setupGuide') }));
-    evidence(focus);
+    evidence('review focus ' + width, focus);
     assert.ok(focus.inGuide, 'Focus after the review request is ' + JSON.stringify(focus));
+    assert.equal(focus.id, 'connectorRequestReview', 'Focus returns to the review button');
   });
-  await expectedFail(`focus stays inside the Thumbtack dialog after a successful "Set up lead notifications" (${width})`, 'thumbtack', 'expected-fail', 'After the lead-notification save the dialog re-renders and keyboard focus falls to <body> while the modal is open.', async evidence => {
+  await check(`focus stays inside the Thumbtack dialog after a successful "Set up lead notifications" (${width})`, 'thumbtack', 'focus', async () => {
     const x = await open(await seed(width), { height, hash: '#setup' }); const { page } = x;
     await leadOpen(x, 'thumbtack'); await page.locator('#selfServePrepare').focus(); await page.keyboard.press('Enter');
     await waitText(page, '#leadSourceStatus', /notification address and key are saved/); await page.waitForTimeout(400);
     const focus = await page.evaluate(() => ({ tag: document.activeElement?.tagName, id: document.activeElement?.id || null, inDialog: !!document.activeElement?.closest('#leadSourceDialog') }));
-    evidence(focus);
+    evidence('notification focus ' + width, focus);
     assert.ok(focus.inDialog, 'Focus after the lead-notification save is ' + JSON.stringify(focus));
   });
 }

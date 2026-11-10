@@ -127,13 +127,15 @@
     var reviewRow=rows().find(function(row){return row.id===id;}),continueAvailable=reviewRow?.verification?.working||reviewRow&&!platformHold(reviewRow)&&action(reviewRow).kind!=='wait';
     var report=assistanceReport(id),state=assistanceState(id),open=report&&report.status!=='resolved',label=report?.status==='acknowledged'?'In review':report?.status==='resolved'?'Review completed':'Awaiting review';
     return (report?'<section id="connectionReviewReceipt" class="connection-setup-progress" data-report-status="'+esc(report.status)+'"><h5>'+esc(label)+'</h5><p>Reference: <strong id="connectionReviewReference">'+esc(report.reference)+'</strong></p><p>'+esc(report.status==='resolved'?'Your connection review is completed. The connection still needs its actual setup and delivery checks.':report.status==='acknowledged'?'Our team has acknowledged your connection review. Setup and provider permissions remain separate.':'Your connection review is saved for our team. This request does not start provisioning or activate the service.')+'</p>'+(report.resolution?'<p>'+esc(report.resolution)+'</p>':'')+'<p class="muted">'+esc(checkedTime(report.resolvedAt||report.acknowledgedAt||report.reportedAt))+'</p></section>':'<p>Send our team your saved connection details and the current setup status. No need to explain them again. This requests a review; it does not activate a service or approve a charge.</p>')+
-      '<p id="connectionReviewStatus" class="connection-verification-notice" role="status" aria-live="polite"'+(state.error?' data-error="true"':'')+'>'+esc(state.pending?(state.reading?'Checking your saved review…':'Sending your connection review…'):state.notice)+'</p>'+
+      '<p id="connectionReviewStatus" class="connection-verification-notice" role="status" aria-live="polite" tabindex="-1"'+(state.error?' data-error="true"':'')+'>'+esc(state.pending?(state.reading?'Checking your saved review…':'Sending your connection review…'):state.notice)+'</p>'+
       '<button type="button" id="connectorRequestReview" class="'+(continueAvailable?'connection-guide-link':'btn-pill btn-pill-blue btn-sm')+'"'+(state.pending?' disabled':'')+'>'+esc(state.pending?(state.reading?'Checking review…':'Sending request…'):state.uncertain&&!state.checked?'Check saved request':open?'Check review status':state.attempt?'Send saved request':report?'Request another review':'Request connection review')+'</button>';
   }
   async function requestConnectionReview(automatic) {
     if(!current()||!labels[selected])return;var id=selected,row=rows().find(function(item){return item.id===id;});if(stoppedConnection(row))return;
     var state=assistanceState(id),session=preparationSession(),slug=data.client.slug,generation=assistanceGeneration;if(state.pending||!session)return;
-    state.pending=true;state.reading=state.uncertain&&!state.checked||!!assistanceReport(id)&&(automatic||assistanceReport(id).status!=='resolved');state.error=false;render();
+    // The pressed button is disabled while sending, so its status line holds focus until the button returns.
+    var returnFocus=!automatic&&document.activeElement?.id==='connectorRequestReview';
+    state.pending=true;state.reading=state.uncertain&&!state.checked||!!assistanceReport(id)&&(automatic||assistanceReport(id).status!=='resolved');state.error=false;render();if(returnFocus)$('connectionReviewStatus')?.focus({preventScroll:true});
     var controller=new AbortController(),timer=setTimeout(function(){controller.abort();},15000);assistanceControllers.add(controller);
     try {
       await restoreAssistance(id,session,slug,state);if(generation!==assistanceGeneration||!current()||session!==preparationSession()||data.client.slug!==slug)return;
@@ -152,7 +154,7 @@
       else throw new Error('The saved review could not be confirmed.');
       document.dispatchEvent(new CustomEvent('mc:desk-refresh',{detail:{soft:true}}));
     } catch(error) {if(generation===assistanceGeneration&&current()&&session===preparationSession()&&data.client.slug===slug){state.error=true;state.uncertain=!!state.attempt;state.checked=false;state.notice=['Your saved review changed. Check the latest status before requesting another review.','The request could not be confirmed. Your connection details are kept.','The saved review could not be confirmed.'].includes(error.message)?error.message:state.attempt?'The response was interrupted. Your request may already be saved. Check its status before sending it again.':'The saved review status could not be checked. Your reference and connection details are kept. Check again.';}}
-    finally {clearTimeout(timer);assistanceControllers.delete(controller);if(generation===assistanceGeneration){state.pending=false;if(current())render();}}
+    finally {clearTimeout(timer);assistanceControllers.delete(controller);if(generation===assistanceGeneration){state.pending=false;if(current()){render();var button=$('connectorRequestReview');if(returnFocus&&button&&!button.disabled&&selected===id&&(document.activeElement===document.body||host.contains(document.activeElement)))button.focus({preventScroll:true});}}}
   }
   // Only explicit setup intents call this; rendering and returning visits never submit a review.
   function requestSavedConnectionReview(row) {
@@ -164,8 +166,11 @@
   }
   function clearAssistance(){assistanceGeneration++;assistanceControllers.forEach(function(controller){controller.abort();});assistanceControllers.clear();assistance={};}
   function holdActions() { return '<button type="button" id="setupGuideCheckConnection" class="connection-guide-link"'+(connectionCheck?' disabled':'')+'>'+(connectionCheck?'Checking availability…':'Check availability again')+'</button>'; }
+  // An owner-disconnected Angi or Thumbtack connection can be prepared again; only a stopped workspace stops it.
+  function leadDisconnected(row) { return !!row&&['thumbtack','angi'].includes(row.id)&&row.status==='disconnected'&&!['cancelled','archived','paused'].includes(data?.client?.status); }
+  function leadDisconnecting(row) { return leadDisconnected(row)&&row.id==='thumbtack'&&data?.leadConnections?.thumbtack?.nativeState==='disconnect_pending'; }
   function stoppedConnection(row) {
-    if(!row)return null;
+    if(!row||leadDisconnected(row))return null;
     var workspace=data?.client?.status,states=['closed','cancelled','archived','disconnected','cancellation_pending','cancel_pending','cleanup_pending','cleanup_uncertain'],stopped=['cancelled','archived','paused'].includes(workspace)||states.includes(row.status)||row.status==='paused';
     if(!stopped)return null;
     var op=row.id==='voice'?data.connections?.voice?.operation:row.id==='sms'?data.connections?.messaging?.operation:null,state=op?.state||row.setupProgress?.state||row.status;
@@ -178,6 +183,7 @@
   }
   function serviceStatus(row) {
     var stopped=stoppedConnection(row);if(stopped)return stopped.status;
+    if(leadDisconnected(row))return leadDisconnecting(row)?'Disconnecting':'Disconnected';
     if(['closed','cancelled','archived'].includes(row.status))return 'Disconnected';
     if(['cancellation_pending','cancel_pending','cleanup_pending','cleanup_uncertain'].includes(row.status))return 'Checking cleanup';
     if(row.status==='paused')return 'Paused';
@@ -392,8 +398,10 @@
     var websiteManagement=$('websiteSetupDetails'),websiteRow=items.find(function(row){return row.id==='web';});if(websiteManagement){websiteManagement.hidden=!websiteRow||!websiteRow.requested&&!websiteRow.retained;if(!websiteManagement.dataset.connectorManagement){websiteManagement.dataset.connectorManagement='true';websiteManagement.open=false;var caption=websiteManagement.querySelector('summary span');if(caption)caption.innerHTML='Website chat settings<small>Change your website, get installation code or check setup</small>';}}
     host.innerHTML='<div class="setup-guide-heading"><h3 id="setupGuideTitle" tabindex="-1">Your connections</h3><p class="muted">Choose a service. We’ll walk you through one step at a time.</p></div><nav class="connector-service-list" aria-label="Choose a connection">'+items.map(function(row){return '<button type="button" data-guide-service="'+row.id+'" class="connector-service-choice"><span class="brand-lockup">'+brandMark(row.id)+'<span>'+esc(labels[row.id])+'</span></span><span class="connector-choice-status">'+esc(serviceStatus(row))+'</span><span aria-hidden="true">→</span></button>';}).join('')+'</nav>';
   }
+  function keepFocus(id){if(!id)return;var node=$(id);if(node&&host.contains(node)&&!node.disabled&&document.activeElement!==node)node.focus({preventScroll:true});}
   function render() {
     if(!current())return;
+    var focusedId=host.contains(document.activeElement)&&document.activeElement.id?document.activeElement.id:null;
     returnWebsiteTask();
     var card=host.closest('#connectionsCard');card.classList.add('has-setup-guide','has-connector-pages');card.classList.remove('has-connection-preparation');
     document.body.dataset.connectorFlow=pageScreen==='overview'?'overview':'step';
@@ -407,7 +415,7 @@
       return;
     }
     var items=rows();if(!items.length){host.hidden=true;return;}
-    if(pageScreen==='overview'){renderOverview(items);return;}
+    if(pageScreen==='overview'){renderOverview(items);keepFocus(focusedId);return;}
     var row=items.find(function(item){return item.id===selected;});if(!row){pageRoute(null,null,true);renderOverview(items);return;}
     host.dataset.connectorView='step';host.dataset.guideSelectedService=selected;
     var stopped=stoppedConnection(row),usage=usageHold(row);if(stopped&&pageScreen!=='intro')pageRoute(selected,'intro',true);
@@ -446,6 +454,10 @@
       if(selected==='calendar'&&!row.requested&&!data.connections?.calendar?.connected)body+='<p><button type="button" id="setupGuideChoose" class="connection-guide-link">Save Calendar preference</button></p>';
       if(connectionNotices[selected])body+='<p id="connectionVerificationNotice" class="connection-verification-notice" role="status" aria-live="polite"'+(connectionNotices[selected].error?' data-error="true"':'')+'>'+esc(connectionNotices[selected].text)+'</p>';
       footer=holdActions();
+    } else if(pageScreen==='intro'&&leadDisconnected(row)) {
+      var notices=row.deliveryMode==='self_serve',pendingDisconnect=leadDisconnecting(row);
+      body='<h4 id="setupGuideStageTitle" tabindex="-1">'+esc(labels[selected]+(pendingDisconnect?' is disconnecting':' is disconnected'))+'</h4><p class="connector-page-description" id="connectorLeadDisconnected">'+esc(pendingDisconnect?'New Thumbtack leads and replies are blocked while the saved business webhook is disabled. Earlier requests stay in your Inbox.':notices?'New Thumbtack notifications no longer reach this workspace. Pause or delete the webhook in Thumbtack too. Earlier notifications stay in your Inbox.':'New '+labels[selected]+' leads no longer reach this workspace. Earlier '+labels[selected]+' requests stay in your Inbox.')+'</p><dl class="connector-intro-summary"><div><dt>Current status</dt><dd>'+esc(serviceStatus(row))+'</dd></div><div><dt>Next</dt><dd>'+esc(pendingDisconnect?'Finish disconnecting':notices?'Prepare a new notification address and key':selected==='angi'?'Confirm your Angi account':'Prepare a new Thumbtack connection')+'</dd></div></dl>';
+      footer='<button type="button" id="connectorDisconnectedInbox" class="connection-guide-link">Open Inbox</button>'+(pendingDisconnect?'<button type="button" id="connectorManageLead" class="connection-guide-link">Manage connection</button>':'')+'<button type="button" id="connectorStart" class="btn-pill btn-pill-blue btn-sm">'+(pendingDisconnect?'View disconnect status':'Set up again')+'</button>';
     } else if(pageScreen==='intro') {
       body='<h4 id="setupGuideStageTitle" tabindex="-1">'+esc(verified?'Your '+labels[selected]+' connection':'Connect '+labels[selected])+'</h4><p class="connector-page-description">'+esc(verified?row.verification.summary:row.guide?.overview||'Use your saved business details and follow each connection step.')+'</p><dl class="connector-intro-summary"><div><dt>Current status</dt><dd>'+esc(serviceStatus(row))+'</dd></div><div><dt>Next</dt><dd>'+esc(verified?'Review connection checks':needsServiceInformation(selected)?'Confirm your connection details':canonical.label)+'</dd></div></dl>';
       footer='<button type="button" id="connectorStart" class="btn-pill btn-pill-blue btn-sm">'+(verified?'View connection checks':row.requested||row.retained?'Continue setup':'Start setup')+'</button>';if(['thumbtack','angi'].includes(selected)&&(data.leadConnections?.[selected]?.generation||data.leadConnections?.[selected]?.setupRequest))footer='<button type="button" id="connectorManageLead" class="connection-guide-link">Manage connection</button>'+footer;
@@ -464,13 +476,13 @@
       if(waiting&&row.setupProgress?.nextCheckAt)body+='<p class="connector-evidence-time">Next scheduled check: '+esc(checkedTime(row.setupProgress.nextCheckAt))+'</p>';
       if(waiting||manualCheck)body+='<p class="muted" id="connectorAutoCheckStatus" role="status" aria-live="polite">'+esc(document.body.dataset.connectionProgressStatus||'Your saved connection details are kept.')+'</p>';
       // Provider instructions appear only on their dedicated current task page.
-      var main=closed?'':manualCheck?'<button type="button" id="setupGuideCheckConnection" class="btn-pill btn-pill-blue btn-sm">'+(connectionCheck?'Checking…':selected==='voice'?'Check call result':'Check text reply')+'</button>':verified?'<button type="button" id="connectorCheckPage" class="btn-pill btn-pill-blue btn-sm">Check connection</button>':needsServiceInformation(selected)?'<button type="button" id="setupGuideDetails" class="btn-pill btn-pill-blue btn-sm">Continue</button>':row.status==='not_selected'&&['web','voice','sms','calendar'].includes(selected)?'<button type="button" id="setupGuideChoose" class="btn-pill btn-pill-blue btn-sm">Connect '+esc(labels[selected])+'</button>':next.kind==='wait'?'<button type="button" id="setupGuideCheckConnection" class="btn-pill btn-pill-blue btn-sm">'+(connectionCheck?'Checking…':'Check progress')+'</button>':'<button type="button" id="setupGuideContinue" class="btn-pill btn-pill-blue btn-sm">'+esc(next.label||'Continue')+'</button>';
+      var main=closed?'':manualCheck?'<button type="button" id="setupGuideCheckConnection" class="btn-pill btn-pill-blue btn-sm">'+(connectionCheck?'Checking…':selected==='voice'?'Check call result':'Check text reply')+'</button>':verified?'<button type="button" id="connectorCheckPage" class="btn-pill btn-pill-blue btn-sm">Check connection</button>':needsServiceInformation(selected)?'<button type="button" id="setupGuideDetails" class="btn-pill btn-pill-blue btn-sm">Continue</button>':row.status==='not_selected'&&['web','voice','sms','calendar'].includes(selected)?'<button type="button" id="setupGuideChoose" class="btn-pill btn-pill-blue btn-sm">Connect '+esc(labels[selected])+'</button>':next.kind==='wait'?'<button type="button" id="setupGuideCheckConnection" class="btn-pill btn-pill-blue btn-sm">'+(connectionCheck?'Checking…':'Check progress')+'</button>':'<button type="button" id="setupGuideContinue" class="btn-pill btn-pill-blue btn-sm">'+esc(leadDisconnected(row)&&!leadDisconnecting(row)?'Set up again':next.label||'Continue')+'</button>';
       footer=back+exit+main;
       if(waiting&&!verified)body+='<p><button type="button" id="connectorReviewOpen" class="connection-guide-link">Request connection review</button></p>';
       if(connectionNotices[selected])body+='<p id="connectionVerificationNotice" class="connection-verification-notice" role="status"'+(connectionNotices[selected].error?' data-error="true"':'')+'>'+esc(connectionNotices[selected].text)+'</p>';
       if(/^details-\d(?:-\d)?$/.test(pageScreen)){body='<h4 id="setupGuideStageTitle" tabindex="-1">'+(intakeOpeningErrors[selected]?'Your saved details couldn’t be opened':'Opening your saved details…')+'</h4>';if(intakeOpeningErrors[selected])footer=back+exit+'<button type="button" id="setupGuideDetails" class="btn-pill btn-pill-blue btn-sm">Try opening details again</button>';}
     }
-    host.innerHTML='<h3 id="setupGuideTitle" class="sr-only">'+esc(labels[selected])+' setup</h3>'+pageShell(row,step,index,total,body,footer);
+    host.innerHTML='<h3 id="setupGuideTitle" class="sr-only">'+esc(labels[selected])+' setup</h3>'+pageShell(row,step,index,total,body,footer);keepFocus(focusedId);
     if(!stopped&&!usage&&window.MCServiceIntake)window.MCServiceIntake.mount(host.querySelector('.connector-page'),selected,data);
     if(!stopped&&next.kind==='connection'&&['show_phone_steps','show_text_steps'].includes(next.target)&&!['intro','connection-check','complete','connection-review'].includes(pageScreen)&&!/^details-/.test(pageScreen)){
       var original=$('serviceConnections')?.querySelector(next.target==='show_phone_steps'?'#phoneRoutingSteps':'#textConnectionSteps');
@@ -515,6 +527,7 @@
     if(event.target.closest('#connectorFinish')&&!usageHold(pageRow)&&pageRow?.verification?.working&&!connectionCheck&&connectionNotices[selected]?.confirmed&&connectionNotices[selected]?.working&&!connectionNotices[selected]?.error){pageRoute(selected,'complete');render();focusStage();return;}
     if(event.target.closest('#connectorUse')&&!usageHold(pageRow)&&pageRow?.verification?.working){endTask();document.dispatchEvent(new CustomEvent('mc:desk-route',{detail:{tab:selected==='calendar'?'availability':'leads'}}));return;}
     if(event.target.closest('#connectorBack')){if(history.state?.mcConnectorPage?.slug===data.client.slug&&location.hash!=='#setup'){history.back();return;}if(pageScreen==='connection-check'||pageScreen==='complete'){pageRoute(selected,pageScreen==='complete'?'connection-check':'intro');render();focusStage();}else{pageRoute(selected,'intro');render();focusStage();}return;}
+    if(event.target.closest('#connectorDisconnectedInbox')){endTask();document.dispatchEvent(new CustomEvent('mc:desk-route',{detail:{tab:'leads'}}));return;}
     if(event.target.closest('#setupGuideOpenInbox')){endTask();document.dispatchEvent(new CustomEvent('mc:desk-route',{detail:{tab:'leads'}}));return;}
     var stepButton=event.target.closest('button[data-guide-step]');
     if(stepButton){guideStep=stepButton.dataset.guideStep;guideManual=true;render();focusStage();return;}
