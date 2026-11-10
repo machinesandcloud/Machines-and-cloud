@@ -1,0 +1,188 @@
+diff --git a/netlify/functions/chat.mjs b/netlify/functions/chat.mjs
+index 0197686..89167d2 100644
+--- a/netlify/functions/chat.mjs
++++ b/netlify/functions/chat.mjs
+@@ -5,7 +5,7 @@
+ import { runAgent, sanitizeMessages, toApiMessages, json, ndjsonResponse, classifyError } from "./lib/agent.mjs";
+ import { getConversation, saveConversation, id, get, put, assertCurrentWorkspace, beginConversationTurn, ConversationHistoryError } from "./lib/store.mjs";
+ import { buildSystemPrompt, BOOK_VISIT, NOTIFY_OWNER, GET_AVAILABILITY } from "./lib/config.mjs";
+-import { bookVisit, flagLead, availabilityToolResult } from "./lib/desk.mjs";
++import { bookVisit, flagLead, availabilityToolResult, deliveryNote } from "./lib/desk.mjs";
+ import { PERSONAS, OWNER_SUMMARY, personaSystem } from "./lib/practice-personas.mjs";
+ import { runOwnerTest } from "./lib/owner-test.mjs";
+ import { reserveAIRequest, selfServiceAIModelFetch, reserveAIProofMutation } from "./lib/self-service-ai.mjs";
+@@ -181,8 +181,8 @@ export default async (req, context) => {
+       const kind = name === 'book_visit' ? 'bookings' : 'leads';
+       const proofActionId = isSelfServiceClient(c) && ['book_visit','notify_owner'].includes(name) ? await reserveAIProofMutation(c, aiProof, name, input, { contact, ...(websiteContext ? { setupActionId:websiteActionId(websiteContext,kind) } : {}) }) : null;
+       const recordOptions = kind => ({ channel, contact, ...websiteRecordContext(websiteContext), ...(websiteContext ? { managedActionId: websiteActionId(websiteContext, kind) } : proofActionId ? { managedActionId:proofActionId } : {}), ...(isSelfServiceClient(c) ? { onSavedRecord: (recordKind, record) => noteWebsiteRecord(c, recordKind, record, { context: websiteContext, origin, contact }) } : {}) });
+-      if (name === "book_visit") { const b = await bookVisit(c, input, recordOptions('bookings')); if (b.full) return { content: b.message }; rememberSave(name,b,input); const appointmentTexts = await appointmentTextInvitation(c, b); return { content: isSelfServiceClient(c) ? `Visit saved in the shop portal. Ref ${b.id}. This result confirms the saved visit; separate text, calendar or owner-contact delivery is not confirmed here. The shop must confirm arrival details directly. ${appointmentTexts ? 'An optional appointment-text invitation will appear beside your final reply. Do not claim texting consent or delivery.' : ''}` : `Booked. Ref ${b.id}. ${c.owner?.name || "The owner"} has the details and the customer will get a text reminder.`, event: { type: "booking", id: b.id, ...(appointmentTexts ? { appointmentTexts } : {}) } }; }
+-      if (name === "notify_owner") { const l = await flagLead(c, input, recordOptions('leads')); rememberSave(name,l,input); const followupTexts=channel==='web'&&!websiteContext?await(await import('./lib/request-followup.mjs')).requestFollowupInvitation(c,l):null; return { content: l.status === "spam" ? "Noted as spam; the owner was not bothered." : isSelfServiceClient(c) ? `Request saved in the shop portal. Ref ${l.id}. Separate phone, text or email delivery is not confirmed here; human response and timing are not confirmed.${followupTexts?' An optional one-message follow-up invitation will appear beside your final reply; it does not give permission or schedule a text.':''}` : `${c.owner?.name || "The owner"} has been texted. Ref ${l.id}.`, event: { type: "lead", id: l.id, reason: l.reason, ...(followupTexts?{followupTexts}:{}) } }; }
++      if (name === "book_visit") { const b = await bookVisit(c, input, recordOptions('bookings')); if (b.full) return { content: b.message }; rememberSave(name,b,input); const appointmentTexts = await appointmentTextInvitation(c, b); return { content: isSelfServiceClient(c) ? `Visit saved in the shop portal. Ref ${b.id}. This result confirms the saved visit; separate text, calendar or owner-contact delivery is not confirmed here. The shop must confirm arrival details directly. ${appointmentTexts ? 'An optional appointment-text invitation will appear beside your final reply. Do not claim texting consent or delivery.' : ''}` : `Booked. Ref ${b.id}. ${deliveryNote(c, b)}`, event: { type: "booking", id: b.id, ...(appointmentTexts ? { appointmentTexts } : {}) } }; }
++      if (name === "notify_owner") { const l = await flagLead(c, input, recordOptions('leads')); rememberSave(name,l,input); const followupTexts=channel==='web'&&!websiteContext?await(await import('./lib/request-followup.mjs')).requestFollowupInvitation(c,l):null; return { content: l.status === "spam" ? "Noted as spam; the owner was not bothered." : isSelfServiceClient(c) ? `Request saved in the shop portal. Ref ${l.id}. Separate phone, text or email delivery is not confirmed here; human response and timing are not confirmed.${followupTexts?' An optional one-message follow-up invitation will appear beside your final reply; it does not give permission or schedule a text.':''}` : `Request saved. Ref ${l.id}. ${deliveryNote(c, l)}`, event: { type: "lead", id: l.id, reason: l.reason, ...(followupTexts?{followupTexts}:{}) } }; }
+       return { content: "Unknown tool.", is_error: true };
+     };
+     const finish = async (out) => {
+diff --git a/netlify/functions/lib/config.mjs b/netlify/functions/lib/config.mjs
+index 2aaa6aa..1acd6a5 100644
+--- a/netlify/functions/lib/config.mjs
++++ b/netlify/functions/lib/config.mjs
+@@ -291,7 +291,7 @@ How a conversation should go:
+ - ${c.onboarding?.version === 1 ? "A saved booking already records the customer details. Do not repeat notify_owner for that booking unless something new and urgent comes up. Report a separate owner alert only when the tool explicitly confirms it." : "A booking already alerts the owner with every detail. Do not call notify_owner for a customer you just booked unless something new and urgent comes up."}
+ - Lines like [Done: visit booked, ref X] at the end of your earlier messages mean that action already happened. Do not repeat it; refer to the ref if the customer asks.
+ - ${c.onboarding?.version === 1 ? "If a confirmation or response failed for a prior visit, callback or handoff, distinguish three states. A definitive authoritative saved receipt means reuse that receipt and never repeat the saved action. An authoritative definitive rejection that saved nothing permits a corrected retry only with current customer consent. An unknown, lost or timed-out outcome means preserve uncertainty: never repeat the original action or infer that it failed, even when the customer says to repeat it. get_availability is not an existing-request status lookup. Without an applicable authoritative lookup, a direct request to check or recover the prior action authorizes one distinct status-check handoff: use the latest supplied contact facts and notify_owner with reason \"status_check\". With complete facts, save it now without asking for redundant permission; ask only for missing facts. This prior-action rule overrides callback and handoff reasons, including \"wants_call\", \"lead\" and \"question\"; it does not replace life-safety handling. Include the original action and requested timing in English for the owner. If a verified saved status-check receipt already exists, refer to it instead of saving another. Report only the returned check-request outcome; say you cannot confirm the original outcome or whether or when a person will respond here. Do not discuss arrival details for an unverified original visit, claim a person was or was not alerted, or say the shop has not confirmed something elsewhere without a receipt." : "If the customer lost a confirmation, reports a timeout or asks whether a prior attempt worked, preserve the uncertainty: say you cannot confirm that prior outcome. Do not claim nothing was booked or start a replacement booking, charge or text until the original authoritative status is checked. get_availability lists openings; it does not look up existing bookings. If no applicable status lookup is available, collect the contact details and use notify_owner for a status-check request. Describe only its returned outcome; do not claim someone was notified or promise a callback without a confirming receipt. A saved status-check request does not establish that the original visit exists or that a person will confirm arrival details. Say the original outcome is still unconfirmed and the check request is saved for review. Do not discuss arrival details for an unverified original visit. A lack of confirmation in this conversation does not establish whether the shop has confirmed anything elsewhere; say you cannot confirm it, rather than saying the shop has not confirmed it."}
+-- After a tool succeeds, tell the customer what happens next in one sentence. ${c.onboarding?.version === 1 ? "When book_visit succeeds, state only the saved visit and any delivery outcome explicitly confirmed by that tool result. If delivery is queued or unconfirmed, say the details are in the shop's portal and the shop confirms arrival details directly. Never describe a queued text, reminder or calendar update as delivered." : `When book_visit succeeds, say this once: "${consentLine(c)}"${b.spanish ? ` (in Spanish: "${consentLine(c, "es")}")` : ""}. Never say it twice in one conversation.`}
++- After a tool succeeds, tell the customer what happens next in one sentence. ${c.onboarding?.version === 1 ? "When book_visit succeeds, state only the saved visit and any delivery outcome explicitly confirmed by that tool result. If delivery is queued or unconfirmed, say the details are in the shop's portal and the shop confirms arrival details directly. Never describe a queued text, reminder or calendar update as delivered." : `When book_visit succeeds, say this once: "${consentLine(c)}"${b.spanish ? ` (in Spanish: "${consentLine(c, "es")}")` : ""}. Never say it twice in one conversation. If the book_visit result says the confirmation text was not sent, skip that line and do not promise texts.`}
+ - In the "unsure" field of a tool, write anything you were not confident about (the address, the issue, whether it is in the area); leave it empty when you are sure.
+ - Never invent prices, discounts, availability, or guarantees. Never say anything negative about other companies.`;
+ }
+diff --git a/netlify/functions/lib/desk.mjs b/netlify/functions/lib/desk.mjs
+index b2f0aeb..2ac136a 100644
+--- a/netlify/functions/lib/desk.mjs
++++ b/netlify/functions/lib/desk.mjs
+@@ -15,6 +15,27 @@ import { queueCalendarBooking, dispatchCalendarDeliveryWave } from "./calendar-d
+ import { strictRead } from "./accounts.mjs";
+ import { atomicUpdate } from './store.mjs';
+ 
++// Legacy tool results must describe the notifications that actually went out (AI review R2). The send
++// results are kept beside the returned record, never saved with it. Legacy sends are synchronous provider
++// calls, so `ok` means the provider accepted the message; handset delivery is not confirmed.
++const sendResults = new WeakMap();
++const noteSends = (record, outcome) => { if (record && typeof record === "object") sendResults.set(record, outcome); };
++export function deliveryNote(c, record) {
++  const owner = c.owner?.name || "the owner", Owner = c.owner?.name || "The owner";
++  const o = sendResults.get(record);
++  const noClaim = `Do not tell the customer that ${owner} was texted, emailed or told, and do not promise a callback time; say it is saved for ${owner} to review.`;
++  if (!o) return `Whether ${owner} was alerted is not confirmed. ${noClaim}`;
++  const parts = [];
++  if (o.merged) parts.push(`This matched an open request from the last 30 minutes (ref ${record.id}) and nothing changed, so no new alert was sent. Do not say a new text was sent.`);
++  else {
++    const sent = (o.ownerAlert || []).filter((r) => r?.ok).map((r) => r.channel === "email" ? "an email" : "a text");
++    parts.push(sent.length ? `${Owner} was sent ${sent.join(" and ")} with the details (accepted by the provider; delivery and reading are not confirmed).`
++      : `It is saved, but ${owner} could not be alerted yet (${(o.ownerAlert || []).length ? "the alert did not go out" : "no owner phone or email is on file"}). ${noClaim}`);
++  }
++  if ("customerText" in o) parts.push(o.customerText?.ok ? "The customer's confirmation text was accepted for delivery, and reminder texts are scheduled." : "The customer's confirmation text was not sent. Do not promise a confirmation text or text reminders.");
++  return parts.join(" ");
++}
++
+ async function queueSavedDelivery(c, record, kind) {
+   if (!isSelfServiceClient(c) || record.websiteSetupCheck || record.simulation) return;
+   // Provider work is recoverable from source records; a queue outage cannot roll back a booking.
+@@ -311,10 +332,9 @@ export async function bookVisit(c, input, ctx = {}) {
+   } finally { if (canFinish) { if (stable) await finishStableBookingWindow(c, bookingId, ctx.managedActionId); else await finishBookingWindow(c, bookingId, taken); } }
+   await savedRecordEvidence(ctx, 'bookings', b);
+   await queueSavedDelivery(c, b, "bookings");
+-  if (!portalOnly && b.phone && ctx.channel !== "sms") {
+-    await sendSMS({ to: b.phone, client: c, type: "confirmation", body: str("confirmation", b)(c, b) });
+-  }
+-  if (!portalOnly) await notifyOwner(c, ownerSummary(c, "booking", b), { type: "owner_alert" });
++  let customerText;
++  if (!portalOnly && ctx.channel !== "sms") customerText = b.phone ? await sendSMS({ to: b.phone, client: c, type: "confirmation", body: str("confirmation", b)(c, b) }) : { ok: false, reason: "missing" };
++  if (!portalOnly) noteSends(b, { ownerAlert: await notifyOwner(c, ownerSummary(c, "booking", b), { type: "owner_alert" }), ...(customerText ? { customerText } : {}) });
+   await logEvent(c, "booking", { id: b.id, channel: ctx.channel, ...(ctx.websiteSetupCheck ? { setupCheck: true } : {}) });
+   // A customer who books no longer needs a callback: close their open leads from the last 24 hours.
+   const since = Date.now() - D;
+@@ -413,7 +433,7 @@ export async function flagLead(c, input, ctx = {}) {
+     await savedRecordEvidence(ctx, 'leads', prior);
+     await queueSavedDelivery(c, prior, "leads");
+     if (!portalOnly) {
+-      if (changed.length) await notifyOwner(c, `UPDATE ref ${prior.id} (${changed.join(", ")}):\n` + ownerSummary(c, prior.reason, prior), { type: "owner_alert" });
++      noteSends(prior, changed.length ? { ownerAlert: await notifyOwner(c, `UPDATE ref ${prior.id} (${changed.join(", ")}):\n` + ownerSummary(c, prior.reason, prior), { type: "owner_alert" }) } : { merged: true });
+       const waiting = (await workspaceRows(c,"alerts",100)).some((a) => a.leadId === prior.id && a.status === "waiting");
+       if (reason !== "status_check" && !waiting && (prior.urgency === "emergency" || prior.reason === "wants_call")) await openAlert(c, prior, prior.reason === "wants_call" ? "wants_call" : "emergency");
+     }
+@@ -434,7 +454,7 @@ export async function flagLead(c, input, ctx = {}) {
+   await queueSavedDelivery(c, l, "leads");
+   if (!portalOnly && reason !== "spam") {
+     if (reason === "wants_call" || reason === "handoff") { await trackCallback(c, l); await saveRecord("leads", l); }
+-    await notifyOwner(c, ownerSummary(c, reason, l), { type: "owner_alert" });
++    noteSends(l, { ownerAlert: await notifyOwner(c, ownerSummary(c, reason, l), { type: "owner_alert" }) });
+     const urgent = reason !== "status_check" && (reason === "emergency" || reason === "wants_call" || input.urgency === "emergency");
+     if (urgent) await openAlert(c, l, reason === "wants_call" ? "wants_call" : "emergency");
+     if (PLANS[c.plan]?.followUp && l.phone && reason === "lead") {
+@@ -650,13 +670,13 @@ export async function rescheduleVisit(c, b, date, window) {
+     catch (err) { canFinish = false; throw err; }
+   } finally { if (canFinish) await finishBookingWindow(c, b.id, claim); }
+   await queueSavedDelivery(c, b, "bookings");
+-  if (!portalOnly) await notifyOwner(c, `${c.business.name} front desk: RESCHEDULED ref ${b.id} to ${when(b)} (was ${old}).\nCustomer: ${b.customer_name} ${b.phone}\nWhere: ${b.address}\nIssue: ${b.issue}`, { type: "owner_alert" });
++  if (!portalOnly) noteSends(b, { ownerAlert: await notifyOwner(c, `${c.business.name} front desk: RESCHEDULED ref ${b.id} to ${when(b)} (was ${old}).\nCustomer: ${b.customer_name} ${b.phone}\nWhere: ${b.address}\nIssue: ${b.issue}`, { type: "owner_alert" }) });
+   await logEvent(c, "rescheduled", { id: b.id, from: old, to: `${b.date} ${b.window}` });
+   return b;
+ }
+ 
+ export async function cancelRequest(c, b) {
+-  await notifyOwner(c, `${c.business.name} front desk: NEEDS ACTION. ${b.customer_name || b.phone} wants to cancel ref ${b.id} (${when(b)}, ${b.issue}). Reply "cancel ${b.id}" to cancel it.`, { type: "owner_alert" });
++  noteSends(b, { ownerAlert: await notifyOwner(c, `${c.business.name} front desk: NEEDS ACTION. ${b.customer_name || b.phone} wants to cancel ref ${b.id} (${when(b)}, ${b.issue}). Reply "cancel ${b.id}" to cancel it.`, { type: "owner_alert" }) });
+   await logEvent(c, "cancel_requested", { id: b.id });
+   return b;
+ }
+diff --git a/netlify/functions/lib/send.mjs b/netlify/functions/lib/send.mjs
+index 93e834c..09b8057 100644
+--- a/netlify/functions/lib/send.mjs
++++ b/netlify/functions/lib/send.mjs
+@@ -98,8 +98,8 @@ export async function sendEmail({ to, subject, text, html }) {
+ // Owner alert: SMS to the owner's phone from the client's number when both exist, else email.
+ export async function notifyOwner(client, text, opts = {}) {
+   const results = [];
+-  if (client.owner?.phone) results.push(await sendSMS({ to: client.owner.phone, client, body: text, force: true, type: opts.type || "owner_alert" }));
+-  if (client.owner?.email) results.push(await sendEmail({ to: client.owner.email, subject: `${client.business?.name || "Front desk"}: ${text.split("\n")[0].slice(0, 60)}`, text }));
++  if (client.owner?.phone) results.push({ channel: "text", ...(await sendSMS({ to: client.owner.phone, client, body: text, force: true, type: opts.type || "owner_alert" })) });
++  if (client.owner?.email) results.push({ channel: "email", ...(await sendEmail({ to: client.owner.email, subject: `${client.business?.name || "Front desk"}: ${text.split("\n")[0].slice(0, 60)}`, text })) });
+   return results;
+ }
+ 
+diff --git a/netlify/functions/sms-agent-background.mjs b/netlify/functions/sms-agent-background.mjs
+index e798d07..9381086 100644
+--- a/netlify/functions/sms-agent-background.mjs
++++ b/netlify/functions/sms-agent-background.mjs
+@@ -3,7 +3,7 @@
+ import { getClient, getConversation, saveConversation, logEvent } from "./lib/store.mjs";
+ import { runAgent, toApiMessages } from "./lib/agent.mjs";
+ import { buildSystemPrompt, BOOK_VISIT, NOTIFY_OWNER, UPDATE_VISIT, GET_AVAILABILITY } from "./lib/config.mjs";
+-import { bookVisit, flagLead, upcomingBookings, confirmVisit, rescheduleVisit, cancelRequest, availabilityToolResult } from "./lib/desk.mjs";
++import { bookVisit, flagLead, upcomingBookings, confirmVisit, rescheduleVisit, cancelRequest, availabilityToolResult, deliveryNote } from "./lib/desk.mjs";
+ import { sendSMS, e164, optedOut } from "./lib/send.mjs";
+ 
+ export default async (req) => {
+@@ -19,14 +19,14 @@ export default async (req) => {
+   const tools = bookings.length ? [BOOK_VISIT, NOTIFY_OWNER, UPDATE_VISIT, GET_AVAILABILITY] : [BOOK_VISIT, NOTIFY_OWNER, GET_AVAILABILITY];
+   const execTool = async (tool, input) => {
+     if (tool === "get_availability") return availabilityToolResult(c, input);
+-    if (tool === "book_visit") { const b = await bookVisit(c, { ...input, phone: e164(input.phone) || from }, { channel: "sms", contact: from }); if (b.full) return { content: b.message }; return { content: `Booked. Ref ${b.id}.`, event: { type: "booking", id: b.id } }; }
+-    if (tool === "notify_owner") { const l = await flagLead(c, { ...input, phone: e164(input.phone) || from }, { channel: "sms", contact: from }); return { content: l.status === "spam" ? "Noted as spam." : `Owner texted. Ref ${l.id}.`, event: { type: "lead", id: l.id, reason: l.reason } }; }
++    if (tool === "book_visit") { const b = await bookVisit(c, { ...input, phone: e164(input.phone) || from }, { channel: "sms", contact: from }); if (b.full) return { content: b.message }; return { content: `Booked. Ref ${b.id}. ${deliveryNote(c, b)}`, event: { type: "booking", id: b.id } }; }
++    if (tool === "notify_owner") { const l = await flagLead(c, { ...input, phone: e164(input.phone) || from }, { channel: "sms", contact: from }); return { content: l.status === "spam" ? "Noted as spam." : `Request saved. Ref ${l.id}. ${deliveryNote(c, l)}`, event: { type: "lead", id: l.id, reason: l.reason } }; }
+     if (tool === "update_visit") {
+       const b = bookings.find((x) => x.id === input.booking_id) || bookings[0];
+       if (!b) return { content: "No upcoming visit found for this number.", is_error: true };
+       if (input.action === "confirm") { await confirmVisit(c, b); return { content: `Confirmed ref ${b.id}.`, event: { type: "confirmed", id: b.id } }; }
+-      if (input.action === "reschedule") { const r = await rescheduleVisit(c, b, input.date, input.window); if (r?.full) return { content: r.message }; return { content: `Moved ref ${b.id} to ${b.date} ${b.window}. The owner has been told.`, event: { type: "rescheduled", id: b.id, date: b.date, window: b.window } }; }
+-      await cancelRequest(c, b); return { content: `Cancel request sent to the owner for ref ${b.id}; the visit stays until they confirm.`, event: { type: "cancel_request", id: b.id } };
++      if (input.action === "reschedule") { const r = await rescheduleVisit(c, b, input.date, input.window); if (r?.full) return { content: r.message }; return { content: `Moved ref ${b.id} to ${b.date} ${b.window}. ${deliveryNote(c, b)}`, event: { type: "rescheduled", id: b.id, date: b.date, window: b.window } }; }
++      await cancelRequest(c, b); return { content: `Cancel request saved for ref ${b.id}; the visit stays until the owner confirms. ${deliveryNote(c, b)}`, event: { type: "cancel_request", id: b.id } };
+     }
+     return { content: "Unknown tool.", is_error: true };
+   };
+diff --git a/netlify/functions/vapi.mjs b/netlify/functions/vapi.mjs
+index 6f778ac..b76da42 100644
+--- a/netlify/functions/vapi.mjs
++++ b/netlify/functions/vapi.mjs
+@@ -1,7 +1,7 @@
+ // Vapi server webhook: picks the assistant for an incoming call (with what we know about the caller),
+ // runs our tools during the call, and files the transcript and the minutes when the call ends.
+ import { getClient, get, clientByNumber, getConversation, saveConversation, logEvent, recordsFor, noteInbound } from "./lib/store.mjs";
+-import { bookVisit, flagLead, callerContext, cellIsForwardedLine, availabilityToolResult } from "./lib/desk.mjs";
++import { bookVisit, flagLead, callerContext, cellIsForwardedLine, availabilityToolResult, deliveryNote } from "./lib/desk.mjs";
+ import { json } from "./lib/agent.mjs";
+ import { e164 } from "./lib/send.mjs";
+ import { addUsage } from "./lib/usage.mjs";
+@@ -62,8 +62,8 @@ export default async (req) => {
+       if (typeof input === "string") { try { input = JSON.parse(input); } catch { input = {}; } }
+       try {
+         if (name === "get_availability") { const r = await availabilityToolResult(c, input); results.push({ toolCallId: t.id, ...(r.is_error ? { error: r.content } : { result: r.content }) }); }
+-        else if (name === "book_visit") { const b = await bookVisit(c, { ...input, phone: e164(input.phone) || caller }, { channel: "call", contact: caller || callId }); if (b.full) { results.push({ toolCallId: t.id, result: b.message }); continue; } results.push({ toolCallId: t.id, result: `Booked, reference ${b.id}. The owner has the details and the customer will get a text reminder.` }); }
+-        else if (name === "notify_owner") { const l = await flagLead(c, { ...input, phone: e164(input.phone) || caller }, { channel: "call", contact: caller || callId }); results.push({ toolCallId: t.id, result: `The owner has been texted, reference ${l.id}.` }); }
++        else if (name === "book_visit") { const b = await bookVisit(c, { ...input, phone: e164(input.phone) || caller }, { channel: "call", contact: caller || callId }); if (b.full) { results.push({ toolCallId: t.id, result: b.message }); continue; } results.push({ toolCallId: t.id, result: `Booked, reference ${b.id}. ${deliveryNote(c, b)}` }); }
++        else if (name === "notify_owner") { const l = await flagLead(c, { ...input, phone: e164(input.phone) || caller }, { channel: "call", contact: caller || callId }); results.push({ toolCallId: t.id, result: l.status === "spam" ? "Noted as spam; the owner was not alerted." : `Request saved, reference ${l.id}. ${deliveryNote(c, l)}` }); }
+         else results.push({ toolCallId: t.id, error: "Unknown tool." });
+       } catch (err) { console.error("vapi tool", name, err); await logEvent(c, "vapi_tool_failed", { name, error: String(err?.message || err).slice(0, 200) }); results.push({ toolCallId: t.id, error: "The tool failed. Apologize and take the caller's number for a callback." }); }
+     }

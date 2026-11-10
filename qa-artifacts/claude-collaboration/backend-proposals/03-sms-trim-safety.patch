@@ -1,0 +1,37 @@
+diff --git a/netlify/functions/sms-agent-background.mjs b/netlify/functions/sms-agent-background.mjs
+index e798d07..c32ff7f 100644
+--- a/netlify/functions/sms-agent-background.mjs
++++ b/netlify/functions/sms-agent-background.mjs
+@@ -35,7 +35,7 @@ export default async (req) => {
+     const out = await runAgent({ system: buildSystemPrompt(c, "sms", { bookings }), tools, messages: history, execTool, maxTokens: 1200, dropToolPreamble: true });
+     reply = out.reply;
+     const first = reply.split(/(?<=[.!?])\s+/)[0] || "";
+-    if (/^(have|need|got|book|call|now|phone filled|ok,? (i|let)|let me)/i.test(first) && first.split(/\s+/).length < 12 && reply.length > first.length + 10) { reply = reply.slice(first.length).trim(); await logEvent(c, "reply_trimmed", { from, dropped: first }); }
++    if (/^(have|need|got|book|call|now|phone filled|ok,? (i|let)|let me)/i.test(first) && first.split(/\s+/).length < 12 && reply.length > first.length + 10 && !isSafetySentence(c, first)) { reply = reply.slice(first.length).trim(); await logEvent(c, "reply_trimmed", { from, dropped: first }); }
+     done = (out.events || []).map((e) => e.type === "booking" ? `[Done: visit booked, ref ${e.id}]` : e.type === "lead" ? `[Done: owner notified, ref ${e.id}]` : e.type === "confirmed" ? `[Done: visit confirmed, ref ${e.id}]` : e.type === "rescheduled" ? `[Done: visit moved to ${e.date} ${e.window}, ref ${e.id}]` : e.type === "cancel_request" ? `[Done: cancel request sent, ref ${e.id}]` : "").filter(Boolean).join(" ");
+   } catch (err) {
+     console.error("sms agent failed", err);
+@@ -49,3 +49,23 @@ export default async (req) => {
+   await logEvent(c, "sms_reply", { from });
+   return new Response("ok");
+ };
++
++// The first-sentence trim above (S1-21) removes leftover planning notes such as "Have name, address,
++// issue, window." It must never remove life-safety guidance, which the prompt tells the model to put
++// first ("Call 911 and get everyone outside now."). A sentence that names a tool is always planning.
++const SAFETY_WORDS = /\b(911|emergenc\w*|gas|leave|leaving|outside|evacuat\w*|fire|smoke|carbon monoxide|monoxide|get (?:everyone |everybody |the kids |yourself )?out|out of the (?:house|home|building)|emergencia|salga\w*|salir|afuera|incendio|humo|monoxido|monóxido)\b/i;
++const TOOL_NAME = /\b(book_visit|notify_owner|update_visit|get_availability)\b/;
++const DEFAULT_SAFETY_SCRIPT = "Leave the area now, call 911 if there is any danger, then call us back.";
++const plain = (s) => String(s || "").toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
++function isSafetySentence(c, sentence) {
++  if (TOOL_NAME.test(sentence)) return false;
++  if (SAFETY_WORDS.test(sentence) || /\bCO\b/.test(sentence)) return true;
++  // The owner's configured safety script (rules.emergencies.script, or the old string form, as
++  // normalizeEmergencies reads it), else the default script; quoted in whole or in part.
++  const e = c?.rules?.emergencies;
++  const raw = String((typeof e === "string" ? e : e?.script) || "").slice(0, 500) || DEFAULT_SAFETY_SCRIPT;
++  const s = ` ${plain(sentence)} `, script = ` ${plain(raw)} `;
++  const long = (x) => x.trim().split(" ").length >= 3;
++  if (long(s) && script.includes(s)) return true;
++  return raw.split(/(?<=[.!?])\s+/).map((x) => ` ${plain(x)} `).some((x) => long(x) && s.includes(x));
++}

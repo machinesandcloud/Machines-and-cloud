@@ -1,0 +1,32 @@
+{
+  "ok": true,
+  "mode": "Synthetic cumulative account/tenant cost policy and intercepted actual outbox; rates are test upper-bound assumptions, not provider pricing",
+  "passed": 14,
+  "checks": [
+    "Paid SMS expiry stops ordinary reservation and physical send while retaining its saved outbox",
+    "GSM extension and Unicode surrogate boundaries reserve conservative multipart segments",
+    "Missing invalid expired unapproved and wrong-account policies fail closed",
+    "Exact cohort and current workspace authority exclude foreign replacement paused and cancelled tenants",
+    "One CAS document jointly enforces account and tenant message ceilings under concurrent sends",
+    "Self-service policy admits new current workspaces automatically within shared account and tenant ceilings",
+    "Changing between cohort and self-service never replenishes exposure and ambiguous scope is rejected",
+    "Segment and monetary ceilings independently deny otherwise permitted message counts",
+    "Stable reservations survive crashes dates and approved version edits without replenishing spent capacity",
+    "Changed payload refuses reuse and changed rate bounds can only increase retained cost",
+    "Outbox budget denial waits without acquiring a send-attempt marker and later exact approval resumes",
+    "Unknown sends retain message segments and cost reservations and never resend the same outbox intent",
+    "Policy revoked after reservation stops transport and leaves a resumable wait with its debit retained",
+    "Explicit owner setup probe retains its independent nonce/cohort budget after paid expiry"
+  ],
+  "sourceBefore": {
+    "netlify/functions/lib/managed-sms-budget.mjs": "474787cacee34ff434951b95cbbf6915be1e97a3f4793813ae62530dfdd73f83",
+    "netlify/functions/lib/managed-delivery.mjs": "809dc9c8469cc345ed9af8a94e86aeab9045ce24cf6731e2b521c964a10339c9",
+    "scripts/managed-sms-budget-check.mjs": "a74788c4f30627c7735d2844112f709dbb6a29273a5293669e66194fa8ce7ca7"
+  },
+  "sourceAfter": {
+    "netlify/functions/lib/managed-sms-budget.mjs": "474787cacee34ff434951b95cbbf6915be1e97a3f4793813ae62530dfdd73f83",
+    "netlify/functions/lib/managed-delivery.mjs": "809dc9c8469cc345ed9af8a94e86aeab9045ce24cf6731e2b521c964a10339c9",
+    "scripts/managed-sms-budget-check.mjs": "a74788c4f30627c7735d2844112f709dbb6a29273a5293669e66194fa8ce7ca7"
+  },
+  "physicalRequests": 0
+}

