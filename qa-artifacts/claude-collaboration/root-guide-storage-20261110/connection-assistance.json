@@ -1,0 +1,54 @@
+{
+  "mode": "Actual local client/manage handlers; memory storage; all physical networking denied",
+  "checks": [
+    {
+      "name": "All six connectors retain a real operator request without requiring a conversation or creating service resources",
+      "pass": true
+    },
+    {
+      "name": "One owner intent replays and cannot be reused for another service",
+      "pass": true
+    },
+    {
+      "name": "Concurrent different intents coalesce to the same unresolved service review",
+      "pass": true
+    },
+    {
+      "name": "The focused setup status endpoint retains the request and returns current operator acknowledgement and resolution",
+      "pass": true
+    },
+    {
+      "name": "Operator acknowledgement and resolution reach the same owner request without certifying the connection",
+      "pass": true
+    },
+    {
+      "name": "A resolved request requires its current revision before a new review can be opened",
+      "pass": true
+    },
+    {
+      "name": "Strict finite service and action fields reject injected provider or customer targets",
+      "pass": true
+    },
+    {
+      "name": "Foreign and revoked owner sessions cannot create an operator request",
+      "pass": true
+    },
+    {
+      "name": "A replacement tenant does not inherit the earlier service review",
+      "pass": true
+    },
+    {
+      "name": "Stopped workspaces cannot request another setup while existing review records remain readable",
+      "pass": true
+    },
+    {
+      "name": "Actual public intake and setup guide preserve async session boundaries and ordinary recovery",
+      "pass": false,
+      "error": "Error: replacement session can perform its own later explicit save: Missing expected async boundary: automatic report dispatch\n    at Timeout.<anonymous> (file:///private/tmp/mc-root-guide-storage-20261110/scripts/connection-intake-lifecycle-check.mjs:13:143)\n    at listOnTimeout (node:internal/timers:605:17)\n    at process.processTimers (node:internal/timers:541:7)"
+    }
+  ],
+  "passed": 10,
+  "total": 11,
+  "physicalRequests": 0,
+  "ok": false
+}

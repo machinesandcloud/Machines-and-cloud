@@ -1,0 +1,89 @@
+{
+  "disposition": {
+    "originalPath": "/private/tmp/mc-root-guide-storage-20261110/scripts/connection-intake-lifecycle-check.mjs",
+    "originalSha256": "5c87077ac25796a93d03393425fdfe555fa6dc283fd77bb536e28ce7adf6eca8",
+    "revisedLoadedSha256": "51465097459a2278585e5a1685482c9625e01096279b49a3bafd92c9ccd0aaae",
+    "change": "One replacement-session fixture now initializes full actual guide/intake scripts afresh after expiry; original positive assertions unchanged."
+  },
+  "mode": "Complete actual public assets in a VM with DOM-only visual adapters and injected deferred JSON/digest/fetch; no browser/provider claim",
+  "checks": [
+    {
+      "name": "send rejects a deferred body after session replacement",
+      "pass": true
+    },
+    {
+      "name": "reconcile rejects a deferred body after session replacement",
+      "pass": true
+    },
+    {
+      "name": "open rejects a deferred body after session replacement",
+      "pass": true
+    },
+    {
+      "name": "send rejects a superseded state object",
+      "pass": true
+    },
+    {
+      "name": "reconcile rejects a superseded state object",
+      "pass": true
+    },
+    {
+      "name": "private open cannot replace a newer completed open",
+      "pass": true
+    },
+    {
+      "name": "current-session send still completes",
+      "pass": true
+    },
+    {
+      "name": "current-session reconcile still completes",
+      "pass": true
+    },
+    {
+      "name": "current-session open still completes",
+      "pass": true
+    },
+    {
+      "name": "replacement session can perform its own later explicit save after fresh-page initialization",
+      "pass": true
+    },
+    {
+      "name": "unknown intake save still reconciles by ordinary GET",
+      "pass": true
+    },
+    {
+      "name": "review persistence yields safely on replace_session",
+      "pass": true
+    },
+    {
+      "name": "review persistence yields safely on clear_session",
+      "pass": true
+    },
+    {
+      "name": "review persistence yields safely on clear_lifecycle",
+      "pass": true
+    },
+    {
+      "name": "review persistence yields safely on lifecycle_same_session",
+      "pass": true
+    },
+    {
+      "name": "review persistence yields safely on replace_workspace",
+      "pass": true
+    },
+    {
+      "name": "review persistence yields safely on not_current",
+      "pass": true
+    },
+    {
+      "name": "current authority still dispatches one review after persistence",
+      "pass": true
+    },
+    {
+      "name": "unknown review keeps GET-only reconciliation and exact explicit replay",
+      "pass": true
+    }
+  ],
+  "passed": 19,
+  "total": 19
+}

@@ -45,7 +45,14 @@ async function exerciseBody(source,guide,method,change){
    await context.__intakeProbe.open('calendar');
  }
  release(response);await promise;
- if(continueReplacement){const fresh=state();fresh.attempt.body.submissionId='b'.repeat(32);context.__intakeProbe.replace(fresh);await context.__intakeProbe.send('calendar');}
+ if(continueReplacement){
+   // Email sign-in returns by navigation. An expired document never acquires a new identity in place.
+   listeners.clear();
+   vm.runInContext(instrumentation(guide,guideHook),context,{filename:'fresh-page-actual-guide.js'});
+   vm.runInContext(instrumentation(source,intakeHook),context,{filename:'fresh-page-actual-intake.js'});
+   const freshView=view('REPLACEMENT_READY');
+   context.__guideProbe.bind(freshView,'calendar');context.__intakeProbe.bind(freshView,state());
+   const fresh=state();fresh.attempt.body.submissionId='b'.repeat(32);context.__intakeProbe.replace(fresh);await context.__intakeProbe.send('calendar');}
  // Automatic review continues asynchronously after the save event. Observe its fetch boundary.
  if(events.some(e=>e.type==='mc:connection-details-saved'))await atBoundary(reportSeen,'automatic report dispatch');
  const current=context.__intakeProbe.data();
@@ -90,7 +97,7 @@ export async function checkConnectionIntakeLifecycle() {
  for(const method of ['send','reconcile','open'])await check('current-session '+method+' still completes',async()=>{
   const r=await exerciseBody(intake,guide,method,'normal');assert.equal(r.staleBodyProjected,true);if(method==='open')assert.equal(r.openedEvents,1);else{assert.equal(r.acceptedSaveEvents,1);assert.equal(r.automaticReportDispatches,1);}
  });
- await check('replacement session can perform its own later explicit save',async()=>{
+ await check('replacement session can perform its own later explicit save after fresh-page initialization',async()=>{
   const r=await exerciseBody(intake,guide,'send','session-then-new');assert.equal(r.currentToken,'NEW_SESSION_SAVE');assert.equal(r.acceptedSaveEvents,1);assert.equal(r.automaticReportDispatches,1);assert.equal(r.automaticUnderReplacementSession,true);
  });
  await check('unknown intake save still reconciles by ordinary GET',async()=>{
