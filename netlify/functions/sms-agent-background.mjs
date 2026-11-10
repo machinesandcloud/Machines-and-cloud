@@ -34,8 +34,8 @@ export default async (req) => {
   try {
     const out = await runAgent({ system: buildSystemPrompt(c, "sms", { bookings }), tools, messages: history, execTool, maxTokens: 1200, dropToolPreamble: true });
     reply = out.reply;
-    const first = reply.split(/(?<=[.!?])\s+/)[0] || "";
-    if (/^(have|need|got|book|call|now|phone filled|ok,? (i|let)|let me)/i.test(first) && first.split(/\s+/).length < 12 && reply.length > first.length + 10) { reply = reply.slice(first.length).trim(); await logEvent(c, "reply_trimmed", { from, dropped: first }); }
+    const { kept, dropped } = dropPlanningLead(reply);
+    if (dropped.length) { reply = kept; await logEvent(c, "reply_trimmed", { from, dropped: dropped.join(" ") }); }
     done = (out.events || []).map((e) => e.type === "booking" ? `[Done: visit booked, ref ${e.id}]` : e.type === "lead" ? `[Done: owner notified, ref ${e.id}]` : e.type === "confirmed" ? `[Done: visit confirmed, ref ${e.id}]` : e.type === "rescheduled" ? `[Done: visit moved to ${e.date} ${e.window}, ref ${e.id}]` : e.type === "cancel_request" ? `[Done: cancel request sent, ref ${e.id}]` : "").filter(Boolean).join(" ");
   } catch (err) {
     console.error("sms agent failed", err);
@@ -49,3 +49,53 @@ export default async (req) => {
   await logEvent(c, "sms_reply", { from });
   return new Response("ok");
 };
+
+// Last-resort filter for exact planning notes at the start of a completed SMS reply.
+// runAgent withholds tool-use, truncated and refused text. Here, an internal tool name somewhere
+// in a sentence is never enough to discard that sentence: it may also contain a safety instruction.
+const TOOL = "(?:book_visit|notify_owner|update_visit|get_availability|bookVisit|notifyOwner|updateVisit|getAvailability|flagLead)";
+const TOOL_NOTE = new RegExp(`^(?:(?:now|next|then)[,:]?\\s+)?(?:(?:call|calling|use|using|run|running)\\s+)?${TOOL}(?:\\s+(?:now|next|done|completed|as (?:emergency|urgent|lead|spam)|with urgency (?:emergency|urgent|normal)))?$`, "i");
+const SPACED_TOOL_NOTE = /^(?:(?:(?:now|next|then)[,:]?\s+)?(?:call|calling|use|using|run|running)\s+(?:book visit|update visit|get availability)(?:\s+(?:now|next))?|(?:now|next|then)\s+notify owner as (?:emergency|urgent|lead|spam))$/i;
+const FIELD = "(?:customer\\s+)?(?:name|phone(?:\\s+number)?|number|address|issue|problem|window|date|time|email|zip|urgency)";
+const STATUS = "(?:[a-z]+\\s+)?(?:flagged|filled|captured|collected|confirmed|noted|set)(?:\\s+automatically)?";
+const SEGMENT = `(?:${FIELD}(?:\\s+${STATUS})?|[a-z]+\\s+(?:flagged|noted))`;
+const CHECKLIST = new RegExp(`^(?:(?:now|next|then|ok|okay)[,:]?\\s+)?(?:(?:have|got|need|still need|missing|ask(?:\\s+for)?|collect)\\s*:?\\s+)?${SEGMENT}(?:\\s*(?:,|;|/|&|\\band\\b)\\s*${SEGMENT})*$`, "i");
+const FLAG_NOTE = /^(?:(?:now\s+)?flag(?:ging)?\s+(?:as\s+)?(?:emergency|urgent|lead|spam)|(?:now\s+)?book(?:ing)?\s+it(?:\s+now)?)$/i;
+const bareNote = text => text.trim().replace(/[.!]+$/, "").trim();
+const isToolNote = text => !/\?$/.test(text.trim()) && (TOOL_NOTE.test(bareNote(text)) || SPACED_TOOL_NOTE.test(bareNote(text)));
+function isPlanningSentence(sentence) {
+  const t = sentence.trim();
+  if (!t || /\?$/.test(t)) return false;
+  const bare = bareNote(t);
+  if (isToolNote(t) || FLAG_NOTE.test(bare)) return true;
+  if (!CHECKLIST.test(bare)) return false;
+  // A bare field alone is ambiguous; require a verb, a list or a status.
+  return /\b(?:have|got|need|missing|ask|collect|flagged|filled|captured|collected|confirmed|noted|set)\b/i.test(bare) || /[,;/&]|\band\b/i.test(bare);
+}
+function leadSentence(text) {
+  const m = text.match(/^[^\n]*?[.!?](?=\s)|^[^\n]+(?=\n)/);
+  return m ? m[0] : text;
+}
+function dropPlanningLead(reply) {
+  let rest = reply.trim();
+  const dropped = [];
+  while (rest) {
+    const first = leadSentence(rest);
+    if (isPlanningSentence(first)) {
+      // Keep an ambiguous lone field/checklist request. An exact tool note has no customer content.
+      if (first === rest && !isToolNote(first)) break;
+      dropped.push(first); rest = rest.slice(first.length).trimStart();
+      continue;
+    }
+    // Remove only complete tool-note clauses; retain every other word, including safety text.
+    const clauses = bareNote(first).split(/\s*(?:;|,|\band\b)\s*/);
+    const notes = clauses.filter(isToolNote);
+    if (clauses.length > 1 && notes.length) {
+      const keep = clauses.filter(clause => !isToolNote(clause));
+      dropped.push(...notes);
+      rest = keep.join("; ") + "." + (first === rest ? "" : " " + rest.slice(first.length).trimStart());
+    }
+    break;
+  }
+  return dropped.length ? { kept: rest || "Sorry, could you say that again?", dropped } : { kept: reply, dropped: [] };
+}
