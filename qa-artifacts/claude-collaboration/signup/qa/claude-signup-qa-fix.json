@@ -1,0 +1,2499 @@
+{
+  "at": "2026-11-10T09:38:05.167Z",
+  "mode": "actual index.html + signup-intake.js + onboard page; actual intake/access handlers in memory; fake mailbox and model; no network",
+  "checks": [
+    {
+      "name": "validation-1440: empty submit (keyboard) focuses the first invalid field and sends nothing",
+      "pass": true,
+      "detail": "intake-name"
+    },
+    {
+      "name": "validation-1440: each invalid field is aria-invalid with a visible message tied by aria-describedby",
+      "pass": true,
+      "detail": [
+        {
+          "id": "intake-name",
+          "invalid": "true",
+          "described": [
+            "Enter your name."
+          ]
+        },
+        {
+          "id": "intake-email",
+          "invalid": "true",
+          "described": [
+            "Enter your email address."
+          ]
+        },
+        {
+          "id": "intake-business",
+          "invalid": "true",
+          "described": [
+            "Enter your business name."
+          ]
+        }
+      ]
+    },
+    {
+      "name": "validation-1440: whitespace-only name and malformed email are flagged; focus on the first; fixed field cleared",
+      "pass": true,
+      "detail": {
+        "active": "intake-name",
+        "nameInvalid": "true",
+        "nameDesc": "Enter your name.",
+        "emailInvalid": "true",
+        "emailDesc": "Enter an email address like name@example.com.",
+        "businessInvalid": null
+      }
+    },
+    {
+      "name": "validation-1440: corrected form saves once and opens setup",
+      "pass": true
+    },
+    {
+      "name": "validation-1440: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "empty",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "validation-1440: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "lost-before-handler-1440: unknown outcome shows no raw browser/JSON error text",
+      "pass": true,
+      "detail": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup."
+    },
+    {
+      "name": "lost-before-handler-1440: unknown outcome says the details may already be saved and retrying is safe",
+      "pass": true,
+      "detail": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup."
+    },
+    {
+      "name": "lost-before-handler-1440: unknown outcome names the retry button on the page",
+      "pass": true,
+      "detail": {
+        "status": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup.",
+        "button": "Continue to setup"
+      }
+    },
+    {
+      "name": "lost-before-handler-1440: unknown outcome copy has no em dash",
+      "pass": true,
+      "detail": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup."
+    },
+    {
+      "name": "lost-before-handler-1440: typed values stay and focus moves to the message",
+      "pass": true,
+      "detail": {
+        "status": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup.",
+        "isError": true,
+        "focusOnStatus": true,
+        "activeId": "intake-status",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-lost-before-handler-1440@example.test",
+        "business": "Signup QA lost-before-handler 1440",
+        "path": "/"
+      }
+    },
+    {
+      "name": "lost-before-handler-1440: store state after the fault matches where it was lost",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "lost-before-handler-1440: retry reuses the same submission id and lands in exactly one signup",
+      "pass": true,
+      "detail": {
+        "submissionIds": 1,
+        "posts": 2,
+        "handoffs": [
+          {
+            "key": "587dedad",
+            "business": "Signup QA lost-before-handler 1440"
+          }
+        ]
+      }
+    },
+    {
+      "name": "lost-before-handler-1440: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "error",
+          false
+        ],
+        [
+          "next",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "lost-before-handler-1440: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "lost-after-commit-1440: unknown outcome shows no raw browser/JSON error text",
+      "pass": true,
+      "detail": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup."
+    },
+    {
+      "name": "lost-after-commit-1440: unknown outcome says the details may already be saved and retrying is safe",
+      "pass": true,
+      "detail": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup."
+    },
+    {
+      "name": "lost-after-commit-1440: unknown outcome names the retry button on the page",
+      "pass": true,
+      "detail": {
+        "status": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup.",
+        "button": "Continue to setup"
+      }
+    },
+    {
+      "name": "lost-after-commit-1440: unknown outcome copy has no em dash",
+      "pass": true,
+      "detail": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup."
+    },
+    {
+      "name": "lost-after-commit-1440: typed values stay and focus moves to the message",
+      "pass": true,
+      "detail": {
+        "status": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup.",
+        "isError": true,
+        "focusOnStatus": true,
+        "activeId": "intake-status",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-lost-after-commit-1440@example.test",
+        "business": "Signup QA lost-after-commit 1440",
+        "path": "/"
+      }
+    },
+    {
+      "name": "lost-after-commit-1440: store state after the fault matches where it was lost",
+      "pass": true,
+      "detail": [
+        {
+          "key": "0a4f5d9b",
+          "business": "Signup QA lost-after-commit 1440"
+        }
+      ]
+    },
+    {
+      "name": "lost-after-commit-1440: retry reuses the same submission id and lands in exactly one signup",
+      "pass": true,
+      "detail": {
+        "submissionIds": 1,
+        "posts": 2,
+        "handoffs": [
+          {
+            "key": "0a4f5d9b",
+            "business": "Signup QA lost-after-commit 1440"
+          }
+        ],
+        "retryFocus": "intake-submit"
+      }
+    },
+    {
+      "name": "lost-after-commit-1440: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "error",
+          false
+        ],
+        [
+          "next",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "lost-after-commit-1440: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "html-502-1440: unknown outcome shows no raw browser/JSON error text",
+      "pass": true,
+      "detail": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup."
+    },
+    {
+      "name": "html-502-1440: unknown outcome says the details may already be saved and retrying is safe",
+      "pass": true,
+      "detail": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup."
+    },
+    {
+      "name": "html-502-1440: unknown outcome names the retry button on the page",
+      "pass": true,
+      "detail": {
+        "status": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup.",
+        "button": "Continue to setup"
+      }
+    },
+    {
+      "name": "html-502-1440: unknown outcome copy has no em dash",
+      "pass": true,
+      "detail": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup."
+    },
+    {
+      "name": "html-502-1440: typed values stay and focus moves to the message",
+      "pass": true,
+      "detail": {
+        "status": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup.",
+        "isError": true,
+        "focusOnStatus": true,
+        "activeId": "intake-status",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-html-502-1440@example.test",
+        "business": "Signup QA html-502 1440",
+        "path": "/"
+      }
+    },
+    {
+      "name": "html-502-1440: store state after the fault matches where it was lost",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "html-502-1440: retry reuses the same submission id and lands in exactly one signup",
+      "pass": true,
+      "detail": {
+        "submissionIds": 1,
+        "posts": 2,
+        "handoffs": [
+          {
+            "key": "5215bcb4",
+            "business": "Signup QA html-502 1440"
+          }
+        ]
+      }
+    },
+    {
+      "name": "html-502-1440: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "error",
+          false
+        ],
+        [
+          "next",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "html-502-1440: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "json-4xx-rate-limit-1440: definite 4xx shows the server message, not unknown-outcome copy",
+      "pass": true,
+      "detail": {
+        "status": 429,
+        "text": "Please wait a few minutes before trying again."
+      }
+    },
+    {
+      "name": "json-4xx-rate-limit-1440: 4xx keeps typed values and focus moves to the message",
+      "pass": true,
+      "detail": {
+        "status": "Please wait a few minutes before trying again.",
+        "isError": true,
+        "focusOnStatus": true,
+        "activeId": "intake-status",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-json-4xx-rate-limit-1440@example.test",
+        "business": "Signup QA json-4xx-rate-limit 1440",
+        "path": "/"
+      }
+    },
+    {
+      "name": "json-4xx-rate-limit-1440: nothing was saved",
+      "pass": true
+    },
+    {
+      "name": "json-4xx-rate-limit-1440: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "error",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "json-4xx-rate-limit-1440: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "slow-timeout-after-commit-1440: a slow reply tells the owner it is still working and to keep the page open",
+      "pass": true,
+      "detail": "Still saving. Please keep this page open."
+    },
+    {
+      "name": "slow-timeout-after-commit-1440: unknown outcome shows no raw browser/JSON error text",
+      "pass": true,
+      "detail": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup."
+    },
+    {
+      "name": "slow-timeout-after-commit-1440: unknown outcome says the details may already be saved and retrying is safe",
+      "pass": true,
+      "detail": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup."
+    },
+    {
+      "name": "slow-timeout-after-commit-1440: unknown outcome names the retry button on the page",
+      "pass": true,
+      "detail": {
+        "status": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup.",
+        "button": "Continue to setup"
+      }
+    },
+    {
+      "name": "slow-timeout-after-commit-1440: unknown outcome copy has no em dash",
+      "pass": true,
+      "detail": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup."
+    },
+    {
+      "name": "slow-timeout-after-commit-1440: typed values stay and focus moves to the message",
+      "pass": true,
+      "detail": {
+        "status": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup.",
+        "isError": true,
+        "focusOnStatus": true,
+        "activeId": "intake-status",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-slow-timeout-after-commit-1440@example.test",
+        "business": "Signup QA slow-timeout-after-commit 1440",
+        "path": "/"
+      }
+    },
+    {
+      "name": "slow-timeout-after-commit-1440: store state after the fault matches where it was lost",
+      "pass": true,
+      "detail": [
+        {
+          "key": "6aac82ce",
+          "business": "Signup QA slow-timeout-after-commit 1440"
+        }
+      ]
+    },
+    {
+      "name": "slow-timeout-after-commit-1440: retry reuses the same submission id and lands in exactly one signup",
+      "pass": true,
+      "detail": {
+        "submissionIds": 1,
+        "posts": 2,
+        "handoffs": [
+          {
+            "key": "6aac82ce",
+            "business": "Signup QA slow-timeout-after-commit 1440"
+          }
+        ]
+      }
+    },
+    {
+      "name": "slow-timeout-after-commit-1440: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "error",
+          false
+        ],
+        [
+          "next",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "slow-timeout-after-commit-1440: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "double-tap-1440: second tap, Enter and requestSubmit during a pending save send no extra request",
+      "pass": true,
+      "detail": 1
+    },
+    {
+      "name": "double-tap-1440: after success, while setup is opening, the button stays locked and another tap/submit sends nothing",
+      "pass": true,
+      "detail": {
+        "probe": {
+          "disabled": "true"
+        },
+        "posts": 1
+      }
+    },
+    {
+      "name": "double-tap-1440: one signup stored",
+      "pass": true
+    },
+    {
+      "name": "double-tap-1440: no horizontal scroll",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "double-tap-1440: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "edit-after-lost-1440: a changed answer after a lost response is sent as a new submission, carries the edit, and keeps one prospect",
+      "pass": true,
+      "detail": {
+        "handoffs": [
+          {
+            "key": "25838dcb",
+            "business": "Signup QA edit-after-lost 1440 Edited"
+          },
+          {
+            "key": "dd2ab341",
+            "business": "Signup QA edit-after-lost 1440"
+          }
+        ],
+        "prospectBusiness": "Signup QA edit-after-lost 1440",
+        "posts": 2,
+        "ids": 2
+      }
+    },
+    {
+      "name": "edit-after-lost-1440: lost-response copy shows no raw text",
+      "pass": true,
+      "detail": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup."
+    },
+    {
+      "name": "edit-after-lost-1440: no horizontal scroll",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "edit-after-lost-1440: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "keyboard-journey-1440: Tab order from Business name reaches the submit button without hitting the honeypot",
+      "pass": true,
+      "detail": [
+        "intake-goal",
+        "intake-marketing",
+        "A",
+        "intake-submit"
+      ]
+    },
+    {
+      "name": "keyboard-journey-1440: keyboard submit opens setup with the saved-details notice and email carried, no PII in URL",
+      "pass": true,
+      "detail": {
+        "url": "/onboard.html",
+        "notice": "Your business details are saved. Confirm your email to carry them into your setup.",
+        "email": "qa-signup-keyboard-journey-1440@example.test",
+        "active": "BODY"
+      }
+    },
+    {
+      "name": "keyboard-journey-1440: the fake-mailbox link carries the signup answers into setup (no real email)",
+      "pass": true,
+      "detail": {
+        "business": "Signup QA keyboard-journey 1440",
+        "name": "Signup QA Owner"
+      }
+    },
+    {
+      "name": "keyboard-journey-1440: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "next",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "keyboard-journey-1440: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "validation-390: empty submit (keyboard) focuses the first invalid field and sends nothing",
+      "pass": true,
+      "detail": "intake-name"
+    },
+    {
+      "name": "validation-390: each invalid field is aria-invalid with a visible message tied by aria-describedby",
+      "pass": true,
+      "detail": [
+        {
+          "id": "intake-name",
+          "invalid": "true",
+          "described": [
+            "Enter your name."
+          ]
+        },
+        {
+          "id": "intake-email",
+          "invalid": "true",
+          "described": [
+            "Enter your email address."
+          ]
+        },
+        {
+          "id": "intake-business",
+          "invalid": "true",
+          "described": [
+            "Enter your business name."
+          ]
+        }
+      ]
+    },
+    {
+      "name": "validation-390: whitespace-only name and malformed email are flagged; focus on the first; fixed field cleared",
+      "pass": true,
+      "detail": {
+        "active": "intake-name",
+        "nameInvalid": "true",
+        "nameDesc": "Enter your name.",
+        "emailInvalid": "true",
+        "emailDesc": "Enter an email address like name@example.com.",
+        "businessInvalid": null
+      }
+    },
+    {
+      "name": "validation-390: corrected form saves once and opens setup",
+      "pass": true
+    },
+    {
+      "name": "validation-390: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "empty",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "validation-390: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "lost-before-handler-390: unknown outcome shows no raw browser/JSON error text",
+      "pass": true,
+      "detail": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup."
+    },
+    {
+      "name": "lost-before-handler-390: unknown outcome says the details may already be saved and retrying is safe",
+      "pass": true,
+      "detail": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup."
+    },
+    {
+      "name": "lost-before-handler-390: unknown outcome names the retry button on the page",
+      "pass": true,
+      "detail": {
+        "status": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup.",
+        "button": "Continue to setup"
+      }
+    },
+    {
+      "name": "lost-before-handler-390: unknown outcome copy has no em dash",
+      "pass": true,
+      "detail": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup."
+    },
+    {
+      "name": "lost-before-handler-390: typed values stay and focus moves to the message",
+      "pass": true,
+      "detail": {
+        "status": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup.",
+        "isError": true,
+        "focusOnStatus": true,
+        "activeId": "intake-status",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-lost-before-handler-390@example.test",
+        "business": "Signup QA lost-before-handler 390",
+        "path": "/"
+      }
+    },
+    {
+      "name": "lost-before-handler-390: store state after the fault matches where it was lost",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "lost-before-handler-390: retry reuses the same submission id and lands in exactly one signup",
+      "pass": true,
+      "detail": {
+        "submissionIds": 1,
+        "posts": 2,
+        "handoffs": [
+          {
+            "key": "57b069a1",
+            "business": "Signup QA lost-before-handler 390"
+          }
+        ]
+      }
+    },
+    {
+      "name": "lost-before-handler-390: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "error",
+          false
+        ],
+        [
+          "next",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "lost-before-handler-390: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "lost-after-commit-390: unknown outcome shows no raw browser/JSON error text",
+      "pass": true,
+      "detail": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup."
+    },
+    {
+      "name": "lost-after-commit-390: unknown outcome says the details may already be saved and retrying is safe",
+      "pass": true,
+      "detail": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup."
+    },
+    {
+      "name": "lost-after-commit-390: unknown outcome names the retry button on the page",
+      "pass": true,
+      "detail": {
+        "status": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup.",
+        "button": "Continue to setup"
+      }
+    },
+    {
+      "name": "lost-after-commit-390: unknown outcome copy has no em dash",
+      "pass": true,
+      "detail": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup."
+    },
+    {
+      "name": "lost-after-commit-390: typed values stay and focus moves to the message",
+      "pass": true,
+      "detail": {
+        "status": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup.",
+        "isError": true,
+        "focusOnStatus": true,
+        "activeId": "intake-status",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-lost-after-commit-390@example.test",
+        "business": "Signup QA lost-after-commit 390",
+        "path": "/"
+      }
+    },
+    {
+      "name": "lost-after-commit-390: store state after the fault matches where it was lost",
+      "pass": true,
+      "detail": [
+        {
+          "key": "b46ec165",
+          "business": "Signup QA lost-after-commit 390"
+        }
+      ]
+    },
+    {
+      "name": "lost-after-commit-390: retry reuses the same submission id and lands in exactly one signup",
+      "pass": true,
+      "detail": {
+        "submissionIds": 1,
+        "posts": 2,
+        "handoffs": [
+          {
+            "key": "b46ec165",
+            "business": "Signup QA lost-after-commit 390"
+          }
+        ],
+        "retryFocus": "intake-submit"
+      }
+    },
+    {
+      "name": "lost-after-commit-390: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "error",
+          false
+        ],
+        [
+          "next",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "lost-after-commit-390: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "html-502-390: unknown outcome shows no raw browser/JSON error text",
+      "pass": true,
+      "detail": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup."
+    },
+    {
+      "name": "html-502-390: unknown outcome says the details may already be saved and retrying is safe",
+      "pass": true,
+      "detail": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup."
+    },
+    {
+      "name": "html-502-390: unknown outcome names the retry button on the page",
+      "pass": true,
+      "detail": {
+        "status": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup.",
+        "button": "Continue to setup"
+      }
+    },
+    {
+      "name": "html-502-390: unknown outcome copy has no em dash",
+      "pass": true,
+      "detail": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup."
+    },
+    {
+      "name": "html-502-390: typed values stay and focus moves to the message",
+      "pass": true,
+      "detail": {
+        "status": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup.",
+        "isError": true,
+        "focusOnStatus": true,
+        "activeId": "intake-status",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-html-502-390@example.test",
+        "business": "Signup QA html-502 390",
+        "path": "/"
+      }
+    },
+    {
+      "name": "html-502-390: store state after the fault matches where it was lost",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "html-502-390: retry reuses the same submission id and lands in exactly one signup",
+      "pass": true,
+      "detail": {
+        "submissionIds": 1,
+        "posts": 2,
+        "handoffs": [
+          {
+            "key": "85a1a61b",
+            "business": "Signup QA html-502 390"
+          }
+        ]
+      }
+    },
+    {
+      "name": "html-502-390: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "error",
+          false
+        ],
+        [
+          "next",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "html-502-390: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "json-4xx-rate-limit-390: definite 4xx shows the server message, not unknown-outcome copy",
+      "pass": true,
+      "detail": {
+        "status": 429,
+        "text": "Please wait a few minutes before trying again."
+      }
+    },
+    {
+      "name": "json-4xx-rate-limit-390: 4xx keeps typed values and focus moves to the message",
+      "pass": true,
+      "detail": {
+        "status": "Please wait a few minutes before trying again.",
+        "isError": true,
+        "focusOnStatus": true,
+        "activeId": "intake-status",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-json-4xx-rate-limit-390@example.test",
+        "business": "Signup QA json-4xx-rate-limit 390",
+        "path": "/"
+      }
+    },
+    {
+      "name": "json-4xx-rate-limit-390: nothing was saved",
+      "pass": true
+    },
+    {
+      "name": "json-4xx-rate-limit-390: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "error",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "json-4xx-rate-limit-390: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "slow-timeout-after-commit-390: a slow reply tells the owner it is still working and to keep the page open",
+      "pass": true,
+      "detail": "Still saving. Please keep this page open."
+    },
+    {
+      "name": "slow-timeout-after-commit-390: unknown outcome shows no raw browser/JSON error text",
+      "pass": true,
+      "detail": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup."
+    },
+    {
+      "name": "slow-timeout-after-commit-390: unknown outcome says the details may already be saved and retrying is safe",
+      "pass": true,
+      "detail": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup."
+    },
+    {
+      "name": "slow-timeout-after-commit-390: unknown outcome names the retry button on the page",
+      "pass": true,
+      "detail": {
+        "status": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup.",
+        "button": "Continue to setup"
+      }
+    },
+    {
+      "name": "slow-timeout-after-commit-390: unknown outcome copy has no em dash",
+      "pass": true,
+      "detail": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup."
+    },
+    {
+      "name": "slow-timeout-after-commit-390: typed values stay and focus moves to the message",
+      "pass": true,
+      "detail": {
+        "status": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup.",
+        "isError": true,
+        "focusOnStatus": true,
+        "activeId": "intake-status",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-slow-timeout-after-commit-390@example.test",
+        "business": "Signup QA slow-timeout-after-commit 390",
+        "path": "/"
+      }
+    },
+    {
+      "name": "slow-timeout-after-commit-390: store state after the fault matches where it was lost",
+      "pass": true,
+      "detail": [
+        {
+          "key": "714b7d55",
+          "business": "Signup QA slow-timeout-after-commit 390"
+        }
+      ]
+    },
+    {
+      "name": "slow-timeout-after-commit-390: retry reuses the same submission id and lands in exactly one signup",
+      "pass": true,
+      "detail": {
+        "submissionIds": 1,
+        "posts": 2,
+        "handoffs": [
+          {
+            "key": "714b7d55",
+            "business": "Signup QA slow-timeout-after-commit 390"
+          }
+        ]
+      }
+    },
+    {
+      "name": "slow-timeout-after-commit-390: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "error",
+          false
+        ],
+        [
+          "next",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "slow-timeout-after-commit-390: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "double-tap-390: second tap, Enter and requestSubmit during a pending save send no extra request",
+      "pass": true,
+      "detail": 1
+    },
+    {
+      "name": "double-tap-390: after success, while setup is opening, the button stays locked and another tap/submit sends nothing",
+      "pass": true,
+      "detail": {
+        "probe": {
+          "disabled": "true"
+        },
+        "posts": 1
+      }
+    },
+    {
+      "name": "double-tap-390: one signup stored",
+      "pass": true
+    },
+    {
+      "name": "double-tap-390: no horizontal scroll",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "double-tap-390: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "edit-after-lost-390: a changed answer after a lost response is sent as a new submission, carries the edit, and keeps one prospect",
+      "pass": true,
+      "detail": {
+        "handoffs": [
+          {
+            "key": "2bc7b728",
+            "business": "Signup QA edit-after-lost 390 Edited"
+          },
+          {
+            "key": "e54010b5",
+            "business": "Signup QA edit-after-lost 390"
+          }
+        ],
+        "prospectBusiness": "Signup QA edit-after-lost 390",
+        "posts": 2,
+        "ids": 2
+      }
+    },
+    {
+      "name": "edit-after-lost-390: lost-response copy shows no raw text",
+      "pass": true,
+      "detail": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup."
+    },
+    {
+      "name": "edit-after-lost-390: no horizontal scroll",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "edit-after-lost-390: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "keyboard-journey-390: Tab order from Business name reaches the submit button without hitting the honeypot",
+      "pass": true,
+      "detail": [
+        "intake-goal",
+        "intake-marketing",
+        "A",
+        "intake-submit"
+      ]
+    },
+    {
+      "name": "keyboard-journey-390: keyboard submit opens setup with the saved-details notice and email carried, no PII in URL",
+      "pass": true,
+      "detail": {
+        "url": "/onboard.html",
+        "notice": "Your business details are saved. Confirm your email to carry them into your setup.",
+        "email": "qa-signup-keyboard-journey-390@example.test",
+        "active": "BODY"
+      }
+    },
+    {
+      "name": "keyboard-journey-390: the fake-mailbox link carries the signup answers into setup (no real email)",
+      "pass": true,
+      "detail": {
+        "business": "Signup QA keyboard-journey 390",
+        "name": "Signup QA Owner"
+      }
+    },
+    {
+      "name": "keyboard-journey-390: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "next",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "keyboard-journey-390: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "No browser request left the fixture origin",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "No forbidden API route was requested",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "No physical server transport was attempted",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Exactly one signup-intake.js was served, and it is the pinned source",
+      "pass": true,
+      "detail": [
+        "19e8d0bb353c240aa749b2f93591f4d3156953f0cc83f59cf610923b570ee724"
+      ]
+    },
+    {
+      "name": "Source stayed stable throughout the check",
+      "pass": true
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "validation-1440",
+      "kind": "validation",
+      "width": 1440,
+      "keyboard": true,
+      "events": [],
+      "overflow": [
+        [
+          "empty",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "intakeBodies": [
+        {
+          "submissionId": "62e97c0a-4fbe-4a30-b6a7-189e5147a9d6",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-validation-1440@example.test",
+          "business": "Bayou Service",
+          "trade": "",
+          "goal": "",
+          "marketingConsent": false,
+          "botfield": ""
+        }
+      ],
+      "email": "qa-signup-validation-1440@example.test",
+      "values": {
+        "name": "Signup QA Owner",
+        "email": "qa-signup-validation-1440@example.test",
+        "business": "Signup QA validation 1440"
+      },
+      "onboardHolds": [],
+      "empty": {
+        "active": "intake-name",
+        "fields": [
+          {
+            "id": "intake-name",
+            "invalid": "true",
+            "described": [
+              "Enter your name."
+            ]
+          },
+          {
+            "id": "intake-email",
+            "invalid": "true",
+            "described": [
+              "Enter your email address."
+            ]
+          },
+          {
+            "id": "intake-business",
+            "invalid": "true",
+            "described": [
+              "Enter your business name."
+            ]
+          }
+        ]
+      },
+      "partial": {
+        "active": "intake-name",
+        "nameInvalid": "true",
+        "nameDesc": "Enter your name.",
+        "emailInvalid": "true",
+        "emailDesc": "Enter an email address like name@example.com.",
+        "businessInvalid": null
+      }
+    },
+    {
+      "id": "lost-before-handler-1440",
+      "kind": "lost-before-handler",
+      "width": 1440,
+      "keyboard": false,
+      "events": [
+        "aborted POST /api/intake before the handler ran"
+      ],
+      "overflow": [
+        [
+          "error",
+          false
+        ],
+        [
+          "next",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "intakeBodies": [
+        {
+          "submissionId": "bc5fb8d5-0407-424e-ab28-d91d9eab2da8",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-lost-before-handler-1440@example.test",
+          "business": "Signup QA lost-before-handler 1440",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        },
+        {
+          "submissionId": "bc5fb8d5-0407-424e-ab28-d91d9eab2da8",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-lost-before-handler-1440@example.test",
+          "business": "Signup QA lost-before-handler 1440",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        }
+      ],
+      "email": "qa-signup-lost-before-handler-1440@example.test",
+      "values": {
+        "name": "Signup QA Owner",
+        "email": "qa-signup-lost-before-handler-1440@example.test",
+        "business": "Signup QA lost-before-handler 1440"
+      },
+      "onboardHolds": [],
+      "fault": {
+        "when": "before",
+        "remaining": 0
+      },
+      "lostState": {
+        "status": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup.",
+        "isError": true,
+        "focusOnStatus": true,
+        "activeId": "intake-status",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-lost-before-handler-1440@example.test",
+        "business": "Signup QA lost-before-handler 1440",
+        "path": "/"
+      },
+      "handoffsAfterLoss": []
+    },
+    {
+      "id": "lost-after-commit-1440",
+      "kind": "lost-after-commit",
+      "width": 1440,
+      "keyboard": true,
+      "events": [
+        "lost POST /api/intake response after the handler returned 202"
+      ],
+      "overflow": [
+        [
+          "error",
+          false
+        ],
+        [
+          "next",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "intakeBodies": [
+        {
+          "submissionId": "52d8c30f-57ea-403e-87a8-db7dbd55ccd4",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-lost-after-commit-1440@example.test",
+          "business": "Signup QA lost-after-commit 1440",
+          "trade": "",
+          "goal": "",
+          "marketingConsent": false,
+          "botfield": ""
+        },
+        {
+          "submissionId": "52d8c30f-57ea-403e-87a8-db7dbd55ccd4",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-lost-after-commit-1440@example.test",
+          "business": "Signup QA lost-after-commit 1440",
+          "trade": "",
+          "goal": "",
+          "marketingConsent": false,
+          "botfield": ""
+        }
+      ],
+      "email": "qa-signup-lost-after-commit-1440@example.test",
+      "values": {
+        "name": "Signup QA Owner",
+        "email": "qa-signup-lost-after-commit-1440@example.test",
+        "business": "Signup QA lost-after-commit 1440"
+      },
+      "onboardHolds": [],
+      "fault": {
+        "when": "after",
+        "remaining": 0
+      },
+      "lostState": {
+        "status": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup.",
+        "isError": true,
+        "focusOnStatus": true,
+        "activeId": "intake-status",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-lost-after-commit-1440@example.test",
+        "business": "Signup QA lost-after-commit 1440",
+        "path": "/"
+      },
+      "handoffsAfterLoss": [
+        {
+          "key": "0a4f5d9b",
+          "business": "Signup QA lost-after-commit 1440"
+        }
+      ],
+      "retryFocus": "intake-submit"
+    },
+    {
+      "id": "html-502-1440",
+      "kind": "html-502",
+      "width": 1440,
+      "keyboard": false,
+      "events": [
+        "gateway 502 HTML for POST /api/intake (handler not run)"
+      ],
+      "overflow": [
+        [
+          "error",
+          false
+        ],
+        [
+          "next",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "intakeBodies": [
+        {
+          "submissionId": "1188aeb3-d0cb-4323-93df-e4816bdabcec",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-html-502-1440@example.test",
+          "business": "Signup QA html-502 1440",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        },
+        {
+          "submissionId": "1188aeb3-d0cb-4323-93df-e4816bdabcec",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-html-502-1440@example.test",
+          "business": "Signup QA html-502 1440",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        }
+      ],
+      "email": "qa-signup-html-502-1440@example.test",
+      "values": {
+        "name": "Signup QA Owner",
+        "email": "qa-signup-html-502-1440@example.test",
+        "business": "Signup QA html-502 1440"
+      },
+      "onboardHolds": [],
+      "fault": {
+        "when": "html502",
+        "remaining": 0
+      },
+      "lostState": {
+        "status": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup.",
+        "isError": true,
+        "focusOnStatus": true,
+        "activeId": "intake-status",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-html-502-1440@example.test",
+        "business": "Signup QA html-502 1440",
+        "path": "/"
+      },
+      "handoffsAfterLoss": []
+    },
+    {
+      "id": "json-4xx-rate-limit-1440",
+      "kind": "json-4xx-rate-limit",
+      "width": 1440,
+      "keyboard": false,
+      "events": [],
+      "overflow": [
+        [
+          "error",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "intakeBodies": [
+        {
+          "submissionId": "d08c07c7-db19-4da8-affe-b39ea392cad5",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-json-4xx-rate-limit-1440@example.test",
+          "business": "Signup QA json-4xx-rate-limit 1440",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        }
+      ],
+      "email": "qa-signup-json-4xx-rate-limit-1440@example.test",
+      "values": {
+        "name": "Signup QA Owner",
+        "email": "qa-signup-json-4xx-rate-limit-1440@example.test",
+        "business": "Signup QA json-4xx-rate-limit 1440"
+      },
+      "onboardHolds": [],
+      "lostState": {
+        "status": "Please wait a few minutes before trying again.",
+        "isError": true,
+        "focusOnStatus": true,
+        "activeId": "intake-status",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-json-4xx-rate-limit-1440@example.test",
+        "business": "Signup QA json-4xx-rate-limit 1440",
+        "path": "/"
+      }
+    },
+    {
+      "id": "slow-timeout-after-commit-1440",
+      "kind": "slow-timeout-after-commit",
+      "width": 1440,
+      "keyboard": false,
+      "events": [
+        "held POST /api/intake response after the handler returned 202"
+      ],
+      "overflow": [
+        [
+          "error",
+          false
+        ],
+        [
+          "next",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "intakeBodies": [
+        {
+          "submissionId": "6c397673-4875-49a8-88c4-1c767deaf3d0",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-slow-timeout-after-commit-1440@example.test",
+          "business": "Signup QA slow-timeout-after-commit 1440",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        },
+        {
+          "submissionId": "6c397673-4875-49a8-88c4-1c767deaf3d0",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-slow-timeout-after-commit-1440@example.test",
+          "business": "Signup QA slow-timeout-after-commit 1440",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        }
+      ],
+      "email": "qa-signup-slow-timeout-after-commit-1440@example.test",
+      "values": {
+        "name": "Signup QA Owner",
+        "email": "qa-signup-slow-timeout-after-commit-1440@example.test",
+        "business": "Signup QA slow-timeout-after-commit 1440"
+      },
+      "onboardHolds": [],
+      "fault": {
+        "when": "hold-after",
+        "remaining": 0
+      },
+      "slowText": "Still saving. Please keep this page open.",
+      "lostState": {
+        "status": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup.",
+        "isError": true,
+        "focusOnStatus": true,
+        "activeId": "intake-status",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-slow-timeout-after-commit-1440@example.test",
+        "business": "Signup QA slow-timeout-after-commit 1440",
+        "path": "/"
+      },
+      "handoffsAfterLoss": [
+        {
+          "key": "6aac82ce",
+          "business": "Signup QA slow-timeout-after-commit 1440"
+        }
+      ]
+    },
+    {
+      "id": "double-tap-1440",
+      "kind": "double-tap",
+      "width": 1440,
+      "keyboard": false,
+      "events": [
+        "held POST /api/intake response after the handler returned 202",
+        "held navigation to /onboard.html"
+      ],
+      "overflow": [],
+      "pageErrors": [],
+      "intakeBodies": [
+        {
+          "submissionId": "4ef75fef-a2db-4e68-94c6-32dab8f14820",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-double-tap-1440@example.test",
+          "business": "Signup QA double-tap 1440",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        }
+      ],
+      "email": "qa-signup-double-tap-1440@example.test",
+      "values": {
+        "name": "Signup QA Owner",
+        "email": "qa-signup-double-tap-1440@example.test",
+        "business": "Signup QA double-tap 1440"
+      },
+      "onboardHolds": [
+        null
+      ],
+      "holdAll": false,
+      "holdOnboard": false,
+      "probe": {
+        "disabled": "true"
+      }
+    },
+    {
+      "id": "edit-after-lost-1440",
+      "kind": "edit-after-lost",
+      "width": 1440,
+      "keyboard": false,
+      "events": [
+        "lost POST /api/intake response after the handler returned 202"
+      ],
+      "overflow": [],
+      "pageErrors": [],
+      "intakeBodies": [
+        {
+          "submissionId": "14957033-afff-4dd5-a6d7-0cfbb0f33955",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-edit-after-lost-1440@example.test",
+          "business": "Signup QA edit-after-lost 1440",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        },
+        {
+          "submissionId": "1713d2cb-69f2-4abc-b569-80cf0751cc38",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-edit-after-lost-1440@example.test",
+          "business": "Signup QA edit-after-lost 1440 Edited",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        }
+      ],
+      "email": "qa-signup-edit-after-lost-1440@example.test",
+      "values": {
+        "name": "Signup QA Owner",
+        "email": "qa-signup-edit-after-lost-1440@example.test",
+        "business": "Signup QA edit-after-lost 1440"
+      },
+      "onboardHolds": [],
+      "fault": {
+        "when": "after",
+        "remaining": 0
+      },
+      "lostState": {
+        "status": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup.",
+        "isError": true,
+        "focusOnStatus": true,
+        "activeId": "intake-status",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-edit-after-lost-1440@example.test",
+        "business": "Signup QA edit-after-lost 1440",
+        "path": "/"
+      },
+      "after": {
+        "handoffs": [
+          {
+            "key": "25838dcb",
+            "business": "Signup QA edit-after-lost 1440 Edited"
+          },
+          {
+            "key": "dd2ab341",
+            "business": "Signup QA edit-after-lost 1440"
+          }
+        ],
+        "prospectBusiness": "Signup QA edit-after-lost 1440",
+        "posts": 2,
+        "ids": 2
+      }
+    },
+    {
+      "id": "keyboard-journey-1440",
+      "kind": "keyboard-journey",
+      "width": 1440,
+      "keyboard": true,
+      "events": [],
+      "overflow": [
+        [
+          "next",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "intakeBodies": [
+        {
+          "submissionId": "a7b1e7d1-11d0-4e56-a02e-a6a6037776e4",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-keyboard-journey-1440@example.test",
+          "business": "Signup QA keyboard-journey 1440",
+          "trade": "",
+          "goal": "",
+          "marketingConsent": false,
+          "botfield": ""
+        }
+      ],
+      "email": "qa-signup-keyboard-journey-1440@example.test",
+      "values": {
+        "name": "Signup QA Owner",
+        "email": "qa-signup-keyboard-journey-1440@example.test",
+        "business": "Signup QA keyboard-journey 1440"
+      },
+      "onboardHolds": [],
+      "tabPath": [
+        "intake-goal",
+        "intake-marketing",
+        "A",
+        "intake-submit"
+      ],
+      "next": {
+        "url": "/onboard.html",
+        "notice": "Your business details are saved. Confirm your email to carry them into your setup.",
+        "email": "qa-signup-keyboard-journey-1440@example.test",
+        "active": "BODY"
+      },
+      "carried": {
+        "business": "Signup QA keyboard-journey 1440",
+        "name": "Signup QA Owner"
+      }
+    },
+    {
+      "id": "validation-390",
+      "kind": "validation",
+      "width": 390,
+      "keyboard": true,
+      "events": [],
+      "overflow": [
+        [
+          "empty",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "intakeBodies": [
+        {
+          "submissionId": "dbf7df13-b9c4-409a-95ef-93e1241b54d4",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-validation-390@example.test",
+          "business": "Bayou Service",
+          "trade": "",
+          "goal": "",
+          "marketingConsent": false,
+          "botfield": ""
+        }
+      ],
+      "email": "qa-signup-validation-390@example.test",
+      "values": {
+        "name": "Signup QA Owner",
+        "email": "qa-signup-validation-390@example.test",
+        "business": "Signup QA validation 390"
+      },
+      "onboardHolds": [],
+      "empty": {
+        "active": "intake-name",
+        "fields": [
+          {
+            "id": "intake-name",
+            "invalid": "true",
+            "described": [
+              "Enter your name."
+            ]
+          },
+          {
+            "id": "intake-email",
+            "invalid": "true",
+            "described": [
+              "Enter your email address."
+            ]
+          },
+          {
+            "id": "intake-business",
+            "invalid": "true",
+            "described": [
+              "Enter your business name."
+            ]
+          }
+        ]
+      },
+      "partial": {
+        "active": "intake-name",
+        "nameInvalid": "true",
+        "nameDesc": "Enter your name.",
+        "emailInvalid": "true",
+        "emailDesc": "Enter an email address like name@example.com.",
+        "businessInvalid": null
+      }
+    },
+    {
+      "id": "lost-before-handler-390",
+      "kind": "lost-before-handler",
+      "width": 390,
+      "keyboard": false,
+      "events": [
+        "aborted POST /api/intake before the handler ran"
+      ],
+      "overflow": [
+        [
+          "error",
+          false
+        ],
+        [
+          "next",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "intakeBodies": [
+        {
+          "submissionId": "21ef8fdb-0f61-4df1-9752-24b2b42990cb",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-lost-before-handler-390@example.test",
+          "business": "Signup QA lost-before-handler 390",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        },
+        {
+          "submissionId": "21ef8fdb-0f61-4df1-9752-24b2b42990cb",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-lost-before-handler-390@example.test",
+          "business": "Signup QA lost-before-handler 390",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        }
+      ],
+      "email": "qa-signup-lost-before-handler-390@example.test",
+      "values": {
+        "name": "Signup QA Owner",
+        "email": "qa-signup-lost-before-handler-390@example.test",
+        "business": "Signup QA lost-before-handler 390"
+      },
+      "onboardHolds": [],
+      "fault": {
+        "when": "before",
+        "remaining": 0
+      },
+      "lostState": {
+        "status": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup.",
+        "isError": true,
+        "focusOnStatus": true,
+        "activeId": "intake-status",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-lost-before-handler-390@example.test",
+        "business": "Signup QA lost-before-handler 390",
+        "path": "/"
+      },
+      "handoffsAfterLoss": []
+    },
+    {
+      "id": "lost-after-commit-390",
+      "kind": "lost-after-commit",
+      "width": 390,
+      "keyboard": true,
+      "events": [
+        "lost POST /api/intake response after the handler returned 202"
+      ],
+      "overflow": [
+        [
+          "error",
+          false
+        ],
+        [
+          "next",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "intakeBodies": [
+        {
+          "submissionId": "e456fe8c-6951-4643-ab63-e51244f639fe",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-lost-after-commit-390@example.test",
+          "business": "Signup QA lost-after-commit 390",
+          "trade": "",
+          "goal": "",
+          "marketingConsent": false,
+          "botfield": ""
+        },
+        {
+          "submissionId": "e456fe8c-6951-4643-ab63-e51244f639fe",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-lost-after-commit-390@example.test",
+          "business": "Signup QA lost-after-commit 390",
+          "trade": "",
+          "goal": "",
+          "marketingConsent": false,
+          "botfield": ""
+        }
+      ],
+      "email": "qa-signup-lost-after-commit-390@example.test",
+      "values": {
+        "name": "Signup QA Owner",
+        "email": "qa-signup-lost-after-commit-390@example.test",
+        "business": "Signup QA lost-after-commit 390"
+      },
+      "onboardHolds": [],
+      "fault": {
+        "when": "after",
+        "remaining": 0
+      },
+      "lostState": {
+        "status": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup.",
+        "isError": true,
+        "focusOnStatus": true,
+        "activeId": "intake-status",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-lost-after-commit-390@example.test",
+        "business": "Signup QA lost-after-commit 390",
+        "path": "/"
+      },
+      "handoffsAfterLoss": [
+        {
+          "key": "b46ec165",
+          "business": "Signup QA lost-after-commit 390"
+        }
+      ],
+      "retryFocus": "intake-submit"
+    },
+    {
+      "id": "html-502-390",
+      "kind": "html-502",
+      "width": 390,
+      "keyboard": false,
+      "events": [
+        "gateway 502 HTML for POST /api/intake (handler not run)"
+      ],
+      "overflow": [
+        [
+          "error",
+          false
+        ],
+        [
+          "next",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "intakeBodies": [
+        {
+          "submissionId": "31db1fa8-0fce-4ad6-9ddc-1f4967711288",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-html-502-390@example.test",
+          "business": "Signup QA html-502 390",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        },
+        {
+          "submissionId": "31db1fa8-0fce-4ad6-9ddc-1f4967711288",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-html-502-390@example.test",
+          "business": "Signup QA html-502 390",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        }
+      ],
+      "email": "qa-signup-html-502-390@example.test",
+      "values": {
+        "name": "Signup QA Owner",
+        "email": "qa-signup-html-502-390@example.test",
+        "business": "Signup QA html-502 390"
+      },
+      "onboardHolds": [],
+      "fault": {
+        "when": "html502",
+        "remaining": 0
+      },
+      "lostState": {
+        "status": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup.",
+        "isError": true,
+        "focusOnStatus": true,
+        "activeId": "intake-status",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-html-502-390@example.test",
+        "business": "Signup QA html-502 390",
+        "path": "/"
+      },
+      "handoffsAfterLoss": []
+    },
+    {
+      "id": "json-4xx-rate-limit-390",
+      "kind": "json-4xx-rate-limit",
+      "width": 390,
+      "keyboard": false,
+      "events": [],
+      "overflow": [
+        [
+          "error",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "intakeBodies": [
+        {
+          "submissionId": "38a34943-eccd-41e6-97ef-29478c590cfa",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-json-4xx-rate-limit-390@example.test",
+          "business": "Signup QA json-4xx-rate-limit 390",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        }
+      ],
+      "email": "qa-signup-json-4xx-rate-limit-390@example.test",
+      "values": {
+        "name": "Signup QA Owner",
+        "email": "qa-signup-json-4xx-rate-limit-390@example.test",
+        "business": "Signup QA json-4xx-rate-limit 390"
+      },
+      "onboardHolds": [],
+      "lostState": {
+        "status": "Please wait a few minutes before trying again.",
+        "isError": true,
+        "focusOnStatus": true,
+        "activeId": "intake-status",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-json-4xx-rate-limit-390@example.test",
+        "business": "Signup QA json-4xx-rate-limit 390",
+        "path": "/"
+      }
+    },
+    {
+      "id": "slow-timeout-after-commit-390",
+      "kind": "slow-timeout-after-commit",
+      "width": 390,
+      "keyboard": false,
+      "events": [
+        "held POST /api/intake response after the handler returned 202"
+      ],
+      "overflow": [
+        [
+          "error",
+          false
+        ],
+        [
+          "next",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "intakeBodies": [
+        {
+          "submissionId": "5906a1d2-ea14-4365-9925-d52d4024b867",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-slow-timeout-after-commit-390@example.test",
+          "business": "Signup QA slow-timeout-after-commit 390",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        },
+        {
+          "submissionId": "5906a1d2-ea14-4365-9925-d52d4024b867",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-slow-timeout-after-commit-390@example.test",
+          "business": "Signup QA slow-timeout-after-commit 390",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        }
+      ],
+      "email": "qa-signup-slow-timeout-after-commit-390@example.test",
+      "values": {
+        "name": "Signup QA Owner",
+        "email": "qa-signup-slow-timeout-after-commit-390@example.test",
+        "business": "Signup QA slow-timeout-after-commit 390"
+      },
+      "onboardHolds": [],
+      "fault": {
+        "when": "hold-after",
+        "remaining": 0
+      },
+      "slowText": "Still saving. Please keep this page open.",
+      "lostState": {
+        "status": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup.",
+        "isError": true,
+        "focusOnStatus": true,
+        "activeId": "intake-status",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-slow-timeout-after-commit-390@example.test",
+        "business": "Signup QA slow-timeout-after-commit 390",
+        "path": "/"
+      },
+      "handoffsAfterLoss": [
+        {
+          "key": "714b7d55",
+          "business": "Signup QA slow-timeout-after-commit 390"
+        }
+      ]
+    },
+    {
+      "id": "double-tap-390",
+      "kind": "double-tap",
+      "width": 390,
+      "keyboard": false,
+      "events": [
+        "held POST /api/intake response after the handler returned 202",
+        "held navigation to /onboard.html"
+      ],
+      "overflow": [],
+      "pageErrors": [],
+      "intakeBodies": [
+        {
+          "submissionId": "3c174c5c-e363-4c66-aaa2-83cd27f393ed",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-double-tap-390@example.test",
+          "business": "Signup QA double-tap 390",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        }
+      ],
+      "email": "qa-signup-double-tap-390@example.test",
+      "values": {
+        "name": "Signup QA Owner",
+        "email": "qa-signup-double-tap-390@example.test",
+        "business": "Signup QA double-tap 390"
+      },
+      "onboardHolds": [
+        null
+      ],
+      "holdAll": false,
+      "holdOnboard": false,
+      "probe": {
+        "disabled": "true"
+      }
+    },
+    {
+      "id": "edit-after-lost-390",
+      "kind": "edit-after-lost",
+      "width": 390,
+      "keyboard": false,
+      "events": [
+        "lost POST /api/intake response after the handler returned 202"
+      ],
+      "overflow": [],
+      "pageErrors": [],
+      "intakeBodies": [
+        {
+          "submissionId": "e0c96589-6a31-4e92-ab21-e8e30d24b7d5",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-edit-after-lost-390@example.test",
+          "business": "Signup QA edit-after-lost 390",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        },
+        {
+          "submissionId": "bc9232d1-5534-4830-a438-b29c45de2181",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-edit-after-lost-390@example.test",
+          "business": "Signup QA edit-after-lost 390 Edited",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        }
+      ],
+      "email": "qa-signup-edit-after-lost-390@example.test",
+      "values": {
+        "name": "Signup QA Owner",
+        "email": "qa-signup-edit-after-lost-390@example.test",
+        "business": "Signup QA edit-after-lost 390"
+      },
+      "onboardHolds": [],
+      "fault": {
+        "when": "after",
+        "remaining": 0
+      },
+      "lostState": {
+        "status": "We couldn’t confirm whether your details were saved. They may already be saved. Your answers are still here, and it’s safe to try again: choose Continue to setup and it won’t create a second signup.",
+        "isError": true,
+        "focusOnStatus": true,
+        "activeId": "intake-status",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-edit-after-lost-390@example.test",
+        "business": "Signup QA edit-after-lost 390",
+        "path": "/"
+      },
+      "after": {
+        "handoffs": [
+          {
+            "key": "2bc7b728",
+            "business": "Signup QA edit-after-lost 390 Edited"
+          },
+          {
+            "key": "e54010b5",
+            "business": "Signup QA edit-after-lost 390"
+          }
+        ],
+        "prospectBusiness": "Signup QA edit-after-lost 390",
+        "posts": 2,
+        "ids": 2
+      }
+    },
+    {
+      "id": "keyboard-journey-390",
+      "kind": "keyboard-journey",
+      "width": 390,
+      "keyboard": true,
+      "events": [],
+      "overflow": [
+        [
+          "next",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "intakeBodies": [
+        {
+          "submissionId": "8e4dbd88-9089-4c98-8fa9-2b01e4aeedef",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-keyboard-journey-390@example.test",
+          "business": "Signup QA keyboard-journey 390",
+          "trade": "",
+          "goal": "",
+          "marketingConsent": false,
+          "botfield": ""
+        }
+      ],
+      "email": "qa-signup-keyboard-journey-390@example.test",
+      "values": {
+        "name": "Signup QA Owner",
+        "email": "qa-signup-keyboard-journey-390@example.test",
+        "business": "Signup QA keyboard-journey 390"
+      },
+      "onboardHolds": [],
+      "tabPath": [
+        "intake-goal",
+        "intake-marketing",
+        "A",
+        "intake-submit"
+      ],
+      "next": {
+        "url": "/onboard.html",
+        "notice": "Your business details are saved. Confirm your email to carry them into your setup.",
+        "email": "qa-signup-keyboard-journey-390@example.test",
+        "active": "BODY"
+      },
+      "carried": {
+        "business": "Signup QA keyboard-journey 390",
+        "name": "Signup QA Owner"
+      }
+    }
+  ],
+  "requests": [
+    {
+      "id": "validation-1440",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "62e97c0a",
+      "status": 202
+    },
+    {
+      "id": "lost-before-handler-1440",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "bc5fb8d5",
+      "lost": "before"
+    },
+    {
+      "id": "lost-before-handler-1440",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "bc5fb8d5",
+      "status": 202
+    },
+    {
+      "id": "lost-after-commit-1440",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "52d8c30f",
+      "status": 202,
+      "lost": "after"
+    },
+    {
+      "id": "lost-after-commit-1440",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "52d8c30f",
+      "status": 202
+    },
+    {
+      "id": "html-502-1440",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "1188aeb3",
+      "status": 502,
+      "fake": "html"
+    },
+    {
+      "id": "html-502-1440",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "1188aeb3",
+      "status": 202
+    },
+    {
+      "id": "json-4xx-rate-limit-1440",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "d08c07c7",
+      "status": 429
+    },
+    {
+      "id": "slow-timeout-after-commit-1440",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "6c397673",
+      "status": 202,
+      "lost": "hold-after"
+    },
+    {
+      "id": "slow-timeout-after-commit-1440",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "6c397673",
+      "status": 202
+    },
+    {
+      "id": "double-tap-1440",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "4ef75fef",
+      "status": 202
+    },
+    {
+      "id": "edit-after-lost-1440",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "14957033",
+      "status": 202,
+      "lost": "after"
+    },
+    {
+      "id": "edit-after-lost-1440",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "1713d2cb",
+      "status": 202
+    },
+    {
+      "id": "keyboard-journey-1440",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "a7b1e7d1",
+      "status": 202
+    },
+    {
+      "id": "keyboard-journey-1440",
+      "method": "POST",
+      "path": "/api/access",
+      "action": "request_link",
+      "status": 202
+    },
+    {
+      "id": "keyboard-journey-1440",
+      "method": "POST",
+      "path": "/api/access",
+      "action": "exchange",
+      "status": 200
+    },
+    {
+      "id": "keyboard-journey-1440",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "validation-390",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "dbf7df13",
+      "status": 202
+    },
+    {
+      "id": "lost-before-handler-390",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "21ef8fdb",
+      "lost": "before"
+    },
+    {
+      "id": "lost-before-handler-390",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "21ef8fdb",
+      "status": 202
+    },
+    {
+      "id": "lost-after-commit-390",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "e456fe8c",
+      "status": 202,
+      "lost": "after"
+    },
+    {
+      "id": "lost-after-commit-390",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "e456fe8c",
+      "status": 202
+    },
+    {
+      "id": "html-502-390",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "31db1fa8",
+      "status": 502,
+      "fake": "html"
+    },
+    {
+      "id": "html-502-390",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "31db1fa8",
+      "status": 202
+    },
+    {
+      "id": "json-4xx-rate-limit-390",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "38a34943",
+      "status": 429
+    },
+    {
+      "id": "slow-timeout-after-commit-390",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "5906a1d2",
+      "status": 202,
+      "lost": "hold-after"
+    },
+    {
+      "id": "slow-timeout-after-commit-390",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "5906a1d2",
+      "status": 202
+    },
+    {
+      "id": "double-tap-390",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "3c174c5c",
+      "status": 202
+    },
+    {
+      "id": "edit-after-lost-390",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "e0c96589",
+      "status": 202,
+      "lost": "after"
+    },
+    {
+      "id": "edit-after-lost-390",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "bc9232d1",
+      "status": 202
+    },
+    {
+      "id": "keyboard-journey-390",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "8e4dbd88",
+      "status": 202
+    },
+    {
+      "id": "keyboard-journey-390",
+      "method": "POST",
+      "path": "/api/access",
+      "action": "request_link",
+      "status": 202
+    },
+    {
+      "id": "keyboard-journey-390",
+      "method": "POST",
+      "path": "/api/access",
+      "action": "exchange",
+      "status": 200
+    },
+    {
+      "id": "keyboard-journey-390",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    }
+  ],
+  "blockedBrowser": [],
+  "forbiddenApi": [],
+  "blockedServer": [],
+  "pageErrors": [],
+  "screenshots": [
+    "scratchpad/claude-signup-qa-fix-validation-1440-empty.png",
+    "scratchpad/claude-signup-qa-fix-lost-before-handler-1440-error.png",
+    "scratchpad/claude-signup-qa-fix-lost-after-commit-1440-error.png",
+    "scratchpad/claude-signup-qa-fix-html-502-1440-error.png",
+    "scratchpad/claude-signup-qa-fix-json-4xx-rate-limit-1440-error.png",
+    "scratchpad/claude-signup-qa-fix-slow-timeout-after-commit-1440-error.png",
+    "scratchpad/claude-signup-qa-fix-keyboard-journey-1440-next.png",
+    "scratchpad/claude-signup-qa-fix-validation-390-empty.png",
+    "scratchpad/claude-signup-qa-fix-lost-before-handler-390-error.png",
+    "scratchpad/claude-signup-qa-fix-lost-after-commit-390-error.png",
+    "scratchpad/claude-signup-qa-fix-html-502-390-error.png",
+    "scratchpad/claude-signup-qa-fix-json-4xx-rate-limit-390-error.png",
+    "scratchpad/claude-signup-qa-fix-slow-timeout-after-commit-390-error.png",
+    "scratchpad/claude-signup-qa-fix-keyboard-journey-390-next.png"
+  ],
+  "servedSignupJs": [
+    "19e8d0bb353c240aa749b2f93591f4d3156953f0cc83f59cf610923b570ee724"
+  ],
+  "sourceBefore": {
+    "index.html": "471b25d6aae88216fe2090a1258ffc4aa19d8718fe8dbb1aaad156d83cc331f4",
+    "signup-intake.js": "19e8d0bb353c240aa749b2f93591f4d3156953f0cc83f59cf610923b570ee724",
+    "site-refresh.css": "5c962fe8bf9507c3c639a71c9b046f2ed66d4e066e50e3d2fce91faff2082cc1",
+    "styles.css": "e8ac1b30d0205f99c9499dab7cf3d51e4970f8f69295e9c66f963a12033bd56b",
+    "onboard.html": "fd475d713c37d30c32d607d985cb24627bff6a80032386eae6ef9fc985620887",
+    "onboard.js": "99920e7b26ea0fe0313e00472dce942da025c6efb0c3498e104ab74fc44bd29b",
+    "netlify/functions/intake.mjs": "d110f94abd94feceedd6aa2fb30f2c8f536e1fc1e6ec5f7be22d86c978807ea8",
+    "netlify/functions/lib/intake.mjs": "0ff345d37c5e64be6304cd44fe3e68ad74e67e23bcb8acd8e4d44ec6eb03baa3",
+    "netlify/functions/access.mjs": "5141bce6641cdf35a3503f4de41021b313b7de1745c82e2101ac7bdf19c89b53",
+    "netlify/functions/lib/access.mjs": "057921a525476b4cba51ce15233cca477a2ab135ece40b59bfce56d17a16969d",
+    "netlify/functions/lib/store.mjs": "4b12e064e451311f79b32e54a25a0cbd0c55ce8efc5a423fdb5166be419858da"
+  },
+  "sourceAfter": {
+    "index.html": "471b25d6aae88216fe2090a1258ffc4aa19d8718fe8dbb1aaad156d83cc331f4",
+    "signup-intake.js": "19e8d0bb353c240aa749b2f93591f4d3156953f0cc83f59cf610923b570ee724",
+    "site-refresh.css": "5c962fe8bf9507c3c639a71c9b046f2ed66d4e066e50e3d2fce91faff2082cc1",
+    "styles.css": "e8ac1b30d0205f99c9499dab7cf3d51e4970f8f69295e9c66f963a12033bd56b",
+    "onboard.html": "fd475d713c37d30c32d607d985cb24627bff6a80032386eae6ef9fc985620887",
+    "onboard.js": "99920e7b26ea0fe0313e00472dce942da025c6efb0c3498e104ab74fc44bd29b",
+    "netlify/functions/intake.mjs": "d110f94abd94feceedd6aa2fb30f2c8f536e1fc1e6ec5f7be22d86c978807ea8",
+    "netlify/functions/lib/intake.mjs": "0ff345d37c5e64be6304cd44fe3e68ad74e67e23bcb8acd8e4d44ec6eb03baa3",
+    "netlify/functions/access.mjs": "5141bce6641cdf35a3503f4de41021b313b7de1745c82e2101ac7bdf19c89b53",
+    "netlify/functions/lib/access.mjs": "057921a525476b4cba51ce15233cca477a2ab135ece40b59bfce56d17a16969d",
+    "netlify/functions/lib/store.mjs": "4b12e064e451311f79b32e54a25a0cbd0c55ce8efc5a423fdb5166be419858da"
+  },
+  "summary": {
+    "checks": 129,
+    "passed": 129,
+    "failed": 0
+  },
+  "failed": []
+}

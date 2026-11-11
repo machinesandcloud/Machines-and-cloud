@@ -1,0 +1,4286 @@
+{
+  "at": "2026-11-10T09:47:26.679Z",
+  "mode": "actual index.html + signup-intake.js + onboard page; actual intake/access handlers in memory; fake mailbox and model; no network",
+  "checks": [
+    {
+      "name": "validation-1440: empty submit (keyboard) focuses the first invalid field and sends nothing",
+      "pass": true,
+      "detail": "intake-name"
+    },
+    {
+      "name": "validation-1440: each invalid field is aria-invalid with a visible message tied by aria-describedby",
+      "pass": false,
+      "detail": [
+        {
+          "id": "intake-name",
+          "invalid": null,
+          "described": []
+        },
+        {
+          "id": "intake-email",
+          "invalid": null,
+          "described": []
+        },
+        {
+          "id": "intake-business",
+          "invalid": null,
+          "described": []
+        }
+      ]
+    },
+    {
+      "name": "validation-1440: whitespace-only name and malformed email are flagged; focus on the first; fixed field cleared",
+      "pass": false,
+      "detail": {
+        "active": "intake-email",
+        "nameInvalid": null,
+        "nameDesc": "",
+        "emailInvalid": null,
+        "emailDesc": "",
+        "businessInvalid": null
+      }
+    },
+    {
+      "name": "validation-1440: corrected form saves once and opens setup",
+      "pass": true
+    },
+    {
+      "name": "validation-1440: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "empty",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "validation-1440: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "lost-before-handler-1440: unknown outcome shows no raw browser/JSON error text",
+      "pass": false,
+      "detail": "Failed to fetch"
+    },
+    {
+      "name": "lost-before-handler-1440: unknown outcome says the details may already be saved and retrying is safe",
+      "pass": false,
+      "detail": "Failed to fetch"
+    },
+    {
+      "name": "lost-before-handler-1440: unknown outcome names the retry button on the page",
+      "pass": false,
+      "detail": {
+        "status": "Failed to fetch",
+        "button": "Continue to setup"
+      }
+    },
+    {
+      "name": "lost-before-handler-1440: unknown outcome copy has no em dash",
+      "pass": true,
+      "detail": "Failed to fetch"
+    },
+    {
+      "name": "lost-before-handler-1440: typed values stay and focus moves to the message",
+      "pass": false,
+      "detail": {
+        "statusRole": "status",
+        "statusLive": "polite",
+        "status": "Failed to fetch",
+        "isError": true,
+        "focusOnStatus": "",
+        "activeId": "BODY",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-lost-before-handler-1440@example.test",
+        "business": "Signup QA lost-before-handler 1440",
+        "path": "/"
+      }
+    },
+    {
+      "name": "lost-before-handler-1440: the no-second-signup promise is limited to unchanged answers and says a change is a new signup",
+      "pass": false,
+      "detail": "Failed to fetch"
+    },
+    {
+      "name": "lost-before-handler-1440: the focused error is not also in a live region (announced once)",
+      "pass": true,
+      "detail": {
+        "role": "status",
+        "live": "polite",
+        "focus": ""
+      }
+    },
+    {
+      "name": "lost-before-handler-1440: store state after the fault matches where it was lost",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "lost-before-handler-1440: retry reuses the same submission id and lands in exactly one signup",
+      "pass": true,
+      "detail": {
+        "submissionIds": 1,
+        "posts": 2,
+        "handoffs": [
+          {
+            "key": "57090f5a",
+            "business": "Signup QA lost-before-handler 1440"
+          }
+        ]
+      }
+    },
+    {
+      "name": "lost-before-handler-1440: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "error",
+          false
+        ],
+        [
+          "next",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "lost-before-handler-1440: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "lost-after-commit-1440: unknown outcome shows no raw browser/JSON error text",
+      "pass": false,
+      "detail": "Failed to fetch"
+    },
+    {
+      "name": "lost-after-commit-1440: unknown outcome says the details may already be saved and retrying is safe",
+      "pass": false,
+      "detail": "Failed to fetch"
+    },
+    {
+      "name": "lost-after-commit-1440: unknown outcome names the retry button on the page",
+      "pass": false,
+      "detail": {
+        "status": "Failed to fetch",
+        "button": "Continue to setup"
+      }
+    },
+    {
+      "name": "lost-after-commit-1440: unknown outcome copy has no em dash",
+      "pass": true,
+      "detail": "Failed to fetch"
+    },
+    {
+      "name": "lost-after-commit-1440: typed values stay and focus moves to the message",
+      "pass": false,
+      "detail": {
+        "statusRole": "status",
+        "statusLive": "polite",
+        "status": "Failed to fetch",
+        "isError": true,
+        "focusOnStatus": false,
+        "activeId": "intake-business",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-lost-after-commit-1440@example.test",
+        "business": "Signup QA lost-after-commit 1440",
+        "path": "/"
+      }
+    },
+    {
+      "name": "lost-after-commit-1440: the no-second-signup promise is limited to unchanged answers and says a change is a new signup",
+      "pass": false,
+      "detail": "Failed to fetch"
+    },
+    {
+      "name": "lost-after-commit-1440: the focused error is not also in a live region (announced once)",
+      "pass": true,
+      "detail": {
+        "role": "status",
+        "live": "polite",
+        "focus": false
+      }
+    },
+    {
+      "name": "lost-after-commit-1440: store state after the fault matches where it was lost",
+      "pass": true,
+      "detail": [
+        {
+          "key": "4052e829",
+          "business": "Signup QA lost-after-commit 1440"
+        }
+      ]
+    },
+    {
+      "name": "lost-after-commit-1440: retry reuses the same submission id and lands in exactly one signup",
+      "pass": false,
+      "detail": {
+        "submissionIds": 1,
+        "posts": 2,
+        "handoffs": [
+          {
+            "key": "4052e829",
+            "business": "Signup QA lost-after-commit 1440"
+          }
+        ],
+        "retryFocus": "intake-email"
+      }
+    },
+    {
+      "name": "lost-after-commit-1440: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "error",
+          false
+        ],
+        [
+          "next",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "lost-after-commit-1440: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "html-502-1440: unknown outcome shows no raw browser/JSON error text",
+      "pass": false,
+      "detail": "Unexpected token '<', \"<!doctype \"... is not valid JSON"
+    },
+    {
+      "name": "html-502-1440: unknown outcome says the details may already be saved and retrying is safe",
+      "pass": false,
+      "detail": "Unexpected token '<', \"<!doctype \"... is not valid JSON"
+    },
+    {
+      "name": "html-502-1440: unknown outcome names the retry button on the page",
+      "pass": false,
+      "detail": {
+        "status": "Unexpected token '<', \"<!doctype \"... is not valid JSON",
+        "button": "Continue to setup"
+      }
+    },
+    {
+      "name": "html-502-1440: unknown outcome copy has no em dash",
+      "pass": true,
+      "detail": "Unexpected token '<', \"<!doctype \"... is not valid JSON"
+    },
+    {
+      "name": "html-502-1440: typed values stay and focus moves to the message",
+      "pass": false,
+      "detail": {
+        "statusRole": "status",
+        "statusLive": "polite",
+        "status": "Unexpected token '<', \"<!doctype \"... is not valid JSON",
+        "isError": true,
+        "focusOnStatus": "",
+        "activeId": "BODY",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-html-502-1440@example.test",
+        "business": "Signup QA html-502 1440",
+        "path": "/"
+      }
+    },
+    {
+      "name": "html-502-1440: the no-second-signup promise is limited to unchanged answers and says a change is a new signup",
+      "pass": false,
+      "detail": "Unexpected token '<', \"<!doctype \"... is not valid JSON"
+    },
+    {
+      "name": "html-502-1440: the focused error is not also in a live region (announced once)",
+      "pass": true,
+      "detail": {
+        "role": "status",
+        "live": "polite",
+        "focus": ""
+      }
+    },
+    {
+      "name": "html-502-1440: store state after the fault matches where it was lost",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "html-502-1440: retry reuses the same submission id and lands in exactly one signup",
+      "pass": true,
+      "detail": {
+        "submissionIds": 1,
+        "posts": 2,
+        "handoffs": [
+          {
+            "key": "05eea000",
+            "business": "Signup QA html-502 1440"
+          }
+        ]
+      }
+    },
+    {
+      "name": "html-502-1440: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "error",
+          false
+        ],
+        [
+          "next",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "html-502-1440: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "json-4xx-rate-limit-1440: definite 4xx shows the server message, not unknown-outcome copy",
+      "pass": true,
+      "detail": {
+        "status": 429,
+        "text": "Please wait a few minutes before trying again."
+      }
+    },
+    {
+      "name": "json-4xx-rate-limit-1440: 4xx keeps typed values and focus moves to the message",
+      "pass": false,
+      "detail": {
+        "statusRole": "status",
+        "statusLive": "polite",
+        "status": "Please wait a few minutes before trying again.",
+        "isError": true,
+        "focusOnStatus": "",
+        "activeId": "BODY",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-json-4xx-rate-limit-1440@example.test",
+        "business": "Signup QA json-4xx-rate-limit 1440",
+        "path": "/"
+      }
+    },
+    {
+      "name": "json-4xx-rate-limit-1440: the focused 4xx message is not also in a live region (announced once)",
+      "pass": false,
+      "detail": {
+        "role": "status",
+        "live": "polite"
+      }
+    },
+    {
+      "name": "json-4xx-rate-limit-1440: nothing was saved",
+      "pass": true
+    },
+    {
+      "name": "json-4xx-rate-limit-1440: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "error",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "json-4xx-rate-limit-1440: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "slow-timeout-after-commit-1440: a slow reply tells the owner it is still working and to keep the page open",
+      "pass": false,
+      "detail": "Saving your details…"
+    },
+    {
+      "name": "slow-timeout-after-commit-1440: unknown outcome shows no raw browser/JSON error text",
+      "pass": true,
+      "detail": "That took longer than expected. Your answers are still here. Please try again."
+    },
+    {
+      "name": "slow-timeout-after-commit-1440: unknown outcome says the details may already be saved and retrying is safe",
+      "pass": false,
+      "detail": "That took longer than expected. Your answers are still here. Please try again."
+    },
+    {
+      "name": "slow-timeout-after-commit-1440: unknown outcome names the retry button on the page",
+      "pass": false,
+      "detail": {
+        "status": "That took longer than expected. Your answers are still here. Please try again.",
+        "button": "Continue to setup"
+      }
+    },
+    {
+      "name": "slow-timeout-after-commit-1440: unknown outcome copy has no em dash",
+      "pass": true,
+      "detail": "That took longer than expected. Your answers are still here. Please try again."
+    },
+    {
+      "name": "slow-timeout-after-commit-1440: typed values stay and focus moves to the message",
+      "pass": false,
+      "detail": {
+        "statusRole": "status",
+        "statusLive": "polite",
+        "status": "That took longer than expected. Your answers are still here. Please try again.",
+        "isError": true,
+        "focusOnStatus": "",
+        "activeId": "BODY",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-slow-timeout-after-commit-1440@example.test",
+        "business": "Signup QA slow-timeout-after-commit 1440",
+        "path": "/"
+      }
+    },
+    {
+      "name": "slow-timeout-after-commit-1440: the no-second-signup promise is limited to unchanged answers and says a change is a new signup",
+      "pass": false,
+      "detail": "That took longer than expected. Your answers are still here. Please try again."
+    },
+    {
+      "name": "slow-timeout-after-commit-1440: the focused error is not also in a live region (announced once)",
+      "pass": true,
+      "detail": {
+        "role": "status",
+        "live": "polite",
+        "focus": ""
+      }
+    },
+    {
+      "name": "slow-timeout-after-commit-1440: store state after the fault matches where it was lost",
+      "pass": true,
+      "detail": [
+        {
+          "key": "b9dc0716",
+          "business": "Signup QA slow-timeout-after-commit 1440"
+        }
+      ]
+    },
+    {
+      "name": "slow-timeout-after-commit-1440: retry reuses the same submission id and lands in exactly one signup",
+      "pass": true,
+      "detail": {
+        "submissionIds": 1,
+        "posts": 2,
+        "handoffs": [
+          {
+            "key": "b9dc0716",
+            "business": "Signup QA slow-timeout-after-commit 1440"
+          }
+        ]
+      }
+    },
+    {
+      "name": "slow-timeout-after-commit-1440: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "error",
+          false
+        ],
+        [
+          "next",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "slow-timeout-after-commit-1440: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "double-tap-1440: second tap, Enter and requestSubmit during a pending save send no extra request",
+      "pass": true,
+      "detail": 1
+    },
+    {
+      "name": "double-tap-1440: after success, while setup is opening, the button stays locked and another tap/submit sends nothing",
+      "pass": false,
+      "detail": {
+        "probe": {
+          "disabled": "false"
+        },
+        "posts": 2
+      }
+    },
+    {
+      "name": "double-tap-1440: one signup stored",
+      "pass": true
+    },
+    {
+      "name": "double-tap-1440: no horizontal scroll",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "double-tap-1440: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "edit-after-lost-1440: a changed answer after a lost response is sent as a new submission, carries the edit, and keeps one prospect",
+      "pass": true,
+      "detail": {
+        "handoffs": [
+          {
+            "key": "16b7ad17",
+            "business": "Signup QA edit-after-lost 1440 Edited"
+          },
+          {
+            "key": "1ecbaee3",
+            "business": "Signup QA edit-after-lost 1440"
+          }
+        ],
+        "prospectBusiness": "Signup QA edit-after-lost 1440",
+        "posts": 2,
+        "ids": 2
+      }
+    },
+    {
+      "name": "edit-after-lost-1440: lost-response copy shows no raw text",
+      "pass": false,
+      "detail": "Failed to fetch"
+    },
+    {
+      "name": "edit-after-lost-1440: no horizontal scroll",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "edit-after-lost-1440: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "keyboard-journey-1440: Tab order from Business name reaches the submit button without hitting the honeypot",
+      "pass": true,
+      "detail": [
+        "intake-goal",
+        "intake-marketing",
+        "A",
+        "intake-submit"
+      ]
+    },
+    {
+      "name": "keyboard-journey-1440: keyboard submit opens setup with the saved-details notice and email carried, no PII in URL",
+      "pass": true,
+      "detail": {
+        "url": "/onboard.html",
+        "notice": "Your business details are saved. Confirm your email to carry them into your setup.",
+        "email": "qa-signup-keyboard-journey-1440@example.test",
+        "active": "BODY"
+      }
+    },
+    {
+      "name": "keyboard-journey-1440: the fake-mailbox link carries the signup answers into setup (no real email)",
+      "pass": true,
+      "detail": {
+        "business": "Signup QA keyboard-journey 1440",
+        "name": "Signup QA Owner"
+      }
+    },
+    {
+      "name": "keyboard-journey-1440: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "next",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "keyboard-journey-1440: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "edit-copy-and-revert-1440: with an answer changed after a lost response, the message on screen does not promise no second signup unconditionally",
+      "pass": false,
+      "detail": "Failed to fetch"
+    },
+    {
+      "name": "edit-copy-and-revert-1440: changing back to the first answers reuses the first submission id (no third signup, no extra rate spend)",
+      "pass": false,
+      "detail": {
+        "posts": 3,
+        "distinctIds": 3,
+        "revertReusedFirst": false,
+        "handoffs": [
+          {
+            "key": "538b40e6",
+            "business": "Signup QA edit-copy-and-revert 1440"
+          },
+          {
+            "key": "64bc4155",
+            "business": "Signup QA edit-copy-and-revert 1440"
+          },
+          {
+            "key": "691f30d9",
+            "business": "Signup QA edit-copy-and-revert 1440 Edited"
+          }
+        ],
+        "emailRate": 3
+      }
+    },
+    {
+      "name": "edit-copy-and-revert-1440: no horizontal scroll",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "edit-copy-and-revert-1440: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "stuck-after-success-1440: after success with a stalled page change, an \"Open your setup\" link to the handoff is shown and focused",
+      "pass": false,
+      "detail": {
+        "path": "/",
+        "status": "Saved. Opening your setup…",
+        "link": null,
+        "linkFocused": false,
+        "linkInLive": false
+      }
+    },
+    {
+      "name": "stuck-after-success-1440: the focused link is not inside a live region",
+      "pass": false,
+      "detail": {
+        "path": "/",
+        "status": "Saved. Opening your setup…",
+        "link": null,
+        "linkFocused": false,
+        "linkInLive": false
+      }
+    },
+    {
+      "name": "stuck-after-success-1440: the link (keyboard) opens setup with the saved details, one signup",
+      "pass": false,
+      "detail": {
+        "notice": "Your business details are saved. Confirm your email to carry them into your setup.",
+        "email": "qa-signup-stuck-after-success-1440@example.test",
+        "hash": ""
+      }
+    },
+    {
+      "name": "stuck-after-success-1440: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "stuck",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "stuck-after-success-1440: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "server-invalid-email-1440: server invalid_email focuses the email field with the server message tied by aria-describedby",
+      "pass": false,
+      "detail": {
+        "status": "Enter a valid email address.",
+        "focus": "",
+        "invalid": null,
+        "desc": ""
+      }
+    },
+    {
+      "name": "server-invalid-email-1440: the server message is not duplicated in the status line",
+      "pass": false,
+      "detail": {
+        "focus": "",
+        "invalid": null,
+        "desc": "",
+        "status": "Enter a valid email address."
+      }
+    },
+    {
+      "name": "server-invalid-email-1440: the corrected email saves and opens setup",
+      "pass": true
+    },
+    {
+      "name": "server-invalid-email-1440: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "invalid-email",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "server-invalid-email-1440: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "expired-410-1440: 410 intake_expired copy names the button that works instead of \"Start a new form\"",
+      "pass": false,
+      "detail": {
+        "status": 410,
+        "text": "Start a new form to continue.",
+        "focus": "",
+        "live": "polite"
+      }
+    },
+    {
+      "name": "expired-410-1440: scenario completes",
+      "pass": false,
+      "detail": "page.waitForURL: Timeout 15000ms exceeded."
+    },
+    {
+      "name": "expired-410-1440: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "expired",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "expired-410-1440: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "validation-390: empty submit (keyboard) focuses the first invalid field and sends nothing",
+      "pass": true,
+      "detail": "intake-name"
+    },
+    {
+      "name": "validation-390: each invalid field is aria-invalid with a visible message tied by aria-describedby",
+      "pass": false,
+      "detail": [
+        {
+          "id": "intake-name",
+          "invalid": null,
+          "described": []
+        },
+        {
+          "id": "intake-email",
+          "invalid": null,
+          "described": []
+        },
+        {
+          "id": "intake-business",
+          "invalid": null,
+          "described": []
+        }
+      ]
+    },
+    {
+      "name": "validation-390: whitespace-only name and malformed email are flagged; focus on the first; fixed field cleared",
+      "pass": false,
+      "detail": {
+        "active": "intake-email",
+        "nameInvalid": null,
+        "nameDesc": "",
+        "emailInvalid": null,
+        "emailDesc": "",
+        "businessInvalid": null
+      }
+    },
+    {
+      "name": "validation-390: corrected form saves once and opens setup",
+      "pass": true
+    },
+    {
+      "name": "validation-390: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "empty",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "validation-390: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "lost-before-handler-390: unknown outcome shows no raw browser/JSON error text",
+      "pass": false,
+      "detail": "Failed to fetch"
+    },
+    {
+      "name": "lost-before-handler-390: unknown outcome says the details may already be saved and retrying is safe",
+      "pass": false,
+      "detail": "Failed to fetch"
+    },
+    {
+      "name": "lost-before-handler-390: unknown outcome names the retry button on the page",
+      "pass": false,
+      "detail": {
+        "status": "Failed to fetch",
+        "button": "Continue to setup"
+      }
+    },
+    {
+      "name": "lost-before-handler-390: unknown outcome copy has no em dash",
+      "pass": true,
+      "detail": "Failed to fetch"
+    },
+    {
+      "name": "lost-before-handler-390: typed values stay and focus moves to the message",
+      "pass": false,
+      "detail": {
+        "statusRole": "status",
+        "statusLive": "polite",
+        "status": "Failed to fetch",
+        "isError": true,
+        "focusOnStatus": "",
+        "activeId": "BODY",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-lost-before-handler-390@example.test",
+        "business": "Signup QA lost-before-handler 390",
+        "path": "/"
+      }
+    },
+    {
+      "name": "lost-before-handler-390: the no-second-signup promise is limited to unchanged answers and says a change is a new signup",
+      "pass": false,
+      "detail": "Failed to fetch"
+    },
+    {
+      "name": "lost-before-handler-390: the focused error is not also in a live region (announced once)",
+      "pass": true,
+      "detail": {
+        "role": "status",
+        "live": "polite",
+        "focus": ""
+      }
+    },
+    {
+      "name": "lost-before-handler-390: store state after the fault matches where it was lost",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "lost-before-handler-390: retry reuses the same submission id and lands in exactly one signup",
+      "pass": true,
+      "detail": {
+        "submissionIds": 1,
+        "posts": 2,
+        "handoffs": [
+          {
+            "key": "a2a59a8e",
+            "business": "Signup QA lost-before-handler 390"
+          }
+        ]
+      }
+    },
+    {
+      "name": "lost-before-handler-390: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "error",
+          false
+        ],
+        [
+          "next",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "lost-before-handler-390: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "lost-after-commit-390: unknown outcome shows no raw browser/JSON error text",
+      "pass": false,
+      "detail": "Failed to fetch"
+    },
+    {
+      "name": "lost-after-commit-390: unknown outcome says the details may already be saved and retrying is safe",
+      "pass": false,
+      "detail": "Failed to fetch"
+    },
+    {
+      "name": "lost-after-commit-390: unknown outcome names the retry button on the page",
+      "pass": false,
+      "detail": {
+        "status": "Failed to fetch",
+        "button": "Continue to setup"
+      }
+    },
+    {
+      "name": "lost-after-commit-390: unknown outcome copy has no em dash",
+      "pass": true,
+      "detail": "Failed to fetch"
+    },
+    {
+      "name": "lost-after-commit-390: typed values stay and focus moves to the message",
+      "pass": false,
+      "detail": {
+        "statusRole": "status",
+        "statusLive": "polite",
+        "status": "Failed to fetch",
+        "isError": true,
+        "focusOnStatus": false,
+        "activeId": "intake-business",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-lost-after-commit-390@example.test",
+        "business": "Signup QA lost-after-commit 390",
+        "path": "/"
+      }
+    },
+    {
+      "name": "lost-after-commit-390: the no-second-signup promise is limited to unchanged answers and says a change is a new signup",
+      "pass": false,
+      "detail": "Failed to fetch"
+    },
+    {
+      "name": "lost-after-commit-390: the focused error is not also in a live region (announced once)",
+      "pass": true,
+      "detail": {
+        "role": "status",
+        "live": "polite",
+        "focus": false
+      }
+    },
+    {
+      "name": "lost-after-commit-390: store state after the fault matches where it was lost",
+      "pass": true,
+      "detail": [
+        {
+          "key": "97cb3928",
+          "business": "Signup QA lost-after-commit 390"
+        }
+      ]
+    },
+    {
+      "name": "lost-after-commit-390: retry reuses the same submission id and lands in exactly one signup",
+      "pass": false,
+      "detail": {
+        "submissionIds": 1,
+        "posts": 2,
+        "handoffs": [
+          {
+            "key": "97cb3928",
+            "business": "Signup QA lost-after-commit 390"
+          }
+        ],
+        "retryFocus": "intake-email"
+      }
+    },
+    {
+      "name": "lost-after-commit-390: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "error",
+          false
+        ],
+        [
+          "next",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "lost-after-commit-390: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "html-502-390: unknown outcome shows no raw browser/JSON error text",
+      "pass": false,
+      "detail": "Unexpected token '<', \"<!doctype \"... is not valid JSON"
+    },
+    {
+      "name": "html-502-390: unknown outcome says the details may already be saved and retrying is safe",
+      "pass": false,
+      "detail": "Unexpected token '<', \"<!doctype \"... is not valid JSON"
+    },
+    {
+      "name": "html-502-390: unknown outcome names the retry button on the page",
+      "pass": false,
+      "detail": {
+        "status": "Unexpected token '<', \"<!doctype \"... is not valid JSON",
+        "button": "Continue to setup"
+      }
+    },
+    {
+      "name": "html-502-390: unknown outcome copy has no em dash",
+      "pass": true,
+      "detail": "Unexpected token '<', \"<!doctype \"... is not valid JSON"
+    },
+    {
+      "name": "html-502-390: typed values stay and focus moves to the message",
+      "pass": false,
+      "detail": {
+        "statusRole": "status",
+        "statusLive": "polite",
+        "status": "Unexpected token '<', \"<!doctype \"... is not valid JSON",
+        "isError": true,
+        "focusOnStatus": "",
+        "activeId": "BODY",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-html-502-390@example.test",
+        "business": "Signup QA html-502 390",
+        "path": "/"
+      }
+    },
+    {
+      "name": "html-502-390: the no-second-signup promise is limited to unchanged answers and says a change is a new signup",
+      "pass": false,
+      "detail": "Unexpected token '<', \"<!doctype \"... is not valid JSON"
+    },
+    {
+      "name": "html-502-390: the focused error is not also in a live region (announced once)",
+      "pass": true,
+      "detail": {
+        "role": "status",
+        "live": "polite",
+        "focus": ""
+      }
+    },
+    {
+      "name": "html-502-390: store state after the fault matches where it was lost",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "html-502-390: retry reuses the same submission id and lands in exactly one signup",
+      "pass": true,
+      "detail": {
+        "submissionIds": 1,
+        "posts": 2,
+        "handoffs": [
+          {
+            "key": "822d367f",
+            "business": "Signup QA html-502 390"
+          }
+        ]
+      }
+    },
+    {
+      "name": "html-502-390: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "error",
+          false
+        ],
+        [
+          "next",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "html-502-390: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "json-4xx-rate-limit-390: definite 4xx shows the server message, not unknown-outcome copy",
+      "pass": true,
+      "detail": {
+        "status": 429,
+        "text": "Please wait a few minutes before trying again."
+      }
+    },
+    {
+      "name": "json-4xx-rate-limit-390: 4xx keeps typed values and focus moves to the message",
+      "pass": false,
+      "detail": {
+        "statusRole": "status",
+        "statusLive": "polite",
+        "status": "Please wait a few minutes before trying again.",
+        "isError": true,
+        "focusOnStatus": "",
+        "activeId": "BODY",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-json-4xx-rate-limit-390@example.test",
+        "business": "Signup QA json-4xx-rate-limit 390",
+        "path": "/"
+      }
+    },
+    {
+      "name": "json-4xx-rate-limit-390: the focused 4xx message is not also in a live region (announced once)",
+      "pass": false,
+      "detail": {
+        "role": "status",
+        "live": "polite"
+      }
+    },
+    {
+      "name": "json-4xx-rate-limit-390: nothing was saved",
+      "pass": true
+    },
+    {
+      "name": "json-4xx-rate-limit-390: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "error",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "json-4xx-rate-limit-390: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "slow-timeout-after-commit-390: a slow reply tells the owner it is still working and to keep the page open",
+      "pass": false,
+      "detail": "Saving your details…"
+    },
+    {
+      "name": "slow-timeout-after-commit-390: unknown outcome shows no raw browser/JSON error text",
+      "pass": true,
+      "detail": "That took longer than expected. Your answers are still here. Please try again."
+    },
+    {
+      "name": "slow-timeout-after-commit-390: unknown outcome says the details may already be saved and retrying is safe",
+      "pass": false,
+      "detail": "That took longer than expected. Your answers are still here. Please try again."
+    },
+    {
+      "name": "slow-timeout-after-commit-390: unknown outcome names the retry button on the page",
+      "pass": false,
+      "detail": {
+        "status": "That took longer than expected. Your answers are still here. Please try again.",
+        "button": "Continue to setup"
+      }
+    },
+    {
+      "name": "slow-timeout-after-commit-390: unknown outcome copy has no em dash",
+      "pass": true,
+      "detail": "That took longer than expected. Your answers are still here. Please try again."
+    },
+    {
+      "name": "slow-timeout-after-commit-390: typed values stay and focus moves to the message",
+      "pass": false,
+      "detail": {
+        "statusRole": "status",
+        "statusLive": "polite",
+        "status": "That took longer than expected. Your answers are still here. Please try again.",
+        "isError": true,
+        "focusOnStatus": "",
+        "activeId": "BODY",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-slow-timeout-after-commit-390@example.test",
+        "business": "Signup QA slow-timeout-after-commit 390",
+        "path": "/"
+      }
+    },
+    {
+      "name": "slow-timeout-after-commit-390: the no-second-signup promise is limited to unchanged answers and says a change is a new signup",
+      "pass": false,
+      "detail": "That took longer than expected. Your answers are still here. Please try again."
+    },
+    {
+      "name": "slow-timeout-after-commit-390: the focused error is not also in a live region (announced once)",
+      "pass": true,
+      "detail": {
+        "role": "status",
+        "live": "polite",
+        "focus": ""
+      }
+    },
+    {
+      "name": "slow-timeout-after-commit-390: store state after the fault matches where it was lost",
+      "pass": true,
+      "detail": [
+        {
+          "key": "1c256c41",
+          "business": "Signup QA slow-timeout-after-commit 390"
+        }
+      ]
+    },
+    {
+      "name": "slow-timeout-after-commit-390: retry reuses the same submission id and lands in exactly one signup",
+      "pass": true,
+      "detail": {
+        "submissionIds": 1,
+        "posts": 2,
+        "handoffs": [
+          {
+            "key": "1c256c41",
+            "business": "Signup QA slow-timeout-after-commit 390"
+          }
+        ]
+      }
+    },
+    {
+      "name": "slow-timeout-after-commit-390: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "error",
+          false
+        ],
+        [
+          "next",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "slow-timeout-after-commit-390: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "double-tap-390: second tap, Enter and requestSubmit during a pending save send no extra request",
+      "pass": true,
+      "detail": 1
+    },
+    {
+      "name": "double-tap-390: after success, while setup is opening, the button stays locked and another tap/submit sends nothing",
+      "pass": false,
+      "detail": {
+        "probe": {
+          "disabled": "false"
+        },
+        "posts": 2
+      }
+    },
+    {
+      "name": "double-tap-390: one signup stored",
+      "pass": true
+    },
+    {
+      "name": "double-tap-390: no horizontal scroll",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "double-tap-390: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "edit-after-lost-390: a changed answer after a lost response is sent as a new submission, carries the edit, and keeps one prospect",
+      "pass": true,
+      "detail": {
+        "handoffs": [
+          {
+            "key": "1f01a0ff",
+            "business": "Signup QA edit-after-lost 390"
+          },
+          {
+            "key": "65a8b6a3",
+            "business": "Signup QA edit-after-lost 390 Edited"
+          }
+        ],
+        "prospectBusiness": "Signup QA edit-after-lost 390",
+        "posts": 2,
+        "ids": 2
+      }
+    },
+    {
+      "name": "edit-after-lost-390: lost-response copy shows no raw text",
+      "pass": false,
+      "detail": "Failed to fetch"
+    },
+    {
+      "name": "edit-after-lost-390: no horizontal scroll",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "edit-after-lost-390: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "keyboard-journey-390: Tab order from Business name reaches the submit button without hitting the honeypot",
+      "pass": true,
+      "detail": [
+        "intake-goal",
+        "intake-marketing",
+        "A",
+        "intake-submit"
+      ]
+    },
+    {
+      "name": "keyboard-journey-390: keyboard submit opens setup with the saved-details notice and email carried, no PII in URL",
+      "pass": true,
+      "detail": {
+        "url": "/onboard.html",
+        "notice": "Your business details are saved. Confirm your email to carry them into your setup.",
+        "email": "qa-signup-keyboard-journey-390@example.test",
+        "active": "BODY"
+      }
+    },
+    {
+      "name": "keyboard-journey-390: the fake-mailbox link carries the signup answers into setup (no real email)",
+      "pass": true,
+      "detail": {
+        "business": "Signup QA keyboard-journey 390",
+        "name": "Signup QA Owner"
+      }
+    },
+    {
+      "name": "keyboard-journey-390: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "next",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "keyboard-journey-390: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "edit-copy-and-revert-390: with an answer changed after a lost response, the message on screen does not promise no second signup unconditionally",
+      "pass": false,
+      "detail": "Failed to fetch"
+    },
+    {
+      "name": "edit-copy-and-revert-390: changing back to the first answers reuses the first submission id (no third signup, no extra rate spend)",
+      "pass": false,
+      "detail": {
+        "posts": 3,
+        "distinctIds": 3,
+        "revertReusedFirst": false,
+        "handoffs": [
+          {
+            "key": "1424b152",
+            "business": "Signup QA edit-copy-and-revert 390"
+          },
+          {
+            "key": "600bb97a",
+            "business": "Signup QA edit-copy-and-revert 390 Edited"
+          },
+          {
+            "key": "69ea57ee",
+            "business": "Signup QA edit-copy-and-revert 390"
+          }
+        ],
+        "emailRate": 3
+      }
+    },
+    {
+      "name": "edit-copy-and-revert-390: no horizontal scroll",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "edit-copy-and-revert-390: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "stuck-after-success-390: after success with a stalled page change, an \"Open your setup\" link to the handoff is shown and focused",
+      "pass": false,
+      "detail": {
+        "path": "/",
+        "status": "Saved. Opening your setup…",
+        "link": null,
+        "linkFocused": false,
+        "linkInLive": false
+      }
+    },
+    {
+      "name": "stuck-after-success-390: the focused link is not inside a live region",
+      "pass": false,
+      "detail": {
+        "path": "/",
+        "status": "Saved. Opening your setup…",
+        "link": null,
+        "linkFocused": false,
+        "linkInLive": false
+      }
+    },
+    {
+      "name": "stuck-after-success-390: the link (keyboard) opens setup with the saved details, one signup",
+      "pass": false,
+      "detail": {
+        "notice": "Your business details are saved. Confirm your email to carry them into your setup.",
+        "email": "qa-signup-stuck-after-success-390@example.test",
+        "hash": ""
+      }
+    },
+    {
+      "name": "stuck-after-success-390: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "stuck",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "stuck-after-success-390: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "server-invalid-email-390: server invalid_email focuses the email field with the server message tied by aria-describedby",
+      "pass": false,
+      "detail": {
+        "status": "Enter a valid email address.",
+        "focus": "",
+        "invalid": null,
+        "desc": ""
+      }
+    },
+    {
+      "name": "server-invalid-email-390: the server message is not duplicated in the status line",
+      "pass": false,
+      "detail": {
+        "focus": "",
+        "invalid": null,
+        "desc": "",
+        "status": "Enter a valid email address."
+      }
+    },
+    {
+      "name": "server-invalid-email-390: the corrected email saves and opens setup",
+      "pass": true
+    },
+    {
+      "name": "server-invalid-email-390: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "invalid-email",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "server-invalid-email-390: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "expired-410-390: 410 intake_expired copy names the button that works instead of \"Start a new form\"",
+      "pass": false,
+      "detail": {
+        "status": 410,
+        "text": "Start a new form to continue.",
+        "focus": "",
+        "live": "polite"
+      }
+    },
+    {
+      "name": "expired-410-390: scenario completes",
+      "pass": false,
+      "detail": "page.waitForURL: Timeout 15000ms exceeded."
+    },
+    {
+      "name": "expired-410-390: no horizontal scroll",
+      "pass": true,
+      "detail": [
+        [
+          "expired",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "expired-410-390: no page errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "No browser request left the fixture origin",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "No forbidden API route was requested",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "No physical server transport was attempted",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Exactly one signup-intake.js was served, and it is the pinned source",
+      "pass": true,
+      "detail": [
+        "7f6e01593eedd12ecf9d768a41a9b43d3976799306825e0bd4d53fc1a29b89d9"
+      ]
+    },
+    {
+      "name": "Source stayed stable throughout the check",
+      "pass": true
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "validation-1440",
+      "kind": "validation",
+      "width": 1440,
+      "keyboard": true,
+      "events": [],
+      "overflow": [
+        [
+          "empty",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "intakeBodies": [
+        {
+          "submissionId": "f2f4e0ae-f202-488f-a24b-c0dd2b6cdd58",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-validation-1440@example.test",
+          "business": "Bayou Service",
+          "trade": "",
+          "goal": "",
+          "marketingConsent": false,
+          "botfield": ""
+        }
+      ],
+      "email": "qa-signup-validation-1440@example.test",
+      "values": {
+        "name": "Signup QA Owner",
+        "email": "qa-signup-validation-1440@example.test",
+        "business": "Signup QA validation 1440"
+      },
+      "onboardHolds": [],
+      "empty": {
+        "active": "intake-name",
+        "fields": [
+          {
+            "id": "intake-name",
+            "invalid": null,
+            "described": []
+          },
+          {
+            "id": "intake-email",
+            "invalid": null,
+            "described": []
+          },
+          {
+            "id": "intake-business",
+            "invalid": null,
+            "described": []
+          }
+        ]
+      },
+      "partial": {
+        "active": "intake-email",
+        "nameInvalid": null,
+        "nameDesc": "",
+        "emailInvalid": null,
+        "emailDesc": "",
+        "businessInvalid": null
+      }
+    },
+    {
+      "id": "lost-before-handler-1440",
+      "kind": "lost-before-handler",
+      "width": 1440,
+      "keyboard": false,
+      "events": [
+        "aborted POST /api/intake before the handler ran"
+      ],
+      "overflow": [
+        [
+          "error",
+          false
+        ],
+        [
+          "next",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "intakeBodies": [
+        {
+          "submissionId": "f93cb7e5-d057-44e4-afef-58cc4faeabb7",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-lost-before-handler-1440@example.test",
+          "business": "Signup QA lost-before-handler 1440",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        },
+        {
+          "submissionId": "f93cb7e5-d057-44e4-afef-58cc4faeabb7",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-lost-before-handler-1440@example.test",
+          "business": "Signup QA lost-before-handler 1440",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        }
+      ],
+      "email": "qa-signup-lost-before-handler-1440@example.test",
+      "values": {
+        "name": "Signup QA Owner",
+        "email": "qa-signup-lost-before-handler-1440@example.test",
+        "business": "Signup QA lost-before-handler 1440"
+      },
+      "onboardHolds": [],
+      "fault": {
+        "when": "before",
+        "remaining": 0
+      },
+      "lostState": {
+        "statusRole": "status",
+        "statusLive": "polite",
+        "status": "Failed to fetch",
+        "isError": true,
+        "focusOnStatus": "",
+        "activeId": "BODY",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-lost-before-handler-1440@example.test",
+        "business": "Signup QA lost-before-handler 1440",
+        "path": "/"
+      },
+      "handoffsAfterLoss": []
+    },
+    {
+      "id": "lost-after-commit-1440",
+      "kind": "lost-after-commit",
+      "width": 1440,
+      "keyboard": true,
+      "events": [
+        "lost POST /api/intake response after the handler returned 202"
+      ],
+      "overflow": [
+        [
+          "error",
+          false
+        ],
+        [
+          "next",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "intakeBodies": [
+        {
+          "submissionId": "bff91515-d4f5-4133-8d38-0c7ee7e218af",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-lost-after-commit-1440@example.test",
+          "business": "Signup QA lost-after-commit 1440",
+          "trade": "",
+          "goal": "",
+          "marketingConsent": false,
+          "botfield": ""
+        },
+        {
+          "submissionId": "bff91515-d4f5-4133-8d38-0c7ee7e218af",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-lost-after-commit-1440@example.test",
+          "business": "Signup QA lost-after-commit 1440",
+          "trade": "",
+          "goal": "",
+          "marketingConsent": false,
+          "botfield": ""
+        }
+      ],
+      "email": "qa-signup-lost-after-commit-1440@example.test",
+      "values": {
+        "name": "Signup QA Owner",
+        "email": "qa-signup-lost-after-commit-1440@example.test",
+        "business": "Signup QA lost-after-commit 1440"
+      },
+      "onboardHolds": [],
+      "fault": {
+        "when": "after",
+        "remaining": 0
+      },
+      "lostState": {
+        "statusRole": "status",
+        "statusLive": "polite",
+        "status": "Failed to fetch",
+        "isError": true,
+        "focusOnStatus": false,
+        "activeId": "intake-business",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-lost-after-commit-1440@example.test",
+        "business": "Signup QA lost-after-commit 1440",
+        "path": "/"
+      },
+      "handoffsAfterLoss": [
+        {
+          "key": "4052e829",
+          "business": "Signup QA lost-after-commit 1440"
+        }
+      ],
+      "retryFocus": "intake-email"
+    },
+    {
+      "id": "html-502-1440",
+      "kind": "html-502",
+      "width": 1440,
+      "keyboard": false,
+      "events": [
+        "gateway 502 HTML for POST /api/intake (handler not run)"
+      ],
+      "overflow": [
+        [
+          "error",
+          false
+        ],
+        [
+          "next",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "intakeBodies": [
+        {
+          "submissionId": "75f69148-d9f7-4023-81c2-354f53bc2bf1",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-html-502-1440@example.test",
+          "business": "Signup QA html-502 1440",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        },
+        {
+          "submissionId": "75f69148-d9f7-4023-81c2-354f53bc2bf1",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-html-502-1440@example.test",
+          "business": "Signup QA html-502 1440",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        }
+      ],
+      "email": "qa-signup-html-502-1440@example.test",
+      "values": {
+        "name": "Signup QA Owner",
+        "email": "qa-signup-html-502-1440@example.test",
+        "business": "Signup QA html-502 1440"
+      },
+      "onboardHolds": [],
+      "fault": {
+        "when": "html502",
+        "remaining": 0
+      },
+      "lostState": {
+        "statusRole": "status",
+        "statusLive": "polite",
+        "status": "Unexpected token '<', \"<!doctype \"... is not valid JSON",
+        "isError": true,
+        "focusOnStatus": "",
+        "activeId": "BODY",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-html-502-1440@example.test",
+        "business": "Signup QA html-502 1440",
+        "path": "/"
+      },
+      "handoffsAfterLoss": []
+    },
+    {
+      "id": "json-4xx-rate-limit-1440",
+      "kind": "json-4xx-rate-limit",
+      "width": 1440,
+      "keyboard": false,
+      "events": [],
+      "overflow": [
+        [
+          "error",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "intakeBodies": [
+        {
+          "submissionId": "103a8a55-f54c-41e1-b23b-f42ed55a1cd1",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-json-4xx-rate-limit-1440@example.test",
+          "business": "Signup QA json-4xx-rate-limit 1440",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        }
+      ],
+      "email": "qa-signup-json-4xx-rate-limit-1440@example.test",
+      "values": {
+        "name": "Signup QA Owner",
+        "email": "qa-signup-json-4xx-rate-limit-1440@example.test",
+        "business": "Signup QA json-4xx-rate-limit 1440"
+      },
+      "onboardHolds": [],
+      "lostState": {
+        "statusRole": "status",
+        "statusLive": "polite",
+        "status": "Please wait a few minutes before trying again.",
+        "isError": true,
+        "focusOnStatus": "",
+        "activeId": "BODY",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-json-4xx-rate-limit-1440@example.test",
+        "business": "Signup QA json-4xx-rate-limit 1440",
+        "path": "/"
+      }
+    },
+    {
+      "id": "slow-timeout-after-commit-1440",
+      "kind": "slow-timeout-after-commit",
+      "width": 1440,
+      "keyboard": false,
+      "events": [
+        "held POST /api/intake response after the handler returned 202"
+      ],
+      "overflow": [
+        [
+          "error",
+          false
+        ],
+        [
+          "next",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "intakeBodies": [
+        {
+          "submissionId": "2851a0de-2680-4889-a584-6a37462e4f83",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-slow-timeout-after-commit-1440@example.test",
+          "business": "Signup QA slow-timeout-after-commit 1440",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        },
+        {
+          "submissionId": "2851a0de-2680-4889-a584-6a37462e4f83",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-slow-timeout-after-commit-1440@example.test",
+          "business": "Signup QA slow-timeout-after-commit 1440",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        }
+      ],
+      "email": "qa-signup-slow-timeout-after-commit-1440@example.test",
+      "values": {
+        "name": "Signup QA Owner",
+        "email": "qa-signup-slow-timeout-after-commit-1440@example.test",
+        "business": "Signup QA slow-timeout-after-commit 1440"
+      },
+      "onboardHolds": [],
+      "fault": {
+        "when": "hold-after",
+        "remaining": 0
+      },
+      "slowText": "Saving your details…",
+      "lostState": {
+        "statusRole": "status",
+        "statusLive": "polite",
+        "status": "That took longer than expected. Your answers are still here. Please try again.",
+        "isError": true,
+        "focusOnStatus": "",
+        "activeId": "BODY",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-slow-timeout-after-commit-1440@example.test",
+        "business": "Signup QA slow-timeout-after-commit 1440",
+        "path": "/"
+      },
+      "handoffsAfterLoss": [
+        {
+          "key": "b9dc0716",
+          "business": "Signup QA slow-timeout-after-commit 1440"
+        }
+      ]
+    },
+    {
+      "id": "double-tap-1440",
+      "kind": "double-tap",
+      "width": 1440,
+      "keyboard": false,
+      "events": [
+        "held POST /api/intake response after the handler returned 202",
+        "held navigation to /onboard.html",
+        "held navigation to /onboard.html"
+      ],
+      "overflow": [],
+      "pageErrors": [],
+      "intakeBodies": [
+        {
+          "submissionId": "de369acc-c390-4718-9a0a-ba67ba7e3446",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-double-tap-1440@example.test",
+          "business": "Signup QA double-tap 1440",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        },
+        {
+          "submissionId": "de369acc-c390-4718-9a0a-ba67ba7e3446",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-double-tap-1440@example.test",
+          "business": "Signup QA double-tap 1440",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        }
+      ],
+      "email": "qa-signup-double-tap-1440@example.test",
+      "values": {
+        "name": "Signup QA Owner",
+        "email": "qa-signup-double-tap-1440@example.test",
+        "business": "Signup QA double-tap 1440"
+      },
+      "onboardHolds": [
+        null,
+        null
+      ],
+      "holdAll": false,
+      "holdOnboard": false,
+      "probe": {
+        "disabled": "false"
+      }
+    },
+    {
+      "id": "edit-after-lost-1440",
+      "kind": "edit-after-lost",
+      "width": 1440,
+      "keyboard": false,
+      "events": [
+        "lost POST /api/intake response after the handler returned 202"
+      ],
+      "overflow": [],
+      "pageErrors": [],
+      "intakeBodies": [
+        {
+          "submissionId": "cfcd5e7c-b9b2-4172-ae41-1db0c02607ad",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-edit-after-lost-1440@example.test",
+          "business": "Signup QA edit-after-lost 1440",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        },
+        {
+          "submissionId": "da01506d-aa9e-4f68-954a-4287e70d5047",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-edit-after-lost-1440@example.test",
+          "business": "Signup QA edit-after-lost 1440 Edited",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        }
+      ],
+      "email": "qa-signup-edit-after-lost-1440@example.test",
+      "values": {
+        "name": "Signup QA Owner",
+        "email": "qa-signup-edit-after-lost-1440@example.test",
+        "business": "Signup QA edit-after-lost 1440"
+      },
+      "onboardHolds": [],
+      "fault": {
+        "when": "after",
+        "remaining": 0
+      },
+      "lostState": {
+        "statusRole": "status",
+        "statusLive": "polite",
+        "status": "Failed to fetch",
+        "isError": true,
+        "focusOnStatus": "",
+        "activeId": "BODY",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-edit-after-lost-1440@example.test",
+        "business": "Signup QA edit-after-lost 1440",
+        "path": "/"
+      },
+      "after": {
+        "handoffs": [
+          {
+            "key": "16b7ad17",
+            "business": "Signup QA edit-after-lost 1440 Edited"
+          },
+          {
+            "key": "1ecbaee3",
+            "business": "Signup QA edit-after-lost 1440"
+          }
+        ],
+        "prospectBusiness": "Signup QA edit-after-lost 1440",
+        "posts": 2,
+        "ids": 2
+      }
+    },
+    {
+      "id": "keyboard-journey-1440",
+      "kind": "keyboard-journey",
+      "width": 1440,
+      "keyboard": true,
+      "events": [],
+      "overflow": [
+        [
+          "next",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "intakeBodies": [
+        {
+          "submissionId": "e28f3706-6adb-4a69-abee-0dd7b4f0384e",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-keyboard-journey-1440@example.test",
+          "business": "Signup QA keyboard-journey 1440",
+          "trade": "",
+          "goal": "",
+          "marketingConsent": false,
+          "botfield": ""
+        }
+      ],
+      "email": "qa-signup-keyboard-journey-1440@example.test",
+      "values": {
+        "name": "Signup QA Owner",
+        "email": "qa-signup-keyboard-journey-1440@example.test",
+        "business": "Signup QA keyboard-journey 1440"
+      },
+      "onboardHolds": [],
+      "tabPath": [
+        "intake-goal",
+        "intake-marketing",
+        "A",
+        "intake-submit"
+      ],
+      "next": {
+        "url": "/onboard.html",
+        "notice": "Your business details are saved. Confirm your email to carry them into your setup.",
+        "email": "qa-signup-keyboard-journey-1440@example.test",
+        "active": "BODY"
+      },
+      "carried": {
+        "business": "Signup QA keyboard-journey 1440",
+        "name": "Signup QA Owner"
+      }
+    },
+    {
+      "id": "edit-copy-and-revert-1440",
+      "kind": "edit-copy-and-revert",
+      "width": 1440,
+      "keyboard": false,
+      "events": [
+        "lost POST /api/intake response after the handler returned 202",
+        "lost POST /api/intake response after the handler returned 202"
+      ],
+      "overflow": [],
+      "pageErrors": [],
+      "intakeBodies": [
+        {
+          "submissionId": "d3dcad4c-72c0-4a8c-8ccc-8d1d19b863b6",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-edit-copy-and-revert-1440@example.test",
+          "business": "Signup QA edit-copy-and-revert 1440",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        },
+        {
+          "submissionId": "fc396e96-b048-477f-97f4-8d4c9db38bea",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-edit-copy-and-revert-1440@example.test",
+          "business": "Signup QA edit-copy-and-revert 1440 Edited",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        },
+        {
+          "submissionId": "8469ce93-58c0-4bd2-a182-dbf86f3dd058",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-edit-copy-and-revert-1440@example.test",
+          "business": "Signup QA edit-copy-and-revert 1440",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        }
+      ],
+      "email": "qa-signup-edit-copy-and-revert-1440@example.test",
+      "values": {
+        "name": "Signup QA Owner",
+        "email": "qa-signup-edit-copy-and-revert-1440@example.test",
+        "business": "Signup QA edit-copy-and-revert 1440"
+      },
+      "onboardHolds": [],
+      "fault": {
+        "when": "after",
+        "remaining": 0
+      },
+      "copyAfterEdit": "Failed to fetch",
+      "after": {
+        "posts": 3,
+        "distinctIds": 3,
+        "revertReusedFirst": false,
+        "handoffs": [
+          {
+            "key": "538b40e6",
+            "business": "Signup QA edit-copy-and-revert 1440"
+          },
+          {
+            "key": "64bc4155",
+            "business": "Signup QA edit-copy-and-revert 1440"
+          },
+          {
+            "key": "691f30d9",
+            "business": "Signup QA edit-copy-and-revert 1440 Edited"
+          }
+        ],
+        "emailRate": 3
+      }
+    },
+    {
+      "id": "stuck-after-success-1440",
+      "kind": "stuck-after-success",
+      "width": 1440,
+      "keyboard": true,
+      "events": [
+        "navigation to /onboard.html answered 204 (never commits)"
+      ],
+      "overflow": [
+        [
+          "stuck",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "intakeBodies": [
+        {
+          "submissionId": "a8ef459f-45f3-4eb6-beed-0f18bc51fd05",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-stuck-after-success-1440@example.test",
+          "business": "Signup QA stuck-after-success 1440",
+          "trade": "",
+          "goal": "",
+          "marketingConsent": false,
+          "botfield": ""
+        },
+        {
+          "submissionId": "a8ef459f-45f3-4eb6-beed-0f18bc51fd05",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-stuck-after-success-1440@example.test",
+          "business": "Signup QA stuck-after-success 1440",
+          "trade": "",
+          "goal": "",
+          "marketingConsent": false,
+          "botfield": ""
+        }
+      ],
+      "email": "qa-signup-stuck-after-success-1440@example.test",
+      "values": {
+        "name": "Signup QA Owner",
+        "email": "qa-signup-stuck-after-success-1440@example.test",
+        "business": "Signup QA stuck-after-success 1440"
+      },
+      "onboardHolds": [],
+      "onboard204": false,
+      "stuck": {
+        "path": "/",
+        "status": "Saved. Opening your setup…",
+        "link": null,
+        "linkFocused": false,
+        "linkInLive": false
+      },
+      "next": {
+        "notice": "Your business details are saved. Confirm your email to carry them into your setup.",
+        "email": "qa-signup-stuck-after-success-1440@example.test",
+        "hash": ""
+      }
+    },
+    {
+      "id": "server-invalid-email-1440",
+      "kind": "server-invalid-email",
+      "width": 1440,
+      "keyboard": false,
+      "events": [],
+      "overflow": [
+        [
+          "invalid-email",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "intakeBodies": [
+        {
+          "submissionId": "85a143cd-5d5f-4de4-9801-855275b121c5",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-invalid-1440@localhost",
+          "business": "Signup QA server-invalid-email 1440",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        },
+        {
+          "submissionId": "cb1a3750-dc4d-4e18-abc3-ac4120acd3e8",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-invalid-1440@example.test",
+          "business": "Signup QA server-invalid-email 1440",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        }
+      ],
+      "email": "qa-signup-invalid-1440@example.test",
+      "values": {
+        "name": "Signup QA Owner",
+        "email": "qa-signup-invalid-1440@example.test",
+        "business": "Signup QA server-invalid-email 1440"
+      },
+      "onboardHolds": [],
+      "after": {
+        "focus": "",
+        "invalid": null,
+        "desc": "",
+        "status": "Enter a valid email address."
+      }
+    },
+    {
+      "id": "expired-410-1440",
+      "kind": "expired-410",
+      "width": 1440,
+      "keyboard": false,
+      "events": [
+        "lost POST /api/intake response after the handler returned 202"
+      ],
+      "overflow": [
+        [
+          "expired",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "intakeBodies": [
+        {
+          "submissionId": "a9786e63-834c-4a13-a03e-66eaf7c28624",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-expired-410-1440@example.test",
+          "business": "Signup QA expired-410 1440",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        },
+        {
+          "submissionId": "a9786e63-834c-4a13-a03e-66eaf7c28624",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-expired-410-1440@example.test",
+          "business": "Signup QA expired-410 1440",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        },
+        {
+          "submissionId": "a9786e63-834c-4a13-a03e-66eaf7c28624",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-expired-410-1440@example.test",
+          "business": "Signup QA expired-410 1440",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        }
+      ],
+      "email": "qa-signup-expired-410-1440@example.test",
+      "values": {
+        "name": "Signup QA Owner",
+        "email": "qa-signup-expired-410-1440@example.test",
+        "business": "Signup QA expired-410 1440"
+      },
+      "onboardHolds": [],
+      "fault": {
+        "when": "after",
+        "remaining": 0
+      },
+      "expired": {
+        "statusRole": "status",
+        "statusLive": "polite",
+        "status": "Start a new form to continue.",
+        "isError": true,
+        "focusOnStatus": "",
+        "activeId": "BODY",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-expired-410-1440@example.test",
+        "business": "Signup QA expired-410 1440",
+        "path": "/"
+      },
+      "fatal": "page.waitForURL: Timeout 15000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation to \"**/onboard.html\" until \"load\"\n============================================================\n    at /private/tmp/mc-claude-signup-20261110/qa-artifacts/claude-collaboration/signup/signup-lost-response-ui-check.mjs:268:60"
+    },
+    {
+      "id": "validation-390",
+      "kind": "validation",
+      "width": 390,
+      "keyboard": true,
+      "events": [],
+      "overflow": [
+        [
+          "empty",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "intakeBodies": [
+        {
+          "submissionId": "31451b6e-a1a1-49c3-9996-26e1d2348c89",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-validation-390@example.test",
+          "business": "Bayou Service",
+          "trade": "",
+          "goal": "",
+          "marketingConsent": false,
+          "botfield": ""
+        }
+      ],
+      "email": "qa-signup-validation-390@example.test",
+      "values": {
+        "name": "Signup QA Owner",
+        "email": "qa-signup-validation-390@example.test",
+        "business": "Signup QA validation 390"
+      },
+      "onboardHolds": [],
+      "empty": {
+        "active": "intake-name",
+        "fields": [
+          {
+            "id": "intake-name",
+            "invalid": null,
+            "described": []
+          },
+          {
+            "id": "intake-email",
+            "invalid": null,
+            "described": []
+          },
+          {
+            "id": "intake-business",
+            "invalid": null,
+            "described": []
+          }
+        ]
+      },
+      "partial": {
+        "active": "intake-email",
+        "nameInvalid": null,
+        "nameDesc": "",
+        "emailInvalid": null,
+        "emailDesc": "",
+        "businessInvalid": null
+      }
+    },
+    {
+      "id": "lost-before-handler-390",
+      "kind": "lost-before-handler",
+      "width": 390,
+      "keyboard": false,
+      "events": [
+        "aborted POST /api/intake before the handler ran"
+      ],
+      "overflow": [
+        [
+          "error",
+          false
+        ],
+        [
+          "next",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "intakeBodies": [
+        {
+          "submissionId": "f7a79503-d905-471a-b442-cfc473ae4d85",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-lost-before-handler-390@example.test",
+          "business": "Signup QA lost-before-handler 390",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        },
+        {
+          "submissionId": "f7a79503-d905-471a-b442-cfc473ae4d85",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-lost-before-handler-390@example.test",
+          "business": "Signup QA lost-before-handler 390",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        }
+      ],
+      "email": "qa-signup-lost-before-handler-390@example.test",
+      "values": {
+        "name": "Signup QA Owner",
+        "email": "qa-signup-lost-before-handler-390@example.test",
+        "business": "Signup QA lost-before-handler 390"
+      },
+      "onboardHolds": [],
+      "fault": {
+        "when": "before",
+        "remaining": 0
+      },
+      "lostState": {
+        "statusRole": "status",
+        "statusLive": "polite",
+        "status": "Failed to fetch",
+        "isError": true,
+        "focusOnStatus": "",
+        "activeId": "BODY",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-lost-before-handler-390@example.test",
+        "business": "Signup QA lost-before-handler 390",
+        "path": "/"
+      },
+      "handoffsAfterLoss": []
+    },
+    {
+      "id": "lost-after-commit-390",
+      "kind": "lost-after-commit",
+      "width": 390,
+      "keyboard": true,
+      "events": [
+        "lost POST /api/intake response after the handler returned 202"
+      ],
+      "overflow": [
+        [
+          "error",
+          false
+        ],
+        [
+          "next",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "intakeBodies": [
+        {
+          "submissionId": "d0f2fd55-2853-478b-be16-4c82bd5d3063",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-lost-after-commit-390@example.test",
+          "business": "Signup QA lost-after-commit 390",
+          "trade": "",
+          "goal": "",
+          "marketingConsent": false,
+          "botfield": ""
+        },
+        {
+          "submissionId": "d0f2fd55-2853-478b-be16-4c82bd5d3063",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-lost-after-commit-390@example.test",
+          "business": "Signup QA lost-after-commit 390",
+          "trade": "",
+          "goal": "",
+          "marketingConsent": false,
+          "botfield": ""
+        }
+      ],
+      "email": "qa-signup-lost-after-commit-390@example.test",
+      "values": {
+        "name": "Signup QA Owner",
+        "email": "qa-signup-lost-after-commit-390@example.test",
+        "business": "Signup QA lost-after-commit 390"
+      },
+      "onboardHolds": [],
+      "fault": {
+        "when": "after",
+        "remaining": 0
+      },
+      "lostState": {
+        "statusRole": "status",
+        "statusLive": "polite",
+        "status": "Failed to fetch",
+        "isError": true,
+        "focusOnStatus": false,
+        "activeId": "intake-business",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-lost-after-commit-390@example.test",
+        "business": "Signup QA lost-after-commit 390",
+        "path": "/"
+      },
+      "handoffsAfterLoss": [
+        {
+          "key": "97cb3928",
+          "business": "Signup QA lost-after-commit 390"
+        }
+      ],
+      "retryFocus": "intake-email"
+    },
+    {
+      "id": "html-502-390",
+      "kind": "html-502",
+      "width": 390,
+      "keyboard": false,
+      "events": [
+        "gateway 502 HTML for POST /api/intake (handler not run)"
+      ],
+      "overflow": [
+        [
+          "error",
+          false
+        ],
+        [
+          "next",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "intakeBodies": [
+        {
+          "submissionId": "4256c93a-ab87-4495-a4d5-14e24138ccdd",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-html-502-390@example.test",
+          "business": "Signup QA html-502 390",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        },
+        {
+          "submissionId": "4256c93a-ab87-4495-a4d5-14e24138ccdd",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-html-502-390@example.test",
+          "business": "Signup QA html-502 390",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        }
+      ],
+      "email": "qa-signup-html-502-390@example.test",
+      "values": {
+        "name": "Signup QA Owner",
+        "email": "qa-signup-html-502-390@example.test",
+        "business": "Signup QA html-502 390"
+      },
+      "onboardHolds": [],
+      "fault": {
+        "when": "html502",
+        "remaining": 0
+      },
+      "lostState": {
+        "statusRole": "status",
+        "statusLive": "polite",
+        "status": "Unexpected token '<', \"<!doctype \"... is not valid JSON",
+        "isError": true,
+        "focusOnStatus": "",
+        "activeId": "BODY",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-html-502-390@example.test",
+        "business": "Signup QA html-502 390",
+        "path": "/"
+      },
+      "handoffsAfterLoss": []
+    },
+    {
+      "id": "json-4xx-rate-limit-390",
+      "kind": "json-4xx-rate-limit",
+      "width": 390,
+      "keyboard": false,
+      "events": [],
+      "overflow": [
+        [
+          "error",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "intakeBodies": [
+        {
+          "submissionId": "df3b43dd-6e04-4fb7-baaa-14ad63a5754e",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-json-4xx-rate-limit-390@example.test",
+          "business": "Signup QA json-4xx-rate-limit 390",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        }
+      ],
+      "email": "qa-signup-json-4xx-rate-limit-390@example.test",
+      "values": {
+        "name": "Signup QA Owner",
+        "email": "qa-signup-json-4xx-rate-limit-390@example.test",
+        "business": "Signup QA json-4xx-rate-limit 390"
+      },
+      "onboardHolds": [],
+      "lostState": {
+        "statusRole": "status",
+        "statusLive": "polite",
+        "status": "Please wait a few minutes before trying again.",
+        "isError": true,
+        "focusOnStatus": "",
+        "activeId": "BODY",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-json-4xx-rate-limit-390@example.test",
+        "business": "Signup QA json-4xx-rate-limit 390",
+        "path": "/"
+      }
+    },
+    {
+      "id": "slow-timeout-after-commit-390",
+      "kind": "slow-timeout-after-commit",
+      "width": 390,
+      "keyboard": false,
+      "events": [
+        "held POST /api/intake response after the handler returned 202"
+      ],
+      "overflow": [
+        [
+          "error",
+          false
+        ],
+        [
+          "next",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "intakeBodies": [
+        {
+          "submissionId": "7993c932-6127-4560-8815-24862c27e855",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-slow-timeout-after-commit-390@example.test",
+          "business": "Signup QA slow-timeout-after-commit 390",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        },
+        {
+          "submissionId": "7993c932-6127-4560-8815-24862c27e855",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-slow-timeout-after-commit-390@example.test",
+          "business": "Signup QA slow-timeout-after-commit 390",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        }
+      ],
+      "email": "qa-signup-slow-timeout-after-commit-390@example.test",
+      "values": {
+        "name": "Signup QA Owner",
+        "email": "qa-signup-slow-timeout-after-commit-390@example.test",
+        "business": "Signup QA slow-timeout-after-commit 390"
+      },
+      "onboardHolds": [],
+      "fault": {
+        "when": "hold-after",
+        "remaining": 0
+      },
+      "slowText": "Saving your details…",
+      "lostState": {
+        "statusRole": "status",
+        "statusLive": "polite",
+        "status": "That took longer than expected. Your answers are still here. Please try again.",
+        "isError": true,
+        "focusOnStatus": "",
+        "activeId": "BODY",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-slow-timeout-after-commit-390@example.test",
+        "business": "Signup QA slow-timeout-after-commit 390",
+        "path": "/"
+      },
+      "handoffsAfterLoss": [
+        {
+          "key": "1c256c41",
+          "business": "Signup QA slow-timeout-after-commit 390"
+        }
+      ]
+    },
+    {
+      "id": "double-tap-390",
+      "kind": "double-tap",
+      "width": 390,
+      "keyboard": false,
+      "events": [
+        "held POST /api/intake response after the handler returned 202",
+        "held navigation to /onboard.html",
+        "held navigation to /onboard.html"
+      ],
+      "overflow": [],
+      "pageErrors": [],
+      "intakeBodies": [
+        {
+          "submissionId": "05fa144d-faa8-43fe-bbdf-baa410cf08c0",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-double-tap-390@example.test",
+          "business": "Signup QA double-tap 390",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        },
+        {
+          "submissionId": "05fa144d-faa8-43fe-bbdf-baa410cf08c0",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-double-tap-390@example.test",
+          "business": "Signup QA double-tap 390",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        }
+      ],
+      "email": "qa-signup-double-tap-390@example.test",
+      "values": {
+        "name": "Signup QA Owner",
+        "email": "qa-signup-double-tap-390@example.test",
+        "business": "Signup QA double-tap 390"
+      },
+      "onboardHolds": [
+        null,
+        null
+      ],
+      "holdAll": false,
+      "holdOnboard": false,
+      "probe": {
+        "disabled": "false"
+      }
+    },
+    {
+      "id": "edit-after-lost-390",
+      "kind": "edit-after-lost",
+      "width": 390,
+      "keyboard": false,
+      "events": [
+        "lost POST /api/intake response after the handler returned 202"
+      ],
+      "overflow": [],
+      "pageErrors": [],
+      "intakeBodies": [
+        {
+          "submissionId": "645dd2ad-526b-44cf-8b60-ad3835b20237",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-edit-after-lost-390@example.test",
+          "business": "Signup QA edit-after-lost 390",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        },
+        {
+          "submissionId": "88d19392-02d8-4225-b337-c8c965c4491b",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-edit-after-lost-390@example.test",
+          "business": "Signup QA edit-after-lost 390 Edited",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        }
+      ],
+      "email": "qa-signup-edit-after-lost-390@example.test",
+      "values": {
+        "name": "Signup QA Owner",
+        "email": "qa-signup-edit-after-lost-390@example.test",
+        "business": "Signup QA edit-after-lost 390"
+      },
+      "onboardHolds": [],
+      "fault": {
+        "when": "after",
+        "remaining": 0
+      },
+      "lostState": {
+        "statusRole": "status",
+        "statusLive": "polite",
+        "status": "Failed to fetch",
+        "isError": true,
+        "focusOnStatus": "",
+        "activeId": "BODY",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-edit-after-lost-390@example.test",
+        "business": "Signup QA edit-after-lost 390",
+        "path": "/"
+      },
+      "after": {
+        "handoffs": [
+          {
+            "key": "1f01a0ff",
+            "business": "Signup QA edit-after-lost 390"
+          },
+          {
+            "key": "65a8b6a3",
+            "business": "Signup QA edit-after-lost 390 Edited"
+          }
+        ],
+        "prospectBusiness": "Signup QA edit-after-lost 390",
+        "posts": 2,
+        "ids": 2
+      }
+    },
+    {
+      "id": "keyboard-journey-390",
+      "kind": "keyboard-journey",
+      "width": 390,
+      "keyboard": true,
+      "events": [],
+      "overflow": [
+        [
+          "next",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "intakeBodies": [
+        {
+          "submissionId": "da3f847e-f4a3-484a-88d3-d1337c869275",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-keyboard-journey-390@example.test",
+          "business": "Signup QA keyboard-journey 390",
+          "trade": "",
+          "goal": "",
+          "marketingConsent": false,
+          "botfield": ""
+        }
+      ],
+      "email": "qa-signup-keyboard-journey-390@example.test",
+      "values": {
+        "name": "Signup QA Owner",
+        "email": "qa-signup-keyboard-journey-390@example.test",
+        "business": "Signup QA keyboard-journey 390"
+      },
+      "onboardHolds": [],
+      "tabPath": [
+        "intake-goal",
+        "intake-marketing",
+        "A",
+        "intake-submit"
+      ],
+      "next": {
+        "url": "/onboard.html",
+        "notice": "Your business details are saved. Confirm your email to carry them into your setup.",
+        "email": "qa-signup-keyboard-journey-390@example.test",
+        "active": "BODY"
+      },
+      "carried": {
+        "business": "Signup QA keyboard-journey 390",
+        "name": "Signup QA Owner"
+      }
+    },
+    {
+      "id": "edit-copy-and-revert-390",
+      "kind": "edit-copy-and-revert",
+      "width": 390,
+      "keyboard": false,
+      "events": [
+        "lost POST /api/intake response after the handler returned 202",
+        "lost POST /api/intake response after the handler returned 202"
+      ],
+      "overflow": [],
+      "pageErrors": [],
+      "intakeBodies": [
+        {
+          "submissionId": "b5897da7-8fd4-44af-b37a-4170347799a8",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-edit-copy-and-revert-390@example.test",
+          "business": "Signup QA edit-copy-and-revert 390",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        },
+        {
+          "submissionId": "fda9b908-6d54-4ab6-b9b9-5c1ba9c71359",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-edit-copy-and-revert-390@example.test",
+          "business": "Signup QA edit-copy-and-revert 390 Edited",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        },
+        {
+          "submissionId": "e212d687-a11d-4002-a05c-469732b77b95",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-edit-copy-and-revert-390@example.test",
+          "business": "Signup QA edit-copy-and-revert 390",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        }
+      ],
+      "email": "qa-signup-edit-copy-and-revert-390@example.test",
+      "values": {
+        "name": "Signup QA Owner",
+        "email": "qa-signup-edit-copy-and-revert-390@example.test",
+        "business": "Signup QA edit-copy-and-revert 390"
+      },
+      "onboardHolds": [],
+      "fault": {
+        "when": "after",
+        "remaining": 0
+      },
+      "copyAfterEdit": "Failed to fetch",
+      "after": {
+        "posts": 3,
+        "distinctIds": 3,
+        "revertReusedFirst": false,
+        "handoffs": [
+          {
+            "key": "1424b152",
+            "business": "Signup QA edit-copy-and-revert 390"
+          },
+          {
+            "key": "600bb97a",
+            "business": "Signup QA edit-copy-and-revert 390 Edited"
+          },
+          {
+            "key": "69ea57ee",
+            "business": "Signup QA edit-copy-and-revert 390"
+          }
+        ],
+        "emailRate": 3
+      }
+    },
+    {
+      "id": "stuck-after-success-390",
+      "kind": "stuck-after-success",
+      "width": 390,
+      "keyboard": true,
+      "events": [
+        "navigation to /onboard.html answered 204 (never commits)"
+      ],
+      "overflow": [
+        [
+          "stuck",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "intakeBodies": [
+        {
+          "submissionId": "9db89c6c-f767-4c91-9099-fa2d50887b50",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-stuck-after-success-390@example.test",
+          "business": "Signup QA stuck-after-success 390",
+          "trade": "",
+          "goal": "",
+          "marketingConsent": false,
+          "botfield": ""
+        },
+        {
+          "submissionId": "9db89c6c-f767-4c91-9099-fa2d50887b50",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-stuck-after-success-390@example.test",
+          "business": "Signup QA stuck-after-success 390",
+          "trade": "",
+          "goal": "",
+          "marketingConsent": false,
+          "botfield": ""
+        }
+      ],
+      "email": "qa-signup-stuck-after-success-390@example.test",
+      "values": {
+        "name": "Signup QA Owner",
+        "email": "qa-signup-stuck-after-success-390@example.test",
+        "business": "Signup QA stuck-after-success 390"
+      },
+      "onboardHolds": [],
+      "onboard204": false,
+      "stuck": {
+        "path": "/",
+        "status": "Saved. Opening your setup…",
+        "link": null,
+        "linkFocused": false,
+        "linkInLive": false
+      },
+      "next": {
+        "notice": "Your business details are saved. Confirm your email to carry them into your setup.",
+        "email": "qa-signup-stuck-after-success-390@example.test",
+        "hash": ""
+      }
+    },
+    {
+      "id": "server-invalid-email-390",
+      "kind": "server-invalid-email",
+      "width": 390,
+      "keyboard": false,
+      "events": [],
+      "overflow": [
+        [
+          "invalid-email",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "intakeBodies": [
+        {
+          "submissionId": "bd4af425-556d-461c-bc66-1b07eb3d91ee",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-invalid-390@localhost",
+          "business": "Signup QA server-invalid-email 390",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        },
+        {
+          "submissionId": "c61f79cd-5bd1-47df-9703-e9f84fa5acca",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-invalid-390@example.test",
+          "business": "Signup QA server-invalid-email 390",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        }
+      ],
+      "email": "qa-signup-invalid-390@example.test",
+      "values": {
+        "name": "Signup QA Owner",
+        "email": "qa-signup-invalid-390@example.test",
+        "business": "Signup QA server-invalid-email 390"
+      },
+      "onboardHolds": [],
+      "after": {
+        "focus": "",
+        "invalid": null,
+        "desc": "",
+        "status": "Enter a valid email address."
+      }
+    },
+    {
+      "id": "expired-410-390",
+      "kind": "expired-410",
+      "width": 390,
+      "keyboard": false,
+      "events": [
+        "lost POST /api/intake response after the handler returned 202"
+      ],
+      "overflow": [
+        [
+          "expired",
+          false
+        ]
+      ],
+      "pageErrors": [],
+      "intakeBodies": [
+        {
+          "submissionId": "a2792eae-3ee7-4f15-9d33-602fc988bd9b",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-expired-410-390@example.test",
+          "business": "Signup QA expired-410 390",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        },
+        {
+          "submissionId": "a2792eae-3ee7-4f15-9d33-602fc988bd9b",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-expired-410-390@example.test",
+          "business": "Signup QA expired-410 390",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        },
+        {
+          "submissionId": "a2792eae-3ee7-4f15-9d33-602fc988bd9b",
+          "name": "Signup QA Owner",
+          "email": "qa-signup-expired-410-390@example.test",
+          "business": "Signup QA expired-410 390",
+          "trade": "",
+          "goal": "missed_calls",
+          "marketingConsent": false,
+          "botfield": ""
+        }
+      ],
+      "email": "qa-signup-expired-410-390@example.test",
+      "values": {
+        "name": "Signup QA Owner",
+        "email": "qa-signup-expired-410-390@example.test",
+        "business": "Signup QA expired-410 390"
+      },
+      "onboardHolds": [],
+      "fault": {
+        "when": "after",
+        "remaining": 0
+      },
+      "expired": {
+        "statusRole": "status",
+        "statusLive": "polite",
+        "status": "Start a new form to continue.",
+        "isError": true,
+        "focusOnStatus": "",
+        "activeId": "BODY",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-expired-410-390@example.test",
+        "business": "Signup QA expired-410 390",
+        "path": "/"
+      },
+      "fatal": "page.waitForURL: Timeout 15000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation to \"**/onboard.html\" until \"load\"\n============================================================\n    at /private/tmp/mc-claude-signup-20261110/qa-artifacts/claude-collaboration/signup/signup-lost-response-ui-check.mjs:268:60"
+    }
+  ],
+  "requests": [
+    {
+      "id": "validation-1440",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "f2f4e0ae",
+      "status": 202
+    },
+    {
+      "id": "lost-before-handler-1440",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "f93cb7e5",
+      "lost": "before"
+    },
+    {
+      "id": "lost-before-handler-1440",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "f93cb7e5",
+      "status": 202
+    },
+    {
+      "id": "lost-after-commit-1440",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "bff91515",
+      "status": 202,
+      "lost": "after"
+    },
+    {
+      "id": "lost-after-commit-1440",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "bff91515",
+      "status": 202
+    },
+    {
+      "id": "html-502-1440",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "75f69148",
+      "status": 502,
+      "fake": "html"
+    },
+    {
+      "id": "html-502-1440",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "75f69148",
+      "status": 202
+    },
+    {
+      "id": "json-4xx-rate-limit-1440",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "103a8a55",
+      "status": 429
+    },
+    {
+      "id": "slow-timeout-after-commit-1440",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "2851a0de",
+      "status": 202,
+      "lost": "hold-after"
+    },
+    {
+      "id": "slow-timeout-after-commit-1440",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "2851a0de",
+      "status": 202
+    },
+    {
+      "id": "double-tap-1440",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "de369acc",
+      "status": 202
+    },
+    {
+      "id": "double-tap-1440",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "de369acc",
+      "status": 202
+    },
+    {
+      "id": "edit-after-lost-1440",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "cfcd5e7c",
+      "status": 202,
+      "lost": "after"
+    },
+    {
+      "id": "edit-after-lost-1440",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "da01506d",
+      "status": 202
+    },
+    {
+      "id": "keyboard-journey-1440",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "e28f3706",
+      "status": 202
+    },
+    {
+      "id": "keyboard-journey-1440",
+      "method": "POST",
+      "path": "/api/access",
+      "action": "request_link",
+      "status": 202
+    },
+    {
+      "id": "keyboard-journey-1440",
+      "method": "POST",
+      "path": "/api/access",
+      "action": "exchange",
+      "status": 200
+    },
+    {
+      "id": "keyboard-journey-1440",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "edit-copy-and-revert-1440",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "d3dcad4c",
+      "status": 202,
+      "lost": "after"
+    },
+    {
+      "id": "edit-copy-and-revert-1440",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "fc396e96",
+      "status": 202,
+      "lost": "after"
+    },
+    {
+      "id": "edit-copy-and-revert-1440",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "8469ce93",
+      "status": 202
+    },
+    {
+      "id": "stuck-after-success-1440",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "a8ef459f",
+      "status": 202
+    },
+    {
+      "id": "stuck-after-success-1440",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "a8ef459f",
+      "status": 202
+    },
+    {
+      "id": "server-invalid-email-1440",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "85a143cd",
+      "status": 400
+    },
+    {
+      "id": "server-invalid-email-1440",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "cb1a3750",
+      "status": 202
+    },
+    {
+      "id": "expired-410-1440",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "a9786e63",
+      "status": 202,
+      "lost": "after"
+    },
+    {
+      "id": "expired-410-1440",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "a9786e63",
+      "status": 410
+    },
+    {
+      "id": "expired-410-1440",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "a9786e63",
+      "status": 410
+    },
+    {
+      "id": "validation-390",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "31451b6e",
+      "status": 202
+    },
+    {
+      "id": "lost-before-handler-390",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "f7a79503",
+      "lost": "before"
+    },
+    {
+      "id": "lost-before-handler-390",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "f7a79503",
+      "status": 202
+    },
+    {
+      "id": "lost-after-commit-390",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "d0f2fd55",
+      "status": 202,
+      "lost": "after"
+    },
+    {
+      "id": "lost-after-commit-390",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "d0f2fd55",
+      "status": 202
+    },
+    {
+      "id": "html-502-390",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "4256c93a",
+      "status": 502,
+      "fake": "html"
+    },
+    {
+      "id": "html-502-390",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "4256c93a",
+      "status": 202
+    },
+    {
+      "id": "json-4xx-rate-limit-390",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "df3b43dd",
+      "status": 429
+    },
+    {
+      "id": "slow-timeout-after-commit-390",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "7993c932",
+      "status": 202,
+      "lost": "hold-after"
+    },
+    {
+      "id": "slow-timeout-after-commit-390",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "7993c932",
+      "status": 202
+    },
+    {
+      "id": "double-tap-390",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "05fa144d",
+      "status": 202
+    },
+    {
+      "id": "double-tap-390",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "05fa144d",
+      "status": 202
+    },
+    {
+      "id": "edit-after-lost-390",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "645dd2ad",
+      "status": 202,
+      "lost": "after"
+    },
+    {
+      "id": "edit-after-lost-390",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "88d19392",
+      "status": 202
+    },
+    {
+      "id": "keyboard-journey-390",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "da3f847e",
+      "status": 202
+    },
+    {
+      "id": "keyboard-journey-390",
+      "method": "POST",
+      "path": "/api/access",
+      "action": "request_link",
+      "status": 202
+    },
+    {
+      "id": "keyboard-journey-390",
+      "method": "POST",
+      "path": "/api/access",
+      "action": "exchange",
+      "status": 200
+    },
+    {
+      "id": "keyboard-journey-390",
+      "method": "GET",
+      "path": "/api/access",
+      "status": 200
+    },
+    {
+      "id": "edit-copy-and-revert-390",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "b5897da7",
+      "status": 202,
+      "lost": "after"
+    },
+    {
+      "id": "edit-copy-and-revert-390",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "fda9b908",
+      "status": 202,
+      "lost": "after"
+    },
+    {
+      "id": "edit-copy-and-revert-390",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "e212d687",
+      "status": 202
+    },
+    {
+      "id": "stuck-after-success-390",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "9db89c6c",
+      "status": 202
+    },
+    {
+      "id": "stuck-after-success-390",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "9db89c6c",
+      "status": 202
+    },
+    {
+      "id": "server-invalid-email-390",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "bd4af425",
+      "status": 400
+    },
+    {
+      "id": "server-invalid-email-390",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "c61f79cd",
+      "status": 202
+    },
+    {
+      "id": "expired-410-390",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "a2792eae",
+      "status": 202,
+      "lost": "after"
+    },
+    {
+      "id": "expired-410-390",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "a2792eae",
+      "status": 410
+    },
+    {
+      "id": "expired-410-390",
+      "method": "POST",
+      "path": "/api/intake",
+      "submissionId": "a2792eae",
+      "status": 410
+    }
+  ],
+  "blockedBrowser": [],
+  "forbiddenApi": [],
+  "blockedServer": [],
+  "pageErrors": [],
+  "screenshots": [
+    "scratchpad/claude-signup-base2-final-validation-1440-empty.png",
+    "scratchpad/claude-signup-base2-final-lost-before-handler-1440-error.png",
+    "scratchpad/claude-signup-base2-final-lost-after-commit-1440-error.png",
+    "scratchpad/claude-signup-base2-final-html-502-1440-error.png",
+    "scratchpad/claude-signup-base2-final-json-4xx-rate-limit-1440-error.png",
+    "scratchpad/claude-signup-base2-final-slow-timeout-after-commit-1440-error.png",
+    "scratchpad/claude-signup-base2-final-keyboard-journey-1440-next.png",
+    "scratchpad/claude-signup-base2-final-stuck-after-success-1440-stuck.png",
+    "scratchpad/claude-signup-base2-final-server-invalid-email-1440-error.png",
+    "scratchpad/claude-signup-base2-final-expired-410-1440-error.png",
+    "scratchpad/claude-signup-base2-final-expired-410-1440-failure.png",
+    "scratchpad/claude-signup-base2-final-validation-390-empty.png",
+    "scratchpad/claude-signup-base2-final-lost-before-handler-390-error.png",
+    "scratchpad/claude-signup-base2-final-lost-after-commit-390-error.png",
+    "scratchpad/claude-signup-base2-final-html-502-390-error.png",
+    "scratchpad/claude-signup-base2-final-json-4xx-rate-limit-390-error.png",
+    "scratchpad/claude-signup-base2-final-slow-timeout-after-commit-390-error.png",
+    "scratchpad/claude-signup-base2-final-keyboard-journey-390-next.png",
+    "scratchpad/claude-signup-base2-final-stuck-after-success-390-stuck.png",
+    "scratchpad/claude-signup-base2-final-server-invalid-email-390-error.png",
+    "scratchpad/claude-signup-base2-final-expired-410-390-error.png",
+    "scratchpad/claude-signup-base2-final-expired-410-390-failure.png"
+  ],
+  "servedSignupJs": [
+    "7f6e01593eedd12ecf9d768a41a9b43d3976799306825e0bd4d53fc1a29b89d9"
+  ],
+  "sourceBefore": {
+    "index.html": "471b25d6aae88216fe2090a1258ffc4aa19d8718fe8dbb1aaad156d83cc331f4",
+    "signup-intake.js": "7f6e01593eedd12ecf9d768a41a9b43d3976799306825e0bd4d53fc1a29b89d9",
+    "site-refresh.css": "5c962fe8bf9507c3c639a71c9b046f2ed66d4e066e50e3d2fce91faff2082cc1",
+    "styles.css": "e8ac1b30d0205f99c9499dab7cf3d51e4970f8f69295e9c66f963a12033bd56b",
+    "onboard.html": "fd475d713c37d30c32d607d985cb24627bff6a80032386eae6ef9fc985620887",
+    "onboard.js": "99920e7b26ea0fe0313e00472dce942da025c6efb0c3498e104ab74fc44bd29b",
+    "netlify/functions/intake.mjs": "d110f94abd94feceedd6aa2fb30f2c8f536e1fc1e6ec5f7be22d86c978807ea8",
+    "netlify/functions/lib/intake.mjs": "0ff345d37c5e64be6304cd44fe3e68ad74e67e23bcb8acd8e4d44ec6eb03baa3",
+    "netlify/functions/access.mjs": "5141bce6641cdf35a3503f4de41021b313b7de1745c82e2101ac7bdf19c89b53",
+    "netlify/functions/lib/access.mjs": "057921a525476b4cba51ce15233cca477a2ab135ece40b59bfce56d17a16969d",
+    "netlify/functions/lib/store.mjs": "4b12e064e451311f79b32e54a25a0cbd0c55ce8efc5a423fdb5166be419858da"
+  },
+  "sourceAfter": {
+    "index.html": "471b25d6aae88216fe2090a1258ffc4aa19d8718fe8dbb1aaad156d83cc331f4",
+    "signup-intake.js": "7f6e01593eedd12ecf9d768a41a9b43d3976799306825e0bd4d53fc1a29b89d9",
+    "site-refresh.css": "5c962fe8bf9507c3c639a71c9b046f2ed66d4e066e50e3d2fce91faff2082cc1",
+    "styles.css": "e8ac1b30d0205f99c9499dab7cf3d51e4970f8f69295e9c66f963a12033bd56b",
+    "onboard.html": "fd475d713c37d30c32d607d985cb24627bff6a80032386eae6ef9fc985620887",
+    "onboard.js": "99920e7b26ea0fe0313e00472dce942da025c6efb0c3498e104ab74fc44bd29b",
+    "netlify/functions/intake.mjs": "d110f94abd94feceedd6aa2fb30f2c8f536e1fc1e6ec5f7be22d86c978807ea8",
+    "netlify/functions/lib/intake.mjs": "0ff345d37c5e64be6304cd44fe3e68ad74e67e23bcb8acd8e4d44ec6eb03baa3",
+    "netlify/functions/access.mjs": "5141bce6641cdf35a3503f4de41021b313b7de1745c82e2101ac7bdf19c89b53",
+    "netlify/functions/lib/access.mjs": "057921a525476b4cba51ce15233cca477a2ab135ece40b59bfce56d17a16969d",
+    "netlify/functions/lib/store.mjs": "4b12e064e451311f79b32e54a25a0cbd0c55ce8efc5a423fdb5166be419858da"
+  },
+  "summary": {
+    "checks": 183,
+    "passed": 111,
+    "failed": 72
+  },
+  "failed": [
+    {
+      "name": "validation-1440: each invalid field is aria-invalid with a visible message tied by aria-describedby",
+      "detail": [
+        {
+          "id": "intake-name",
+          "invalid": null,
+          "described": []
+        },
+        {
+          "id": "intake-email",
+          "invalid": null,
+          "described": []
+        },
+        {
+          "id": "intake-business",
+          "invalid": null,
+          "described": []
+        }
+      ]
+    },
+    {
+      "name": "validation-1440: whitespace-only name and malformed email are flagged; focus on the first; fixed field cleared",
+      "detail": {
+        "active": "intake-email",
+        "nameInvalid": null,
+        "nameDesc": "",
+        "emailInvalid": null,
+        "emailDesc": "",
+        "businessInvalid": null
+      }
+    },
+    {
+      "name": "lost-before-handler-1440: unknown outcome shows no raw browser/JSON error text",
+      "detail": "Failed to fetch"
+    },
+    {
+      "name": "lost-before-handler-1440: unknown outcome says the details may already be saved and retrying is safe",
+      "detail": "Failed to fetch"
+    },
+    {
+      "name": "lost-before-handler-1440: unknown outcome names the retry button on the page",
+      "detail": {
+        "status": "Failed to fetch",
+        "button": "Continue to setup"
+      }
+    },
+    {
+      "name": "lost-before-handler-1440: typed values stay and focus moves to the message",
+      "detail": {
+        "statusRole": "status",
+        "statusLive": "polite",
+        "status": "Failed to fetch",
+        "isError": true,
+        "focusOnStatus": "",
+        "activeId": "BODY",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-lost-before-handler-1440@example.test",
+        "business": "Signup QA lost-before-handler 1440",
+        "path": "/"
+      }
+    },
+    {
+      "name": "lost-before-handler-1440: the no-second-signup promise is limited to unchanged answers and says a change is a new signup",
+      "detail": "Failed to fetch"
+    },
+    {
+      "name": "lost-after-commit-1440: unknown outcome shows no raw browser/JSON error text",
+      "detail": "Failed to fetch"
+    },
+    {
+      "name": "lost-after-commit-1440: unknown outcome says the details may already be saved and retrying is safe",
+      "detail": "Failed to fetch"
+    },
+    {
+      "name": "lost-after-commit-1440: unknown outcome names the retry button on the page",
+      "detail": {
+        "status": "Failed to fetch",
+        "button": "Continue to setup"
+      }
+    },
+    {
+      "name": "lost-after-commit-1440: typed values stay and focus moves to the message",
+      "detail": {
+        "statusRole": "status",
+        "statusLive": "polite",
+        "status": "Failed to fetch",
+        "isError": true,
+        "focusOnStatus": false,
+        "activeId": "intake-business",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-lost-after-commit-1440@example.test",
+        "business": "Signup QA lost-after-commit 1440",
+        "path": "/"
+      }
+    },
+    {
+      "name": "lost-after-commit-1440: the no-second-signup promise is limited to unchanged answers and says a change is a new signup",
+      "detail": "Failed to fetch"
+    },
+    {
+      "name": "lost-after-commit-1440: retry reuses the same submission id and lands in exactly one signup",
+      "detail": {
+        "submissionIds": 1,
+        "posts": 2,
+        "handoffs": [
+          {
+            "key": "4052e829",
+            "business": "Signup QA lost-after-commit 1440"
+          }
+        ],
+        "retryFocus": "intake-email"
+      }
+    },
+    {
+      "name": "html-502-1440: unknown outcome shows no raw browser/JSON error text",
+      "detail": "Unexpected token '<', \"<!doctype \"... is not valid JSON"
+    },
+    {
+      "name": "html-502-1440: unknown outcome says the details may already be saved and retrying is safe",
+      "detail": "Unexpected token '<', \"<!doctype \"... is not valid JSON"
+    },
+    {
+      "name": "html-502-1440: unknown outcome names the retry button on the page",
+      "detail": {
+        "status": "Unexpected token '<', \"<!doctype \"... is not valid JSON",
+        "button": "Continue to setup"
+      }
+    },
+    {
+      "name": "html-502-1440: typed values stay and focus moves to the message",
+      "detail": {
+        "statusRole": "status",
+        "statusLive": "polite",
+        "status": "Unexpected token '<', \"<!doctype \"... is not valid JSON",
+        "isError": true,
+        "focusOnStatus": "",
+        "activeId": "BODY",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-html-502-1440@example.test",
+        "business": "Signup QA html-502 1440",
+        "path": "/"
+      }
+    },
+    {
+      "name": "html-502-1440: the no-second-signup promise is limited to unchanged answers and says a change is a new signup",
+      "detail": "Unexpected token '<', \"<!doctype \"... is not valid JSON"
+    },
+    {
+      "name": "json-4xx-rate-limit-1440: 4xx keeps typed values and focus moves to the message",
+      "detail": {
+        "statusRole": "status",
+        "statusLive": "polite",
+        "status": "Please wait a few minutes before trying again.",
+        "isError": true,
+        "focusOnStatus": "",
+        "activeId": "BODY",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-json-4xx-rate-limit-1440@example.test",
+        "business": "Signup QA json-4xx-rate-limit 1440",
+        "path": "/"
+      }
+    },
+    {
+      "name": "json-4xx-rate-limit-1440: the focused 4xx message is not also in a live region (announced once)",
+      "detail": {
+        "role": "status",
+        "live": "polite"
+      }
+    },
+    {
+      "name": "slow-timeout-after-commit-1440: a slow reply tells the owner it is still working and to keep the page open",
+      "detail": "Saving your details…"
+    },
+    {
+      "name": "slow-timeout-after-commit-1440: unknown outcome says the details may already be saved and retrying is safe",
+      "detail": "That took longer than expected. Your answers are still here. Please try again."
+    },
+    {
+      "name": "slow-timeout-after-commit-1440: unknown outcome names the retry button on the page",
+      "detail": {
+        "status": "That took longer than expected. Your answers are still here. Please try again.",
+        "button": "Continue to setup"
+      }
+    },
+    {
+      "name": "slow-timeout-after-commit-1440: typed values stay and focus moves to the message",
+      "detail": {
+        "statusRole": "status",
+        "statusLive": "polite",
+        "status": "That took longer than expected. Your answers are still here. Please try again.",
+        "isError": true,
+        "focusOnStatus": "",
+        "activeId": "BODY",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-slow-timeout-after-commit-1440@example.test",
+        "business": "Signup QA slow-timeout-after-commit 1440",
+        "path": "/"
+      }
+    },
+    {
+      "name": "slow-timeout-after-commit-1440: the no-second-signup promise is limited to unchanged answers and says a change is a new signup",
+      "detail": "That took longer than expected. Your answers are still here. Please try again."
+    },
+    {
+      "name": "double-tap-1440: after success, while setup is opening, the button stays locked and another tap/submit sends nothing",
+      "detail": {
+        "probe": {
+          "disabled": "false"
+        },
+        "posts": 2
+      }
+    },
+    {
+      "name": "edit-after-lost-1440: lost-response copy shows no raw text",
+      "detail": "Failed to fetch"
+    },
+    {
+      "name": "edit-copy-and-revert-1440: with an answer changed after a lost response, the message on screen does not promise no second signup unconditionally",
+      "detail": "Failed to fetch"
+    },
+    {
+      "name": "edit-copy-and-revert-1440: changing back to the first answers reuses the first submission id (no third signup, no extra rate spend)",
+      "detail": {
+        "posts": 3,
+        "distinctIds": 3,
+        "revertReusedFirst": false,
+        "handoffs": [
+          {
+            "key": "538b40e6",
+            "business": "Signup QA edit-copy-and-revert 1440"
+          },
+          {
+            "key": "64bc4155",
+            "business": "Signup QA edit-copy-and-revert 1440"
+          },
+          {
+            "key": "691f30d9",
+            "business": "Signup QA edit-copy-and-revert 1440 Edited"
+          }
+        ],
+        "emailRate": 3
+      }
+    },
+    {
+      "name": "stuck-after-success-1440: after success with a stalled page change, an \"Open your setup\" link to the handoff is shown and focused",
+      "detail": {
+        "path": "/",
+        "status": "Saved. Opening your setup…",
+        "link": null,
+        "linkFocused": false,
+        "linkInLive": false
+      }
+    },
+    {
+      "name": "stuck-after-success-1440: the focused link is not inside a live region",
+      "detail": {
+        "path": "/",
+        "status": "Saved. Opening your setup…",
+        "link": null,
+        "linkFocused": false,
+        "linkInLive": false
+      }
+    },
+    {
+      "name": "stuck-after-success-1440: the link (keyboard) opens setup with the saved details, one signup",
+      "detail": {
+        "notice": "Your business details are saved. Confirm your email to carry them into your setup.",
+        "email": "qa-signup-stuck-after-success-1440@example.test",
+        "hash": ""
+      }
+    },
+    {
+      "name": "server-invalid-email-1440: server invalid_email focuses the email field with the server message tied by aria-describedby",
+      "detail": {
+        "status": "Enter a valid email address.",
+        "focus": "",
+        "invalid": null,
+        "desc": ""
+      }
+    },
+    {
+      "name": "server-invalid-email-1440: the server message is not duplicated in the status line",
+      "detail": {
+        "focus": "",
+        "invalid": null,
+        "desc": "",
+        "status": "Enter a valid email address."
+      }
+    },
+    {
+      "name": "expired-410-1440: 410 intake_expired copy names the button that works instead of \"Start a new form\"",
+      "detail": {
+        "status": 410,
+        "text": "Start a new form to continue.",
+        "focus": "",
+        "live": "polite"
+      }
+    },
+    {
+      "name": "expired-410-1440: scenario completes",
+      "detail": "page.waitForURL: Timeout 15000ms exceeded."
+    },
+    {
+      "name": "validation-390: each invalid field is aria-invalid with a visible message tied by aria-describedby",
+      "detail": [
+        {
+          "id": "intake-name",
+          "invalid": null,
+          "described": []
+        },
+        {
+          "id": "intake-email",
+          "invalid": null,
+          "described": []
+        },
+        {
+          "id": "intake-business",
+          "invalid": null,
+          "described": []
+        }
+      ]
+    },
+    {
+      "name": "validation-390: whitespace-only name and malformed email are flagged; focus on the first; fixed field cleared",
+      "detail": {
+        "active": "intake-email",
+        "nameInvalid": null,
+        "nameDesc": "",
+        "emailInvalid": null,
+        "emailDesc": "",
+        "businessInvalid": null
+      }
+    },
+    {
+      "name": "lost-before-handler-390: unknown outcome shows no raw browser/JSON error text",
+      "detail": "Failed to fetch"
+    },
+    {
+      "name": "lost-before-handler-390: unknown outcome says the details may already be saved and retrying is safe",
+      "detail": "Failed to fetch"
+    },
+    {
+      "name": "lost-before-handler-390: unknown outcome names the retry button on the page",
+      "detail": {
+        "status": "Failed to fetch",
+        "button": "Continue to setup"
+      }
+    },
+    {
+      "name": "lost-before-handler-390: typed values stay and focus moves to the message",
+      "detail": {
+        "statusRole": "status",
+        "statusLive": "polite",
+        "status": "Failed to fetch",
+        "isError": true,
+        "focusOnStatus": "",
+        "activeId": "BODY",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-lost-before-handler-390@example.test",
+        "business": "Signup QA lost-before-handler 390",
+        "path": "/"
+      }
+    },
+    {
+      "name": "lost-before-handler-390: the no-second-signup promise is limited to unchanged answers and says a change is a new signup",
+      "detail": "Failed to fetch"
+    },
+    {
+      "name": "lost-after-commit-390: unknown outcome shows no raw browser/JSON error text",
+      "detail": "Failed to fetch"
+    },
+    {
+      "name": "lost-after-commit-390: unknown outcome says the details may already be saved and retrying is safe",
+      "detail": "Failed to fetch"
+    },
+    {
+      "name": "lost-after-commit-390: unknown outcome names the retry button on the page",
+      "detail": {
+        "status": "Failed to fetch",
+        "button": "Continue to setup"
+      }
+    },
+    {
+      "name": "lost-after-commit-390: typed values stay and focus moves to the message",
+      "detail": {
+        "statusRole": "status",
+        "statusLive": "polite",
+        "status": "Failed to fetch",
+        "isError": true,
+        "focusOnStatus": false,
+        "activeId": "intake-business",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-lost-after-commit-390@example.test",
+        "business": "Signup QA lost-after-commit 390",
+        "path": "/"
+      }
+    },
+    {
+      "name": "lost-after-commit-390: the no-second-signup promise is limited to unchanged answers and says a change is a new signup",
+      "detail": "Failed to fetch"
+    },
+    {
+      "name": "lost-after-commit-390: retry reuses the same submission id and lands in exactly one signup",
+      "detail": {
+        "submissionIds": 1,
+        "posts": 2,
+        "handoffs": [
+          {
+            "key": "97cb3928",
+            "business": "Signup QA lost-after-commit 390"
+          }
+        ],
+        "retryFocus": "intake-email"
+      }
+    },
+    {
+      "name": "html-502-390: unknown outcome shows no raw browser/JSON error text",
+      "detail": "Unexpected token '<', \"<!doctype \"... is not valid JSON"
+    },
+    {
+      "name": "html-502-390: unknown outcome says the details may already be saved and retrying is safe",
+      "detail": "Unexpected token '<', \"<!doctype \"... is not valid JSON"
+    },
+    {
+      "name": "html-502-390: unknown outcome names the retry button on the page",
+      "detail": {
+        "status": "Unexpected token '<', \"<!doctype \"... is not valid JSON",
+        "button": "Continue to setup"
+      }
+    },
+    {
+      "name": "html-502-390: typed values stay and focus moves to the message",
+      "detail": {
+        "statusRole": "status",
+        "statusLive": "polite",
+        "status": "Unexpected token '<', \"<!doctype \"... is not valid JSON",
+        "isError": true,
+        "focusOnStatus": "",
+        "activeId": "BODY",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-html-502-390@example.test",
+        "business": "Signup QA html-502 390",
+        "path": "/"
+      }
+    },
+    {
+      "name": "html-502-390: the no-second-signup promise is limited to unchanged answers and says a change is a new signup",
+      "detail": "Unexpected token '<', \"<!doctype \"... is not valid JSON"
+    },
+    {
+      "name": "json-4xx-rate-limit-390: 4xx keeps typed values and focus moves to the message",
+      "detail": {
+        "statusRole": "status",
+        "statusLive": "polite",
+        "status": "Please wait a few minutes before trying again.",
+        "isError": true,
+        "focusOnStatus": "",
+        "activeId": "BODY",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-json-4xx-rate-limit-390@example.test",
+        "business": "Signup QA json-4xx-rate-limit 390",
+        "path": "/"
+      }
+    },
+    {
+      "name": "json-4xx-rate-limit-390: the focused 4xx message is not also in a live region (announced once)",
+      "detail": {
+        "role": "status",
+        "live": "polite"
+      }
+    },
+    {
+      "name": "slow-timeout-after-commit-390: a slow reply tells the owner it is still working and to keep the page open",
+      "detail": "Saving your details…"
+    },
+    {
+      "name": "slow-timeout-after-commit-390: unknown outcome says the details may already be saved and retrying is safe",
+      "detail": "That took longer than expected. Your answers are still here. Please try again."
+    },
+    {
+      "name": "slow-timeout-after-commit-390: unknown outcome names the retry button on the page",
+      "detail": {
+        "status": "That took longer than expected. Your answers are still here. Please try again.",
+        "button": "Continue to setup"
+      }
+    },
+    {
+      "name": "slow-timeout-after-commit-390: typed values stay and focus moves to the message",
+      "detail": {
+        "statusRole": "status",
+        "statusLive": "polite",
+        "status": "That took longer than expected. Your answers are still here. Please try again.",
+        "isError": true,
+        "focusOnStatus": "",
+        "activeId": "BODY",
+        "buttonEnabled": true,
+        "button": "Continue to setup",
+        "name": "Signup QA Owner",
+        "email": "qa-signup-slow-timeout-after-commit-390@example.test",
+        "business": "Signup QA slow-timeout-after-commit 390",
+        "path": "/"
+      }
+    },
+    {
+      "name": "slow-timeout-after-commit-390: the no-second-signup promise is limited to unchanged answers and says a change is a new signup",
+      "detail": "That took longer than expected. Your answers are still here. Please try again."
+    },
+    {
+      "name": "double-tap-390: after success, while setup is opening, the button stays locked and another tap/submit sends nothing",
+      "detail": {
+        "probe": {
+          "disabled": "false"
+        },
+        "posts": 2
+      }
+    },
+    {
+      "name": "edit-after-lost-390: lost-response copy shows no raw text",
+      "detail": "Failed to fetch"
+    },
+    {
+      "name": "edit-copy-and-revert-390: with an answer changed after a lost response, the message on screen does not promise no second signup unconditionally",
+      "detail": "Failed to fetch"
+    },
+    {
+      "name": "edit-copy-and-revert-390: changing back to the first answers reuses the first submission id (no third signup, no extra rate spend)",
+      "detail": {
+        "posts": 3,
+        "distinctIds": 3,
+        "revertReusedFirst": false,
+        "handoffs": [
+          {
+            "key": "1424b152",
+            "business": "Signup QA edit-copy-and-revert 390"
+          },
+          {
+            "key": "600bb97a",
+            "business": "Signup QA edit-copy-and-revert 390 Edited"
+          },
+          {
+            "key": "69ea57ee",
+            "business": "Signup QA edit-copy-and-revert 390"
+          }
+        ],
+        "emailRate": 3
+      }
+    },
+    {
+      "name": "stuck-after-success-390: after success with a stalled page change, an \"Open your setup\" link to the handoff is shown and focused",
+      "detail": {
+        "path": "/",
+        "status": "Saved. Opening your setup…",
+        "link": null,
+        "linkFocused": false,
+        "linkInLive": false
+      }
+    },
+    {
+      "name": "stuck-after-success-390: the focused link is not inside a live region",
+      "detail": {
+        "path": "/",
+        "status": "Saved. Opening your setup…",
+        "link": null,
+        "linkFocused": false,
+        "linkInLive": false
+      }
+    },
+    {
+      "name": "stuck-after-success-390: the link (keyboard) opens setup with the saved details, one signup",
+      "detail": {
+        "notice": "Your business details are saved. Confirm your email to carry them into your setup.",
+        "email": "qa-signup-stuck-after-success-390@example.test",
+        "hash": ""
+      }
+    },
+    {
+      "name": "server-invalid-email-390: server invalid_email focuses the email field with the server message tied by aria-describedby",
+      "detail": {
+        "status": "Enter a valid email address.",
+        "focus": "",
+        "invalid": null,
+        "desc": ""
+      }
+    },
+    {
+      "name": "server-invalid-email-390: the server message is not duplicated in the status line",
+      "detail": {
+        "focus": "",
+        "invalid": null,
+        "desc": "",
+        "status": "Enter a valid email address."
+      }
+    },
+    {
+      "name": "expired-410-390: 410 intake_expired copy names the button that works instead of \"Start a new form\"",
+      "detail": {
+        "status": 410,
+        "text": "Start a new form to continue.",
+        "focus": "",
+        "live": "polite"
+      }
+    },
+    {
+      "name": "expired-410-390: scenario completes",
+      "detail": "page.waitForURL: Timeout 15000ms exceeded."
+    }
+  ]
+}

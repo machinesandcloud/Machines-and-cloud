@@ -1,0 +1,156 @@
+{
+  "at": "2026-11-10T09:38:31.883Z",
+  "mode": "Memory storage; all external networking blocked",
+  "before": {
+    "netlify/functions/intake.mjs": "d110f94abd94feceedd6aa2fb30f2c8f536e1fc1e6ec5f7be22d86c978807ea8",
+    "netlify/functions/lib/intake.mjs": "0ff345d37c5e64be6304cd44fe3e68ad74e67e23bcb8acd8e4d44ec6eb03baa3",
+    "netlify/functions/access.mjs": "5141bce6641cdf35a3503f4de41021b313b7de1745c82e2101ac7bdf19c89b53",
+    "netlify/functions/lib/access.mjs": "057921a525476b4cba51ce15233cca477a2ab135ece40b59bfce56d17a16969d",
+    "netlify/functions/onboard.mjs": "be2ed480eabf172059f88162cb6010e974c7e8f38846104f58d915c458daa31e",
+    "netlify/functions/client.mjs": "eafa4e54aae9adcf7e882f09f7daf3797486791178b88ebc1c2e3954cf4a7391",
+    "netlify/functions/lib/setup.mjs": "0748a30291a6976ca080b754d1329fc30b2410ad54e63b64394de6d7fd5c890a"
+  },
+  "checks": [
+    {
+      "name": "Capture durably stores a prospect before verification",
+      "pass": true
+    },
+    {
+      "name": "Response contains only opaque handoff, expiry and fixed path",
+      "pass": true
+    },
+    {
+      "name": "Raw handoff and browser submission secret are absent from stored values",
+      "pass": true
+    },
+    {
+      "name": "Anonymous GET never discloses prospect data",
+      "pass": true
+    },
+    {
+      "name": "Default authenticated audience excludes unverified opt-ins",
+      "pass": true
+    },
+    {
+      "name": "Intake creates no account or client",
+      "pass": true
+    },
+    {
+      "name": "Concurrent identical retries keep one lead and identical handoff",
+      "pass": true
+    },
+    {
+      "name": "Changed payload cannot reuse an existing submission secret",
+      "pass": true
+    },
+    {
+      "name": "Verified link recovers preliminary answers with CAS revision",
+      "pass": true
+    },
+    {
+      "name": "Sign-in alone does not subscribe to marketing",
+      "pass": true
+    },
+    {
+      "name": "Explicit verified preference enables eligible audience",
+      "pass": true
+    },
+    {
+      "name": "Replay cannot refill an owner-cleared blank",
+      "pass": true
+    },
+    {
+      "name": "Another verified mailbox cannot attach captured details",
+      "pass": true
+    },
+    {
+      "name": "Public recapture cannot withdraw or replace verified consent",
+      "pass": true
+    },
+    {
+      "name": "Verified owner can change a local opt-out back to explicit opt-in",
+      "pass": true
+    },
+    {
+      "name": "External suppression survives authenticated preference and anonymous recapture",
+      "pass": true
+    },
+    {
+      "name": "Verified fields replace poisoned anonymous identity in operator output",
+      "pass": true
+    },
+    {
+      "name": "A delayed older opt-in cannot undo a completed newer opt-out",
+      "pass": true
+    },
+    {
+      "name": "Export fails closed on stale consent projection after newer saved opt-out",
+      "pass": true
+    },
+    {
+      "name": "First adoption preserves every saved answer including deliberate blank",
+      "pass": true
+    },
+    {
+      "name": "Unknown goal is rejected",
+      "pass": true
+    },
+    {
+      "name": "Unknown field is rejected",
+      "pass": true
+    },
+    {
+      "name": "Consent type is rejected",
+      "pass": true
+    },
+    {
+      "name": "Control character is rejected",
+      "pass": true
+    },
+    {
+      "name": "Honeypot consumes no lead storage",
+      "pass": true
+    },
+    {
+      "name": "Cross-origin and originless captures fail closed",
+      "pass": true
+    },
+    {
+      "name": "Large/malformed bodies rejected",
+      "pass": true
+    },
+    {
+      "name": "CSV neutralizes formula cells and carries consent eligibility",
+      "pass": true
+    },
+    {
+      "name": "Verified account stores goal and all channel preferences without activating them",
+      "pass": true
+    },
+    {
+      "name": "Connection preferences CAS changes intent only and preserves review revision",
+      "pass": true
+    },
+    {
+      "name": "Connection preferences reject invalid enums and wrong verified owner",
+      "pass": true
+    },
+    {
+      "name": "No live network request occurred",
+      "pass": true
+    },
+    {
+      "name": "Backend sources remained stable throughout checks",
+      "pass": true
+    }
+  ],
+  "after": {
+    "netlify/functions/intake.mjs": "d110f94abd94feceedd6aa2fb30f2c8f536e1fc1e6ec5f7be22d86c978807ea8",
+    "netlify/functions/lib/intake.mjs": "0ff345d37c5e64be6304cd44fe3e68ad74e67e23bcb8acd8e4d44ec6eb03baa3",
+    "netlify/functions/access.mjs": "5141bce6641cdf35a3503f4de41021b313b7de1745c82e2101ac7bdf19c89b53",
+    "netlify/functions/lib/access.mjs": "057921a525476b4cba51ce15233cca477a2ab135ece40b59bfce56d17a16969d",
+    "netlify/functions/onboard.mjs": "be2ed480eabf172059f88162cb6010e974c7e8f38846104f58d915c458daa31e",
+    "netlify/functions/client.mjs": "eafa4e54aae9adcf7e882f09f7daf3797486791178b88ebc1c2e3954cf4a7391",
+    "netlify/functions/lib/setup.mjs": "0748a30291a6976ca080b754d1329fc30b2410ad54e63b64394de6d7fd5c890a"
+  }
+}
