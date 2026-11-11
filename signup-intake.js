@@ -3,7 +3,7 @@
   var form = document.getElementById('signup-intake');
   if (!form) return;
   var button = document.getElementById('intake-submit'), status = document.getElementById('intake-status');
-  var busy = false, done = false, submissionIds = Object.create(null);
+  var busy = false, done = false, submissionIds = Object.create(null), lockedControls = [], requestGeneration = 0, activeController = null;
   var handoffStorage = 'mc-signup-intake-v1';
   var plan = new URLSearchParams(window.location.search).get('plan');
   if (['starter', 'growth'].indexOf(plan) < 0) plan = null;
@@ -80,8 +80,16 @@
     next.appendChild(document.createTextNode('If it doesn’t open, choose ')); next.appendChild(link); next.appendChild(document.createTextNode('.'));
     next.hidden = false; link.focus();
   }
+  function lockControls() {
+    lockedControls = Array.from(form.elements).filter(function (control) { return typeof control.disabled === 'boolean'; }).map(function (control) { return { el: control, disabled: control.disabled }; });
+    lockedControls.forEach(function (control) { control.el.disabled = true; });
+  }
+  function restoreControls() {
+    lockedControls.forEach(function (control) { control.el.disabled = control.disabled; });
+    lockedControls = [];
+  }
   // Back/forward cache: a restored page must be usable again.
-  window.addEventListener('pageshow', function (event) { if (event.persisted) { done = false; busy = false; button.disabled = false; form.removeAttribute('aria-busy'); progress(''); clearNext(); } });
+  window.addEventListener('pageshow', function (event) { if (event.persisted) { requestGeneration++; if (activeController) activeController.abort(); activeController = null; restoreControls(); done = false; busy = false; button.disabled = false; form.removeAttribute('aria-busy'); progress(''); clearNext(); } });
   function definite(text) { var error = new Error(text); error.definite = true; return error; }
   form.addEventListener('input', function () { if (done) progress('Your signup is already saved with the earlier answers. Open your setup to continue; you can change details there.'); });
   form.addEventListener('submit', async function (event) {
@@ -100,9 +108,11 @@
       // The same answers always reuse their key, even after an edit and a change back.
       submissionId = submissionIds[signature] || (submissionIds[signature] = id());
     } catch (error) { showError(error.message); return; }
-    busy = true; button.disabled = true; form.setAttribute('aria-busy', 'true'); clearNext(); progress('Saving your details…');
+    busy = true; lockControls(); button.disabled = true; form.setAttribute('aria-busy', 'true'); clearNext(); progress('Saving your details…');
+    var generation = ++requestGeneration;
     var controller = new AbortController(), timer = setTimeout(function () { controller.abort(); }, 20000);
-    var slow = setTimeout(function () { if (busy) progress(SLOW); }, 8000);
+    activeController = controller;
+    var slow = setTimeout(function () { if (busy && generation === requestGeneration) progress(SLOW); }, 8000);
     try {
       var response, result = null;
       try {
@@ -111,7 +121,9 @@
           body: JSON.stringify(Object.assign({ submissionId: submissionId }, payload)), signal: controller.signal
         });
       } catch (error) { throw new Error(UNKNOWN); } // Lost before or after the server ran, or timed out.
+      if (generation !== requestGeneration) return;
       try { result = await response.json(); } catch (error) { result = null; }
+      if (generation !== requestGeneration) return;
       if (response.status >= 400 && response.status < 500) {
         // The server answered and refused. Nothing new was saved for this request.
         var code = result && result.error;
@@ -119,6 +131,7 @@
         var emailField = code === 'invalid_email' && fieldById('intake-email');
         if (emailField) {
           // The message lives on the field only; focus goes there.
+          restoreControls();
           progress(''); setFieldError(emailField, (result && result.message) || emailField.invalid); emailField.el.focus();
           return;
         }
@@ -136,10 +149,10 @@
       showNext(result.handoff);
       window.location.assign(setupUrl(result.handoff));
     } catch (error) {
-      showError(error && error.definite ? error.message : UNKNOWN);
+      if (generation === requestGeneration) { restoreControls(); showError(error && error.definite ? error.message : UNKNOWN); }
     } finally {
-      clearTimeout(timer); clearTimeout(slow); busy = false; form.removeAttribute('aria-busy');
-      if (!done) button.disabled = false;
+      clearTimeout(timer); clearTimeout(slow);
+      if (generation === requestGeneration) { activeController = null; busy = false; form.removeAttribute('aria-busy'); if (!done) { restoreControls(); button.disabled = false; } }
     }
   });
 })();
