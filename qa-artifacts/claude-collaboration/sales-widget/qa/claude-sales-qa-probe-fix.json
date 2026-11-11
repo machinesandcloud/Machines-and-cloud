@@ -1,0 +1,119 @@
+{
+  "at": "2026-11-10T14:59:06.139Z",
+  "widget": "worktree",
+  "widgetSha": "82159cfd82c0be32d13ebdb2830a423d449c05700d185ca8e2ec265fceaae201",
+  "csp": "frame-ancestors 'self'; connect-src 'self' https://*.vapi.ai wss://*.vapi.ai https://*.daily.co wss://*.daily.co; media-src 'self' blob: https://*.daily.co; frame-src 'self' blob: https://*.daily.co",
+  "checks": [
+    {
+      "name": "CSP(_headers /index.html): no violation and injected style is applied (close 44px, 16px composer, placeholder #5d6b82)",
+      "pass": true,
+      "detail": {
+        "styles": 1,
+        "closeH": 44,
+        "font": "16px",
+        "ph": "rgb(93, 107, 130)",
+        "csp": []
+      }
+    },
+    {
+      "name": "style and root injected exactly once even if the script loads twice",
+      "pass": true,
+      "detail": {
+        "styles": 1,
+        "roots": 1
+      }
+    },
+    {
+      "name": "long reply: announcement capped near 1,500 chars and says where the rest is",
+      "pass": true,
+      "detail": {
+        "annLen": 1560,
+        "annTail": "ns from saved detail… The full reply is in the conversation.",
+        "count": 1
+      }
+    },
+    {
+      "name": "long reply: tail of reply is in the conversation and in the accessibility tree (labelled region)",
+      "pass": true,
+      "detail": {
+        "annLen": 1560,
+        "annTail": "ns from saved detail… The full reply is in the conversation.",
+        "annRole": "status",
+        "annLive": "polite",
+        "anns": [
+          "Working through your question…",
+          "Front desk replied: Paragraph 1: a home-service shop can ans"
+        ],
+        "logRole": "region",
+        "logLabel": "Conversation",
+        "logLive": null,
+        "tailInDom": true,
+        "scrollable": true,
+        "tabindex": null,
+        "snapHasTail": true
+      }
+    },
+    {
+      "name": "reopen after reload: history restored silently (announcer empty) and full reply still readable",
+      "pass": true,
+      "detail": {
+        "ann": "",
+        "anns": [],
+        "tail": true
+      }
+    },
+    {
+      "name": "desktop (pointer coarse=false): keyboard Send -> Stop while waiting -> mcAgentInput after reply",
+      "pass": true,
+      "detail": {
+        "onSend": "mcAgentSend",
+        "during": "mcAgentStop",
+        "after": "mcAgentInput"
+      }
+    },
+    {
+      "name": "touchLaptop (pointer coarse=true): keyboard Send -> Stop while waiting -> mcAgentSend after reply",
+      "pass": true,
+      "detail": {
+        "onSend": "mcAgentSend",
+        "during": "mcAgentStop",
+        "after": "mcAgentSend"
+      }
+    },
+    {
+      "name": "phone (pointer coarse=true): keyboard Send -> Stop while waiting -> mcAgentSend after reply",
+      "pass": true,
+      "detail": {
+        "onSend": "mcAgentSend",
+        "during": "mcAgentStop",
+        "after": "mcAgentSend"
+      }
+    },
+    {
+      "name": "working / still working / final each announced exactly once",
+      "pass": true,
+      "detail": [
+        "Working through your question…",
+        "Still working on this one. You can keep waiting, or choose Stop and try again.",
+        "Front desk replied: Late but here."
+      ]
+    }
+  ],
+  "external": [],
+  "strictCspObservation": {
+    "csp": [
+      "style-src-elem inline"
+    ],
+    "closeH": 32
+  },
+  "longScrollableNoTabindex": {
+    "scrollable": true,
+    "tabindex": null
+  },
+  "clickIntoLogObservation": {
+    "before": "BODY",
+    "after": "mcAgentInput"
+  },
+  "passed": 9,
+  "total": 9
+}

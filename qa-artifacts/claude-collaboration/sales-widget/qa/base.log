@@ -1,0 +1,85 @@
+PASS phone /: keyboard open focuses the composer inside a labelled dialog
+PASS phone /: aria-modal is honest (every background child inert)
+PASS phone /: the actual handler's reply is shown and saved as one complete exchange
+PASS phone /: Esc closes, restores the page and returns focus to the launcher
+PASS phone /: reopening keeps the conversation
+PASS phone /about.html: keyboard open focuses the composer inside a labelled dialog
+PASS phone /about.html: aria-modal is honest (every background child inert)
+PASS phone /about.html: the actual handler's reply is shown and saved as one complete exchange
+PASS phone /about.html: Esc closes, restores the page and returns focus to the launcher
+PASS phone /about.html: reopening keeps the conversation
+FAIL phone: Send by keyboard keeps focus on a visible chat control while waiting
+FAIL phone: Send by keyboard keeps focus on a visible chat control after the reply
+PASS phone: exactly one request for one Send
+FAIL phone: a keyboard-chosen suggestion leaves focus on a visible chat control
+PASS phone: lost response shows plain words, keeps the question and offers Retry
+PASS phone: after a failure focus stays on a visible chat control
+FAIL phone: keyboard Retry keeps focus on a visible chat control while waiting
+FAIL phone: keyboard Retry keeps focus on a visible chat control after the reply
+PASS phone: Retry completes once with no duplicate turn
+PASS phone: a non-JSON 502 shows plain recovery copy and Retry, no raw body
+PASS phone: Retry after 502 completes
+PASS phone: the actual handler's 429 shows the allowance copy, keeps the question and a way to talk with us
+PASS phone: a busy 429 shows plain copy and keeps the question
+PASS phone: repeated Enter/submit while waiting sends exactly once and keeps the new draft
+PASS phone: double-activating Retry sends once
+FAIL phone: after 20s of waiting the chat says it is still working and that Stop/Retry is available
+PASS phone: closing and reopening mid-reply keeps the wait visible with Stop
+PASS phone: the slow reply lands after reopening
+PASS phone: the 85s timeout ends in plain recovery copy with Retry
+FAIL phone: Stop by keyboard leaves focus on a visible chat control (Retry or composer)
+FAIL phone: focus stays on the earlier reply's link when the new reply finishes
+FAIL phone: streamed partial text is not announced; the final reply is announced exactly once
+FAIL phone: a failure is announced once, without re-reading the question
+FAIL phone: opening a saved conversation does not read the whole history aloud
+FAIL phone: Esc that ends an IME composition does not close the chat
+PASS phone: Tab and Shift+Tab never leave the open dialog
+FAIL phone: suggestion buttons are at least 44px tall
+FAIL phone: every chat control outside running text is at least 44×44px
+PASS phone: the panel fits the viewport with no horizontal scroll
+FAIL phone: visible chat text meets WCAG AA contrast
+PASS phone: composer and Close stay inside the visible viewport above a simulated keyboard
+PASS desktop /: keyboard open focuses the composer inside a labelled dialog
+PASS desktop /: aria-modal is honest (every background child inert)
+PASS desktop /: the actual handler's reply is shown and saved as one complete exchange
+PASS desktop /: Esc closes, restores the page and returns focus to the launcher
+PASS desktop /: reopening keeps the conversation
+PASS desktop /about.html: keyboard open focuses the composer inside a labelled dialog
+PASS desktop /about.html: aria-modal is honest (every background child inert)
+PASS desktop /about.html: the actual handler's reply is shown and saved as one complete exchange
+PASS desktop /about.html: Esc closes, restores the page and returns focus to the launcher
+PASS desktop /about.html: reopening keeps the conversation
+FAIL desktop: Send by keyboard keeps focus on a visible chat control while waiting
+FAIL desktop: Send by keyboard keeps focus on a visible chat control after the reply
+PASS desktop: exactly one request for one Send
+FAIL desktop: a keyboard-chosen suggestion leaves focus on a visible chat control
+PASS desktop: lost response shows plain words, keeps the question and offers Retry
+PASS desktop: after a failure focus stays on a visible chat control
+FAIL desktop: keyboard Retry keeps focus on a visible chat control while waiting
+FAIL desktop: keyboard Retry keeps focus on a visible chat control after the reply
+PASS desktop: Retry completes once with no duplicate turn
+PASS desktop: a non-JSON 502 shows plain recovery copy and Retry, no raw body
+PASS desktop: Retry after 502 completes
+PASS desktop: the actual handler's 429 shows the allowance copy, keeps the question and a way to talk with us
+PASS desktop: a busy 429 shows plain copy and keeps the question
+PASS desktop: repeated Enter/submit while waiting sends exactly once and keeps the new draft
+PASS desktop: double-activating Retry sends once
+FAIL desktop: after 20s of waiting the chat says it is still working and that Stop/Retry is available
+PASS desktop: closing and reopening mid-reply keeps the wait visible with Stop
+PASS desktop: the slow reply lands after reopening
+PASS desktop: the 85s timeout ends in plain recovery copy with Retry
+FAIL desktop: Stop by keyboard leaves focus on a visible chat control (Retry or composer)
+FAIL desktop: focus stays on the earlier reply's link when the new reply finishes
+FAIL desktop: streamed partial text is not announced; the final reply is announced exactly once
+FAIL desktop: a failure is announced once, without re-reading the question
+FAIL desktop: opening a saved conversation does not read the whole history aloud
+FAIL desktop: Esc that ends an IME composition does not close the chat
+PASS desktop: Tab and Shift+Tab never leave the open dialog
+PASS desktop: suggestion buttons are at least 24px tall
+FAIL desktop: every chat control outside running text is at least 24×24px
+PASS desktop: the panel fits the viewport with no horizontal scroll
+FAIL desktop: visible chat text meets WCAG AA contrast
+PASS phone: composer text is at least 16px so iOS Safari does not zoom on focus
+FAIL tablet: composer text is at least 16px so iOS Safari does not zoom on focus
+53/83 (base) handler=28 fixtures=10 injected=14 physical=0 external=0 pageErrors=0 -> scratchpad/claude-sales-qa-base.json
+exit 0

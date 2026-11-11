@@ -1,0 +1,138 @@
+{
+  "at": "2026-11-10T14:54:19.493Z",
+  "mode": "same-origin browser requests fulfilled from actual repo/handlers; memory only; no external requests",
+  "checks": [
+    {
+      "name": "Preliminary entry has one submit action and unchecked optional email choice",
+      "pass": true
+    },
+    {
+      "name": "Only preliminary name, email and business are required; goals include follow-up",
+      "pass": true
+    },
+    {
+      "name": "Early form has explicit labels, autocomplete and live status",
+      "pass": true
+    },
+    {
+      "name": "Keyboard follows the short form, privacy link and submit while skipping the hidden bot field",
+      "pass": true,
+      "detail": [
+        "intake-name",
+        "intake-email",
+        "intake-business",
+        "intake-goal",
+        "intake-marketing",
+        "a:privacy-policy.html",
+        "intake-submit"
+      ]
+    },
+    {
+      "name": "Preliminary form is readable and contained at 320px",
+      "pass": true,
+      "detail": {
+        "x": 20,
+        "right": 300,
+        "width": 320,
+        "overflow": false,
+        "fontSize": 16,
+        "buttonHeight": 50
+      }
+    },
+    {
+      "name": "Preliminary form is readable and contained at 390px",
+      "pass": true,
+      "detail": {
+        "x": 20,
+        "right": 370,
+        "width": 390,
+        "overflow": false,
+        "fontSize": 16,
+        "buttonHeight": 50
+      }
+    },
+    {
+      "name": "Preliminary form is readable and contained at 1440px",
+      "pass": true,
+      "detail": {
+        "x": 770,
+        "right": 1340,
+        "width": 1440,
+        "overflow": false,
+        "fontSize": 16,
+        "buttonHeight": 50
+      }
+    },
+    {
+      "name": "Source bytes stayed stable through browser QA",
+      "pass": true
+    },
+    {
+      "name": "No server network calls or browser script errors",
+      "pass": true,
+      "detail": {
+        "blockedServer": [],
+        "pageErrors": []
+      }
+    }
+  ],
+  "requests": [],
+  "blockedBrowser": [],
+  "blockedServer": [],
+  "pageErrors": [],
+  "screenshots": [
+    "scratchpad/claude-sales-acq-fix-entry-320.png",
+    "scratchpad/claude-sales-acq-fix-entry-form-320.png",
+    "scratchpad/claude-sales-acq-fix-entry-390.png",
+    "scratchpad/claude-sales-acq-fix-entry-form-390.png",
+    "scratchpad/claude-sales-acq-fix-entry-1440.png",
+    "scratchpad/claude-sales-acq-fix-entry-form-1440.png"
+  ],
+  "sourceBefore": {
+    "index.html": "471b25d6aae88216fe2090a1258ffc4aa19d8718fe8dbb1aaad156d83cc331f4",
+    "signup-intake.js": "7f6e01593eedd12ecf9d768a41a9b43d3976799306825e0bd4d53fc1a29b89d9",
+    "site-refresh.css": "5c962fe8bf9507c3c639a71c9b046f2ed66d4e066e50e3d2fce91faff2082cc1",
+    "styles.css": "e8ac1b30d0205f99c9499dab7cf3d51e4970f8f69295e9c66f963a12033bd56b",
+    "script.js": "acbadd0add3111e505b07155d57a04547cc7f6a38a466809e13a2f3d81cab488",
+    "onboard.html": "fd475d713c37d30c32d607d985cb24627bff6a80032386eae6ef9fc985620887",
+    "onboard.js": "99920e7b26ea0fe0313e00472dce942da025c6efb0c3498e104ab74fc44bd29b",
+    "desk.html": "5fb1a9be91dc46a0f16ead29691ca693329244b8d624de9ae82db7af4da8ad13",
+    "desk.js": "f4017bc4745bca629f36159c05973b6e7c76c4961fa49ea9cb21dd77bbf428ee",
+    "admin.html": "1467220cc275d3029acd62bdc2f6a5f0b4d52d7960310dee3aea9ff31ab4aa5b",
+    "netlify/functions/admin.mjs": "46b52bd4b54d80c94c4f7fc447f51e66ce97b8e7244fc2534376a489ba0109ae",
+    "netlify/functions/intake.mjs": "d110f94abd94feceedd6aa2fb30f2c8f536e1fc1e6ec5f7be22d86c978807ea8",
+    "netlify/functions/lib/intake.mjs": "0ff345d37c5e64be6304cd44fe3e68ad74e67e23bcb8acd8e4d44ec6eb03baa3",
+    "netlify/functions/access.mjs": "5141bce6641cdf35a3503f4de41021b313b7de1745c82e2101ac7bdf19c89b53",
+    "netlify/functions/lib/access.mjs": "057921a525476b4cba51ce15233cca477a2ab135ece40b59bfce56d17a16969d",
+    "netlify/functions/onboard.mjs": "be2ed480eabf172059f88162cb6010e974c7e8f38846104f58d915c458daa31e",
+    "netlify/functions/client.mjs": "eafa4e54aae9adcf7e882f09f7daf3797486791178b88ebc1c2e3954cf4a7391",
+    "netlify/functions/lib/setup.mjs": "0748a30291a6976ca080b754d1329fc30b2410ad54e63b64394de6d7fd5c890a"
+  },
+  "harnessHash": "98dc3e51db5ff9db588e6b51d40a73ae95b954a0c7e7fbef195bddc6a8cb65a4",
+  "fatal": "locator.evaluateAll: TypeError: Cannot read properties of null (reading 'getBoundingClientRect')\n    at eval (eval at evaluate (:370:30), <anonymous>:1:111)\n    at Array.map (<anonymous>)\n    at eval (eval at evaluate (:370:30), <anonymous>:1:16)\n    at UtilityScript.evaluate (<anonymous>:372:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\n    at /private/tmp/mc-claude-sales-widget-20261110/scripts/acquisition-ui-qa-check.mjs:167:60",
+  "sourceAfter": {
+    "index.html": "471b25d6aae88216fe2090a1258ffc4aa19d8718fe8dbb1aaad156d83cc331f4",
+    "signup-intake.js": "7f6e01593eedd12ecf9d768a41a9b43d3976799306825e0bd4d53fc1a29b89d9",
+    "site-refresh.css": "5c962fe8bf9507c3c639a71c9b046f2ed66d4e066e50e3d2fce91faff2082cc1",
+    "styles.css": "e8ac1b30d0205f99c9499dab7cf3d51e4970f8f69295e9c66f963a12033bd56b",
+    "script.js": "acbadd0add3111e505b07155d57a04547cc7f6a38a466809e13a2f3d81cab488",
+    "onboard.html": "fd475d713c37d30c32d607d985cb24627bff6a80032386eae6ef9fc985620887",
+    "onboard.js": "99920e7b26ea0fe0313e00472dce942da025c6efb0c3498e104ab74fc44bd29b",
+    "desk.html": "5fb1a9be91dc46a0f16ead29691ca693329244b8d624de9ae82db7af4da8ad13",
+    "desk.js": "f4017bc4745bca629f36159c05973b6e7c76c4961fa49ea9cb21dd77bbf428ee",
+    "admin.html": "1467220cc275d3029acd62bdc2f6a5f0b4d52d7960310dee3aea9ff31ab4aa5b",
+    "netlify/functions/admin.mjs": "46b52bd4b54d80c94c4f7fc447f51e66ce97b8e7244fc2534376a489ba0109ae",
+    "netlify/functions/intake.mjs": "d110f94abd94feceedd6aa2fb30f2c8f536e1fc1e6ec5f7be22d86c978807ea8",
+    "netlify/functions/lib/intake.mjs": "0ff345d37c5e64be6304cd44fe3e68ad74e67e23bcb8acd8e4d44ec6eb03baa3",
+    "netlify/functions/access.mjs": "5141bce6641cdf35a3503f4de41021b313b7de1745c82e2101ac7bdf19c89b53",
+    "netlify/functions/lib/access.mjs": "057921a525476b4cba51ce15233cca477a2ab135ece40b59bfce56d17a16969d",
+    "netlify/functions/onboard.mjs": "be2ed480eabf172059f88162cb6010e974c7e8f38846104f58d915c458daa31e",
+    "netlify/functions/client.mjs": "eafa4e54aae9adcf7e882f09f7daf3797486791178b88ebc1c2e3954cf4a7391",
+    "netlify/functions/lib/setup.mjs": "0748a30291a6976ca080b754d1329fc30b2410ad54e63b64394de6d7fd5c890a"
+  },
+  "summary": {
+    "passed": 9,
+    "failed": 0,
+    "total": 9
+  }
+}
