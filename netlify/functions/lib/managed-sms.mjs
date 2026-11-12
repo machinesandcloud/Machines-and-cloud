@@ -2,10 +2,11 @@ import { assertPaidServiceAuthority, PaidServiceAuthorityError } from './paid-se
 import { createHmac, timingSafeEqual, randomBytes, createHash } from "node:crypto";
 import { atomicUpdate, list } from "./store.mjs";
 import { strictRead } from "./accounts.mjs";
-import { recordManagedInbound, managedSMSConsent, managedAppointmentConsentQuestion, deliveryTenant } from "./managed-consent.mjs";
+import { recordManagedInbound, managedSMSConsent, managedAppointmentConsentQuestion, deliveryTenant, REVIEW_KEYWORD, REVIEW_YES, managedReviewConsentQuestion } from "./managed-consent.mjs";
 import { managedDeliveryEnabled, managedDeliveryProofScope, queueManagedMessage, recordManagedSMSReceipt, dispatchManagedDeliveryWave } from "./managed-delivery.mjs";
 import { findMessagingClientByNumber, messagingInboundBinding, messagingSender, pendingMessagingProbe, recordMessagingProbe } from "./messaging-activation.mjs";
 import { getAcquiredPhoneResource } from "./phone-activation.mjs";
+import { reviewRequestsAvailable } from './messaging-program.mjs';
 import { buildSystemPrompt, BOOK_VISIT, NOTIFY_OWNER, GET_AVAILABILITY, agentFallbackLanguage } from "./config.mjs";
 import { runAgent, MANAGED_TEXT_MODEL } from "./agent.mjs";
 import { reserveAIRequest, selfServiceAIModelFetch } from "./self-service-ai.mjs";
@@ -146,6 +147,15 @@ export async function processManagedSMS(id) {
     // provider-verified YES after the sent question grants its stated permission.
     if(!job.reply&&/^(?:YES\s+)?(?:QUOTE|REQUEST)\b/i.test(job.body.trim())){const {requestFollowupInbound}=await import('./request-followup.mjs'),choice=await requestFollowupInbound(c,job);if(choice){job=await updateInbound(id,row=>row.claim?.token===token&&!row.reply?{...row,reply:choice.reply,replyPurpose:choice.purpose,replyFollowup:choice.followup||null}:null);}}
     if(!job.reply&&/^(YES|SI|SÍ)$/i.test(job.body.trim())){const {requestFollowupAffirmativeInstruction}=await import('./request-followup.mjs'),reply=await requestFollowupAffirmativeInstruction(c,job);if(reply)job=await updateInbound(id,row=>row.claim?.token===token&&!row.reply?{...row,reply,replyPurpose:'reply'}:null);}
+    // Review-request permission is answered deterministically only when the owner offers it.
+    if(!job.reply&&(REVIEW_KEYWORD.test(job.body.trim())||REVIEW_YES.test(job.body.trim()))&&c.postVisit?.reviewRequest===true&&reviewRequestsAvailable()){
+      const text=job.body.trim(),es=/RESE/i.test(text),name=c.business.name,latest=await managedSMSConsent(c,job.from);
+      const reply=REVIEW_KEYWORD.test(text)?managedReviewConsentQuestion(c,es?'es':'en'):latest?.reviewProof?.messageSid===job.messageSid
+        ?(es?`${name}: listo. Le escribiremos una vez después de cada visita terminada para pedirle una reseña. Pueden aplicarse tarifas de mensajes y datos. HELP para ayuda; STOP/ALTO/PARAR para terminar.`:`${name}: you're set. We'll text once after each completed visit to ask for a review. Message and data rates may apply. HELP for help; STOP/ALTO/PARAR to end.`)
+        :(es?`${name}: los mensajes de reseña no están activados. Envíe RESEÑAS para recibir la pregunta y luego responda SÍ RESEÑAS. HELP para ayuda; STOP/ALTO/PARAR para terminar.`:`${name}: review texts are not set up. Text REVIEWS for the question, then reply YES REVIEWS. HELP for help; STOP/ALTO/PARAR to end.`);
+      if (!await freshAuthority()) return {ok:true,suppressed:true};
+      job=await updateInbound(id,row=>row.claim?.token===token&&!row.reply?{...row,reply,replyPurpose:'reply'}:null);
+    }
     if (!job.reply && /^(APPOINTMENTS|CITAS|YES|SI|SÍ)$/i.test(job.body.trim())) {
       const asking = /^(APPOINTMENTS|CITAS)$/i.test(job.body.trim()) && !consent.transactional;
       const spanish = /^(CITAS|SI|SÍ)$/i.test(job.body.trim()) || consent.proof?.wording === managedAppointmentConsentQuestion(c, 'es');

@@ -24,7 +24,7 @@ export function managedEmailBudgetPolicy() {
 }
 function payload(c, job) {
   const owner = normalizeAccountEmail(c.owner?.email);
-  if (!owner || !job || job.channel !== 'email' || !['owner_booking','owner_lead'].includes(job.purpose) || job.tenant !== workspaceTenant(c) || typeof job.id !== 'string' || !new RegExp('^' + c.slug + '/[a-f0-9]{64}$').test(job.id) || job.to !== owner || typeof job.body !== 'string' || !job.body.trim() || job.body.length > 8000) fail('email_budget_message_changed');
+  if (!owner || !job || job.channel !== 'email' || !['owner_booking','owner_lead','owner_visit_check'].includes(job.purpose) || job.tenant !== workspaceTenant(c) || typeof job.id !== 'string' || !new RegExp('^' + c.slug + '/[a-f0-9]{64}$').test(job.id) || job.to !== owner || typeof job.body !== 'string' || !job.body.trim() || job.body.length > 8000) fail('email_budget_message_changed');
   return { id: hash(job.id), tenant: workspaceTenant(c), emailHash: hash(owner), identity: hash({ id: job.id, tenant: job.tenant, purpose: job.purpose, to: job.to, body: job.body, source: job.source }) };
 }
 async function authority(c, p, input) {

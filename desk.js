@@ -122,7 +122,7 @@
   function leadReference(lead) { return platformLeadLabel(lead) && lead.platform.externalLeadId ? platformLeadLabel(lead) + ' · ' + String(lead.platform.externalLeadId) : lead.id; }
   function humanHandoffStatus(lead) { var h=lead.humanHandoff;if(!h)return '';var text=({callback_only:'Callback requested; no live transfer',control_uncertain:'Live connection unconfirmed',control_accepted:'Call control accepted; connection unconfirmed',not_attempted:'Live transfer was not started',dial_uncertain:'Live connection unconfirmed',human_accepted:'Person accepted; connection unconfirmed',connected:'Person accepted; provider confirmed connection',not_connected:'Live transfer did not connect',unknown:'Live connection outcome unknown',limit_reached:'Live transfer stopped at usage limit'})[h.state]||'Live connection unconfirmed';return '<br><span class="muted" data-human-handoff>'+esc(text)+'. No callback time confirmed.'+(lead.alertAttentionDue?' Needs acknowledgment.':'')+'</span>'; }
   function customerVisitRequest(visit) { return !!(data && data.client && data.client.onboarding && data.client.onboarding.version === 1 && visit && visit.status === 'booked' && ['web','sms','call','voice'].indexOf(visit.channel) >= 0); }
-  function visitStatusLabel(visit) { return customerVisitRequest(visit) ? 'Visit requested' : visit && visit.status || ''; }
+  function visitStatusLabel(visit) { return customerVisitRequest(visit) ? 'Visit requested' : visit && ({done:'Job done',no_show:'No-show'})[visit.status] || visit && visit.status || ''; }
   function visitDetailsText(visit) { return 'Ref '+visit.id+' · '+visitStatusLabel(visit)+' · '+visitDateLabel(visit.date)+' · '+visit.window+'\n'+(visit.issue || '')+' · '+(visit.address || 'Address not saved')+(customerVisitRequest(visit)?'\nContact the customer to confirm the arrival window.':''); }
   var VISIT_EDIT_FIELDS=[['visitEditName','customer_name'],['visitEditPhone','phone'],['visitEditAddress','address'],['visitEditIssue','issue']];
   function visitFieldsDisabled(disabled) { ['visitName','visitPhone','visitAddress','visitIssue','visitDate','visitWindow','visitCancelConfirm','saveVisit','cancelVisit','visitCompleteRequest','visitEditName','visitEditPhone','visitEditAddress','visitEditIssue','saveVisitDetails','discardVisitDetails','editVisitDetails'].forEach(function(id){$(id).disabled=disabled;}); }
@@ -161,6 +161,7 @@
     $('visitWindow').innerHTML=windows.map(function(window){return '<option value="'+esc(window)+'">'+esc(window)+'</option>';}).join(''); $('visitWindow').value=windowValue;
     $('visitCancelConfirm').checked=!!(pending && pending.action==='cancel_visit'); $('visitChangeForm').hidden=visitEditing || !visitSelected.canChange && !pending;
     visitFieldsDisabled(!!pending); $('retryVisit').hidden=!pending; $('visitMessage').textContent=pending?'A saved change still needs confirmation. Retry it using the same details.':visitSelected.canChange?(creating?"We’ll check availability when you save.":'Choose a listed arrival window. Full or blocked windows keep the original visit unchanged.'):'This visit is retained for your records.';
+    renderPostVisit(creating?null:id);
     $('visitDialog').showModal();document.dispatchEvent(new CustomEvent('mc:visit-open',{detail:{visitId:creating?null:visitSelected.id,visitRevision:creating?null:visitSelected.revision,configurationRevision:data.configurationRevision,pending:!!pending || visitEditing,canChange:visitSelected.canChange,preferredWindow:visitPrefill && visitPrefill.window || null}})); $('closeVisit').focus();
   }
   // A save re-renders lists, so the opener may be replaced. Return to the same record's
@@ -233,6 +234,71 @@
   $('visitChangeForm').addEventListener('submit',function(event){event.preventDefault();saveVisitChange('reschedule_visit');});
   $('cancelVisit').addEventListener('click',function(){saveVisitChange('cancel_visit');});
   $('retryVisit').addEventListener('click',function(){if(visitPending)saveVisitChange(visitPending.action);});
+  // ---- After the visit (PRA-HOMEOWNER-08): done/no-show, payment reminders, follow-up settings ----
+  var postVisitBusy=false,postVisitPending=null,postVisitId=null;
+  var POST_STATES={queued:'Scheduled',waiting_consent:'Waiting for the customer’s permission',waiting_hours:'Waiting for sending hours',waiting_platform:'Waiting for a texting registration that includes it',sending:'Sending',accepted:'Sent to the carrier',delivered:'Delivered',superseded:'Stopped',suppressed:'Stopped',expired:'Expired unsent',failed:'Not delivered',uncertain:'Outcome unconfirmed',not_queued:'Not scheduled'};
+  function postState(job){return job?POST_STATES[job.state]||job.state:'Not scheduled';}
+  function renderPostVisit(id){
+    postVisitId=id;var row=id&&(data.bookings||[]).find(function(item){return item.id===id;}),pv=row&&row.postVisit,mutable=['testing','live','paused'].includes(data.client.status);
+    $('visitPost').hidden=!pv;if(!pv)return;
+    var lines=[];
+    if(pv.outcome==='done')lines.push('Job marked done'+(pv.at?' on '+recordTimeLabel(pv.at):'')+'. Visit reminders are stopped.');
+    else if(pv.outcome==='no_show')lines.push('Marked as no-show. Visit reminders are stopped and no follow-up is sent.');
+    else lines.push(pv.canComplete?'When the job is finished, mark it done. Reminders still scheduled for this visit stop.':'You can mark this visit done on its service day.');
+    if(pv.review)lines.push('Review request: '+postState(pv.review)+'.');
+    if(pv.payment)lines.push('Payment reminders for '+pv.payment.amount+': '+(pv.payment.paidAt?'stopped, marked paid':pv.payment.reminders.map(function(job){return (job&&job.dueAt?visitDateLabel(new Intl.DateTimeFormat('en-CA',{timeZone:'America/Chicago'}).format(new Date(job.dueAt)))+' ':'')+postState(job).toLowerCase();}).join(' · '))+'.');
+    $('visitPostStatus').textContent=lines.join(' ');
+    $('visitPostClose').hidden=!pv.canComplete||!mutable;
+    $('visitPayForm').hidden=!(pv.outcome==='done'&&(pv.canInvoice||pv.payment)&&mutable);
+    $('visitPaySend').hidden=!pv.canInvoice;$('visitPaySend').textContent=pv.payment&&!pv.payment.paidAt?'Replace amount':'Start payment reminders';$('visitPayAmount').parentElement.hidden=!pv.canInvoice;
+    $('visitMarkPaid').hidden=!(pv.payment&&!pv.payment.paidAt);$('visitReopen').hidden=!(pv.canReopen&&mutable);
+    $('visitPostRetry').hidden=!postVisitPending;
+    ['visitMarkDone','visitNoShow','visitPaySend','visitMarkPaid','visitPayAmount','visitReopen'].forEach(function(name){$(name).disabled=postVisitBusy;});
+  }
+  async function postVisitAction(type,extra){
+    if(postVisitBusy||leaving||!data)return;
+    var generation=portalGeneration,row=(data.bookings||[]).find(function(item){return item.id===postVisitId;});
+    if(postVisitPending&&postVisitPending.type!==type)postVisitPending=null;
+    if(!postVisitPending){
+      if(type!=='settings'&&(!row||!row.ownerVisit))return;
+      postVisitPending=Object.assign({action:'post_visit',type:type,expectedRevision:data.configurationRevision,operationId:visitSubmissionId()},type==='settings'?{}:{visitId:row.id,expectedVisitRevision:row.ownerVisit.revision},extra||{});
+    }
+    var target=type==='settings'?$('pvMessage'):$('visitMessage');postVisitBusy=true;if(type!=='settings')renderPostVisit(postVisitId);target.textContent='Saving…';
+    try{
+      var result=await apiRequest('POST',postVisitPending);if(leaving||generation!==portalGeneration)return;
+      postVisitPending=null;target.textContent=result.message;
+      await load();if(leaving||generation!==portalGeneration)return;
+      if(type!=='settings'&&$('visitDialog').open){var fresh=(data.bookings||[]).find(function(item){return item.id===postVisitId;});if(fresh){visitSelected=Object.assign({},fresh.ownerVisit);$('visitDetails').textContent=visitDetailsText(Object.assign({},fresh,fresh.ownerVisit));$('visitChangeForm').hidden=!fresh.ownerVisit.canChange;}}
+      target.focus();
+    }catch(error){
+      if(leaving||generation!==portalGeneration)return;
+      target.textContent=error.message;
+      if(error.status&&error.status<500){postVisitPending=null;if(error.field==='amount'){$('visitPayAmount').setAttribute('aria-invalid','true');$('visitPayAmountError').textContent=error.message;$('visitPayAmount').focus();}else target.focus();}
+      else target.textContent+=' Retry the saved action; it will not be applied twice.';
+    }finally{if(!leaving&&generation===portalGeneration){postVisitBusy=false;if(type==='settings')$('pvSave').disabled=false;else renderPostVisit(postVisitId);}}
+  }
+  $('visitMarkDone').addEventListener('click',function(){postVisitAction('mark_done');});
+  $('visitNoShow').addEventListener('click',function(){postVisitAction('no_show');});
+  $('visitMarkPaid').addEventListener('click',function(){postVisitAction('mark_paid');});
+  $('visitReopen').addEventListener('click',function(){postVisitAction('reopen');});
+  $('visitPostRetry').addEventListener('click',function(){if(postVisitPending)postVisitAction(postVisitPending.type);});
+  $('visitPayForm').addEventListener('submit',function(event){event.preventDefault();$('visitPayAmount').removeAttribute('aria-invalid');$('visitPayAmountError').textContent='';var amount=$('visitPayAmount').value.trim();if(!amount){$('visitPayAmount').setAttribute('aria-invalid','true');$('visitPayAmountError').textContent='Enter the amount still owed.';$('visitPayAmount').focus();return;}postVisitAction('payment_reminder',{amount:amount});});
+  $('visitDialog').addEventListener('close',function(){postVisitPending=null;postVisitId=null;});
+  function renderPostVisitSettings(d){
+    var settings=d.postVisitSettings,box=$('postVisitSettings');box.hidden=!settings;if(!settings)return;
+    if(!$('postVisitForm').dataset.dirty){$('pvVisitCheck').checked=settings.visitCheck;$('pvReview').checked=settings.reviewRequest;$('pvPayment').checked=settings.paymentReminders;}
+    $('pvReview').closest('label').hidden=!settings.reviewAvailable;$('pvSampleReview').hidden=!settings.reviewAvailable;if(!settings.reviewAvailable)$('pvReview').checked=false;
+    var name=d.client.business.name||'Your business';
+    $('pvSampleReview').textContent='Review request: “Thanks for choosing '+name+', Rosa. How did we do? A quick Google review helps a small shop a lot: (your review link). Reply here if anything was not right. Reply STOP to end texts.”';
+    $('pvSamplePayment').textContent='Payment reminder: “'+name+': friendly reminder that the invoice for $180 is open. Reply here with any questions. Reply STOP to end texts.”';
+    var customer=$('pvReview').checked||$('pvPayment').checked;$('pvProgram').hidden=!customer;
+    var notes=[];if($('pvReview').checked&&!settings.reviewLink)notes.push('Add your Google review link under Your business before review requests can go out.');
+    if(customer&&settings.program&&!settings.program.registered)notes.push(settings.program.reason==='post_visit_program_not_selected'?'Your current texting registration does not include review requests or payment reminders, so none will be scheduled or sent. Updating the registration is a separate step. Your appointment texts are unchanged.':'Review requests and payment reminders wait for your texting registration, which will include them. Your appointment texts are unchanged.');
+    $('pvProgramState').hidden=!notes.length;$('pvProgramState').textContent=notes.join(' ');
+    $('pvSave').disabled=postVisitBusy||!['testing','live','paused'].includes(d.client.status);
+  }
+  ['pvVisitCheck','pvReview','pvPayment'].forEach(function(name){$(name).addEventListener('change',function(){$('postVisitForm').dataset.dirty='1';if(data)renderPostVisitSettings(data);});});
+  $('postVisitForm').addEventListener('submit',function(event){event.preventDefault();var customer=$('pvReview').checked||$('pvPayment').checked;if(customer&&!$('pvAcknowledge').checked){$('pvMessage').textContent='Review what customers will receive, then confirm.';$('pvAcknowledge').focus();return;}$('pvSave').disabled=true;delete $('postVisitForm').dataset.dirty;postVisitAction('settings',{visitCheck:$('pvVisitCheck').checked,reviewRequest:$('pvReview').checked,paymentReminders:$('pvPayment').checked,acknowledgeProgram:customer&&$('pvAcknowledge').checked});});
   $('retryLoad').addEventListener('click', function () { load().then(greet); });
   function availabilityDateLabel(date) { return new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(date + 'T12:00:00Z')); }
   function renderAvailability(blocks) {
@@ -1266,7 +1332,7 @@
       if ((c.windows || []).indexOf(windowChoice) >= 0) $('availabilityWindow').value = windowChoice;
       var houstonToday = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
       $('availabilityDate').min = houstonToday; if (!$('availabilityDate').value) $('availabilityDate').value = houstonToday;
-      renderAvailability(d.availabilityBlocks || []);
+      renderAvailability(d.availabilityBlocks || []); renderPostVisitSettings(d);
       $('title').textContent = (c.business.name || 'Your front desk'); $('railBusiness').textContent = c.business.name || 'Your front desk';
       var selfService = c.onboarding && c.onboarding.version === 1;
       $('today').dataset.summaryScope=selfService?'workspace':'legacy';

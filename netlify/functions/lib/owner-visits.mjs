@@ -54,6 +54,7 @@ async function authority(client, session, expectedRevision, { checkRevision = tr
   if (checkRevision && configurationRevision(current) !== expectedRevision) throw new OwnerVisitError('configuration_changed', 'Your saved business rules changed. Refresh before trying this change.');
   return current;
 }
+export { authority as ownerVisitAuthority };
 // An explicit owner check reuses ordinary availability and Calendar admission.
 // The projection never contains external event IDs, titles or attendee data.
 export async function previewOwnerVisitAvailability(client,session,body){

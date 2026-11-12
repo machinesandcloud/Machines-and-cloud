@@ -53,6 +53,8 @@ import { connectionPreparationView, prepareConnections, fenceConnectionPreparati
 import {reportConversation,reportConnection,connectionAssistanceViews,supportReportViews,SupportReportError} from './lib/support-reports.mjs';
 import {readOwnerSchedule,ScheduleReadError} from './lib/owner-schedule.mjs';
 import { currentChannelAvailability } from './lib/channel-availability.mjs';
+import { changePostVisit, postVisitView, postVisitSettings, postVisitProgramState } from './lib/post-visit.mjs';
+import { reviewRequestsAvailable } from './lib/messaging-program.mjs';
 
 export const config = { path: "/api/client" };
 
@@ -209,7 +211,7 @@ async function handle(req, context) {
     let bookings=bookingPage.records,leads=leadPage.records,alerts=alertPage.records;
     bookings=bookings.filter(row=>belongsToWorkspace(c,row));leads=leads.filter(row=>belongsToWorkspace(c,row));convs=convs.filter(row=>belongsToWorkspace(c,row));events=events.filter(row=>belongsToWorkspace(c,row));alerts=alerts.filter(row=>belongsToWorkspace(c,row));
     if(selfService)leads=await requestFollowthroughSummaries(c,await Promise.all(leads.map(lead=>managedHumanLeadView(c,lead))));
-    const ownerBookings = selfService ? await Promise.all(bookings.filter(booking => visibleOwnerBooking(c, booking)).map(async booking => ({ ...booking, ownerVisit: ownerVisitView(booking), pendingVisitChange: await pendingOwnerVisitChange(c, booking.id) }))) : bookings;
+    const ownerBookings = selfService ? await Promise.all(bookings.filter(booking => visibleOwnerBooking(c, booking)).map(async booking => ({ ...booking, ownerVisit: ownerVisitView(booking), postVisit: await postVisitView(c, booking), pendingVisitChange: await pendingOwnerVisitChange(c, booking.id) }))) : bookings;
     const waiting = new Set(alerts.filter((a) => a.status === "waiting").map((a) => a.leadId));
     const attentionDue = new Set(alerts.filter(a=>a.status==='waiting' && a.attentionDueAt).map(a=>a.leadId));
     const connections=selfService?await serviceConnections(c):null;
@@ -232,6 +234,7 @@ async function handle(req, context) {
       today: todayStrip(c, ownerBookings, leads, events),
       health: lineHealth(c, events, await lastInbound(c)),
       availabilityBlocks,recordListing:{bookings:bookingPage.listing,leads:leadPage.listing,alerts:alertPage.listing},
+      ...(selfService?{postVisitSettings:{...postVisitSettings(c),reviewAvailable:reviewRequestsAvailable(),program:await postVisitProgramState(c),reviewLink:!!(c.business?.reviewLink||c.business?.googlePlaceId)}}:{}),
       integrations: { sms: smsEnabled(), google: googleEnabled(), stripe: stripeEnabled() },
       forwarding: forwardingInstructions(c),
       policy: policyUrls(c.slug, site), dataPolicy: DATA_POLICY, ackMinutesOptions: ACK_MINUTES,
@@ -354,6 +357,11 @@ async function handle(req, context) {
       if (JSON.stringify(b).length > 1200) return json({ error: 'invalid_request' }, 400);
       try { return json(await startWebsiteCheck(c, session, b), 200, { 'Cache-Control': 'no-store' }); }
       catch (error) { if (error instanceof WebsiteInstallationError) return json({ error: error.code, message: error.message, ...(error.field ? { field: error.field } : {}) }, error.status, { 'Cache-Control': 'no-store' }); throw error; }
+    }
+    if (b?.action === "post_visit") {
+      if (!selfService || !accessOriginAllowed(origin)) return json({ error: "forbidden" }, 403, { "Cache-Control": "no-store" });
+      try { return json(await changePostVisit(c, session, b), 200, { "Cache-Control": "no-store" }); }
+      catch (error) { if (error instanceof OwnerVisitError) return json({ error: error.code, message: error.message, field: error.field }, error.status, { "Cache-Control": "no-store" }); return json({ error: "post_visit_uncertain", message: "The change could not be confirmed. Retry the same action; it will not be applied twice." }, 503, { "Cache-Control": "no-store" }); }
     }
     if (["create_visit", "reschedule_visit", "cancel_visit", "edit_visit", "visit_availability"].includes(b?.action)) {
       if (!selfService || !accessOriginAllowed(origin)) return json({ error: "forbidden" }, 403, { "Cache-Control": "no-store" });

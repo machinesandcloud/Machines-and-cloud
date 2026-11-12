@@ -16,6 +16,7 @@ const stamp = () => new Date().toISOString();
 const STORE = "managed_deliveries";
 const INDEX = "managed_delivery_pending";
 const messageId = (c,channel,eventId) => `${c.slug}/${hash(`${deliveryTenant(c)}:${channel}:${eventId}`)}`;
+export const managedMessageId = messageId;
 const canonical = value => value && typeof value === "object" ? Array.isArray(value) ? value.map(canonical) : Object.fromEntries(Object.keys(value).sort().map(key => [key,canonical(value[key])])) : value;
 const undispatchedSMS = new WeakMap();
 const paidDispatchIdentity = job => paidUsageDigest({ id: job.id, tenant: job.tenant, digest: job.digest, attemptStartedAt: job.attemptStartedAt, from: job.from, serviceSid: job.serviceSid });
@@ -68,17 +69,18 @@ async function currentClient(c) {
   if (!current || !isSupportedSelfServiceClient(current) || deliveryTenant(c) !== deliveryTenant(current)) throw new Error("Delivery workspace changed");
   return current;
 }
-export async function queueManagedMessage(c, { eventId, channel, purpose, to, body, source = null, dueAt = null, consentAsk = false, preserveSnapshot = false, probe = null, followup = null, subject = null, alert = null }) {
+export async function queueManagedMessage(c, { eventId, channel, purpose, to, body, source = null, dueAt = null, consentAsk = false, preserveSnapshot = false, probe = null, followup = null, subject = null, alert = null, postVisit = null }) {
   const scope = await managedDeliveryProofScope();
   if (!proofClientAllowed(scope,c) || scope && (channel !== 'email' || to !== scope.email)) return null;
   await currentClient(c);
-  if (!/^[a-zA-Z0-9:_-]{1,160}$/.test(eventId || "") || !["email", "sms"].includes(channel) || !["owner_booking", "owner_lead", "confirmation", "reminder_24h", "reminder_1h", "cancelled", "reply", "consent_ask", "activation_probe", "followup_consent_ask", "quote_followup", "request_followup"].includes(purpose) || typeof body !== "string" || !body.trim() || body.length > 8000 || (dueAt !== null && !Number.isFinite(Date.parse(dueAt)))) throw new Error("Invalid delivery intent");
-  if (channel === "email" && !["owner_booking", "owner_lead"].includes(purpose)) throw new Error("Unsupported email purpose");
+  if (!/^[a-zA-Z0-9:_-]{1,160}$/.test(eventId || "") || !["email", "sms"].includes(channel) || !["owner_booking", "owner_lead", "confirmation", "reminder_24h", "reminder_1h", "cancelled", "reply", "consent_ask", "activation_probe", "followup_consent_ask", "quote_followup", "request_followup", "review_request", "payment_reminder", "owner_visit_check"].includes(purpose) || typeof body !== "string" || !body.trim() || body.length > 8000 || (dueAt !== null && !Number.isFinite(Date.parse(dueAt)))) throw new Error("Invalid delivery intent");
+  if (channel === "email" && !["owner_booking", "owner_lead", "owner_visit_check"].includes(purpose)) throw new Error("Unsupported email purpose");
+  if (channel === "sms" && purpose === "owner_visit_check" || channel === "email" && ["review_request", "payment_reminder"].includes(purpose) || ["review_request", "payment_reminder", "owner_visit_check"].includes(purpose) !== !!postVisit) throw new Error("Invalid delivery intent");
   const id = messageId(c,channel,eventId);
   const answer = channel === 'sms' ? await paidAnswerForDelivery(c, eventId, to, body) : {};
   if (subject !== null && (channel !== "email" || typeof subject !== "string" || !subject.trim() || subject.length > 120)) throw new Error("Invalid delivery intent");
   if (alert !== null && (channel !== "email" || !/^[a-f0-9]{10,32}$/.test(alert?.id || "") || ![1, 2].includes(alert.step))) throw new Error("Invalid delivery intent");
-  const payload = { tenant: deliveryTenant(c), channel, purpose, to, body, source, dueAt, consentAsk, probe, ...(followup?{followup}:{}), ...(subject?{subject}:{}), ...(alert?{alert:{id:alert.id,step:alert.step,...(alert.epoch?{epoch:alert.epoch}:{})}}:{}), ...answer }, digest = hash(JSON.stringify(canonical(payload)));
+  const payload = { tenant: deliveryTenant(c), channel, purpose, to, body, source, dueAt, consentAsk, probe, ...(followup?{followup}:{}), ...(postVisit?{postVisit}:{}), ...(subject?{subject}:{}), ...(alert?{alert:{id:alert.id,step:alert.step,...(alert.epoch?{epoch:alert.epoch}:{})}}:{}), ...answer }, digest = hash(JSON.stringify(canonical(payload)));
   // Like the body, the subject is display text: a re-queue of an existing snapshot keeps the
   // snapshot, and jobs written before subjects existed keep their original identity.
   const { subject: _subject, ...identityPayload } = payload;
@@ -170,6 +172,9 @@ export async function queueManagedRecord(c, record, kind = "bookings") {
   const current = await currentClient(c), saved = await strictRead(kind, `${c.slug}/${record.id}`);
   if (!saved || saved.delivery?.tenantIdentity !== deliveryTenant(c) || !belongsToWorkspace(c, saved) || saved.websiteSetupCheck || saved.simulation) return;
   const rev = revision(saved), source = { kind, id: saved.id, revision: rev }, eventId = `${kind}:${saved.id}:${rev}`;
+  // The owner closed this visit in the workspace: no owner email echo and no visit texts.
+  // Only the post-visit intents this exact visit state allows are (re)queued.
+  if (kind === 'bookings' && ['done', 'no_show'].includes(saved.status)) { if (!scope) { const { queuePostVisit } = await import('./post-visit.mjs'); await queuePostVisit(current, saved); } return; }
   const requestedVisit = kind === 'bookings' && saved.status === 'booked' && ['web','sms','call','voice'].includes(saved.channel);
   // A change made by the customer on a verified channel says so, with the old and new time.
   const last = kind === 'bookings' && saved.ownerVisitMutation ? saved.ownerVisitHistory?.at(-1) : null, byCustomer = typeof last?.actor === 'string' && last.actor.startsWith('customer:') && last.at === saved.ownerVisitMutation.at;
@@ -177,6 +182,7 @@ export async function queueManagedRecord(c, record, kind = "bookings") {
   const body = ownerRecordBody(current, saved, kind, requestedVisit, changeLine);
   await queueManagedMessage(current, { eventId: `${eventId}:owner`, channel: "email", purpose: kind === "bookings" ? "owner_booking" : "owner_lead", to: current.owner.email, body, subject: ownerRequestSubject(saved, kind), source, preserveSnapshot: true });
   if (scope) return; // This internal phase proves owner email only, not customer SMS.
+  if (kind === 'bookings') { const { ownerVisitCheckIntent } = await import('./post-visit.mjs'), check = ownerVisitCheckIntent(current, saved, rev); if (check) await queueManagedMessage(current, { eventId: check.eventId, channel: 'email', purpose: 'owner_visit_check', to: current.owner.email, body: check.body, dueAt: check.dueAt, postVisit: check.postVisit, preserveSnapshot: true }); }
   if (kind !== "bookings" || !saved.phone || !["booked", "confirmed", "on_the_way", "cancelled"].includes(saved.status)) return;
   const cancelled = saved.status === "cancelled";
   // Customer texts follow the booking's saved language (TEMPLATES_ES/STRINGS via str()).
@@ -209,6 +215,7 @@ async function confirmationAlreadySent(c, saved) {
 async function inspectSource(job, c) {
   if (job.alert) { const alert = await strictRead("alerts", `${c.slug}/${job.alert.id}`); if (!alert || alert.status !== "waiting" || (Number(alert.epoch) || 0) !== (Number(job.alert.epoch) || 0) || !belongsToWorkspace(c, alert)) return false; }
   if(job.followup){const {inspectRequestFollowup}=await import("./request-followup.mjs");if(!await inspectRequestFollowup(c,job))return false;}
+  if(job.postVisit){const {inspectPostVisit}=await import("./post-visit.mjs");if(!await inspectPostVisit(c,job))return false;}
   if (!job.source) return true;
   const record = await strictRead(job.source.kind, `${c.slug}/${job.source.id}`);
   return !!record && !record.websiteSetupCheck && !record.simulation && record.delivery?.tenantIdentity === job.tenant && belongsToWorkspace(c, record) && revision(record) === job.source.revision;
@@ -327,7 +334,7 @@ function providerAdapter(deadlineAt=Date.now()+10000) {
         await assertManagedEmailReservation(c, job, job.emailBudget);
         assertManagedEmailDispatchPolicy(job.emailBudget);
         assertProofPolicy(scope);
-        const { response, data } = await request("https://api.resend.com/emails", { method: "POST", headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, "Content-Type": "application/json", "Idempotency-Key": `delivery/${hash(job.id)}` }, body: JSON.stringify({ from: process.env.FROM_EMAIL, to: [job.to], subject: job.subject || (job.purpose === "owner_booking" ? "Your front desk: visit update" : "Your front desk: customer request"), text: job.body }) });
+        const { response, data } = await request("https://api.resend.com/emails", { method: "POST", headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, "Content-Type": "application/json", "Idempotency-Key": `delivery/${hash(job.id)}` }, body: JSON.stringify({ from: process.env.FROM_EMAIL, to: [job.to], subject: job.subject || (job.purpose === "owner_booking" ? "Your front desk: visit update" : job.purpose === "owner_visit_check" ? "Your front desk: did this visit happen?" : "Your front desk: customer request"), text: job.body }) });
         if (!response.ok || typeof data.id !== "string") throw new Error("Email result unconfirmed");
         return { id: data.id, status: "accepted" };
       }
@@ -396,6 +403,7 @@ function engine({ provider = null, gate = managedDeliveryEnabled, sender = sende
       // A crash can leave the provider receipt saved before the question's
       // consent-ledger projection. Rebuild it from this same verified receipt;
       // never send another question merely to repair that local projection.
+      if (job.purpose === 'reply' && job.channel === 'sms' && !['failed','undelivered','canceled'].includes(receipt.status)) { const { saveManagedReviewAsk } = await import('./managed-consent.mjs'); await saveManagedReviewAsk(c, job.to, { wording: job.body, messageSid: receipt.id, sentAt: receipt.sentAt || job.acceptedAt }); }
       if (job.consentAsk && job.channel === 'sms' && !['failed','undelivered','canceled'].includes(receipt.status)) {
         const { saveManagedConsentAsk } = await import('./managed-consent.mjs');
         await saveManagedConsentAsk(c, job.to, { wording: job.body, messageSid: receipt.id, sentAt: receipt.sentAt, senderNumber: job.from, messagingServiceSid: job.serviceSid });
@@ -410,6 +418,7 @@ function engine({ provider = null, gate = managedDeliveryEnabled, sender = sende
       return change(id, row => ({ ...row, state: "uncertain", reasonCode: "provider_receipt_missing" }));
     }
     if (!gate() || (c.status !== "live" && !await testingDeliveryAuthorized(c,job))) return change(id, row => ({ ...row, state: "waiting_platform", reasonCode: c.status !== "live" ? "workspace_not_live" : "delivery_gate_closed" }));
+    if (job.postVisit && !(Date.parse(job.postVisit.expiresAt) > Date.now())) return stopPaidBeforeSend(job,c,'post_visit_expired','expired');
     if (!await inspectSource(job, c)) return stopPaidBeforeSend(job,c,'record_changed','superseded');
     if(job.source && ["confirmation","reminder_24h","reminder_1h"].includes(job.purpose)) {
       const record=await strictRead(job.source.kind,`${c.slug}/${job.source.id}`);
@@ -427,6 +436,7 @@ function engine({ provider = null, gate = managedDeliveryEnabled, sender = sende
     if (job.channel === "sms") {
       const binding=await (job.purpose === "activation_probe" ? jobSender(c,job) : sender(c)); smsBinding=binding;
       if(job.followup){const {requestFollowupBlocker}=await import('./request-followup.mjs'),block=await requestFollowupBlocker(c,job);if(block)return change(id,row=>({...row,state:'waiting_platform',reasonCode:block.code,detail:block.message}));}
+      if(job.postVisit){const {postVisitBlocker}=await import('./post-visit.mjs'),block=await postVisitBlocker(c,job);if(block)return change(id,row=>({...row,state:'waiting_platform',reasonCode:block.code,detail:block.message}));}
       if (!binding) return change(id, row => ({ ...row, state: "waiting_platform", reasonCode: "sms_not_ready" }));
       if (job.purpose !== "activation_probe" && !await mayDeliverManagedSMS(c, job.to, job.purpose, job)) return change(id, row => ({ ...row, state: "waiting_consent", reasonCode: "consent_required" }));
       if (!["reply", "consent_ask", "followup_consent_ask"].includes(job.purpose) && inQuietHours()) return change(id, row => ({ ...row, state: "waiting_hours", reasonCode: "quiet_hours" }));
@@ -473,6 +483,7 @@ function engine({ provider = null, gate = managedDeliveryEnabled, sender = sende
       if (!receipt?.id) throw new Error("Missing receipt");
       const saved = await change(id, row => row.providerId || terminal(row.state) || row.claim?.token !== token ? null : { ...row, state: "accepted", providerId: receipt.id, from: receipt.from || null, serviceSid: receipt.serviceSid || null, acceptedAt: stamp(), claim: null, reasonCode: null });
       if(job.purpose==='followup_consent_ask'){const {saveRequestFollowupAsk}=await import('./request-followup.mjs');await saveRequestFollowupAsk(latest,job,receipt);}
+      if (job.purpose === 'reply' && job.channel === 'sms') { const { saveManagedReviewAsk } = await import('./managed-consent.mjs'); await saveManagedReviewAsk(latest, job.to, { wording: job.body, messageSid: receipt.id, sentAt: receipt.sentAt || stamp() }); }
       if (job.consentAsk && job.channel === "sms") { const { saveManagedConsentAsk } = await import("./managed-consent.mjs"); await saveManagedConsentAsk(latest, job.to, { wording: job.body, messageSid: receipt.id,sentAt:receipt.sentAt,senderNumber:saved.from,messagingServiceSid:saved.serviceSid }); }
       return saved;
     } catch(error) {

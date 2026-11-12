@@ -71,6 +71,15 @@
     <details class="desk-schedule-secondary" id="scheduleHistory"><summary>Visit history <span>Review all loaded visit records</span></summary>
     <div class="card2 desk-visits-card" id="scheduleVisitHistory"><h3>Visits <span class="desk-record-count" id="bookingCount">0</span> <button type="button" class="btn-pill btn-pill-blue btn-sm" id="newVisit" hidden>Add visit</button></h3><div id="bookings"></div></div>
     </details>
+    <details class="desk-schedule-secondary" id="postVisitSettings" hidden><summary>After-visit follow-ups <span>Job-done check, review requests and payment reminders</span></summary><div class="card2 desk-postvisit-card">
+      <form id="postVisitForm" novalidate>
+        <label class="post-visit-toggle" for="pvVisitCheck"><input type="checkbox" id="pvVisitCheck"> <span><b>Ask me if a visit happened</b><small>An email the morning after a visit that is still not marked done. Only you receive it.</small></span></label>
+        <label class="post-visit-toggle" for="pvReview"><input type="checkbox" id="pvReview"> <span><b>Text one review request</b><small>2 hours after you mark a job done, with your review link. Only to customers who texted REVIEWS or RESEÑAS to your business number and then agreed with YES REVIEWS or SÍ RESEÑAS. We never ask them for you, so tell customers about it yourself.</small></span></label>
+        <label class="post-visit-toggle" for="pvPayment"><input type="checkbox" id="pvPayment"> <span><b>Payment reminders you start</b><small>For a job marked done with an amount still owed. Day 3 and day 7, only to customers with appointment-text permission.</small></span></label>
+        <div class="post-visit-program" id="pvProgram" hidden><p><b>What customers receive</b></p><p class="muted" id="pvSampleReview"></p><p class="muted" id="pvSamplePayment"></p><p class="muted">Texts never go out between 9 pm and 9 am (Sunday before noon). STOP, ALTO or PARAR ends them.</p><label for="pvAcknowledge"><input type="checkbox" id="pvAcknowledge"> I reviewed what customers will receive.</label></div>
+        <p id="pvProgramState" class="muted" hidden></p>
+        <button type="submit" class="btn-pill btn-pill-blue btn-sm" id="pvSave">Save follow-up settings</button><p id="pvMessage" role="status" aria-live="polite" tabindex="-1"></p>
+      </form></div></details>
     <details class="desk-schedule-secondary" id="scheduleBlockManager"><summary>Manage blocked time <span>Add time off or review saved blocks</span></summary><div class="card2 desk-availability-card">
       <h3>Blocked time</h3>
       <p class="muted">Block a day or arrival window for other jobs, time off or a closure. Keep work booked elsewhere up to date here.</p>
@@ -296,6 +305,10 @@
     <button type="submit" class="btn-pill btn-pill-blue btn-sm" id="saveVisit">Save new time</button>
     <div class="visit-cancel"><label for="visitCancelConfirm"><input type="checkbox" id="visitCancelConfirm"> I want to cancel this visit. Its history will remain in my workspace.</label><button type="button" class="walkthrough-dismiss" id="cancelVisit">Cancel visit</button></div>
   </form>
+  <section class="visit-post" id="visitPost" hidden aria-labelledby="visitPostTitle"><h3 id="visitPostTitle">After the visit</h3><p id="visitPostStatus" class="muted"></p>
+    <div class="visit-post-actions" id="visitPostClose" hidden><button type="button" class="btn-pill btn-pill-blue btn-sm" id="visitMarkDone">Mark job done</button><button type="button" class="btn-pill btn-pill-dark btn-sm" id="visitNoShow">No-show</button></div>
+    <form id="visitPayForm" class="visit-post-pay" hidden novalidate><div class="form-group"><label class="form-label" for="visitPayAmount">Amount still owed</label><input class="form-input" id="visitPayAmount" inputmode="decimal" maxlength="12" placeholder="180" aria-describedby="visitPayHelp visitPayAmountError"><p id="visitPayAmountError" class="visit-field-error"></p></div><p class="muted" id="visitPayHelp">Two reminders, on day 3 and day 7, between 9 am and 9 pm. Only to customers with appointment-text permission. They stop when you mark it paid or the customer replies STOP.</p><div class="visit-post-actions"><button type="submit" class="btn-pill btn-pill-dark btn-sm" id="visitPaySend">Start payment reminders</button><button type="button" class="btn-pill btn-pill-dark btn-sm" id="visitMarkPaid" hidden>Mark paid</button></div></form>
+    <button type="button" class="walkthrough-dismiss" id="visitReopen" hidden>Reopen this visit</button><button type="button" class="btn-pill btn-pill-blue btn-sm" id="visitPostRetry" hidden>Retry saved action</button></section>
   <p id="visitMessage" role="status" aria-live="polite" tabindex="-1"></p><button type="button" class="btn-pill btn-pill-blue btn-sm" id="retryVisit" hidden>Retry saved change</button>
 </dialog>
 <dialog class="walkthrough support-dialog" id="supportDialog" aria-labelledby="supportTitle" aria-describedby="supportIntro">
