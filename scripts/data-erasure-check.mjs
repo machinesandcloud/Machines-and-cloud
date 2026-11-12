@@ -52,7 +52,7 @@ const storeNames = new Set();
 for (const file of files) {
   const text = readFileSync(file, 'utf8');
   for (const m of text.matchAll(/(?<![.\w])(?:atomicUpdate|strictRead|put|get|del|remove|list|listJSON|boundedRecordKeys|rowsOf)\(\s*['"]([a-z][a-z0-9_]+)['"]/g)) storeNames.add(m[1]);
-  for (const m of text.matchAll(/\b[A-Z_]*(?:STORE|QUEUE|INDEX|CALLS|CALLBACKS|OPERATIONS|LOCKS|KIND|REVIEWS|EVENTS|CURSOR|CLOCK|ERASURES)\s*=\s*['"]([a-z][a-z0-9_]+)['"]/g)) storeNames.add(m[1]);
+  for (const m of text.matchAll(/\b[A-Z_]*(?:STORE|QUEUE|INDEX|CALLS|CALLBACKS|OPERATIONS|LOCKS|KIND|REVIEWS|EVENTS|CURSOR|CLOCK|ERASURES|REQUESTS)\s*=\s*['"]([a-z][a-z0-9_]+)['"]/g)) storeNames.add(m[1]);
 }
 for (const n of ['workspace_rebuild', 'daily']) storeNames.delete(n);
 await check('every store the source names is classified by ERASURE_REGISTRY, plus the conditional 09/15 stores', async () => {

@@ -47,6 +47,7 @@ export const ERASURE_REGISTRY = Object.freeze({
   lead_connections: { scope: 'prefix', contact: false },
   request_followthrough: { scope: 'prefix' }, request_followup_permissions: { scope: 'prefix' },
   owner_visit_operations: { scope: 'prefix' }, owner_visit_locks: { scope: 'prefix' }, owner_tests: { scope: 'prefix' },
+  customer_visit_requests: { scope: 'prefix' }, // customer-visits.mjs: `${slug}/${tenant}/…`, holds the customer's phone and visit details
   self_service_ai_proofs: { scope: 'exact' }, // keyed by the bare slug (self-service-ai.mjs PROOF_STORE)
   website_installations: { scope: 'prefix', contact: false }, setup_assistance: { scope: 'prefix', contact: false },
   service_intake: { scope: 'prefix', contact: false }, service_approval: { scope: 'prefix', contact: false },
