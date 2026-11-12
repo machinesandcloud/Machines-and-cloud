@@ -1,7 +1,7 @@
 // The four sends that go to every live shop at a fixed hour: digest (6 pm), audit (9 pm), weekly (Monday 8 am),
 // monthly (the 1st, 9 am). Each is one function so the scheduler can hand it to a background function
 // (no synchronous time limit) and tests can run it inline. Every shop is wrapped; one failure never stops the rest.
-import { list, getClient, logEvent, get, put } from "./store.mjs";
+import { list, getClient, logEvent, get, put, atomicUpdate } from "./store.mjs";
 import { sendSMS, sendEmail, notifySteve } from "./send.mjs";
 import { dailyDigest, autoFlagDay, weeklyReport, monthlyReport } from "./desk.mjs";
 import { isSelfServiceClient } from "./setup.mjs";
@@ -54,9 +54,7 @@ export async function fanout(kind) {
 }
 
 // Once per Houston day per kind: the stamp is written before the send so a retry inside the window never doubles it.
+// A conditional write, so two overlapping runs cannot both take the same day.
 export async function claimFanout(kind, dateKey) {
-  const k = `fanout:${kind}:${dateKey}`;
-  if (await get("health", k)) return false;
-  await put("health", k, { at: new Date().toISOString() });
-  return true;
+  return atomicUpdate("health", `fanout:${kind}:${dateKey}`, (row) => row ? { result: false } : { value: { at: new Date().toISOString() }, result: true });
 }

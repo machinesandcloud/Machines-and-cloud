@@ -14,6 +14,7 @@ import { queueManagedRecord, dispatchManagedDeliveryWave } from "./managed-deliv
 import { queueCalendarBooking, dispatchCalendarDeliveryWave } from "./calendar-delivery.mjs";
 import { strictRead } from "./accounts.mjs";
 import { atomicUpdate } from './store.mjs';
+import { arrivalInstant } from "./service-time.mjs";
 
 // Legacy tool results must describe the notifications that actually went out (AI review R2). The send
 // results are kept beside the returned record, never saved with it. Legacy sends are synchronous provider
@@ -142,6 +143,7 @@ export async function runConsentAsk(c, task) {
   const b = task.data?.bookingId ? await getRecord("bookings", c.slug, task.data.bookingId) : null;
   const wording = str("consent_ask", b || {})(c);
   const r = await sendSMS({ to: phone, client: c, type: "consent_ask", body: wording });
+  if (r.reason === "sender_not_registered") return "held: sender not registered";
   if (!(r.ok || r.logged)) return "send failed";
   cust.consentAskedAt = new Date().toISOString(); cust.consentWording = wording; cust.language = b?.language || "en";
   await saveCustomer(cust);
@@ -219,24 +221,22 @@ function askFor(kind, r) {
   return "";
 }
 
-// Quiet hours for follow-up texts (Texas Business and Commerce Code ch. 304 hours): 9 am to 9 pm
+// Quiet hours for follow-up texts (Texas Business and Commerce Code §301.051 hours): 9 am to 9 pm
 // Monday to Saturday, noon to 9 pm Sunday, Houston time. A due time inside quiet hours moves to the
 // next opening minute. Visit confirmations, reminders, on-the-way texts, text-backs, and live replies
 // are exempt; only the scheduled follow-ups below go through this.
 export const FOLLOW_UP_TYPES = ["review_request", "review_nudge", "quote_check", "lead_chase", "referral_ask", "payment_reminder", "consent_ask", "maintenance_reminder"];
 const HOU = (d) => { const p = Object.fromEntries(new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", weekday: "short", hour: "numeric", minute: "numeric", hour12: false }).formatToParts(d).filter((x) => x.type !== "literal").map((x) => [x.type, x.value])); return { day: p.weekday, hour: Number(p.hour) % 24, minute: Number(p.minute) }; };
 export function nextOpenTime(at) {
-  let t = new Date(at);
-  for (let i = 0; i < 8; i++) {
-    const { day, hour, minute } = HOU(t);
-    const open = day === "Sun" ? 12 : 9, close = 21;
-    const mins = hour * 60 + minute;
-    if (mins >= open * 60 && mins < close * 60) return t;
-    // Before opening: move forward to the opening minute today. After closing: to the next day's opening.
-    const forward = mins < open * 60 ? (open * 60 - mins) : (24 * 60 - mins) + (HOU(new Date(t.getTime() + (24 * 60 - mins) * 60000)).day === "Sun" ? 12 : 9) * 60;
-    t = new Date(t.getTime() + forward * 60000);
-  }
-  return t;
+  const t = new Date(at);
+  const { day, hour, minute } = HOU(t);
+  const open = day === "Sun" ? 12 : 9, mins = hour * 60 + minute;
+  if (mins >= open * 60 && mins < 21 * 60) return t;
+  // Before opening: today's opening minute. After closing: the next calendar day's opening. Built from the
+  // Houston date (not by adding minutes), so the 23- and 25-hour DST days land on the right hour.
+  const today = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Chicago" }).format(t);
+  const date = mins < open * 60 ? today : new Date(Date.parse(today + "T12:00:00Z") + D).toISOString().slice(0, 10);
+  return new Date(arrivalInstant(date, new Date(date + "T12:00:00Z").getUTCDay() === 0 ? "12 to 1" : "9 to 10"));
 }
 export async function scheduleFollowUp(c, at, type, data) {
   const due = FOLLOW_UP_TYPES.includes(type) ? nextOpenTime(at) : new Date(at);

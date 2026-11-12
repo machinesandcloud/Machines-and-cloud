@@ -58,6 +58,10 @@ export async function clearOptOut(to) { await del("optouts", e164(to)); }
  *   Machines & Cloud registered sender (MC_MESSAGING_SERVICE_SID or MC_TWILIO_NUMBER) with the
  *   business name prefixed, so day-one texts are legal and deliverable.
  */
+// Scheduled customer texts (reminders and follow-ups) leave only from the shop's own approved registration.
+// Until then they are held, never sent through the platform campaign or an unregistered number (legal-audit G1).
+export const REGISTERED_ONLY_TYPES = ["reminder_24h", "reminder_1h", "review_request", "review_nudge", "quote_check", "lead_chase", "referral_ask", "payment_reminder", "consent_ask", "maintenance_reminder"];
+export const ownSenderApproved = (client) => Boolean(client?.phone?.twilioNumber && client.phone.tenDlc === "approved");
 export async function sendSMS({ to, from, body, client, messagingServiceSid, force, type = "sms" }) {
   if (isSelfServiceClient(client)) return { ok: false, reason: "channel_not_active" };
   to = e164(to);
@@ -66,6 +70,19 @@ export async function sendSMS({ to, from, body, client, messagingServiceSid, for
   // Unknown opt-out state: hold the text (not sent, not thrown) so owner alerts still fall through to email.
   if (optOut === null) { if (client) await logEvent(client, "sms_held", { to, type, reason: "optout_unreadable" }).catch(() => {}); return { ok: false, reason: "sms_unconfirmed", held: true }; }
   if (optOut) { if (client) await logEvent(client, "sms_blocked", { to, type }); return { ok: false, reason: "opted_out" }; }
+  if (client && !force && REGISTERED_ONLY_TYPES.includes(type)) {
+    // With 12-03: a scheduled text may have been held (or its series started) on the shared sender; a STOP recorded
+    // there ends it, also when the shop's own number was approved in the meantime (QA r2 N4). Approved shops keep
+    // their old behaviour if the ledger is unreadable; a held text stays held.
+    const approved = ownSenderApproved(client);
+    let stopped = false;
+    try { const { platformSMSSuppressed } = await import("./platform-sms.mjs"); stopped = await platformSMSSuppressed(to); } catch { /* unreadable: held stays held; approved sends as before */ }
+    if (stopped) { await logEvent(client, "sms_blocked", { to, type, store: "platform" }); return { ok: false, reason: "opted_out" }; }
+    if (!approved) {
+      await logEvent(client, "sms_held", { to, type, reason: "sender_not_registered", tenDlc: client.phone?.tenDlc || null });
+      return { ok: false, reason: "sender_not_registered" };
+    }
+  }
   let text = body.slice(0, 1500);
   let service = messagingServiceSid;
   if (client) {
@@ -101,7 +118,7 @@ export async function sendSMS({ to, from, body, client, messagingServiceSid, for
   if (!res.ok) console.error("twilio send failed", res.status, data?.message);
   if (client) await logEvent(client, res.ok ? "sms_sent" : "sms_failed", { to, type, sender: mode, ok: res.ok, sid: data?.sid, code: data?.code, message: data?.message, preview: text.slice(0, 300) });
   if (client && res.ok) await countText(client, type);
-  return { ok: res.ok, sid: data?.sid, error: data?.message };
+  return { ok: res.ok, sid: data?.sid, error: data?.message, status: res.status, code: data?.code };
 }
 
 // Customer-facing texts count toward the plan (usage.mjs); owner alerts and digests do not.
