@@ -58,8 +58,8 @@ function refused(origin, body, error, message = CHAT_UNAVAILABLE) {
 }
 
 // 60 messages per network (IPv4 address or IPv6 /64) per 10 minutes for legacy tenants and fictional practice only.
-// Keys carry the bucket, so old ones are simply never read again. A missing IP shares one "unknown" bucket.
-// The count is a conditional write, so a concurrent burst cannot pass more than the limit.
+// Keys carry the bucket; the scheduler's retention block deletes buckets older than the previous window. A missing IP
+// shares one "unknown" bucket. The count is a conditional write, so a concurrent burst cannot pass more than the limit.
 // The owner's test line (valid key) and the admin key are exempt. Daily ceilings live in public-chat-budget.mjs.
 const RATE_LIMIT = 60;
 async function rateLimited(ip) {

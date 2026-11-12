@@ -145,7 +145,44 @@ function validatedPatch(patch) {
     throw Object.assign(new OperatorError('invalid_patch', error.message, error.status), { fieldErrors: error.fieldErrors });
   }
 }
+// Erasure is operator-only, needs a reason and the current revision, and writes its own audit
+// record (workspace_erasures / contact_erasures) because the client row itself is removed.
+async function erasureAction(session, body) {
+  const { eraseWorkspace, eraseContact, confirmProviderCleanup, ErasureError, REASON_NOTICE } = await import('./data-erasure.mjs');
+  const fields = { erase_workspace: ['confirmSlug', 'providerCleanup'], erase_contact: ['phone', 'webContact'], confirm_provider_cleanup: ['providerId'] }[body.action];
+  if (Object.keys(body).some(key => !['action', 'slug', 'expectedRevision', 'reason', ...fields].includes(key))) throw new OperatorError('invalid_request', 'Unexpected support action fields.');
+  if (!/^[a-z0-9-]{1,40}$/.test(body.slug || '') || typeof body.reason !== 'string' || body.reason.trim().length < 3 || body.reason.length > 300) throw new OperatorError('invalid_request', 'Choose a customer and add a reason for this change. ' + REASON_NOTICE);
+  await requireCurrentOperator(session);
+  const actor = session.email, reason = body.reason.trim();
+  try {
+    // Reasons are stored verbatim in the audit, so every erasure reply repeats the rule (REASON_NOTICE).
+    if (body.action === 'confirm_provider_cleanup') return { ...await confirmProviderCleanup({ slug: body.slug, providerId: String(body.providerId || ''), actor, reason }), notice: REASON_NOTICE };
+    const c = await strictRead('clients', body.slug);
+    if (c && !isSelfServiceClient(c)) throw new OperatorError('legacy_read_only', 'This account requires a reviewed migration before managed changes.', 409);
+    if (c && managementRevision(c) !== body.expectedRevision) throw new OperatorError('customer_changed', 'Customer details changed. Refresh before trying again.', 409);
+    if (body.action === 'erase_contact') {
+      if (!c) throw new OperatorError('not_found', 'Customer not found.', 404);
+      if (body.phone !== undefined && typeof body.phone !== 'string' || body.webContact !== undefined && typeof body.webContact !== 'string' || !body.phone === !body.webContact) throw new OperatorError('invalid_request', 'Choose one phone number or one website conversation.');
+      const result = await eraseContact({ client: c, phone: body.phone || null, webContact: body.webContact || null, actor, reason });
+      await atomicUpdate('clients', c.slug, current => {
+        if (!current || workspaceTenant(current) !== workspaceTenant(c)) return { result: null };
+        const audit = { tenantIdentity: workspaceTenant(current), id: result.erasure.id, at: result.erasure.at, actor, action: 'erase_contact', reason, fields: [] };
+        return { value: { ...current, management: { ...current.management, revision: (current.management?.revision || 0) + 1, audit: [...(current.management?.audit || []), audit].slice(-100), notes: current.management?.notes || [] }, updatedAt: result.erasure.at } };
+      });
+      return { ...result, notice: REASON_NOTICE };
+    }
+    // erase_workspace: the operator retypes the slug; an unfinished erasure resumes without a client row.
+    if (body.confirmSlug !== body.slug) throw new OperatorError('invalid_request', 'Type the customer ID to confirm erasure.');
+    if (body.providerCleanup !== undefined && !['require_confirmed', 'retain_tombstone'].includes(body.providerCleanup)) throw new OperatorError('invalid_request', 'Choose how provider cleanup is handled.');
+    if (!c && !/^[a-f0-9]{64}$/.test(body.expectedRevision || '')) throw new OperatorError('invalid_request', 'Choose a customer and add a reason for this change.');
+    return { ...await eraseWorkspace({ slug: body.slug, client: c, actor, reason, providerCleanup: body.providerCleanup || 'require_confirmed', requireClosed: true, workspaceKind: 'self_service' }), notice: REASON_NOTICE };
+  } catch (error) {
+    if (error instanceof ErasureError) throw Object.assign(new OperatorError(error.code, error.message, error.status), error.erasure ? { erasure: error.erasure } : {}, error.providerCleanup ? { providerCleanup: error.providerCleanup } : {});
+    throw error;
+  }
+}
 export async function supportAction(session, body) {
+  if (['erase_workspace', 'erase_contact', 'confirm_provider_cleanup'].includes(body?.action)) return erasureAction(session, body);
   if(body?.action==='record_voice_rejection'){
     await requireCurrentOperator(session);
     if(!/^[a-z0-9-]{1,40}$/.test(body.slug||'')||!/^[a-f0-9]{64}$/.test(body.expectedRevision||''))throw new OperatorError('invalid_request','Choose the exact customer and current revision.');

@@ -18,6 +18,10 @@ import { networkBucket } from "./lib/network-bucket.mjs";
 import { workspaceTenant, belongsToWorkspace } from "./lib/workspace-identity.mjs";
 
 export const config = { path: "/api/admin" };
+const erasureReply = async (work) => {
+  try { return json(await work()); }
+  catch (e) { if (e?.code && Number.isInteger(e?.status)) return json({ error: e.code, message: e.message, ...(e.erasure ? { erasure: e.erasure } : {}), ...(e.providerCleanup ? { providerCleanup: e.providerCleanup } : {}) }, e.status); throw e; }
+};
 
 export default async (req) => {
   const key = process.env.ADMIN_KEY;
@@ -71,6 +75,10 @@ export default async (req) => {
   if (b.action === "last_run") return json({ ok: true, lastRun: await get("health", "scheduler:lastRun") });
   if (b.action === "ratelimit_reset") { const ip = String(b.ip || "").trim(); if (!ip) return json({ error: "missing_ip" }, 400); let n = 0; for (const k of await list("ratelimit", networkBucket(ip) + "/")) { await del("ratelimit", k); n++; } return json({ ok: true, cleared: n }); }
   const c = await getClient(b.slug || "");
+  if (!c && b.action === "delete") {
+    const { eraseWorkspace } = await import("./lib/data-erasure.mjs");
+    return erasureReply(async () => ({ ok: true, deleted: String(b.slug), erasure: (await eraseWorkspace({ slug: String(b.slug || ""), client: null, actor: "admin-key", reason: String(b.reason || "legacy admin delete (resume)"), workspaceKind: "legacy" })).erasure }));
+  }
   if (!c) return json({ error: "not_found" }, 404);
   // New customer support uses scoped, revisioned, audited managed actions.
   // The legacy console must not bypass readiness, identity or lifecycle gates.
@@ -159,27 +167,26 @@ export default async (req) => {
     return json({ ok: true, ...d });
   }
   if (b.action === "delete") {
+    // One erasure routine for every store (lib/data-erasure.mjs). Provider IDs whose release is not
+    // confirmed stay in the erasure record (workspace_erasures) instead of disappearing with the client.
+    const { eraseWorkspace } = await import("./lib/data-erasure.mjs");
     const released = {};
-    try { if (twilioEnabled() && c.phone?.twilioNumberSid) released.number = await releaseNumber(c.phone.twilioNumberSid, c.phone.messagingServiceSid); } catch (e) { released.numberError = String(e.message); }
-    try { if (c.voice?.assistantId) released.voice = await releaseVoice(c); } catch (e) { released.voiceError = String(e.message); }
-    // Recordings we made (VIP voicemails) are deleted at Twilio when keys allow; Twilio and Vapi keep their own logs.
-    try { const { deleteRecording, twilioEnabled: tw } = await import("./lib/twilio.mjs"); if (tw()) { for (const e of await listJSON("events", c.slug + "/", 2000)) if (e.type === "vip_voicemail" && e.data?.sid) { try { await deleteRecording(e.data.sid); (released.recordings = released.recordings || []).push(e.data.sid); } catch (err) { released.recordingError = String(err.message); } } } } catch { /* ignore */ }
-    // conversation_access / conversation_forks (lib/conversation-access.mjs) hold token hashes and the legacy-window IP digest.
-    for (const kind of ["bookings", "leads", "alerts", "conversations", "conversation_access", "conversation_forks", "events", "usage", "customers"]) for (const k of await list(kind, c.slug + "/")) await del(kind, k);
-    for (const k of await list("tasks", "")) { const t = await get("tasks", k); if (t?.slug === c.slug) await del("tasks", k); }
-    // Opt-outs are keyed by phone across shops (the bridge sender is shared): keep them, forget the shop.
-    for (const k of await list("optouts", "")) { const o = await get("optouts", k); if (o?.slug === c.slug) await put("optouts", k, { ...o, slug: "", formerSlug: c.slug }); }
-    for (const k of await list("index", "bridge:")) { const sl = await get("index", k); if (sl === c.slug) await del("index", k); }
-    for (const prefix of [`bookings:${c.slug}:`, `leads:${c.slug}:`, `platform:${c.slug}:`, `vapitool:${c.slug}:`, `vapicall:${c.slug}:`]) for (const k of await list("index", prefix)) await del("index", k);
-    await del("index", "capacity:" + c.slug);
-    await del("health", "lastInbound:" + c.slug);
-    if (c.owner?.email) await del("index", "email:" + c.owner.email.toLowerCase());
-    if (c.phone?.twilioNumber) await del("index", "number:" + c.phone.twilioNumber);
-    if (c.voice?.assistantId) await del("index", "vapi:" + c.voice.assistantId);
-    await del("health", "lastsend:" + c.slug);
-    for (const k of await list("health", "alert:" + c.slug + ":")) await del("health", k);
-    await del("clients", c.slug);
-    return json({ ok: true, deleted: c.slug, released });
+    const releaseProviders = async (refs, client) => {
+      const confirmed = [];
+      if (!client) return confirmed;
+      const has = id => refs.some(ref => ref.id === id);
+      if (twilioEnabled() && client.phone?.twilioNumberSid && has(client.phone.twilioNumberSid)) {
+        try { released.number = await releaseNumber(client.phone.twilioNumberSid, client.phone.messagingServiceSid); confirmed.push(client.phone.twilioNumberSid); if (released.number?.messagingService) confirmed.push(released.number.messagingService); } catch (e) { released.numberError = String(e.message); }
+      }
+      if (client.voice?.assistantId || client.voice?.phoneNumberId) {
+        try { released.voice = await releaseVoice(client); for (const field of ["assistant", "phoneNumber"]) if (released.voice?.[field]) confirmed.push(released.voice[field]); } catch (e) { released.voiceError = String(e.message); }
+      }
+      // Recordings we made (VIP voicemails) are deleted at Twilio when keys allow; Twilio and Vapi keep their own logs.
+      const { deleteRecording } = await import("./lib/twilio.mjs");
+      if (twilioEnabled()) for (const ref of refs.filter(ref => ref.kind === "recording")) { try { await deleteRecording(ref.id); (released.recordings = released.recordings || []).push(ref.id); confirmed.push(ref.id); } catch (err) { released.recordingError = String(err.message); } }
+      return confirmed;
+    };
+    return erasureReply(async () => ({ ok: true, deleted: c.slug, released, erasure: (await eraseWorkspace({ slug: c.slug, client: c, actor: "admin-key", reason: String(b.reason || "legacy admin delete"), releaseProviders })).erasure }));
   }
   if (b.action === "pause" || b.action === "resume") {
     const { detachVoice, attachVoice } = await import("./lib/vapi.mjs");
@@ -187,6 +194,10 @@ export default async (req) => {
     if (b.action === "pause") { if (!["testing", "live"].includes(c.status)) return json({ error: "not_active" }, 400); c.pausedFrom = c.status; c.status = "paused"; c.pausedAt = new Date().toISOString(); await saveClient(c); await logEvent(c, "paused", { by: "admin" }); try { await detachVoice(c, site); await saveClient(c); } catch (e) { console.error(e); } }
     else { if (c.status !== "paused") return json({ error: "not_paused" }, 400); c.status = "live"; c.pausedAt = null; c.liveAt = c.liveAt || new Date().toISOString(); await saveClient(c); await logEvent(c, "resumed", { by: "admin" }); try { await attachVoice(c, site); await saveClient(c); } catch (e) { console.error(e); } }
     return json({ ok: true, status: c.status });
+  }
+  if (b.action === "erase_contact") {
+    const { eraseContact } = await import("./lib/data-erasure.mjs");
+    return erasureReply(() => eraseContact({ client: c, phone: b.phone ? e164(String(b.phone)) : null, webContact: b.webContact ? String(b.webContact) : null, actor: "admin-key", reason: String(b.reason || "") }));
   }
   if (b.action === "clear_optout") { const n = e164(b.phone || ""); if (!n) return json({ error: "missing_phone" }, 400); await del("optouts", n); return json({ ok: true, cleared: n }); }
   if (b.action) return json({ error: "unknown_action", action: String(b.action) }, 400);

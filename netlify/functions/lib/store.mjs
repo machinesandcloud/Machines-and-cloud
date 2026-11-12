@@ -70,6 +70,10 @@ export async function atomicUpdate(kind, key, update) {
 export async function del(kind, key) {
   try { await store(kind).delete(safe(key)); } catch { /* ignore */ }
 }
+// Erasure needs to know when a delete failed so a retry can finish it.
+export async function remove(kind, key) {
+  await store(kind).delete(safe(key));
+}
 export async function list(kind, prefix = "") {
   const { blobs } = await store(kind).list({ prefix: safe(prefix) });
   return blobs.map((b) => unsafe(b.key)).sort();
@@ -170,7 +174,7 @@ const conversationPath = conv => `${conv.slug}/${conv.tenantIdentity}/${conv.cha
 const batchPath = (conv, batchId) => `${conv.slug}/${conv.tenantIdentity}/${digestConversation([conv.channel, conv.contact])}/${batchId}`;
 function validateConversationHistory(conv) {
   const h = conv.history;
-  if (!h || h.version !== 1 || !Array.isArray(h.entries) || h.entries.length > CONVERSATION_BATCH_LIMIT || !Array.isArray(h.pending) || h.pending.length > CONVERSATION_PENDING_LIMIT || typeof h.complete !== 'boolean' || !Number.isInteger(h.total) || h.total < 0 || h.entries.some(row => !/^[a-f0-9]{64}$/.test(row.id || '') || !/^[a-f0-9]{64}$/.test(row.digest || '') || !Number.isInteger(row.count) || row.count < 1 || row.count > 40) || h.entries.reduce((n, row) => n + row.count, 0) !== h.total || new Set(h.entries.map(row => row.id)).size !== h.entries.length || h.pending.some(row => !/^[a-f0-9]{64}$/.test(row.id || '') || !/^[a-f0-9]{64}$/.test(row.inputHash || ''))) historyError('conversation_history_unavailable', 'This saved conversation needs checking. Please contact support.', 503);
+  if (!h || h.version !== 1 || !Array.isArray(h.entries) || h.entries.length > CONVERSATION_BATCH_LIMIT || !Array.isArray(h.pending) || h.pending.length > CONVERSATION_PENDING_LIMIT || typeof h.complete !== 'boolean' || !Number.isInteger(h.total) || h.total < 0 || h.entries.some(row => !/^[a-f0-9]{64}$/.test(row.id || '') || !/^[a-f0-9]{64}$/.test(row.digest || '') || !Number.isInteger(row.count) || row.count < 1 || row.count > 40 || row.redactedDigest !== undefined && !/^[a-f0-9]{64}$/.test(row.redactedDigest)) || h.entries.reduce((n, row) => n + row.count, 0) !== h.total || new Set(h.entries.map(row => row.id)).size !== h.entries.length || h.pending.some(row => !/^[a-f0-9]{64}$/.test(row.id || '') || !/^[a-f0-9]{64}$/.test(row.inputHash || ''))) historyError('conversation_history_unavailable', 'This saved conversation needs checking. Please contact support.', 503);
   return h;
 }
 async function currentConversationWorkspace(conv) {
@@ -178,8 +182,13 @@ async function currentConversationWorkspace(conv) {
   if (!supportedWorkspace(current) || workspaceTenant(current) !== conv.tenantIdentity || !belongsToWorkspace(current, conv)) throw new WorkspaceIdentityError();
   return current;
 }
+// Contact erasure (lib/data-erasure.mjs) redacts a batch in place: it first stages the redacted
+// batch's digest on the head entry (`redactedDigest`), rewrites the batch, then adopts the new
+// digest. A staged entry verifies against either digest, so the chain reads at every step.
+export const conversationBatchDigest = row => digestConversation({ messages: row.messages, inputHash: row.inputHash || null, output: row.output || null });
 function validBatch(conv, entry, row) {
-  if (!row || row.version !== 1 || row.tenantIdentity !== conv.tenantIdentity || row.slug !== conv.slug || row.channel !== conv.channel || row.contact !== conv.contact || row.id !== entry.id || !Array.isArray(row.messages) || row.messages.length !== entry.count || digestConversation({ messages: row.messages, inputHash: row.inputHash || null, output: row.output || null }) !== entry.digest) historyError('conversation_history_unavailable', 'Part of this saved conversation could not be read. Try again; its saved history is kept.', 503);
+  const digest = row && Array.isArray(row.messages) ? conversationBatchDigest(row) : null;
+  if (!row || row.version !== 1 || row.tenantIdentity !== conv.tenantIdentity || row.slug !== conv.slug || row.channel !== conv.channel || row.contact !== conv.contact || row.id !== entry.id || !Array.isArray(row.messages) || row.messages.length !== entry.count || digest !== entry.digest && !(entry.redactedDigest && digest === entry.redactedDigest)) historyError('conversation_history_unavailable', 'Part of this saved conversation could not be read. Try again; its saved history is kept.', 503);
   return row;
 }
 async function writeBatch(conv, batchId, messages, inputHash = null, output = null) {

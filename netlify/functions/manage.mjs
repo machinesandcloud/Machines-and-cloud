@@ -3,6 +3,7 @@ import { normalizeAccountEmail, strictRead } from './lib/accounts.mjs';
 import { OperatorError, operatorEmails, requireOperator, requireCurrentOperator, customerPage, customerView, supportAction, operatorProviderStates } from './lib/operator.mjs';
 import { prospectAudience, prospectsCSV } from './lib/intake.mjs';
 import { platformSMSView } from './lib/platform-sms.mjs';
+import { pendingProviderCleanup } from './lib/data-erasure.mjs';
 import { serviceHealthFailureFacts, schedulerHealthState } from './lib/service-health.mjs';
 
 export const config = { path: '/api/manage' };
@@ -64,11 +65,11 @@ export default async (req, context) => {
     const page = await customerPage(url.searchParams.get('cursor') || '');
     const scheduler = await strictRead('health', 'scheduler:lastRun');
     const {healthy,minutesAgo:age,blocks}=schedulerHealthState(scheduler);
-    const result = { ok: true, operator: { email: session.email, expiresAt: session.expiresAt }, ...page, inquiries: await prospectAudience('all'), platformSMS: await platformSMSView(), system: { scheduler: { at: scheduler?.at || null, healthy, minutesAgo: age, blocks: blocks.map(([name, saved]) => { const row=saved && typeof saved === 'object' ? saved : {}; return ({ name, ok: row.ok === true, queued: row.queued, failed: row.failed, uncertain: row.uncertain, openFailures: row.openFailures, pending: row.pending, unresolved: row.unresolved, cleanupPending: row.cleanupPending, inspected: row.inspected, reasonCode: name === 'serviceDeliveryRecovery' ? serviceHealthFailureFacts(row)[0]?.reasonCode || (row.ok === true ? null : 'service_delivery_unresolved') : row.reasonCode, ...(name === 'serviceDeliveryRecovery' ? { failingComponents: serviceHealthFailureFacts(row) } : {}) }); }) }, providerStates: operatorProviderStates() } };
+    const result = { ok: true, operator: { email: session.email, expiresAt: session.expiresAt }, ...page, inquiries: await prospectAudience('all'), providerCleanupPending: await pendingProviderCleanup(), platformSMS: await platformSMSView(), system: { scheduler: { at: scheduler?.at || null, healthy, minutesAgo: age, blocks: blocks.map(([name, saved]) => { const row=saved && typeof saved === 'object' ? saved : {}; return ({ name, ok: row.ok === true, queued: row.queued, failed: row.failed, uncertain: row.uncertain, openFailures: row.openFailures, pending: row.pending, unresolved: row.unresolved, cleanupPending: row.cleanupPending, inspected: row.inspected, reasonCode: name === 'serviceDeliveryRecovery' ? serviceHealthFailureFacts(row)[0]?.reasonCode || (row.ok === true ? null : 'service_delivery_unresolved') : row.reasonCode, ...(name === 'serviceDeliveryRecovery' ? { failingComponents: serviceHealthFailureFacts(row) } : {}) }); }) }, providerStates: operatorProviderStates() } };
     await requireCurrentOperator(session);
     return reply(result);
   } catch (error) {
-    if (error instanceof OperatorError || error instanceof AccessError || Number.isInteger(error?.status) && error?.code) return reply({ error: error.code, message: error.message, ...(error.fieldErrors ? { fieldErrors: error.fieldErrors } : {}) }, error.status);
+    if (error instanceof OperatorError || error instanceof AccessError || Number.isInteger(error?.status) && error?.code) return reply({ error: error.code, message: error.message, ...(error.fieldErrors ? { fieldErrors: error.fieldErrors } : {}), ...(error.providerCleanup ? { providerCleanup: error.providerCleanup } : {}), ...(error.erasure ? { erasure: error.erasure } : {}) }, error.status);
     return reply({ error: 'management_unavailable', message: 'We could not confirm this operation. Refresh to check the saved state before retrying.' }, 503);
   }
 };

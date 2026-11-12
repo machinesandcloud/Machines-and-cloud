@@ -244,6 +244,12 @@ export async function run({ forceHour, forceDay, inline, all } = {}) {
     }
     return { released };
   });
+  // Expired sign-in rows and raw-IP rate-limit buckets are not kept past their purpose (F6/F7).
+  await block(record, "retention", async () => {
+    if (!halfHour) return { skipped: "runs at :00 and :30" };
+    const { retentionSweep } = await import("./lib/data-erasure.mjs");
+    return retentionSweep();
+  });
   // The clock, Houston.
   const parts = new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", hour: "numeric", minute: "numeric", hour12: false }).formatToParts(new Date());
   const hour = forceHour ?? Number(parts.find((p) => p.type === "hour")?.value);
