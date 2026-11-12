@@ -10,6 +10,7 @@ import { setupReadiness, configurationRevision, isSelfServiceClient, isSupported
 import { AvailabilityInputError, normalizeAppointmentHours, validateAppointmentConfiguration } from "./lib/availability.mjs";
 import { publicView, ownerView, PLANS, loopCheck, ACK_MINUTES, DATA_POLICY, policyUrls, normalizeEmergencies, normalizeHours, parseHours, emergency247 } from "./lib/config.mjs";
 import { json } from "./lib/agent.mjs";
+import { formulaSafe } from "./lib/spreadsheet-cell.mjs";
 import { sendSMS, smsEnabled, e164, sendEmail, notifySteve } from "./lib/send.mjs";
 import { googleEnabled } from "./lib/calendar.mjs";
 import { stripeEnabled } from "./lib/billing.mjs";
@@ -582,7 +583,7 @@ function todayStrip(c, bookings, leads, events) {
 }
 
 // ---- CSV export (RFC 4180, UTF-8 BOM, attachment) ----
-const csvCell = (v) => { const t = v == null ? "" : typeof v === "object" ? JSON.stringify(v) : String(v); return /[",\r\n]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t; };
+const csvCell = (v) => { const t = formulaSafe(v == null ? "" : typeof v === "object" ? JSON.stringify(v) : String(v)); return /[",\r\n]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t; };
 const csv = (header, rows) => "\uFEFF" + [header, ...rows].map((r) => r.map(csvCell).join(",")).join("\r\n") + "\r\n";
 async function recordsForExport(c,kind,limit){
   const page=await listWorkspaceRecords(c,kind,limit);
