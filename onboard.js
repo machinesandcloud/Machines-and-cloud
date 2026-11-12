@@ -176,7 +176,7 @@
       }
       var data; try { data = await response.json(); } catch (error) { if (response.ok || response.status >= 500) throw connectionError(error, !response.ok); data = {}; }
       if (!response.ok) {
-        var failure = new Error(data.message || (response.status < 500 ? 'Machines & Cloud didn’t accept that request. Check your details and try again.' : 'We could not confirm that request. Please try again.')); failure.code = data.error; failure.status = response.status; failure.field = data.field; throw failure;
+        var failure = new Error(data.message || (response.status < 500 ? 'Machines & Cloud didn’t accept that request. Check your details and try again.' : 'We could not confirm that request. Please try again.')); failure.code = data.error; failure.status = response.status; failure.data = data; failure.field = data.field; throw failure;
       }
       return data;
     } finally { clearTimeout(timeout); }
@@ -348,6 +348,32 @@
     form.querySelectorAll('.plans-pick label').forEach(function (label) { label.classList.toggle('on', label.querySelector('input').checked); });
     restoring = false; dirty = false;
     updatePhoneSetup(); updateConnectionPreview();
+  }
+  // Re-signup on an email whose workspace is stopped: offer to reopen that same workspace.
+  // The server never creates a second one; reopening keeps saved records and answers.
+  function stoppedWorkspace(info) {
+    document.body.dataset.setupState = 'stopped'; syncPageLabels();
+    form.hidden = true; document.querySelector('.ob-steps').hidden = true; draftStatus.hidden = true; gate.hidden = true;
+    var done = document.getElementById('done'), title = document.getElementById('done-title'); done.classList.add('on');
+    title.textContent = info.reopen && info.reopen.available ? 'Reopen your workspace' : 'Your workspace is stopped';
+    document.getElementById('buildStatus').textContent = info.message || 'This email already has a stopped workspace.';
+    var go = document.getElementById('goPortal'), link = document.getElementById('portalLink'), button = document.getElementById('reopenWorkspace');
+    link.textContent = 'Open your stopped workspace'; link.href = info.portal || '/desk.html?c=' + encodeURIComponent(info.slug);
+    go.hidden = true;
+    if (info.reopen && info.reopen.available) {
+      if (!button) { button = document.createElement('button'); button.type = 'button'; button.id = 'reopenWorkspace'; button.className = go.className || 'btn'; go.parentNode.insertBefore(button, go); }
+      button.hidden = false; button.disabled = false; button.textContent = 'Reopen your workspace';
+      button.onclick = async function () {
+        button.disabled = true; button.textContent = 'Reopening…';
+        try {
+          var result = await request('/api/client?c=' + encodeURIComponent(info.slug), 'POST', { action: 'reopen_workspace', expectedRevision: info.reopen.configurationRevision });
+          if (!result.ok || result.status !== 'testing') throw new Error('The reopen could not be confirmed. Open your workspace to check its status.');
+          go.hidden = false; button.hidden = true;
+          workspace(link.href, 'Your workspace is reopened with your saved records and answers. Review your business details and run a private test before turning service back on.');
+        } catch (error) { button.disabled = false; button.textContent = 'Reopen your workspace'; document.getElementById('buildStatus').textContent = (error.message || 'The reopen could not be confirmed.') + ' Nothing new was created.'; }
+      };
+    } else { if (button) button.hidden = true; go.hidden = false; go.href = 'mailto:support@machinesandcloud.com'; go.textContent = 'Contact support'; }
+    window.scrollTo({ top: 0, behavior: 'instant' }); title.focus({ preventScroll: true });
   }
   function workspace(portal, text) {
     document.body.dataset.setupState = 'ready'; syncPageLabels();
@@ -637,6 +663,7 @@
       workspace(result.portal);
     } catch (error) {
       if (generation !== accessGeneration) return;
+      if (error.code === 'workspace_stopped' && error.data) { stoppedWorkspace(error.data); return; }
       // The create call is safe to repeat: the server returns the workspace already made for this email, with the answers it first received.
       // Name the button shown now; a lost save after advancing leaves the page on the next step.
       var lost = error.code === 'connection' || error.code === 'unavailable', button = i === steps.length - 1 ? 'Create my workspace' : 'Save and continue';

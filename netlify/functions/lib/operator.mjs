@@ -23,6 +23,7 @@ import { workspaceBillingConfiguration } from './workspace-billing.mjs';
 import {voiceRejectionReview,recordVoiceCreateRejection} from './voice-provider-evidence.mjs';
 import {supportReportViews,supportReportIssues,changeSupportReport} from './support-reports.mjs';
 import {classifyIssues,actionableIssues} from './operator-issues.mjs';
+import { lifecycleTransition, afterLifecycleChange, supportCategory, customerMessage, LifecycleError, ownerReopenAllowed, serviceCancellationPending, SERVICE_CLEANUP_LABELS } from './workspace-lifecycle.mjs';
 
 export class OperatorError extends Error {
   constructor(code, message, status = 400) { super(message); this.code = code; this.status = status; }
@@ -102,7 +103,10 @@ export async function customerView(c, detail = false) {
   const triaged=classifyIssues(issues,{client:c,providerStates:operatorProviderStates()}),openIssues=actionableIssues(triaged).length;
   // Raw lead setup contains a provider endpoint and shared secret. Operators
   // receive the same allowlisted journey facts as owners, never that setup DTO.
-  const row = { slug: c.slug, name: c.business?.name || c.slug, owner: { name: c.owner?.name || '', email: c.owner?.email || '', phone: c.owner?.phone || '' }, plan: c.plan, status: c.status, revision: managementRevision(c), configurationRevision: configurationRevision(c), selfService, createdAt: c.createdAt || null, setup, operations, phoneActivation, services, serviceChecks, connections, leadSources, issues: triaged, supportReports: selfService ? supportReportViews(c,{operator:true}) : [], aiAllowance, metrics: { bookings: 0, leads: 0, conversations: 0, openIssues, waitingIssues: triaged.length - openIssues }, activity: (c.management?.audit || []).filter(record=>belongsToWorkspace(c,record)).slice(-100).reverse().map(sanitizedActivity), notes: (c.management?.notes || []).filter(record=>belongsToWorkspace(c,record)).slice(-100).map(n => ({ id: n.id, at: n.at, actor: n.actor, text: trim(n.text, 2000) })) };
+  // QA-LIFE D1: a stopped workspace whose phone/texting work has not yet observed the stop cannot
+  // be reopened (service_cleanup_pending). Operators see which service is still finishing.
+  const cleanupPending = selfService && closedStatus(c.status) ? (await serviceCancellationPending(c)).map(store => SERVICE_CLEANUP_LABELS[store]) : [];
+  const row = { slug: c.slug, name: c.business?.name || c.slug, owner: { name: c.owner?.name || '', email: c.owner?.email || '', phone: c.owner?.phone || '' }, plan: c.plan, status: c.status, lifecycle: selfService ? { notice: c.lifecycleNotice || null, cancelledBy: c.cancelledBy || null, reopenedAt: c.reopenedAt || null, reopenAvailable: closedStatus(c.status) && !c.erasureStartedAt && !cleanupPending.length, ownerCanReopen: ownerReopenAllowed(c), cleanupPending, erasureStarted: !!c.erasureStartedAt } : null, revision: managementRevision(c), configurationRevision: configurationRevision(c), selfService, createdAt: c.createdAt || null, setup, operations, phoneActivation, services, serviceChecks, connections, leadSources, issues: triaged, supportReports: selfService ? supportReportViews(c,{operator:true}) : [], aiAllowance, metrics: { bookings: 0, leads: 0, conversations: 0, openIssues, waitingIssues: triaged.length - openIssues }, activity: (c.management?.audit || []).filter(record=>belongsToWorkspace(c,record)).slice(-100).reverse().map(sanitizedActivity), notes: (c.management?.notes || []).filter(record=>belongsToWorkspace(c,record)).slice(-100).map(n => ({ id: n.id, at: n.at, actor: n.actor, text: trim(n.text, 2000) })) };
   if (detail && selfService) row.voiceRejectionReview=await voiceRejectionReview(c);
   if (detail) {
     for (const operation of operations) {
@@ -201,7 +205,12 @@ export async function supportAction(session, body) {
     try{return {ok:true,supportReport:result.supportReport,receipt:result.receipt,customer:await customerView(result.client,true)};}
     catch{return {ok:true,saved:true,refreshRequired:true,supportReport:result.supportReport,receipt:result.receipt,customer:null,message:'The report update is saved. Refresh customer details to confirm its current status.'};}
   }
-  const allowed = { pause: [], resume: [], cancel_service: [], save_note: ['text'], update_rules: ['patch'], rebuild_workspace: [], retry_operation: ['operationId'], reconcile_services: [] };
+  // Lifecycle actions run the owner's lifecycle routine (workspace-lifecycle.mjs). The owner
+  // sees only reasonCategory and an explicitly shareable customerMessage, never `reason`.
+  const notify = ['reasonCategory', 'customerMessage'];
+  const allowed = { pause: notify, resume: notify, cancel_service: [...notify, 'ownerMayReopen'], reopen_workspace: notify, save_note: ['text'], update_rules: ['patch'], rebuild_workspace: [], retry_operation: ['operationId'], reconcile_services: [] };
+  const lifecycleAction = { pause: 'pause', resume: 'resume', cancel_service: 'cancel', reopen_workspace: 'reopen' }[body?.action] || null;
+  const closedAllowed = ['save_note', 'reconcile_services', 'reopen_workspace'];
   if (!body || !Object.hasOwn(allowed, body.action)) throw new OperatorError('invalid_action', 'Choose an available support action.');
   if (Object.keys(body).some(key => !['action', 'slug', 'expectedRevision', 'reason', ...allowed[body.action]].includes(key))) throw new OperatorError('invalid_request', 'Unexpected support action fields.');
   if (!/^[a-z0-9-]{1,40}$/.test(body.slug || '') || !/^[a-f0-9]{64}$/.test(body.expectedRevision || '') || typeof body.reason !== 'string' || body.reason.trim().length < 3 || body.reason.length > 300) throw new OperatorError('invalid_request', 'Choose a customer and add a reason for this change.');
@@ -209,7 +218,12 @@ export async function supportAction(session, body) {
   if (!c) throw new OperatorError('not_found', 'Customer not found.', 404);
   if (!isSelfServiceClient(c)) throw new OperatorError('legacy_read_only', 'This account requires a reviewed migration before managed changes.', 409);
   if (managementRevision(c) !== body.expectedRevision) throw new OperatorError('customer_changed', 'Customer details changed. Refresh before trying again.', 409);
-  if (closedStatus(c.status) && !['save_note','reconcile_services'].includes(body.action)) throw new OperatorError('account_closed', 'Closed accounts cannot be changed here.', 409);
+  if (closedStatus(c.status) && !closedAllowed.includes(body.action)) throw new OperatorError('account_closed', 'Closed accounts cannot be changed here. Use Reopen workspace to restore access.', 409);
+  if (body.action === 'reopen_workspace' && !closedStatus(c.status)) throw new OperatorError('not_closed', 'Only a stopped workspace can be reopened.', 409);
+  let category = null, message = null;
+  if (body.ownerMayReopen !== undefined && typeof body.ownerMayReopen !== 'boolean') throw new OperatorError('invalid_request', 'Choose whether the owner may reopen this workspace.');
+  try { if (lifecycleAction) { category = supportCategory(body.reasonCategory); message = customerMessage(body.customerMessage); } }
+  catch (error) { throw new OperatorError(error.code, error.message, error.status); }
   const reason = body.reason.trim(), actor = { role: 'operator', email: session.email };
   if (body.action === 'rebuild_workspace' || body.action === 'retry_operation') {
     if (body.action === 'retry_operation' && typeof body.operationId !== 'string') throw new OperatorError('invalid_request', 'Choose an operation to retry.');
@@ -221,23 +235,19 @@ export async function supportAction(session, body) {
   const patch = body.action === 'update_rules' ? validatedPatch(body.patch) : null;
   const at = new Date().toISOString(), eventId = randomUUID();
   const updated = await atomicUpdate('clients', c.slug, async current => {
-    if (!current || !isSelfServiceClient(current) || current.slug !== c.slug || current.ownerKey !== c.ownerKey || normalizeAccountEmail(current.owner?.email) !== normalizeAccountEmail(c.owner?.email) || managementRevision(current) !== body.expectedRevision || closedStatus(current.status) && !['save_note','reconcile_services'].includes(body.action)) return { result: null };
-    // A refreshed or repeated pause must keep the original resume snapshot.
-    if (body.action === 'pause' && current.status === 'paused') throw new OperatorError('already_paused', 'This front desk is already paused. Its previous service settings are kept for Resume.', 409);
-    const value = structuredClone(current);
-    if (body.action === 'pause') { value.pausedFrom = current.status; value.pausedChannels = structuredClone(current.channels || {}); value.status = 'paused'; value.pausedAt = at; value.channels = { ...value.channels, web: { ...value.channels?.web, active: false } }; }
-    if (body.action === 'cancel_service') { value.status = 'cancelled'; value.cancelledAt = at; value.cancelReason = reason; value.channels = { ...value.channels, web: { ...value.channels?.web, active: false } }; }
-    if (body.action === 'resume') {
-      const wantsWeb = !Array.isArray(current.onboarding?.desiredChannels) || current.onboarding.desiredChannels.includes('web'), previousStatus = ['testing','live'].includes(current.pausedFrom) ? current.pausedFrom : 'live';
-      const restoringWeb = wantsWeb && previousStatus === 'live' && current.pausedChannels?.web?.active === true;
-      if (current.status !== 'paused') throw new OperatorError('setup_incomplete', 'Only a paused workspace can be resumed.', 409);
-      if (restoringWeb && (!setupReadiness(current).canActivateWeb || !(await getAIAllowance(current)).available)) throw new OperatorError('setup_incomplete', 'Review, a successful current live test and available AI allowance are required before resuming website chat.', 409);
-      value.status = previousStatus; value.channels = { ...value.channels, web: { ...value.channels?.web, active: restoringWeb } };
-      value.pausedAt = null; if (previousStatus === 'live') value.liveAt = value.liveAt || at; value.pausedFrom = null; value.pausedChannels = null;
+    if (!current || !isSelfServiceClient(current) || current.slug !== c.slug || current.ownerKey !== c.ownerKey || normalizeAccountEmail(current.owner?.email) !== normalizeAccountEmail(c.owner?.email) || managementRevision(current) !== body.expectedRevision || closedStatus(current.status) && !closedAllowed.includes(body.action)) return { result: null };
+    let value = structuredClone(current);
+    if (lifecycleAction) {
+      // The same transition the owner's own Pause, Resume, Cancel and Reopen use.
+      try { value = await lifecycleTransition(current, lifecycleAction, { now: at, actor, category, message, noticeId: eventId, ownerMayReopen: body.ownerMayReopen === true }); }
+      catch (error) {
+        if (!(error instanceof LifecycleError)) throw error;
+        throw new OperatorError(['not_paused', 'resume_not_ready'].includes(error.code) ? 'setup_incomplete' : error.code, error.message, error.status);
+      }
+      if (!value) return { result: null };
     }
     if (patch) for (const [key, item] of Object.entries(patch)) value[key] = key === 'business' ? { ...value.business, ...item } : item;
-    if (['pause','resume','cancel_service'].includes(body.action)) value.operationLifecycleVersion = (current.operationLifecycleVersion || 0) + 1;
-    const audit = { tenantIdentity:workspaceTenant(current),id: eventId, at, actor: session.email, action: body.action, reason, fields: patch ? Object.keys(patch) : [] };
+    const audit = { tenantIdentity:workspaceTenant(current),id: eventId, at, actor: session.email, action: body.action, reason, fields: patch ? Object.keys(patch) : [], ...(lifecycleAction ? { reasonCategory: category, customerMessageShared: !!message } : {}) };
     if (body.action === 'reconcile_services' && (current.management?.serviceReconciliations || []).some(row => ['queued','running','retry','waiting_platform'].includes(row.state))) throw new OperatorError('checks_already_queued', 'Service checks are already queued. Review their saved status before requesting another check.', 409);
     value.management = { ...value.management, revision: (value.management?.revision || 0) + 1, audit: [...(value.management?.audit || []), audit].slice(-100), notes: body.action === 'save_note' ? [...(value.management?.notes || []), { tenantIdentity:workspaceTenant(current),id: eventId, at, actor: session.email, text: body.text.trim() }].slice(-100) : value.management?.notes || [] };
     if (body.action === 'reconcile_services') value.management.serviceReconciliations = [...(value.management?.serviceReconciliations || []), { id:eventId,at,actor:session.email,reason,tenant:deliveryTenant(current),sequence:value.management.revision,state:'queued' }].slice(-20);
@@ -247,11 +257,16 @@ export async function supportAction(session, body) {
     return { value, result: value };
   });
   if (!updated) throw new OperatorError('customer_changed', 'Customer details changed. Refresh before trying again.', 409);
-  let serviceCheck = null;
+  let serviceCheck = null, lifecycle = null;
+  if (lifecycleAction) {
+    // Tasks, billing stop and owner notice follow the commit, exactly as for the owner.
+    try { lifecycle = await afterLifecycleChange(updated, lifecycleAction); }
+    catch { lifecycle = { recovery: 'scheduled', detail: 'The change is saved. Scheduled billing recovery re-queues the stop for a cancelled workspace.' }; }
+  }
   if (body.action === 'reconcile_services') {
     try { await queueServiceReconciliation(updated,eventId); serviceCheck = await runServiceReconciliation(updated,eventId); }
     catch { serviceCheck = {id:eventId,state:'queued',detail:'The audited request is saved. Scheduled recovery will restore its queue receipt and recheck existing authorized work.'}; }
   }
-  try { return { ok: true, ...(serviceCheck ? {serviceCheck} : {}), customer: await customerView(await strictRead('clients',updated.slug), true) }; }
+  try { return { ok: true, ...(serviceCheck ? {serviceCheck} : {}), ...(lifecycle ? {lifecycle} : {}), customer: await customerView(await strictRead('clients',updated.slug), true) }; }
   catch { return { ok: true, saved: true, refreshRequired: true, revision: managementRevision(updated), customer: null, message: 'Your change is saved. Refresh customer details to confirm current status.' }; }
 }

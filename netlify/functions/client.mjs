@@ -39,7 +39,7 @@ import { parseWorkspacePatch, applyWorkspacePatch, workspacePatchConflicts, work
 import { websiteInstallationView, startWebsiteCheck, WebsiteInstallationError } from "./lib/website-installation.mjs";
 
 import { workspaceTenant, belongsToWorkspace } from "./lib/workspace-identity.mjs";
-import { queueWorkspaceStopBilling } from './lib/workspace-billing.mjs';
+import { lifecycleTransition, afterLifecycleChange, ownerLifecycleChange, ownerReopenAllowed, LifecycleError, serviceCancellationPending } from './lib/workspace-lifecycle.mjs';
 
 import { ownerConversationPage } from './lib/conversation-reader.mjs';
 
@@ -223,7 +223,7 @@ async function handle(req, context) {
     const serviceIntake=selfService?await serviceIntakeView(c,connections):null;
     const supportReports=selfService?supportReportViews(c):[],connectionAssistance=selfService?connectionAssistanceViews(c):{};
     const ownerResponse={
-      client: ownerView(c), ...(isSelfServiceClient(c) ? { connectionAssistance, channelAvailability: await currentChannelAvailability(), setup: { ...serviceSetupView(c,connections,serviceOnboarding,websiteInstallation,leadConnections,serviceIntake), connectionPreparation: await connectionPreparationView(c) }, connections, leadConnections, serviceOnboarding, serviceIntake, operations: await listWorkspaceOperations(c), phoneActivation: await phoneActivationStatus(c), configurationRevision: configurationRevision(c), editRevision: workspaceEditRevision(c), supportReports, websiteInstallation, pendingVisitCreations: await pendingOwnerVisitCreations(c), aiAllowance, webAvailable: setupReadiness(c).channels.web.ready && setupReadiness(c).channels.web.active && aiAllowance.available } : {}), plan: PLANS[c.plan], usage: usageView(c, usage), bookings: newestFirst(ownerBookings), leads: newestFirst(leads).map((l) => ({ ...l, alertWaiting: waiting.has(l.id), alertAttentionDue:attentionDue.has(l.id) })),
+      client: ownerView(c), ...(isSelfServiceClient(c) ? { lifecycleCleanupPending: ['cancelled','archived'].includes(c.status) && (await serviceCancellationPending(c)).length > 0, connectionAssistance, channelAvailability: await currentChannelAvailability(), setup: { ...serviceSetupView(c,connections,serviceOnboarding,websiteInstallation,leadConnections,serviceIntake), connectionPreparation: await connectionPreparationView(c) }, connections, leadConnections, serviceOnboarding, serviceIntake, operations: await listWorkspaceOperations(c), phoneActivation: await phoneActivationStatus(c), configurationRevision: configurationRevision(c), editRevision: workspaceEditRevision(c), supportReports, websiteInstallation, pendingVisitCreations: await pendingOwnerVisitCreations(c), aiAllowance, webAvailable: setupReadiness(c).channels.web.ready && setupReadiness(c).channels.web.active && aiAllowance.available } : {}), plan: PLANS[c.plan], usage: usageView(c, usage), bookings: newestFirst(ownerBookings), leads: newestFirst(leads).map((l) => ({ ...l, alertWaiting: waiting.has(l.id), alertAttentionDue:attentionDue.has(l.id) })),
       conversations: convs.sort((a,b)=>(b.updatedAt||'').localeCompare(a.updatedAt||'')).map(v=>{
         const supportReport=selfService?supportReports.find(row=>row.channel===v.channel&&row.contact===v.contact)||null:null;
         return {channel:v.channel,contact:v.contact,updatedAt:v.updatedAt,flag:supportReport?(supportReport.status==='resolved'?null:{at:supportReport.reportedAt,note:supportReport.note,by:'owner',supportReportId:supportReport.id}):v.flag||null,...(selfService?{supportReport}:{}),...(selfService&&v.channel==='web'?{reference:conversationReference(c,v.channel,v.contact),retainedMessages:v.history?.total??v.messages.length,historyComplete:v.history?.complete===true}:{}),messages:v.messages.slice(-12)};
@@ -308,6 +308,19 @@ async function handle(req, context) {
 
   if (req.method === "POST") {
     let b; try { b = await req.json(); } catch { b = {}; }
+    if (b?.action === "reopen_workspace") {
+      // Owner self-reopen of a stopped workspace. Same account, same slug, same records:
+      // the account reservation is untouched, so no second workspace can appear.
+      if (!selfService || !isOwner || !accessOriginAllowed(origin)) return json({ error: "forbidden" }, 403);
+      if (Object.keys(b).some(field => !["action", "expectedRevision"].includes(field)) || typeof b.expectedRevision !== "string") return json({ error: "invalid_request" }, 400);
+      try {
+        const { client: reopened } = await ownerLifecycleChange(c, "reopen", { email: session.email, ownsCurrent, expectedRevision: b.expectedRevision, revisionOf: configurationRevision });
+        return json({ ok: true, status: reopened.status, client: ownerView(reopened), setup: setupReadiness(reopened), configurationRevision: configurationRevision(reopened) }, 200, { "Cache-Control": "no-store" });
+      } catch (error) {
+        if (error instanceof LifecycleError) return json({ error: error.code, message: error.message }, error.status, { "Cache-Control": "no-store" });
+        throw error;
+      }
+    }
     if(['save_service_intake','apply_service_intake'].includes(b?.action)) {
       if(!selfService || !accessOriginAllowed(origin))return json({error:'forbidden'},403);
       if(JSON.stringify(b).length>12000)return json({error:'invalid_intake'},413);
@@ -369,16 +382,15 @@ async function handle(req, context) {
       try {
         let result;
         if(b.action==="resume_services"){
-          const updated=await atomicUpdate("clients",c.slug,current=>{
+          // The shared lifecycle routine, also used by the operator portal's Resume.
+          const updated=await atomicUpdate("clients",c.slug,async current=>{
             if(!ownsCurrent(current))throw new Error("Workspace changed");
-            const restoringWeb = current.pausedChannels?.web?.active === true;
-            if(current.status!=="paused" || b.expectedRevision!==configurationRevision(current) || (restoringWeb && !setupReadiness(current).canActivateWeb))return {result:null};
-            const value={...current,status:current.pausedFrom==="live"?"live":"testing",channels:{...current.channels,web:{active:current.pausedChannels?.web?.active===true}},operationLifecycleVersion:(current.operationLifecycleVersion || 0)+1,pausedAt:null,updatedAt:new Date().toISOString()};
-            return {value,result:value};
+            if(b.expectedRevision!==configurationRevision(current))return {result:null};
+            try{const value=await lifecycleTransition(current,"resume",{actor:{role:"owner",email:session.email}});return {value,result:value};}
+            catch(error){if(error instanceof LifecycleError)return {result:null};throw error;}
           });
           if(!updated)return json({error:"not_ready",message:"Review and test your current saved rules before resuming."},409);
-          try{await dispatchVoiceActivationWave();}catch{/* Scheduled recovery resumes accepted phone work. */}
-          try{await dispatchCalendarDeliveryWave(c);}catch{/* Scheduled recovery resumes saved calendar work. */}
+          await afterLifecycleChange(updated,"resume");
           return json({ok:true,client:ownerView(updated),connections:await serviceConnections(updated)},202,{"Cache-Control":"no-store"});
         }
         if (b.action === "request_service_onboarding" || b.action === "cancel_service_onboarding") {
@@ -463,7 +475,11 @@ async function handle(req, context) {
           const aiAllowance = await getAIAllowance(current);
           if (!aiAllowance.available) return { result: { error: "ai_daily_limit", status: 429, setup, aiAllowance } };
         }
-        if (b.action === "pause" && !["live", "testing"].includes(current.status)) return { result: { error: "not_active", status: 409, setup } };
+        if (["pause", "cancel"].includes(b.action)) {
+          // The shared lifecycle routine, also used by the operator portal's Pause and Cancel.
+          try { const value = await lifecycleTransition(current, b.action, { now, actor: { role: "owner", email: session.email }, ownerReason: s(b.reason, 300) }); return value ? { value, result: { client: value } } : { result: { client: current, unchanged: true } }; }
+          catch (error) { if (error instanceof LifecycleError) return { result: { error: "not_active", status: 409, setup } }; throw error; }
+        }
         const status = b.action === "pause" ? "paused" : b.action === "cancel" ? "cancelled" : "live";
         const webOnly = ["go_live", "resume"].includes(b.action) && ["testing", "live"].includes(current.status);
         const updated = { ...current, status, operationLifecycleVersion: (current.operationLifecycleVersion || 0) + (webOnly ? 0 : 1), channels: webOnly ? { ...current.channels, web: { ...current.channels?.web, active: true } } : { web: { active: status === "live" }, voice: { active: false }, sms: { active: false } }, updatedAt: now,
@@ -471,7 +487,7 @@ async function handle(req, context) {
         return { value: updated, result: { client: updated } };
       });
       if (result.error) return json({ error: result.error, setup: result.setup, ...(result.message ? { message: result.message, blockers: result.blockers, fieldErrors: result.fieldErrors } : {}), ...(result.aiAllowance ? { aiAllowance: result.aiAllowance, message: "Website chat cannot activate while today’s AI allowance is exhausted." } : {}) }, result.status);
-      if (b.action === "cancel") { await cancelTasks(c.slug, () => true); await queueWorkspaceStopBilling(result.client); }
+      if (["pause", "cancel"].includes(b.action)) await afterLifecycleChange(result.client, b.action, { notify: !result.unchanged }); // QA-LIFE F4: a repeated owner Cancel does not re-send an earlier support email
       const aiAllowance = await getAIAllowance(result.client);
       return json({ ok: true, status: result.client.status, client: ownerView(result.client), setup: setupReadiness(result.client), configurationRevision: configurationRevision(result.client), aiAllowance, webAvailable: result.client.status === "live" && setupReadiness(result.client).canActivateWeb && aiAllowance.available, activeChannels: result.client.status === "live" && aiAllowance.available ? ["web"] : [] });
     }

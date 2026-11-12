@@ -830,7 +830,23 @@
   $('websiteInstallAlready').addEventListener('click',websiteStart);$('websiteInstallRefresh').addEventListener('click',function(){websiteChange(async function(generation){await websiteRead();if(generation===portalGeneration&&!leaving)websiteMessage(websiteReadMessage());});});$('websiteInstallHandoff').addEventListener('click',function(){websiteCopy(true);});
 
   function homeFollowupRows(d){var selfService=d.client?.onboarding?.version===1;return (d.leads||[]).filter(function(l){return (!selfService||!l.websiteSetupCheck&&!l.simulation)&&(selfService&&l.followthrough?l.followthrough.needsFollowup||!!l.alertWaiting:l.status==='open'&&(l.alertWaiting||l.overdueAt||l.outcome==='needs_action'||l.outcome==='wants_call'));});}
+  function supportNotice(c) { var n = c && c.lifecycleNotice; return n && n.by === 'support' && ['pause','resume','cancel','reopen'].indexOf(n.action) >= 0 ? n : null; }
+  function supportNoticeText(n) {
+    var verb = { pause: 'Paused', resume: 'Resumed', cancel: 'Stopped', reopen: 'Reopened' }[n.action], when = n.at ? new Date(n.at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+    return verb + ' by Machines & Cloud support' + (when ? ' on ' + when : '') + ': ' + n.summary + (n.message ? ' ' + n.message : '');
+  }
+  function ownerCanReopen(c) { if (['cancelled','archived'].indexOf(c.status) < 0 || c.erasureStartedAt) return false; var by = c.cancelledBy; return !(by && by.role === 'operator') || (by.ownerMayReopen === true && by.category !== 'policy_review'); }
+  // QA-LIFE D1: reopen waits until phone and texting work from before the stop has registered it.
+  var SHUTDOWN_FINISHING = 'We are still finishing the shutdown of phone and texting setup from before the stop. You can reopen once that completes, usually within a few minutes.';
+  function renderLifecycleNotice(d) {
+    var c = d && d.client, n = supportNotice(c), box = $('supportLifecycleNotice'), stopped = c && c.onboarding && c.onboarding.version === 1 && ['cancelled','archived'].indexOf(c.status) >= 0;
+    if (!n && !stopped) { if (box) box.hidden = true; return; }
+    if (!box) { box = document.createElement('div'); box.id = 'supportLifecycleNotice'; box.className = 'desk-support-lifecycle'; box.setAttribute('role', 'status'); box.style.cssText = 'border:1px solid #f0c36d;background:#fff8e6;border-radius:12px;padding:12px 16px;margin:0 0 16px;color:#3b2a05'; var anchor = $('workspaceGuide'); anchor.parentNode.insertBefore(box, anchor); }
+    box.hidden = false; box.innerHTML = (n ? '<strong>' + esc(supportNoticeText(n)) + '</strong><br><span>' + esc(n.nextStep || '') + '</span>' : '<strong>Your front desk is stopped.</strong><br><span>' + (ownerCanReopen(c) ? 'Your saved records and answers are kept. You can reopen this workspace from Account.' : 'Your saved records are kept. Contact support to discuss reopening.') + '</span>') + (stopped && ownerCanReopen(c) && d.lifecycleCleanupPending ? '<br><span data-shutdown-finishing>' + esc(SHUTDOWN_FINISHING) + '</span>' : '') + (stopped && ownerCanReopen(c) ? ' <button type="button" class="btn-pill btn-pill-blue btn-sm" id="homeReopen">Go to Account</button>' : '');
+    if ($('homeReopen')) $('homeReopen').onclick = function () { routeTo('account'); };
+  }
   function renderHomeNext(d) {
+    renderLifecycleNotice(d);
     var guide=$('workspaceGuide'),button=$('nextSetupAction'),setup=d&&d.setup,client=d&&d.client;
     guide.dataset.needed='false';button.hidden=false;delete button.dataset.anchor;delete button.dataset.service;$('homeSetupSecondaryWrap').hidden=true;$('homeSetupReminder').hidden=true;$('homeSetupSecondary').hidden=true;delete $('homeSetupSecondary').dataset.anchor;delete $('homeSetupSecondary').dataset.service;
     if(!setup||!client||['cancelled','archived'].includes(client.status)){document.body.dataset.homeMode='work';if(!homeActivityChosen)$('homeActivityDetails').open=true;if(document.body.dataset.activePage==='today'){$('pageTitle').textContent=pageCopy.today[1];$('pageDescription').textContent=pageCopy.today[2];}syncNextActionVisibility();return;}
@@ -1142,7 +1158,8 @@
     var webActive = !!d.webAvailable && !!d.setup?.channels?.web?.ready && !!d.setup?.channels?.web?.active;
     var rows = d.setup?.connectionJourney?.channels || [], active = rows.filter(function (row) { return row.id === 'web' ? webActive : row.active; });
     $('accountServiceStatus').textContent = closed ? 'Service stopped' : paused ? 'Paused' : active.length ? 'Services connected' : c.status==='live' ? (selfService?'Check connections':'Workspace active') : 'Setup in progress';
-    $('accountServiceSummary').textContent = closed ? 'Your front desk is stopped. Saved customer records are still available to download.' : paused ? 'Automated service is paused. Your records, setup choices and permissions are kept.' : active.length ? 'Check each connection below. A saved visit or message has its own delivery status.' : c.status==='live' ? 'Check Connections for each service’s readiness and next steps.' : 'Your workspace is saved. Continue setup to prepare the services you want to use.';
+    var notice = supportNotice(c), finishing = closed && selfService && ownerCanReopen(c) && d.lifecycleCleanupPending ? ' ' + SHUTDOWN_FINISHING : '';
+    $('accountServiceSummary').textContent = (notice && (closed || paused || ['resume','reopen'].indexOf(notice.action) >= 0) ? supportNoticeText(notice) + ' ' + (notice.nextStep || '') : closed ? 'Your front desk is stopped. Saved customer records are still available to download.' : paused ? 'Automated service is paused. Your records, setup choices and permissions are kept.' : active.length ? 'Check each connection below. A saved visit or message has its own delivery status.' : c.status==='live' ? 'Check Connections for each service’s readiness and next steps.' : 'Your workspace is saved. Continue setup to prepare the services you want to use.') + finishing;
     var labels = {not_selected:'Not selected',needs_action:'Setup needed',pending_activation:'Not connected',waiting_platform:'Waiting for service',waiting_carrier:'Carrier review',working:'Setup in progress',needs_attention:'Needs attention',checking:'Checking saved result',checking_status:'Checking saved status',cleanup_pending:'Checking cleanup',cleanup_uncertain:'Checking cleanup',cancel_pending:'Checking cleanup',cancelled:'Disconnected',closed:'Stopped',paused:'Paused',ready_for_website:'Website setup needed'};
     $('accountConnectionSummary').innerHTML = rows.map(function (row) {
       var relevant = row.requested || row.retained || row.active, label = labels[row.status] || 'Check Connections';
@@ -1160,7 +1177,7 @@
       else if (!selfService && !paused && ['testing','draft'].includes(c.status)) buttons += '<button type="button" class="btn-pill btn-pill-blue btn-sm" id="golive">Go live</button>';
       else buttons += '<button type="button" class="btn-pill btn-pill-blue btn-sm" id="accountConnections">' + (paused ? 'View resume requirements' : active.length || c.status === 'live' ? 'Manage connections' : 'Continue setup') + '</button>';
       if (!paused && ['live','testing'].includes(c.status) && (c.status === 'live' || active.length || rows.some(function(row){return row.retained;}))) buttons += '<button type="button" class="btn-pill btn-pill-dark btn-sm" id="pause">Pause workspace</button>';
-    } else buttons = '<a class="btn-pill btn-pill-dark btn-sm" href="mailto:support@machinesandcloud.com">Contact support</a>';
+    } else buttons = (selfService && ownerCanReopen(c) ? '<button type="button" class="btn-pill btn-pill-blue btn-sm" id="reopenWorkspace">Reopen your workspace</button>' : '') + '<a class="btn-pill btn-pill-dark btn-sm" href="mailto:support@machinesandcloud.com">Contact support</a>';
     var off = d.forwarding?.off;
     if ((paused || closed) && Array.isArray(off) && off.length) buttons += '<div class="desk-account-forwarding muted">To stop carrier forwarding: ' + off.map(function (code) { return '<a href="tel:' + encodeURIComponent(code) + '">Dial ' + esc(code) + '</a>'; }).join(' · ') + '</div>';
     $('liveBtns').innerHTML = buttons;
@@ -1177,23 +1194,24 @@
     if ($('golive')) $('golive').addEventListener('click',function(){accountChange('go_live');});
     if ($('pause')) $('pause').addEventListener('click',function(){accountChange('pause');});
     if ($('resume')) $('resume').addEventListener('click',function(){accountChange(selfService ? 'resume_services' : 'resume');});
+    if ($('reopenWorkspace')) $('reopenWorkspace').addEventListener('click',function(){accountChange('reopen_workspace');});
   }
   function accountResultMatches(d, name, prior) {
     var state = d.client?.status || d.status;
-    return name === 'cancel' ? state === 'cancelled' : name === 'pause' ? state === 'paused' : ['resume','go_live'].includes(name) ? state === 'live' : state === (prior === 'live' ? 'live' : 'testing');
+    return name === 'reopen_workspace' ? state === 'testing' : name === 'cancel' ? state === 'cancelled' : name === 'pause' ? state === 'paused' : ['resume','go_live'].includes(name) ? state === 'live' : state === (prior === 'live' ? 'live' : 'testing');
   }
   function accountConfirmed(name) {
     accountUncertain = null;
     if (name === 'cancel' && $('cancelBox').open) $('cancelBox').close();
-    accountMessage(name === 'cancel' ? 'Service stopped. You can still download your saved records.' : name === 'pause' ? 'Workspace paused. Check carrier forwarding if calls should return to your phone.' : name === 'go_live' ? 'Activation saved. Check Connections for each service’s current status.' : 'Workspace resumed. Check Connections for each service’s current status.');
+    accountMessage(name === 'reopen_workspace' ? 'Workspace reopened. Review your business details and run a private test before turning service back on.' : name === 'cancel' ? 'Service stopped. You can still download your saved records.' : name === 'pause' ? 'Workspace paused. Check carrier forwarding if calls should return to your phone.' : name === 'go_live' ? 'Activation saved. Check Connections for each service’s current status.' : 'Workspace resumed. Check Connections for each service’s current status.');
     $('accountServiceMessage').focus({preventScroll:true});
   }
   async function accountChange(name) {
     if (accountBusy || accountUncertain || leaving || !data) return;
     if ((name === 'resume_services' || name === 'resume') && (cfgDirty || cfgBusy || acctDirty || acctBusy || websiteDirty || websiteBusy)) { accountMessage('Save your edited business details before resuming.', true); return; }
     var generation = portalGeneration, prior = data.client.pausedFrom;
-    accountBusy = true; accountMessage(name === 'cancel' ? 'Stopping service…' : name === 'pause' ? 'Pausing workspace…' : name === 'go_live' ? 'Activating front desk…' : 'Resuming workspace…'); renderAccount(data);
-    var body = name === 'resume_services' ? {expectedRevision:data.configurationRevision} : name === 'cancel' ? {reason:$('cancelReason').value} : {};
+    accountBusy = true; accountMessage(name === 'reopen_workspace' ? 'Reopening workspace…' : name === 'cancel' ? 'Stopping service…' : name === 'pause' ? 'Pausing workspace…' : name === 'go_live' ? 'Activating front desk…' : 'Resuming workspace…'); renderAccount(data);
+    var body = name === 'resume_services' || name === 'reopen_workspace' ? {expectedRevision:data.configurationRevision} : name === 'cancel' ? {reason:$('cancelReason').value} : {};
     try {
       var result = await action(name, body); if (generation !== portalGeneration || leaving) return;
       if (!accountResultMatches(result, name, prior)) throw new Error('The service change could not be confirmed.');
@@ -1201,7 +1219,8 @@
     } catch (error) {
       if (generation !== portalGeneration || leaving) return;
       if (error.status === 401 || error.status === 403) { document.dispatchEvent(new CustomEvent('mc:session-expired')); return; }
-      if (error.status && error.status < 500) { accountMessage(error.message + ' No success was confirmed.', true); if(error.status===409)await load(); }
+      if (error.code === 'service_cleanup_pending') { accountMessage(error.message, false); await load(); }
+      else if (error.status && error.status < 500) { accountMessage(error.message + ' No success was confirmed.', true); if(error.status===409)await load(); }
       else {
         accountUncertain = {name:name, prior:prior};
         accountMessage('The response was lost. Checking the saved service status before another change…', true);

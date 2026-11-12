@@ -7,7 +7,8 @@ import { json } from "./lib/agent.mjs";
 import { createHash } from "node:crypto";
 import { getAccessSession, accessOriginAllowed, accessSite } from "./lib/access.mjs";
 import { strictRead, normalizeAccountEmail, findVerifiedAccount, ensureVerifiedAccount, AccountError } from "./lib/accounts.mjs";
-import { setupReadiness, isSelfServiceClient, isSupportedSelfServiceClient } from "./lib/setup.mjs";
+import { setupReadiness, isSelfServiceClient, isSupportedSelfServiceClient, configurationRevision } from "./lib/setup.mjs";
+import { closedStatus, ownerReopenAllowed } from "./lib/workspace-lifecycle.mjs";
 import { normalizeAppointmentHours, validateAppointmentConfiguration, appointmentHoursTable } from './lib/availability.mjs';
 import { INTAKE_GOALS, INTAKE_CHANNELS } from "./lib/intake.mjs";
 
@@ -57,6 +58,12 @@ async function handle(req) {
   if (!email || (b.email !== undefined && normalizeAccountEmail(b.email) !== email)) return json({ error: "email_mismatch" }, 400);
   const existing = await findVerifiedAccount(email);
   const response = (client, extra = {}) => isSelfServiceClient(client) && !isSupportedSelfServiceClient(client) ? json({ error: "unsupported_workspace" }, 409) : json({ ok: true, slug: client.slug, ...(isSelfServiceClient(client) ? {} : { key: client.ownerKey }), portal: `${accessSite()}/desk.html?c=${encodeURIComponent(client.slug)}${isSelfServiceClient(client) ? "" : `&k=${encodeURIComponent(client.ownerKey)}`}`, client: ownerView(client), setup: setupReadiness(client), ...extra }, 200, { ...CORS(origin), "Cache-Control": "no-store" });
+  // A stopped workspace is never returned as if it were ready, and never replaced by a new one.
+  // The owner is offered "Reopen your workspace" (POST /api/client action reopen_workspace).
+  if (existing && isSupportedSelfServiceClient(existing) && closedStatus(existing.status)) {
+    const allowed = ownerReopenAllowed(existing);
+    return json({ error: "workspace_stopped", slug: existing.slug, portal: `${accessSite()}/desk.html?c=${encodeURIComponent(existing.slug)}`, status: existing.status, reopen: { available: allowed, configurationRevision: allowed ? configurationRevision(existing) : null }, message: allowed ? "This email already has a stopped workspace. Reopen it to keep your saved records and answers. A second workspace is not created." : "This email already has a stopped workspace. Contact Machines & Cloud support to reopen it. A second workspace is not created." }, 409, { ...CORS(origin), "Cache-Control": "no-store" });
+  }
   if (existing) return response(existing, { existing: true });
   const website = s(b.website, 200);
   const phone = e164(s(b.phone, 30));
@@ -123,5 +130,6 @@ async function handle(req) {
   const normalized = { ...c, slug: undefined, ownerKey: undefined, createdAt: undefined, updatedAt: undefined, onboarding: undefined, build: undefined };
   const submissionHash = createHash("sha256").update(JSON.stringify(normalized)).digest("hex");
   const result = await ensureVerifiedAccount({ email, initialClient: c, submissionHash });
+  if (result.outcome === "existing" && isSupportedSelfServiceClient(result.client) && closedStatus(result.client.status)) return json({ error: "workspace_stopped", slug: result.client.slug, reopen: { available: ownerReopenAllowed(result.client), configurationRevision: ownerReopenAllowed(result.client) ? configurationRevision(result.client) : null }, message: "This email already has a stopped workspace. A second workspace is not created." }, 409, { ...CORS(origin), "Cache-Control": "no-store" });
   return response(result.client, { existing: result.outcome === "existing", recovered: result.outcome === "resumed" });
 }
