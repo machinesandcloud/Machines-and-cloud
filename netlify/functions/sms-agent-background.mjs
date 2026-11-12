@@ -60,9 +60,19 @@ const FIELD = "(?:customer\\s+)?(?:name|phone(?:\\s+number)?|number|address|issu
 const STATUS = "(?:[a-z]+\\s+)?(?:flagged|filled|captured|collected|confirmed|noted|set)(?:\\s+automatically)?";
 const SEGMENT = `(?:${FIELD}(?:\\s+${STATUS})?|[a-z]+\\s+(?:flagged|noted))`;
 const CHECKLIST = new RegExp(`^(?:(?:now|next|then|ok|okay)[,:]?\\s+)?(?:(?:have|got|need|still need|missing|ask(?:\\s+for)?|collect)\\s*:?\\s+)?${SEGMENT}(?:\\s*(?:,|;|/|&|\\band\\b)\\s*${SEGMENT})*$`, "i");
-const FLAG_NOTE = /^(?:(?:now\s+)?flag(?:ging)?\s+(?:as\s+)?(?:emergency|urgent|lead|spam)|(?:now\s+)?book(?:ing)?\s+it(?:\s+now)?)$/i;
+const FLAG_NOTE = /^(?:(?:now\s+)?flag(?:ging)?\s+(?:as\s+)?(?:emergency|urgent|lead|spam)|(?:now\s+)?book(?:ing)?\s+it(?:\s+now)?|(?:now\s+)?notifying\s+(?:the\s+)?owner|book(?:ing)?\s+(?:the\s+)?visit(?:\s+(?:now|next|done|ok))?)$/i;
 const bareNote = text => text.trim().replace(/[.!]+$/, "").trim();
-const isToolNote = text => !/\?$/.test(text.trim()) && (TOOL_NOTE.test(bareNote(text)) || SPACED_TOOL_NOTE.test(bareNote(text)));
+// A clause naming an internal tool is also a note when nothing remains after removing the tool name
+// (with a call/use/run verb directly before it) and a closed list of note words: "Notify_owner sent",
+// "I used notify_owner", "notify_owner hecho". Any other word ("leave", "911", "might") keeps it.
+const TOOL_STRIP = new RegExp(`(?:\\b(?:call|calling|use|using|used|run|running|ran)\\s+(?:the\\s+)?)?\\b${TOOL}\\b`, "gi");
+const NOTE_WORD = /^(?:now|next|then|done|completed|sent|ok|okay|ready|called|used|ran|via|flagged|flag|as|emergency|urgent|lead|spam|booked|booking|it|is|was|has|been|i|i've|we|the|tool|with|urgency|priority|confirm|confirmed|listo|hecho|enviado|ya|and)$/i;
+// Beside a note, a clause is dropped only when it is a bare status word ("Done", "ok", "listo"), never
+// when it carries customer words such as "It is urgent", "Emergency" or "then confirm" (QA-DELTA D1).
+const COMPANION = /^(?:done|completed|sent|ok|okay|ready|listo|hecho|enviado)$/i;
+const residue = text => text.replace(TOOL_STRIP, " ").replace(/[^\p{L}\p{N}'\s]/gu, " ").split(/\s+/).filter(w => w && !NOTE_WORD.test(w));
+const namesToolId = text => new RegExp(`\\b${TOOL}\\b`, "i").test(text);
+const isToolNote = text => !/\?$/.test(text.trim()) && (TOOL_NOTE.test(bareNote(text)) || SPACED_TOOL_NOTE.test(bareNote(text)) || (namesToolId(text) && residue(bareNote(text)).length === 0));
 function isPlanningSentence(sentence) {
   const t = sentence.trim();
   if (!t || /\?$/.test(t)) return false;
@@ -87,13 +97,33 @@ function dropPlanningLead(reply) {
       dropped.push(first); rest = rest.slice(first.length).trimStart();
       continue;
     }
-    // Remove only complete tool-note clauses; retain every other word, including safety text.
-    const clauses = bareNote(first).split(/\s*(?:;|,|\band\b)\s*/);
-    const notes = clauses.filter(isToolNote);
-    if (clauses.length > 1 && notes.length) {
-      const keep = clauses.filter(clause => !isToolNote(clause));
-      dropped.push(...notes);
-      rest = keep.join("; ") + "." + (first === rest ? "" : " " + rest.slice(first.length).trimStart());
+    // Remove only complete tool-note clauses (and, beside one, a bare status word such as "Done"; a
+    // lone "Next" stays); every other clause is kept byte for byte with its original separator, so
+    // "If it sparks, stay clear and call 911" is never rewritten.
+    const [, body, end] = first.match(/^([\s\S]*?)([.!?]*)$/);
+    const paren = [];
+    // A parenthesis that closes a "?" sentence keeps the question guard too: "Leave now (notify_owner done)?" is sent as written.
+    const flat = body.replace(/\s*\(((?:[^()]|\(\))*)\)/g, (all, inner, at) => isToolNote(/\?/.test(end) && at + all.length === body.length ? inner + "?" : inner) ? (paren.push(inner), "") : all);
+    const parts = flat.split(/(\s*[;,]\s*|\s+[-\u2013\u2014]\s+|\s+and\s+)/i);
+    const clauses = parts.filter((_, i) => i % 2 === 0);
+    // A sentence ending in "?" keeps the question guard on its last clause: "Leave now, notify_owner
+    // done?" is sent as written (as on a54), never turned into "Leave now?".
+    const question = (i) => /\?/.test(end) && i === clauses.length - 1;
+    const strict = clauses.map((x, i) => isToolNote(question(i) ? x + "?" : x));
+    // A note-words-only clause ("then confirm") goes only when the whole sentence is note material;
+    // beside any customer clause, only bare status words go.
+    const noteish = clauses.map((x, i) => strict[i] || !x.trim() || !question(i) && residue(x).length === 0 && !/^(?:now|next|then)$/i.test(x.trim()));
+    const notes = !strict.some(Boolean) ? strict : noteish.every(Boolean) ? noteish : clauses.map((x, i) => strict[i] || !x.trim() || !question(i) && COMPANION.test(bareNote(x)));
+    if (paren.length || clauses.length > 1 && notes.some(Boolean)) {
+      let kept = "";
+      clauses.forEach((x, i) => { if (notes[i]) { if (x.trim()) dropped.push(x); } else kept += kept ? parts[2 * i - 1] + x : x; });
+      dropped.push(...paren);
+      kept = kept.trim();
+      if (!kept) { rest = rest.slice(first.length).trimStart(); continue; }
+      if (notes[0]) kept = kept.charAt(0).toUpperCase() + kept.slice(1);
+      if (!/[.!?:]$/.test(kept)) kept += end || ".";
+      // Keep the original break after the lead sentence, so a list keeps its newline (QA-DELTA D2).
+      rest = kept + (first === rest ? "" : (rest.slice(first.length).match(/^\s*/)[0] || " ") + rest.slice(first.length).trimStart());
     }
     break;
   }
