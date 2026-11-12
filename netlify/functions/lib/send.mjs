@@ -98,8 +98,10 @@ export async function sendEmail({ to, subject, text, html }) {
 // Owner alert: SMS to the owner's phone from the client's number when both exist, else email.
 export async function notifyOwner(client, text, opts = {}) {
   const results = [];
-  if (client.owner?.phone) results.push(await sendSMS({ to: client.owner.phone, client, body: text, force: true, type: opts.type || "owner_alert" }));
-  if (client.owner?.email) results.push(await sendEmail({ to: client.owner.email, subject: `${client.business?.name || "Front desk"}: ${text.split("\n")[0].slice(0, 60)}`, text }));
+  // opts.settle: a channel that throws (network error) is recorded as not sent and the next channel is still tried.
+  const one = async (channel, send) => { if (!opts.settle) return { channel, ...(await send()) }; try { return { channel, ...(await send()) }; } catch (e) { return { channel, ok: false, reason: "send_error", error: String(e?.message || e).slice(0, 120) }; } };
+  if (client.owner?.phone) results.push(await one("text", () => sendSMS({ to: client.owner.phone, client, body: text, force: true, type: opts.type || "owner_alert" })));
+  if (client.owner?.email) results.push(await one("email", () => sendEmail({ to: client.owner.email, subject: `${client.business?.name || "Front desk"}: ${text.split("\n")[0].slice(0, 60)}`, text })));
   return results;
 }
 

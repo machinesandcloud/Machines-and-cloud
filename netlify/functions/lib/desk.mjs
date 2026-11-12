@@ -15,6 +15,37 @@ import { queueCalendarBooking, dispatchCalendarDeliveryWave } from "./calendar-d
 import { strictRead } from "./accounts.mjs";
 import { atomicUpdate } from './store.mjs';
 
+// Legacy tool results must describe the notifications that actually went out (AI review R2). The send
+// results are kept beside the returned record, never saved with it. Legacy sends are synchronous provider
+// calls, so `ok` means the provider accepted the message; handset delivery is not confirmed.
+const sendResults = new WeakMap();
+const noteSends = (record, outcome) => { if (record && typeof record === "object") sendResults.set(record, outcome); };
+// A provider call that throws (network error) after the record is saved counts as "not sent", so the rest of the
+// tool still runs (the owner alert, the consent and reminder clean-up) instead of aborting the turn.
+const sentOrThrown = async (send) => { try { return await send(); } catch (e) { return { ok: false, reason: "send_error", error: String(e?.message || e).slice(0, 120) }; } };
+const alertOwner = async (c, text, opts) => { try { return await notifyOwner(c, text, { ...opts, settle: true }); } catch (e) { return [{ ok: false, reason: "send_error", error: String(e?.message || e).slice(0, 120) }]; } };
+export function deliveryNote(c, record) {
+  const owner = c.owner?.name || "the owner", Owner = c.owner?.name || "The owner";
+  const o = sendResults.get(record);
+  const noClaim = `Do not tell the customer that ${owner} was texted, emailed or told, and do not promise a callback time; say it is saved for ${owner} to review.`;
+  if (!o) return `Whether ${owner} was alerted is not confirmed. ${noClaim}`;
+  const parts = [];
+  if (o.merged) parts.push(`This matched an open request from the last 30 minutes (ref ${record.id}) and nothing changed, so no new alert was sent. Do not say a new text was sent.`);
+  else {
+    const sent = (o.ownerAlert || []).filter((r) => r?.ok).map((r) => r.channel === "email" ? "an email" : "a text");
+    // QA4: with one channel accepted and the other failed (or thrown), say exactly which one did not go out.
+    const missed = sent.length ? (o.ownerAlert || []).filter((r) => r && !r.ok && r.channel).map((r) => r.channel === "email" ? "The email" : "The text") : [];
+    parts.push(sent.length ? `${Owner} was sent ${sent.join(" and ")} with the details (accepted by the provider; delivery and reading are not confirmed).${missed.length ? ` ${missed.join(" and ")} to ${owner} did not go out; mention only what was sent.` : ""}`
+      : `It is saved, but ${owner} could not be alerted yet (${(o.ownerAlert || []).length ? "the alert did not go out" : "no owner phone or email is on file"}). ${noClaim}`);
+  }
+  if ("customerText" in o) {
+    const r = o.reminders || [];
+    const when = r.length === 2 ? "Reminder texts are scheduled for 24 hours and 1 hour before the visit." : r.includes("reminder_1h") ? "A reminder text is scheduled for 1 hour before the visit." : "No reminder text is scheduled because the visit is too soon.";
+    parts.push(o.customerText?.ok ? `The customer's confirmation text was accepted for delivery. ${when}` : "The customer's confirmation text was not sent, so no reminder texts will be sent and texting consent was not recorded. Do not promise a confirmation text or text reminders.");
+  }
+  return parts.join(" ");
+}
+
 async function queueSavedDelivery(c, record, kind) {
   if (!isSelfServiceClient(c) || record.websiteSetupCheck || record.simulation) return;
   // Provider work is recoverable from source records; a queue outage cannot roll back a booking.
@@ -215,11 +246,13 @@ async function scheduleReminders(c, b) {
   if (!b.date) return;
   const day = bookingDay(b); const { start } = windowHours(b.window);
   const startAt = new Date(houstonISO(day, start)).getTime();
-  if (startAt - D > Date.now()) await scheduleTask(c.slug, new Date(startAt - D), "reminder_24h", { bookingId: b.id });
-  if (startAt - H > Date.now()) await scheduleTask(c.slug, new Date(startAt - H), "reminder_1h", { bookingId: b.id });
+  const scheduled = [];
+  if (startAt - D > Date.now()) { await scheduleTask(c.slug, new Date(startAt - D), "reminder_24h", { bookingId: b.id }); scheduled.push("reminder_24h"); }
+  if (startAt - H > Date.now()) { await scheduleTask(c.slug, new Date(startAt - H), "reminder_1h", { bookingId: b.id }); scheduled.push("reminder_1h"); }
   // The morning after the window: ask the owner whether it happened, once, so "done" is not forgotten.
   // Only where something waits on "done" (Growth and Pro follow-ups); a Starter booking gets no daily question.
   if (PLANS[c.plan]?.followUp) { const next = new Date(day); next.setDate(next.getDate() + 1); await scheduleTask(c.slug, new Date(houstonISO(next, 9)), "visit_check", { bookingId: b.id }); }
+  return scheduled;
 }
 export async function runVisitCheck(c, task) {
   const b = await getRecord("bookings", c.slug, task.data?.bookingId);
@@ -296,12 +329,12 @@ export async function bookVisit(c, input, ctx = {}) {
     await finishBookingWindow(c, bookingId, { ...taken, slot: taken.previous[0] || '', release: !taken.previous.length });
     return { full: true, reason: error.code, message: 'Nothing was booked. ' + error.message };
   }
-  let canFinish = true;
+  let canFinish = true, reminders = [];
   try {
     await addToIndex("bookings", c, b.phone, b.id);
     if (!portalOnly) {
       try { const ev = await createEvent(c, b); if (ev) { b.calendarEventId = ev.id; b.calendarLink = ev.link; } } catch (e) { await calendarFailed(c, b, e, "insert"); }
-      await scheduleReminders(c, b);
+      reminders = await scheduleReminders(c, b);
       // consent: told at booking, recorded on the booking
       const { consentLine } = await import("./config.mjs");
       b.consent = { at: new Date().toISOString(), channel: ctx.channel || "web", phone: b.phone, wording: consentLine(c) };
@@ -311,10 +344,16 @@ export async function bookVisit(c, input, ctx = {}) {
   } finally { if (canFinish) { if (stable) await finishStableBookingWindow(c, bookingId, ctx.managedActionId); else await finishBookingWindow(c, bookingId, taken); } }
   await savedRecordEvidence(ctx, 'bookings', b);
   await queueSavedDelivery(c, b, "bookings");
-  if (!portalOnly && b.phone && ctx.channel !== "sms") {
-    await sendSMS({ to: b.phone, client: c, type: "confirmation", body: str("confirmation", b)(c, b) });
+  let customerText;
+  if (!portalOnly && ctx.channel !== "sms") customerText = b.phone ? await sentOrThrown(() => sendSMS({ to: b.phone, client: c, type: "confirmation", body: str("confirmation", b)(c, b) })) : { ok: false, reason: "missing" };
+  if (customerText && !customerText.ok) {
+    // The texting disclosure travels with the confirmation text (and the model now skips the spoken line when
+    // it fails), so nothing was disclosed: do not keep a consent record or send reminder texts on it.
+    await cancelTasks(c.slug, (t) => ["reminder_24h", "reminder_1h"].includes(t.type) && t.data?.bookingId === b.id);
+    if (b.consent) { b.consent = null; b.textsHeld = { at: new Date().toISOString(), reason: customerText.reason || "confirmation_not_sent" }; await saveRecord("bookings", b); }
+    reminders = [];
   }
-  if (!portalOnly) await notifyOwner(c, ownerSummary(c, "booking", b), { type: "owner_alert" });
+  if (!portalOnly) noteSends(b, { ownerAlert: await alertOwner(c, ownerSummary(c, "booking", b), { type: "owner_alert" }), ...(customerText ? { customerText, reminders } : {}) });
   await logEvent(c, "booking", { id: b.id, channel: ctx.channel, ...(ctx.websiteSetupCheck ? { setupCheck: true } : {}) });
   // A customer who books no longer needs a callback: close their open leads from the last 24 hours.
   const since = Date.now() - D;
@@ -413,7 +452,7 @@ export async function flagLead(c, input, ctx = {}) {
     await savedRecordEvidence(ctx, 'leads', prior);
     await queueSavedDelivery(c, prior, "leads");
     if (!portalOnly) {
-      if (changed.length) await notifyOwner(c, `UPDATE ref ${prior.id} (${changed.join(", ")}):\n` + ownerSummary(c, prior.reason, prior), { type: "owner_alert" });
+      noteSends(prior, changed.length ? { ownerAlert: await alertOwner(c, `UPDATE ref ${prior.id} (${changed.join(", ")}):\n` + ownerSummary(c, prior.reason, prior), { type: "owner_alert" }) } : { merged: true });
       const waiting = (await workspaceRows(c,"alerts",100)).some((a) => a.leadId === prior.id && a.status === "waiting");
       if (reason !== "status_check" && !waiting && (prior.urgency === "emergency" || prior.reason === "wants_call")) await openAlert(c, prior, prior.reason === "wants_call" ? "wants_call" : "emergency");
     }
@@ -434,7 +473,7 @@ export async function flagLead(c, input, ctx = {}) {
   await queueSavedDelivery(c, l, "leads");
   if (!portalOnly && reason !== "spam") {
     if (reason === "wants_call" || reason === "handoff") { await trackCallback(c, l); await saveRecord("leads", l); }
-    await notifyOwner(c, ownerSummary(c, reason, l), { type: "owner_alert" });
+    noteSends(l, { ownerAlert: await alertOwner(c, ownerSummary(c, reason, l), { type: "owner_alert" }) });
     const urgent = reason !== "status_check" && (reason === "emergency" || reason === "wants_call" || input.urgency === "emergency");
     if (urgent) await openAlert(c, l, reason === "wants_call" ? "wants_call" : "emergency");
     if (PLANS[c.plan]?.followUp && l.phone && reason === "lead") {
@@ -643,20 +682,20 @@ export async function rescheduleVisit(c, b, date, window) {
   try {
     await cancelTasks(c.slug, (t) => ["reminder_24h", "reminder_1h", "visit_check"].includes(t.type) && t.data?.bookingId === b.id);
     if (!portalOnly) {
-      await scheduleReminders(c, b);
+      if (!b.textsHeld) await scheduleReminders(c, b); // no consent was recorded at booking (04): keep reminders off
       try { if (b.calendarEventId) await updateEvent(c, b); } catch (e) { await calendarFailed(c, b, e, "update"); }
     }
     try { await saveRecord("bookings", b, { capacityClaim: claim }); }
     catch (err) { canFinish = false; throw err; }
   } finally { if (canFinish) await finishBookingWindow(c, b.id, claim); }
   await queueSavedDelivery(c, b, "bookings");
-  if (!portalOnly) await notifyOwner(c, `${c.business.name} front desk: RESCHEDULED ref ${b.id} to ${when(b)} (was ${old}).\nCustomer: ${b.customer_name} ${b.phone}\nWhere: ${b.address}\nIssue: ${b.issue}`, { type: "owner_alert" });
+  if (!portalOnly) noteSends(b, { ownerAlert: await alertOwner(c, `${c.business.name} front desk: RESCHEDULED ref ${b.id} to ${when(b)} (was ${old}).\nCustomer: ${b.customer_name} ${b.phone}\nWhere: ${b.address}\nIssue: ${b.issue}`, { type: "owner_alert" }) });
   await logEvent(c, "rescheduled", { id: b.id, from: old, to: `${b.date} ${b.window}` });
   return b;
 }
 
 export async function cancelRequest(c, b) {
-  await notifyOwner(c, `${c.business.name} front desk: NEEDS ACTION. ${b.customer_name || b.phone} wants to cancel ref ${b.id} (${when(b)}, ${b.issue}). Reply "cancel ${b.id}" to cancel it.`, { type: "owner_alert" });
+  noteSends(b, { ownerAlert: await alertOwner(c, `${c.business.name} front desk: NEEDS ACTION. ${b.customer_name || b.phone} wants to cancel ref ${b.id} (${when(b)}, ${b.issue}). Reply "cancel ${b.id}" to cancel it.`, { type: "owner_alert" }) });
   await logEvent(c, "cancel_requested", { id: b.id });
   return b;
 }
