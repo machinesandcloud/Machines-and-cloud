@@ -1,12 +1,10 @@
 import { atomicUpdate } from "./store.mjs";
 import { strictRead } from "./accounts.mjs";
 import { workspaceTenant } from './workspace-identity.mjs';
+import { classifySMSKeyword } from './sms-keywords.mjs';
 export const deliveryTenant = workspaceTenant;
 const key = (c, phone) => `${c.slug}/${deliveryTenant(c)}/${phone}`;
 const validPhone = phone => typeof phone === "string" && /^\+1[2-9]\d{9}$/.test(phone);
-const STOP = /^(STOP|STOPALL|UNSUBSCRIBE|CANCEL|END|QUIT|ALTO|PARAR)$/i;
-const START = /^(START|UNSTOP|EMPEZAR)$/i;
-const HELP = /^(HELP|INFO|AYUDA)$/i;
 export const MANAGED_APPOINTMENT_CONSENT_VERSION = "ongoing_appointments_v2";
 export function managedAppointmentConsentQuestion(c, language = 'en') {
   if (language === 'es') return `${c.business.name}: ¿quiere confirmaciones, recordatorios y cancelaciones de citas por mensaje, incluidas visitas futuras? Responda SÍ para aceptar. Frecuencia variable. Pueden aplicarse tarifas de mensajes y datos. HELP para ayuda; STOP/ALTO/PARAR para terminar. Puede reservar sin mensajes.`;
@@ -29,7 +27,9 @@ export async function recordManagedInbound(c, { phone, text, messageSid, provide
     if (row.tenant !== deliveryTenant(c)) throw new Error("Consent identity mismatch");
     if (row.seen?.[messageSid]) return { result: { ...row, keyword: row.seen[messageSid].keyword, duplicate: true } };
     if (Object.keys(row.seen || {}).length >= 4096) throw new Error("Consent history needs archival before accepting more messages");
-    const keyword = STOP.test(word) || providerOptOutType === "STOP" ? "stop" : START.test(word) || providerOptOutType === "START" ? "start" : HELP.test(word) || providerOptOutType === "HELP" ? "help" : "message";
+    // Same normalized vocabulary as the platform line (CTIA 5.1.3); YES/SÍ consent stays exact below.
+    const matched = classifySMSKeyword(word);
+    const keyword = matched === "stop" || providerOptOutType === "STOP" ? "stop" : matched === "start" || providerOptOutType === "START" ? "start" : matched === "help" || providerOptOutType === "HELP" ? "help" : "message";
     const next = { ...row, transactional: currentProof(row), pendingAsk: currentAsk(row.pendingAsk) ? row.pendingAsk : null, seen: { ...row.seen, [messageSid]: { keyword, at: now } }, lastMessageSid: messageSid, lastInboundAt: now, lastKeyword: keyword, updatedAt: now };
     const serviceControl=/^(?:APPOINTMENTS|CITAS|YES|SI|SÍ)$/i.test(word)||/^(?:YES\s+)?(?:QUOTE|REQUEST)\s+[a-zA-Z0-9_-]{1,80}$/i.test(word);
     if(keyword==="message"&&!serviceControl){next.lastServiceReplyAt=now;next.lastServiceReplyMessageSid=messageSid;}

@@ -2,12 +2,10 @@
 import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 import { atomicUpdate } from './store.mjs';
 import { strictRead } from './accounts.mjs';
+import { SMS_KEYWORDS, classifySMSKeyword } from './sms-keywords.mjs';
 
 export const PLATFORM_SMS_WEBHOOK_URL = 'https://machinesandcloud.com/api/platform-sms';
-export const PLATFORM_SMS_KEYWORDS = Object.freeze({
-  stop: Object.freeze(['STOP','STOPALL','UNSUBSCRIBE','CANCEL','END','QUIT','REVOKE','OPTOUT','ALTO','PARAR']),
-  start: Object.freeze(['START','UNSTOP','EMPEZAR']), help: Object.freeze(['HELP','INFO','AYUDA'])
-});
+export const PLATFORM_SMS_KEYWORDS = SMS_KEYWORDS;
 const STORE = 'platform_sms_messages', RECEIPTS = 'platform_sms_receipts', KEY = 'inbound_v1', CAPACITY = 500;
 const phone = value => /^\+1[2-9]\d{9}$/.test(value || '');
 const hash = value => createHash('sha256').update(value).digest('hex');
@@ -33,10 +31,11 @@ function redact(value) {
     .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g,'').slice(0,1600);
 }
 function keyword(body, type) {
-  const word = body.trim().toUpperCase();
-  if (PLATFORM_SMS_KEYWORDS.stop.includes(word) || type === 'STOP') return 'stop';
-  if (PLATFORM_SMS_KEYWORDS.start.includes(word) || type === 'START') return 'start';
-  if (PLATFORM_SMS_KEYWORDS.help.includes(word) || type === 'HELP') return 'help';
+  // Case, whitespace, punctuation and short polite opt-out phrases are normalized (CTIA 5.1.3).
+  const word = classifySMSKeyword(body);
+  if (word === 'stop' || type === 'STOP') return 'stop';
+  if (word === 'start' || type === 'START') return 'start';
+  if (word === 'help' || type === 'HELP') return 'help';
   return 'question';
 }
 function guidance(body, kind) {
