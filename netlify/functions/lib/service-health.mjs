@@ -85,3 +85,33 @@ export async function serviceDeliveryHealth() {
   const failingComponents=serviceHealthFailureFacts(result);
   return {...result,reasonCode:failingComponents[0]?.reasonCode || null,failingComponents};
 }
+// OH-2: the public /api/health projection. Stored block rows can hold raw thrown error text
+// (scheduler.mjs block(): `error: err.message`) and free-form reason strings. The public endpoint
+// returns only a fixed category and a catalogue code per failing block; the raw detail stays in the
+// function log (console.error in block()) and the authenticated operator view (/api/manage).
+const PUBLIC_BLOCK_CODES = new Set([
+  ...Object.values(FAILURE_CODES).flat(), "service_delivery_unresolved",
+  "phone_scope_partial", "phone_recovery_stale", "phone_recovery_failed", "product_gate_closed", "phone_storage_unavailable", "provider_result_unconfirmed", "acquisition_result_unconfirmed", "release_result_unconfirmed", "provider_lookup_unavailable", "service_cleanup_required", "resource_conflict", "workspace_unavailable", "configuration_changed", "dispatch_not_authorized", "paid_service_unconfirmed", "pre_dispatch_retry_exhausted",
+  "lead_intake_cursor_unavailable", "lead_intake_history_unavailable", "lead_intake_recovery_unconfirmed", "workspace_refresh_unavailable",
+]);
+// Same category names as the operator alert email (operator-health fix rev 2, alertLine), minus "scheduler".
+export const PUBLIC_HEALTH_CATEGORIES = Object.freeze(["block_error", "reported_code", "unrecognised_failure"]);
+const PUBLIC_BLOCK_NAME = /^[A-Za-z][A-Za-z0-9_]{0,40}(?::[a-z][a-z0-9_]{0,20})?$/;
+// A thrown error becomes one of four fixed codes; only the code is published, never the text.
+function errorCode(error) {
+  const text = String(error || "");
+  if (/timed?\s*out|timeout|aborted/i.test(text)) return "block_timeout";
+  if (/blobs?|storage|etag|precondition|\bstore\b/i.test(text)) return "block_storage_unavailable";
+  if (/fetch failed|network|ECONN|ENOTFOUND|EAI_AGAIN|socket|\b5\d\d\b/i.test(text)) return "block_dependency_unavailable";
+  return "block_error";
+}
+export function publicSchedulerFailures(blocks) {
+  const rows = (Array.isArray(blocks) ? blocks : []).slice(0, 40).filter(([, b]) => b?.ok !== true).map(([name, b]) => {
+    const block = PUBLIC_BLOCK_NAME.test(String(name)) ? String(name) : "unnamed_block";
+    if (block === "serviceDeliveryRecovery") return { block, category: "reported_code", code: serviceHealthFailureFacts(b)[0]?.reasonCode || "service_delivery_unresolved" };
+    if (b?.error) return { block, category: "block_error", code: errorCode(b.error) };
+    if (PUBLIC_BLOCK_CODES.has(b?.reasonCode)) return { block, category: "reported_code", code: b.reasonCode };
+    return { block, category: "unrecognised_failure", code: "unrecognised_failure" };
+  });
+  return { failing: rows, failingBlocks: rows.map(row => `${row.block}: ${row.code}`) };
+}

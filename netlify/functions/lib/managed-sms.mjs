@@ -30,6 +30,7 @@ export async function dispatchServiceWorker(name, body) {
   const response = await fetch(new URL(`/.netlify/functions/${name}`,site),{method:"POST",headers:{"Content-Type":"application/json","x-service-worker-key":secret},body:JSON.stringify(body),signal:AbortSignal.timeout(3000),redirect:"error"});
   return response.ok;
 }
+const SPANISH_STOP = /\b(?:alto|parar|cancelar|baja|basta|detener|no\s+(?:quiero\s+)?m[aá]s\s+mensajes|no\s+me\s+(?:escriban|manden|env[ií]en|texteen)|dejen\s+de)\b/i;
 function twiml(text = "") { const safe = String(text).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c])); return new Response(`<?xml version="1.0" encoding="UTF-8"?><Response>${safe ? `<Message>${safe}</Message>` : ""}</Response>`,{headers:{"Content-Type":"text/xml","Cache-Control":"no-store"}}); }
 async function verifiedFields(req) {
   if (req.method !== "POST" || !/application\/x-www-form-urlencoded/i.test(req.headers.get("content-type") || "")) return null;
@@ -67,7 +68,8 @@ export async function handleManagedSMS(req) {
     // owner gets a note (once per visit state), including repeats and Twilio-handled opt-outs.
     if (consent.keyword === "stop" && isCancelWord(fields.Body)) { try { await cancelKeywordNotice(c, { phone: fields.From, word: fields.Body }); } catch {} }
     if (consent.duplicate && consent.keyword !== "message") return twiml();
-    if (consent.keyword === "stop") return consent.alreadySuppressed || fields.OptOutType === "STOP" ? twiml() : twiml(`${c.business.name}: texts stopped. Reply START or EMPEZAR to remove the block.`);
+    // One confirmation per opt-out, in the customer's language; a repeat or a Twilio-handled keyword gets none.
+    if (consent.keyword === "stop") return consent.alreadySuppressed || fields.OptOutType === "STOP" ? twiml() : twiml(SPANISH_STOP.test(String(fields.Body || "")) ? `${c.business.name}: ya no recibirá más mensajes de este número. Responda EMPEZAR para volver a recibirlos.` : `${c.business.name}: texts stopped. Reply START or EMPEZAR to remove the block.`);
     if (consent.keyword === "start") return fields.OptOutType === "START" ? twiml() : twiml(c.serviceFollowupProgram?.version==='requested_service_followups_v1'?`${String(c.business.name).trim().slice(0,100)}: your texting block is removed. Each text program needs its own new permission. Use the full instruction for your visit or request. HELP for help; STOP/ALTO/PARAR to end.`:`${c.business.name}: your texting block is removed. Appointment updates need a separate YES. Reply STOP or ALTO to stop.`);
     // AYUDA gets the Spanish reply (needs Spanish reviewer); HELP and INFO keep the English one. The
     // contact choice is unchanged here (PRA-HOMEOWNER-07 owns it).

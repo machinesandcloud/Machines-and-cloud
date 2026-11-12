@@ -90,6 +90,10 @@ export async function saveManagedReviewAsk(c, phone, { wording, messageSid, sent
 export async function mayDeliverManagedSMS(c, phone, purpose, job = null) {
   const row = await managedSMSConsent(c, phone);
   if (!row || row.suppressed) return false;
+  // OH-1: a STOP recorded by the legacy line or the shared platform sender also blocks the outbox,
+  // unless the customer opted in again on this shop's own number afterwards (lib/sms-suppression.mjs).
+  const { crossStoreOptOut } = await import("./sms-suppression.mjs");
+  if (await crossStoreOptOut(phone, row, purpose)) return false;
   if (["followup_consent_ask","quote_followup","request_followup"].includes(purpose)) { const {mayDeliverRequestFollowup}=await import("./request-followup.mjs"); return mayDeliverRequestFollowup(c,phone,purpose,job); }
   if (["reply", "consent_ask"].includes(purpose)) return Date.parse(row.lastInboundAt) > Date.now() - 86400000;
   if (["confirmation", "reminder_24h", "reminder_1h", "cancelled"].includes(purpose)) return currentProof(row);

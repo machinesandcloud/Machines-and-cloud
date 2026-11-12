@@ -450,8 +450,18 @@ function engine({ provider = null, gate = managedDeliveryEnabled, sender = sende
     job = await change(id, row => row.attemptStartedAt ? null : ({ ...row, state: "sending", detail:null, ...(smsBudget?{smsBudget}:{}), ...(emailBudget?{emailBudget}:{}), ...(paidSMSCapacity?{paidSMSCapacity,paidSMSBinding:{number:smsBinding.number,serviceSid:smsBinding.serviceSid},from:smsBinding.number,serviceSid:smsBinding.serviceSid}:{}), attemptStartedAt: stamp(), attempts: row.attempts + 1, claim: { token, until: new Date(Date.now() + 60000).toISOString() } }));
     if (job.claim?.token !== token) return job;
     // Reread lifecycle, source and consent after acquiring the exclusive send claim.
-    const latest = await strictRead("clients", c.slug);
-    if (!latest || (latest.status !== "live" && !await testingDeliveryAuthorized(latest,job)) || deliveryTenant(latest) !== job.tenant || !gate() || !await inspectSource(job, latest) || (job.channel === "sms" && !(job.purpose === "activation_probe" ? await probeFor(latest,job) : await mayDeliverManagedSMS(latest, job.to, job.purpose, job)))) return stopPaidBeforeSend(job, c, 'authority_changed');
+    // QA-OPT F1: nothing has been sent yet. An unreadable store (client, consent, legacy opt-outs, platform
+    // ledger) is "not now": release the claim as a resumable wait, never leave it to become "uncertain".
+    const releaseUnsent = async reasonCode => {
+      if (job.paidSMSCapacity) { const blocked = await change(id,row=>!row.providerId&&row.claim?.token===token?{...row,state:'waiting_platform',claim:null,paidNotDispatched:true,reasonCode}:null); return reconcilePaidDelivery(blocked,c); }
+      return change(id,row=>!row.providerId&&row.claim?.token===token?{...row,state:'waiting_platform',claim:null,attemptStartedAt:null,attempts:Math.max(0,row.attempts-1),reasonCode}:null);
+    };
+    let latest, allowed;
+    try {
+      latest = await strictRead("clients", c.slug);
+      allowed = !(!latest || (latest.status !== "live" && !await testingDeliveryAuthorized(latest,job)) || deliveryTenant(latest) !== job.tenant || !gate() || !await inspectSource(job, latest) || (job.channel === "sms" && !(job.purpose === "activation_probe" ? await probeFor(latest,job) : await mayDeliverManagedSMS(latest, job.to, job.purpose, job))));
+    } catch { return releaseUnsent('authority_unreadable'); }
+    if (!allowed) return stopPaidBeforeSend(job, c, 'authority_changed');
     if(job.channel==="sms") {
       const binding=await (job.purpose==="activation_probe"?jobSender(latest,job):sender(latest));
       if(!binding || job.paidSMSBinding && (binding.number !== job.paidSMSBinding.number || binding.serviceSid !== job.paidSMSBinding.serviceSid))return stopPaidBeforeSend(job, latest, 'sender_changed');
@@ -507,6 +517,7 @@ function engine({ provider = null, gate = managedDeliveryEnabled, sender = sende
         const blocked = await change(id,row=>!row.providerId&&row.claim?.token===token?{...row,state:'waiting_platform',claim:null,paidNotDispatched:true,reasonCode:'sms_preflight_unavailable'}:null);
         return reconcilePaidDelivery(blocked,latest);
       }
+      if (!providerInvoked) return releaseUnsent('authority_unreadable'); // QA-OPT F1: e.g. a follow-up re-check read failed before transport.
       return change(id, row => !row.providerId && !terminal(row.state) && row.claim?.token === token ? { ...row, state: "uncertain", claim: null, reasonCode: "provider_result_unconfirmed" } : null);
     }
   }
