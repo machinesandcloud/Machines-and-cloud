@@ -118,11 +118,13 @@ export default async (req) => {
     : skipReason === "opted_out" ? "They opted out, so no text-back. Please call them back."
     : skipReason === "recent" ? "They were already sent a text-back in the last 24 hours, so no new one."
     : !from ? "No caller ID, so no text-back and no number to call back." : "Text-back is off for this line, so no text-back. Please call them back.";
-  // 12-03: notifyOwner now catches a thrown owner text (sms_unconfirmed) and still tries the email; log it as a throw was.
+  // QA6 (regenerated on 12-03-after-04): settle (proposal 4) records a thrown channel as send_error and still tries the next one.
+  // owner_alert_failed means no channel reached the owner: every result failed (thrown, refused or opted out).
+  // A logged-only (unconfigured) send is not a failure; with no owner phone or email nothing is logged, as before.
   let alerts = null;
-  try { alerts = await notifyOwner(c, `${name} front desk: missed call from ${from || "unknown"}. ${ownerLine}`, { type: "owner_note" }); }
+  try { alerts = await notifyOwner(c, `${name} front desk: missed call from ${from || "unknown"}. ${ownerLine}`, { type: "owner_note", settle: true }); }
   catch (err) { console.error("missed-call owner alert failed", err); }
-  if (!alerts || alerts.some((r) => r?.reason === "sms_unconfirmed")) await logEvent(c, "owner_alert_failed", { from, kind: "missed_call" });
+  if (!alerts || (alerts.length && !alerts.some((r) => r?.ok || r?.logged))) await logEvent(c, "owner_alert_failed", { from, kind: "missed_call" });
   const say = textBack === "sent"
     ? (c.business?.spanish
       ? `<Say voice="Polly.Joanna">Thanks for calling ${esc(name)}. We are on a job right now. We are texting you this second so we can get you scheduled.</Say><Say voice="Polly.Lupe" language="es-US">Gracias por llamar. Le enviamos un mensaje de texto ahora mismo.</Say>`
