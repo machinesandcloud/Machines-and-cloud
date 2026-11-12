@@ -5,9 +5,12 @@ import { atomicUpdate } from './store.mjs';
 import { strictRead } from './accounts.mjs';
 import { workspaceTenant, supportedWorkspace } from './workspace-identity.mjs';
 import { configurationRevision } from './setup.mjs';
-import { CalendarError, CALENDAR_AVAILABILITY_CONSENT_VERSION, calendarConnectionEnabled, getCalendarConnection, googleAccessToken } from './calendar-connection.mjs';
+import { CalendarError, CALENDAR_AVAILABILITY_CONSENT_VERSION, calendarConnectionEnabled, getCalendarConnection, googleAccessToken as connectionAccessToken } from './calendar-connection.mjs';
 import { calendarExecutionPolicy, guardedCalendarFetch, assertCalendarExecution } from './calendar-execution.mjs';
 import { addDays, canonicalWindow, isoDateValid } from './availability.mjs';
+// Lost access (invalid_grant), a token-endpoint outage or a changed connection all mean busy times cannot be read:
+// give every channel the same clean Calendar refusal as a failed busy read, instead of a throw or an unconfirmed save.
+const googleAccessToken=(...args)=>connectionAccessToken(...args).catch(error=>{if(error instanceof CalendarError)fail();throw error;});
 
 export const CALENDAR_BUSY_FIELDS='timeZone,nextPageToken,items(id,status,transparency,start,end,extendedProperties/private,attendees(self,responseStatus),recurrence)';
 const STORE='calendar_busy', ZONE='America/Chicago', TTL=60000, FRESH=5000, MAX_PAGES=4;
@@ -64,6 +67,9 @@ async function authority(c,scope) {
 async function calendarRequired(c) {
   const current=await strictRead('clients',c.slug),retained=await strictRead('calendar_connections',c.slug);
   if(!supportedWorkspace(current)||workspaceTenant(current)!==workspaceTenant(c))fail();
+  // Chosen but never connected (no connection ID was ever saved): use the shop's own hours and capacity, as when
+  // Calendar is not chosen. A Calendar this workspace connected before, including lost access or an owner disconnect, still fails closed below.
+  if(retained?.tenantIdentity!==workspaceTenant(c)||!retained.connectionId&&['not_connected','disconnected'].includes(retained.status))return false;
   const selected=current.onboarding?.desiredChannels?.includes('calendar'),owned=retained?.tenantIdentity===workspaceTenant(c);
   return selected||(owned&&!['not_connected','disconnected'].includes(retained.status));
 }
