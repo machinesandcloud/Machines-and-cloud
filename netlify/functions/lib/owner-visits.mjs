@@ -30,7 +30,19 @@ export const ownerVisitRevision = booking => hash(JSON.stringify(canonical(booki
 export function ownerVisitView(booking) {
   return { id: booking.id, customer_name: booking.customer_name, phone: booking.phone, issue: booking.issue, address: booking.address, date: booking.date, window: booking.window, status: booking.status, revision: ownerVisitRevision(booking), canChange: active(booking.status) };
 }
+// A customer actor is a provider-verified phone on a managed channel. Its caller has
+// already matched the visit's saved number; the expected visit revision binds that match.
+async function customerAuthority(client, actor, expectedRevision, { checkRevision = true } = {}) {
+  const current = await strictRead('clients', client.slug);
+  if (!actor || !['sms', 'call'].includes(actor.channel) || !/^\+1[2-9]\d{9}$/.test(actor.phone || '')) throw new OwnerVisitError('forbidden', 'This visit belongs to another customer.', 403);
+  if (!current || !isSupportedSelfServiceClient(current) || deliveryTenant(current) !== deliveryTenant(client)) throw new OwnerVisitError('forbidden', 'This visit belongs to another workspace.', 403);
+  if (checkRevision && !['testing', 'live'].includes(current.status)) throw new OwnerVisitError('workspace_unavailable', 'This workspace cannot change visits in its current state.');
+  if (checkRevision && configurationRevision(current) !== expectedRevision) throw new OwnerVisitError('configuration_changed', 'The saved business rules changed.');
+  return current;
+}
+const actorLabel = session => session?.customer ? `customer:${session.customer.channel}` : session.email;
 async function authority(client, session, expectedRevision, { checkRevision = true } = {}) {
+  if (session?.customer) return customerAuthority(client, session.customer, expectedRevision, { checkRevision });
   const current = await strictRead('clients', client.slug);
   const access = session?.sessionHash ? await strictRead('access_sessions', session.sessionHash) : null;
   if (!access || access.scope !== 'onboarding' || access.status !== 'active' || !Number.isFinite(Date.parse(access.expiresAt)) || Date.parse(access.expiresAt) <= Date.now() || normalizeAccountEmail(access.email) !== normalizeAccountEmail(session.email)) throw new OwnerVisitError('verification_required', 'Sign in again before changing this visit.', 401);
@@ -190,7 +202,7 @@ export async function changeOwnerVisit(client, session, originalBody) {
         if (creating ? !!saved : ownerVisitRevision(saved) !== body.expectedVisitRevision || !active(saved.status)) throw new OwnerVisitError('visit_changed', 'This visit changed. Refresh its details before trying again.');
         const source = saved || { id: body.visitId, slug: client.slug, createdAt: operation.mutationAt, customer_name: body.customer_name.trim(), phone: e164(body.phone), address: body.address.trim(), issue: body.issue.trim(), status: 'booked', outcome: 'booked', channel: 'owner', customerType: 'new', managedActionId: operationId, delivery: { mode: 'portal_only', ownerContactConfirmed: false, tenantIdentity: tenant } };
         const value = { ...source, ...(cancel ? { status: 'cancelled', cancelledAt: operation.mutationAt } : { date: claim.date, dateSaid: claim.date, window: claim.window, rescheduledAt: operation.mutationAt }), updatedAt: operation.mutationAt,
-          ownerVisitMutation: { id: operationId, action: body.action, at: operation.mutationAt }, ownerVisitHistory: [...(source.ownerVisitHistory || []), { action: body.action, at: operation.mutationAt, actor: session.email, previous: saved ? { date: saved.date, window: saved.window, status: saved.status } : null, next: { date: cancel ? source.date : claim.date, window: cancel ? source.window : claim.window, status: cancel ? 'cancelled' : source.status } }] };
+          ownerVisitMutation: { id: operationId, action: body.action, at: operation.mutationAt }, ownerVisitHistory: [...(source.ownerVisitHistory || []), { action: body.action, at: operation.mutationAt, actor: actorLabel(session), ...(session.customer ? { customerReason: session.customer.reason || '' } : {}), previous: saved ? { date: saved.date, window: saved.window, status: saved.status } : null, next: { date: cancel ? source.date : claim.date, window: cancel ? source.window : claim.window, status: cancel ? 'cancelled' : source.status } }] };
         return { value, result: value };
       });
     }

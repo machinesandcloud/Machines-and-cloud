@@ -378,7 +378,7 @@ export async function bookVisit(c, input, ctx = {}) {
   // A customer who books no longer needs a callback: close their open leads from the last 24 hours.
   const since = Date.now() - D;
   const candidates = b.phone ? await recordsFor("leads", c, b.phone) : await workspaceRows(c,"leads",100);
-  for (const l of candidates.filter((l) => belongsToWorkspace(c,l)&&(ctx.websiteSetupCheck ? l.websiteSetupCheck?.checkId === ctx.websiteSetupCheck.checkId : !l.websiteSetupCheck) && l.status === "open" && new Date(l.createdAt).getTime() > since && ((b.phone && l.phone === b.phone) || (ctx.contact && l.contact === ctx.contact)))) {
+  for (const l of candidates.filter((l) => belongsToWorkspace(c,l)&&!l.relatedVisitId&&(ctx.websiteSetupCheck ? l.websiteSetupCheck?.checkId === ctx.websiteSetupCheck.checkId : !l.websiteSetupCheck) && l.status === "open" && new Date(l.createdAt).getTime() > since && ((b.phone && l.phone === b.phone) || (ctx.contact && l.contact === ctx.contact)))) { // a request or note about one existing visit (relatedVisitId) stays open: a new booking does not answer it
     await assertCurrentWorkspace(c);l.status = "booked"; l.bookingId = b.id; await saveRecord("leads", l);
     await ackAlertsFor(c, l.id, "booking");
     await logEvent(c, "lead_closed", { id: l.id, by: "booking", bookingId: b.id });
@@ -387,11 +387,12 @@ export async function bookVisit(c, input, ctx = {}) {
 }
 
 // A repeat notify_owner for the same customer within 30 minutes updates the open lead instead of
-// opening a second one (and a second escalation chain).
+// opening a second one (and a second escalation chain). A request or note about one existing
+// visit (relatedVisitId) is never merged into or overwritten.
 async function recentOpenLead(c, phone, contact, reason) {
   const cutoff = Date.now() - 30 * 60 * 1000;
   const pool = phone ? await recordsFor("leads", c, phone) : await workspaceRows(c,"leads",60);
-  const leads = pool.filter((l) => !l.websiteSetupCheck && l.status === "open" && (l.reason === "status_check") === (reason === "status_check") && new Date(l.createdAt).getTime() > cutoff && belongsToWorkspace(c,l));
+  const leads = pool.filter((l) => !l.websiteSetupCheck && !l.relatedVisitId && l.status === "open" && (l.reason === "status_check") === (reason === "status_check") && new Date(l.createdAt).getTime() > cutoff && belongsToWorkspace(c,l));
   return leads.reverse().find((l) => (phone && l.phone === phone) || (contact && l.contact === contact)) || null;
 }
 
@@ -483,6 +484,8 @@ export async function flagLead(c, input, ctx = {}) {
   const l = await (stable ? createRecordOnce : addRecord)("leads", c.slug, {
     ...(stable ? { id: ctx.managedActionId.slice(0,32), managedActionId: ctx.managedActionId } : {}),
     ...(stable && Number.isFinite(Date.parse(ctx.managedHumanDeadlineAt)) ? {managedHumanDeadlineAt:ctx.managedHumanDeadlineAt} : {}),
+    ...(stable && /^[a-zA-Z0-9_-]{1,80}$/.test(ctx.relatedVisitId || "") ? { relatedVisitId: ctx.relatedVisitId } : {}),
+    ...(stable && ["cancel", "reschedule"].includes(ctx.customerVisitRequest?.action) && /^[a-f0-9]{64}$/.test(ctx.customerVisitRequest?.visitFacts || "") ? { customerVisitRequest: { action: ctx.customerVisitRequest.action, visitFacts: ctx.customerVisitRequest.visitFacts } } : {}),
     customer_name: esc(input.customer_name), phone, address: esc(input.address), issue: esc(input.issue),
     reason, urgency: input.urgency, wanted: esc(input.wanted), language: input.language, unsure: esc(input.unsure), nobook_reason: NOBOOK_REASONS.includes(input.nobook_reason) ? input.nobook_reason : "none",
     channel: ctx.channel || "web", contact: ctx.contact || "", status: reason === "spam" ? "spam" : "open", outcome: outcomeFor(reason), customerType: await customerType(c, phone),

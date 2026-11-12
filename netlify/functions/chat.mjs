@@ -24,6 +24,7 @@ import { savedPortalAcknowledgment } from "./lib/self-service-ack.mjs";
 import { appointmentTextInvitation } from './lib/appointment-texts.mjs';
 // Proposal 10: a separate import line, so the config/desk import lines that other proposals edit stay untouched.
 import { agentFallbackLanguage } from "./lib/config.mjs";
+import { WEB_VISIT_CHANGE_NOTE } from "./lib/customer-visits.mjs";
 
 export const config = { path: "/api/chat" };
 
@@ -264,7 +265,8 @@ export default async (req, context) => {
     const last = incoming[incoming.length - 1];
     conv.messages.push({ role: "user", content: last.content, at: new Date().toISOString() });
     const history = toApiMessages(conv.messages.slice(-40), 40);
-    const system = buildSystemPrompt(c, channel);
+    // Website visitors are not phone-verified: they never see or change existing visits here.
+    const system = buildSystemPrompt(c, channel) + (isSelfServiceClient(c) && channel === 'web' ? WEB_VISIT_CHANGE_NOTE : '');
     const tools = [BOOK_VISIT, NOTIFY_OWNER, GET_AVAILABILITY].map(tool => !isSelfServiceClient(c) ? tool : {
       ...tool, description: tool.name === "book_visit" ? "Save a visit in the shop portal after the customer accepts a real available window. Connected services may process it separately; this result does not confirm text, calendar or owner-contact delivery." : tool.name === "notify_owner" ? "Save a callback, handoff or emergency request in the shop portal. Separate contact delivery and human response or timing are not confirmed by this result." : tool.description,
     });

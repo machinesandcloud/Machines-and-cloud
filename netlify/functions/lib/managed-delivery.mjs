@@ -62,6 +62,7 @@ async function reserveProofReceiptRead(job) {
   return result;
 }
 const revision = record => hash(JSON.stringify([record.status, record.customer_name, record.phone, record.address, record.issue, record.date, record.window, record.wanted, record.urgency]));
+export const deliverySourceRevision = record => revision(record);
 async function currentClient(c) {
   const current = await strictRead("clients", c.slug);
   if (!current || !isSupportedSelfServiceClient(current) || deliveryTenant(c) !== deliveryTenant(current)) throw new Error("Delivery workspace changed");
@@ -109,7 +110,10 @@ export async function queueManagedRecord(c, record, kind = "bookings") {
   if (!saved || saved.delivery?.tenantIdentity !== deliveryTenant(c) || !belongsToWorkspace(c, saved) || saved.websiteSetupCheck || saved.simulation) return;
   const rev = revision(saved), source = { kind, id: saved.id, revision: rev }, eventId = `${kind}:${saved.id}:${rev}`;
   const requestedVisit = kind === 'bookings' && saved.status === 'booked' && ['web','sms','call','voice'].includes(saved.channel);
-  const body = `${current.business.name}: ${kind === "bookings" ? requestedVisit ? "Visit request" : "Visit" : "Customer request"} ${saved.id}\n${saved.customer_name || "Customer"} ${saved.phone || ""}\n${saved.issue || ""}\n${saved.address || ""}\n${saved.date || saved.wanted || ""} ${saved.window || ""}\nOpen your workspace to review and respond.`;
+  // A change made by the customer on a verified channel says so, with the old and new time.
+  const last = kind === 'bookings' && saved.ownerVisitMutation ? saved.ownerVisitHistory?.at(-1) : null, byCustomer = typeof last?.actor === 'string' && last.actor.startsWith('customer:') && last.at === saved.ownerVisitMutation.at;
+  const changeLine = byCustomer ? `${last.action === 'cancel_visit' ? 'CANCELLED BY THE CUSTOMER' : 'MOVED BY THE CUSTOMER'} (${last.actor === 'customer:call' ? 'phone call' : 'text'})${last.previous ? `, was ${last.previous.date} ${last.previous.window}` : ''}${last.action === 'cancel_visit' ? '' : `, now ${last.next.date} ${last.next.window}`}.${last.customerReason ? ` Reason: ${String(last.customerReason).slice(0, 200)}` : ''}\n` : '';
+  const body = `${current.business.name}: ${kind === "bookings" ? requestedVisit ? "Visit request" : "Visit" : "Customer request"} ${saved.id}\n${changeLine}${saved.customer_name || "Customer"} ${saved.phone || ""}\n${saved.issue || ""}\n${saved.address || ""}\n${saved.date || saved.wanted || ""} ${saved.window || ""}\nOpen your workspace to review and respond.`;
   await queueManagedMessage(current, { eventId: `${eventId}:owner`, channel: "email", purpose: kind === "bookings" ? "owner_booking" : "owner_lead", to: current.owner.email, body, source, preserveSnapshot: true });
   if (scope) return; // This internal phase proves owner email only, not customer SMS.
   if (kind !== "bookings" || !saved.phone || !["booked", "confirmed", "on_the_way", "cancelled"].includes(saved.status)) return;
@@ -333,6 +337,8 @@ function engine({ provider = null, gate = managedDeliveryEnabled, sender = sende
       if(record?.date && record?.window && arrivalInstant(record.date,record.window)<=Date.now())return stopPaidBeforeSend(job,c,'arrival_window_started','expired');
     }
     if (Date.parse(job.dueAt) > Date.now()) return job;
+    // A customer's open change request for this exact visit state holds its reminders until the owner acts.
+    if (job.source?.kind === "bookings" && ["reminder_24h", "reminder_1h"].includes(job.purpose)) { const { customerChangeHold } = await import("./customer-visits.mjs"); if (await customerChangeHold(c, job)) return change(id, row => row.attemptStartedAt ? null : ({ ...row, state: "waiting_platform", reasonCode: "customer_change_requested", detail: "The customer asked to change this visit. Its reminder waits until you change the visit or complete the request." })); }
     if (job.channel === "email" && job.to !== c.owner.email) return change(id, row => ({ ...row, state: "superseded", reasonCode: "owner_changed" }));
     let smsBudget=null,emailBudget=null,paidSMSCapacity=null,smsBinding=null;
     if (job.channel === 'email') {

@@ -13,14 +13,14 @@ const editable = {
   business: ['name', 'website', 'trade', 'city', 'serviceArea', 'notServed', 'hours', 'afterHours', 'spanish', 'licenses', 'googlePlaceId', 'reviewLink', 'payLink'],
   owner: ['name', 'phone', 'backupPhone'], phone: ['businessNumber', 'transferTo', 'handoffEnabled', 'forwarding', 'carrier'],
   widget: ['greeting', 'allowedOrigins'], digest: ['text'],
-  rules: ['never', 'handoff', 'emergencies', 'ackMinutes', 'callbackHours', 'callbackAfterHours', 'windowCapacity', 'consentAsk', 'emergency247', 'hours', 'bypass', 'avgTicket', 'appointmentHours'],
+  rules: ['never', 'handoff', 'emergencies', 'ackMinutes', 'callbackHours', 'callbackAfterHours', 'windowCapacity', 'consentAsk', 'emergency247', 'hours', 'bypass', 'avgTicket', 'appointmentHours', 'visitChanges'],
 };
 const canonical = value => Array.isArray(value) ? value.map(canonical) : plain(value) ? Object.fromEntries(Object.keys(value).sort().map(key => [key, canonical(value[key])])) : value;
 // Editing concurrency is separate from the revision that certifies a reviewed/live-tested desk.
 export function workspaceEditRevision(client) {
   const facts = Object.fromEntries(['services', 'fees', 'windows', 'faq', 'summary', 'plan', 'software'].map(key => [key, client[key] ?? null]));
   facts.workspace = [client.slug, client.ownerKey, client.owner?.email];
-  for (const [group, fields] of Object.entries(editable)) facts[group] = Object.fromEntries(fields.filter(key => key !== 'appointmentHours' || own(client[group], key)).map(key => [key, client[group]?.[key] ?? null]));
+  for (const [group, fields] of Object.entries(editable)) facts[group] = Object.fromEntries(fields.filter(key => !['appointmentHours', 'visitChanges'].includes(key) || own(client[group], key)).map(key => [key, client[group]?.[key] ?? null]));
   return createHash('sha256').update(JSON.stringify(canonical(facts))).digest('hex');
 }
 export class WorkspaceEditError extends Error {
@@ -133,6 +133,7 @@ export function parseWorkspacePatch(input, { operator = false } = {}) {
       ackMinutes: choice(ACK_MINUTES), callbackHours: text(80), callbackAfterHours: text(80), windowCapacity: number(1, 20, true),
       consentAsk: bool, emergency247: bool, hours, appointmentHours: (value, path) => { try { return normalizeAppointmentHours(value); } catch { bad(path, 'Choose business hours or valid custom appointment hours for every day.'); } }, bypass: list(20, 40, (value, path) => { const result = phone(value, path); if (result === '') bad(path, 'Remove the empty phone-number row.'); return result; }),
       avgTicket: (value, path) => typeof value === 'string' && !value.trim() ? 0 : Math.round(number(0, 1000000)(value, path)),
+      visitChanges: choice(['confirm_cancels', 'requests_only', 'direct']), // customer visit-change policy, see lib/customer-visits.mjs
     }),
     plan: choice(['starter', 'growth', 'pro']), software: text(30),
   });

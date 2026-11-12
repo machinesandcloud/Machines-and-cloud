@@ -7,14 +7,19 @@ import { isSupportedSelfServiceClient, configurationRevision } from "./setup.mjs
 import { availabilityToolResult, bookVisit, flagLead } from "./desk.mjs";
 import { belongsToWorkspace } from "./workspace-identity.mjs";
 import { appointmentTextInvitation, appointmentTextVoiceInstruction } from './appointment-texts.mjs';
+import { changeCustomerVisit } from './customer-visits.mjs';
 const hash = value => createHash("sha256").update(value).digest("hex");
 const canonical = value => value && typeof value === "object" ? Array.isArray(value) ? value.map(canonical) : Object.fromEntries(Object.keys(value).sort().map(key => [key, canonical(value[key])])) : value;
-export async function dispatchManagedVoiceTool({ client, callId, toolCallId, name, input, caller = "", channel = "call", onSavedRecord, onAvailabilityResult }) {
+export async function dispatchManagedVoiceTool({ client, callId, toolCallId, name, input, caller = "", channel = "call", callerAttestation = null, onSavedRecord, onAvailabilityResult }) {
   if (onSavedRecord !== undefined && typeof onSavedRecord !== "function") throw new Error("Invalid service action observer");
   if (onAvailabilityResult !== undefined && typeof onAvailabilityResult !== "function") throw new Error("Invalid availability result observer");
   if (!client || !["call", "sms"].includes(channel) || !/^[a-zA-Z0-9_-]{1,120}$/.test(callId || "") || !/^[a-zA-Z0-9_-]{1,160}$/.test(toolCallId || "") || !input || typeof input !== "object" || Array.isArray(input) || JSON.stringify(input).length > 8000) throw new Error("Invalid service action");
   const c = await strictRead("clients", client.slug);
   if (!c || !isSupportedSelfServiceClient(c) || deliveryTenant(client) !== deliveryTenant(c) || !["testing", "live"].includes(c.status) || configurationRevision(client) !== configurationRevision(c)) throw new Error("The shop setup changed. No new action was taken.");
+  // Visit changes act only on a visit saved for the provider-verified caller number.
+  // Their operation identity is the same provider event + tool ID, via the owner visit transaction.
+  // callerAttestation is the STIR/SHAKEN result captured from the Twilio-signed inbound call.
+  if (name === "change_visit") return (await changeCustomerVisit(c, { phone: caller, channel, callId, toolCallId, input, attestation: channel === "call" ? callerAttestation : null })).content;
   if (name === "get_availability") {
     const result = await availabilityToolResult(c, input);
     if (onAvailabilityResult) await onAvailabilityResult(result);

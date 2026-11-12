@@ -14,6 +14,7 @@ import { dispatchManagedVoiceTool } from "./managed-actions.mjs";
 import { reservePaidUsage, assertPaidUsage, attemptPaidUsage, settlePaidUsage, PaidUsageError } from './usage.mjs';
 import { paidUsageDigest, paidAnswerExpected } from './managed-paid-usage.mjs';
 import { houstonToday, normalizeBookingDate } from './availability.mjs';
+import { CHANGE_VISIT, customerContext, customerContextPrompt, cancelKeywordNotice, isCancelWord } from './customer-visits.mjs';
 const hash = value => createHash("sha256").update(value).digest("hex");
 const stamp = () => new Date().toISOString();
 export function serviceWorkerAuthorized(req) {
@@ -60,6 +61,10 @@ export async function handleManagedSMS(req) {
     const binding = await messagingInboundBinding(c);
     const verified = await verifyMessage(fields,binding); if (!verified) return new Response("Unverified message",{status:403});
     const consent = await recordManagedInbound(c,{phone:fields.From,text:fields.Body,messageSid:fields.MessageSid,providerOptOutType:fields.OptOutType,providerDate:verified.date_created});
+    // CANCEL/CANCELAR is a carrier opt-out keyword: the opt-out above stands and the
+    // confirmation below stays the standard one. If this number has an upcoming visit, the
+    // owner gets a note (once per visit state), including repeats and Twilio-handled opt-outs.
+    if (consent.keyword === "stop" && isCancelWord(fields.Body)) { try { await cancelKeywordNotice(c, { phone: fields.From, word: fields.Body }); } catch {} }
     if (consent.duplicate && consent.keyword !== "message") return twiml();
     if (consent.keyword === "stop") return consent.alreadySuppressed || fields.OptOutType === "STOP" ? twiml() : twiml(`${c.business.name}: texts stopped. Reply START or EMPEZAR to remove the block.`);
     if (consent.keyword === "start") return fields.OptOutType === "START" ? twiml() : twiml(c.serviceFollowupProgram?.version==='requested_service_followups_v1'?`${String(c.business.name).trim().slice(0,100)}: your texting block is removed. Each text program needs its own new permission. Use the full instruction for your visit or request. HELP for help; STOP/ALTO/PARAR to end.`:`${c.business.name}: your texting block is removed. Appointment updates need a separate YES. Reply STOP or ALTO to stop.`);
@@ -213,7 +218,9 @@ export async function processManagedSMS(id) {
     const received=Date.parse(job.providerDate), receivedDay=capacity&&Number.isFinite(received)?houstonToday(new Date(received)):null;
     const receivedContext=receivedDay?`\nThe current customer message was received on ${receivedDay} in Houston. Interpret this message's relative days (today, tomorrow or a weekday) from that received date. Use absolute YYYY-MM-DD dates in tools. Availability is checked at processing time; do not move an old request to a different day or promise a past window. If its requested timing has passed, ask for a new preference.`:'';
     let savedActionCount=0,savedCheckReply=null,terminalCheckReply=null,savedBookingLanguage=null;
-    const out=await runAgent({system:buildSystemPrompt(c,"sms")+"\nThis customer is using your verified texting channel. Save real visits and requests with tools. Only the final reply is queued for delivery; never claim a separate notification was delivered. Do not infer recurring texting consent. No promotional outreach."+receivedContext,tools:[GET_AVAILABILITY,BOOK_VISIT,NOTIFY_OWNER],messages,dropToolPreamble:true,fallbackLanguage:agentFallbackLanguage(c),logSlug:c.slug,maxTokens:capacity?800:1200,maxRetries:0,requireComplete:true,modelFetch,...(capacity?{model:MANAGED_TEXT_MODEL}:{}),stopAfterTools:async({toolUses,results})=>{
+    // Read-only visit context for the provider-verified sender number only.
+    const visitContext=await customerContext(c,job.from,{channel:"sms"});
+    const out=await runAgent({system:buildSystemPrompt(c,"sms")+"\nThis customer is using your verified texting channel. Save real visits and requests with tools. Only the final reply is queued for delivery; never claim a separate notification was delivered. Do not infer recurring texting consent. No promotional outreach."+customerContextPrompt(visitContext,"sms")+receivedContext,tools:visitContext.visits.length?[GET_AVAILABILITY,BOOK_VISIT,NOTIFY_OWNER,CHANGE_VISIT]:[GET_AVAILABILITY,BOOK_VISIT,NOTIFY_OWNER],messages,dropToolPreamble:true,fallbackLanguage:agentFallbackLanguage(c),logSlug:c.slug,maxTokens:capacity?800:1200,maxRetries:0,requireComplete:true,modelFetch,...(capacity?{model:MANAGED_TEXT_MODEL}:{}),stopAfterTools:async({toolUses,results})=>{
       if(savedActionCount!==1||!savedCheckReply||toolUses.length!==1||toolUses[0].name!=='notify_owner'||toolUses[0].input.reason!=='status_check'||results.some(result=>result.is_error))return false;
       if(!await freshAuthority())throw new Error("Channel authority changed");
       if(capacity)await assertPaidUsage(c,job.paidAnswerCapacity,paidAnswerExpected(job));
@@ -222,7 +229,7 @@ export async function processManagedSMS(id) {
     },execTool:async(name,input)=>{
       if (!await freshAuthority()) throw new Error("Channel authority changed");
       if(capacity)await assertPaidUsage(c,job.paidAnswerCapacity,paidAnswerExpected(job));
-      if(receivedDay&&['get_availability','book_visit'].includes(name)&&typeof input?.date==='string')input={...input,date:normalizeBookingDate(input.date,receivedDay)||input.date};
+      if(receivedDay&&['get_availability','book_visit','change_visit'].includes(name)&&typeof input?.date==='string'&&input.date)input={...input,date:normalizeBookingDate(input.date,receivedDay)||input.date};
       const toolCallId=name==="get_availability"?"availability":`mutation_${mutationIndex++}`, savedBefore=savedActionCount;
       let availabilityError=false;
       const content=await dispatchManagedVoiceTool({client:c,callId:job.messageSid,toolCallId,name,input,caller:job.from,channel:"sms",onAvailabilityResult:result=>{availabilityError=result.is_error===true;},onSavedRecord:(action,record)=>{

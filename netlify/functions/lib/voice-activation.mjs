@@ -585,7 +585,7 @@ export async function handleManagedVoiceWebhook(req) {
     const forwardingMatches = row.forwardingMode === "forward_business_line" && validNumber(c.phone?.businessNumber) && params.ForwardedFrom === c.phone.businessNumber;
     const saved = await atomicUpdate(CALLS, callKey, previous => {
       if (previous && (previous.operationId !== row.id || previous.generation !== row.generation || previous.from !== params.From || previous.number !== params.To)) return { result: false };
-      return previous ? { result: true } : { value: { version: 1, slug: row.slug, operationId: row.id, generation: row.generation, inputRevision: row.inputRevision, lifecycle: row.lifecycle, twilioCallSid: params.CallSid, number: params.To, from: params.From, forwardedFrom: validNumber(params.ForwardedFrom) ? params.ForwardedFrom : null, forwarded: forwardingMatches, createdAt: iso(), toolResults: {} }, result: true };
+      return previous ? { result: true } : { value: { version: 1, slug: row.slug, operationId: row.id, generation: row.generation, inputRevision: row.inputRevision, lifecycle: row.lifecycle, twilioCallSid: params.CallSid, number: params.To, from: params.From, forwardedFrom: validNumber(params.ForwardedFrom) ? params.ForwardedFrom : null, forwarded: forwardingMatches, stirVerstat: /^TN-[A-Za-z-]{1,60}$/.test(params.StirVerstat || "") ? params.StirVerstat : null, createdAt: iso(), toolResults: {} }, result: true };
     });
     if (!saved) return json({ error: "call_mismatch" }, 403);
     await atomicUpdate("managed_voice_call_index", params.CallSid, prior => prior && prior.operationId !== row.id ? (() => { throw new Error("Voice call index conflict"); })() : { value: { operationId: row.id, slug: row.slug, generation: row.generation } });
@@ -716,15 +716,19 @@ export async function handleManagedVapiWebhook(req, { dispatchTool } = {}) {
     // current owner facts instead. Vapi's documented assistant-request contract
     // accepts CreateAssistantDTO; explicit server.headers also authenticate
     // transient tool/report webhooks (no reliance on inherited credentials).
-    return json({ assistant: managedAssistantBody(latest.c, { correlationId: latestRow.correlationId, inputRevision: latestRow.inputRevision, policy: latestRow.policy, site: siteUrl() }) });
+    // Returning-caller and upcoming-visit context comes only from the signed inbound caller number.
+    let customer = null; try { const { customerContext } = await import("./customer-visits.mjs"); customer = await customerContext(latest.c, call.from, { channel: "call", attestation: call.stirVerstat || null }); } catch { customer = null; }
+    return json({ assistant: managedAssistantBody(latest.c, { correlationId: latestRow.correlationId, inputRevision: latestRow.inputRevision, policy: latestRow.policy, site: siteUrl(), customer }) });
   }
   if (call.vapiCallId !== vapiCallId || m.assistant?.metadata?.mcVoiceCorrelation && m.assistant.metadata.mcVoiceCorrelation !== row.correlationId || m.assistant?.metadata?.mcVoiceRevision && m.assistant.metadata.mcVoiceRevision !== call.inputRevision) return json({ error: "call_mismatch" }, 403);
   if (m.type === "tool-calls") {
     if (!Array.isArray(m.toolCallList) || m.toolCallList.length > 8) return json({ error: "invalid_tools" }, 400);
     const results = [];
+    // change_visit uses the STIR/SHAKEN result stored from the Twilio-signed inbound call, never Vapi metadata.
+    if (typeof dispatchTool === "function") { const dispatch = dispatchTool; dispatchTool = args => dispatch({ ...args, callerAttestation: call.stirVerstat || null }); }
     for (const tool of m.toolCallList) {
       const name = tool.function?.name || tool.name, id = tool.id;
-      if (typeof id !== "string" || id.length < 1 || id.length > 100 || !["get_availability", "book_visit", "notify_owner", "request_human"].includes(name)) { results.push({ toolCallId: String(id || ""), error: "Unsupported tool." }); continue; }
+      if (typeof id !== "string" || id.length < 1 || id.length > 100 || !["get_availability", "book_visit", "notify_owner", "request_human", "change_visit"].includes(name)) { results.push({ toolCallId: String(id || ""), error: "Unsupported tool." }); continue; }
       if (!valid || typeof dispatchTool !== "function") { results.push({ toolCallId: id, error: "This request cannot be confirmed. Please ask the caller to contact the shop directly." }); continue; }
       let input = tool.function?.arguments ?? tool.arguments ?? {}; try { if (typeof input === "string") input = JSON.parse(input); } catch { input = null; }
       if (!input || typeof input !== "object" || Array.isArray(input)) { results.push({ toolCallId: id, error: "Invalid tool details." }); continue; }
