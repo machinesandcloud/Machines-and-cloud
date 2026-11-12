@@ -43,6 +43,7 @@
   document.addEventListener('mc:session-expired',function () {
     ownerKeyRecovery = key && !ownerSession ? OWNER_KEY_INVALID : null; // an owner key is fixed, so a refusal means it is wrong or was replaced
     if (leaving && !ownerSession && !key) return;
+    var keptDraft = cfgKeepExpired();
     rememberReturnRoute(location.hash);
     leaving = true; portalGeneration++; ownerSession = null; key = null; data = null; transcript = []; cancelPracticeReply(); availabilityReset();
     websitePrivateClear();
@@ -51,7 +52,8 @@
     acctBaseline = null; acctBaseClient = null; acctRevision = null; acctEditRevision = null; acctConflict = null; acctDirty = false; acctBusy = false;
     try { sessionStorage.removeItem('mc-owner-visit-pending-v1:'+slug); sessionStorage.removeItem('mc-onboarding-session-v1'); sessionStorage.removeItem('mc-calendar-pending-v1'); sessionStorage.removeItem(ownerKeyStorage); } catch (error) { /* Private content is still cleared. */ }
     closeTour(false, false);
-    recover('Your session expired. Sign in by email to reopen your workspace.', true); $('portalContent').innerHTML = ''; $('deskSignOut').hidden = true; $('retryLoad').hidden = true;
+    recover(keptDraft ? 'Your session expired. Your unsaved business details are kept in this browser tab. Open your email sign-in link in this tab to restore them.' : 'Your session expired. Sign in by email to reopen your workspace.', true); $('portalContent').innerHTML = ''; $('deskSignOut').hidden = true; $('retryLoad').hidden = true;
+    var focused = document.activeElement; if (!focused || focused === document.body || !focused.getClientRects().length) $('recoveryTitle').focus();
   });
   document.addEventListener('mc:desk-refresh',function(event){if(!leaving)load(null,{soft:event.detail?.soft===true,connectionProgress:event.detail?.reason==='connection-progress',connectionProgressRequest:event.detail?.requestId});});
   document.addEventListener('mc:desk-snapshot',function(event){
@@ -161,6 +163,11 @@
     var generation=portalGeneration;
     if(!$('newVisitFields').hidden)actionName='create_visit';
     visitErrorsClear();
+    if(!visitPending && actionName==='create_visit'){
+      // Report every missing customer detail at once, before the time, so the owner can fix them in one pass.
+      var missing=[['visitName','customer_name'],['visitPhone','phone'],['visitAddress','address'],['visitIssue','issue']].filter(function(field){return !$(field[0]).value.trim();});
+      if(missing.length){missing.forEach(function(field){$(field[0]).setAttribute('aria-invalid','true');$(field[0]+'Error').textContent='Complete this customer detail.';});$('visitMessage').textContent=missing.length===1?'Complete the highlighted customer detail.':'Complete the '+missing.length+' highlighted customer details.';$(missing[0][0]).focus();return;}
+    }
     if(!visitPending){
       if(actionName==='create_visit' || actionName==='reschedule_visit') {
         if(!$('visitDate').value || !$('visitDate').checkValidity()){visitFieldError('date','Choose a real visit date.');return;}
@@ -1178,6 +1185,7 @@
       if (!cfgDirty && !cfgBusy && !cfgConflict) {
         cfgFill(cfgFromClient(c)); cfgBaseline = cfgRead(); cfgRevision = d.configurationRevision; cfgEditRevision = d.editRevision; cfgClosed = !!(c.onboarding && c.onboarding.version === 1 && ['cancelled','archived'].includes(c.status));
         cfgStatus(cfgClosed ? 'error' : cfgIncomplete(d.setup) ? 'incomplete' : 'saved', cfgClosed ? 'This workspace no longer accepts business edits.' : cfgSavedMessage(d.setup));
+        cfgRestoreExpired();
       }
       acctObserve(d, false);
       var u = d.usage || {}; $('usage').textContent = u.month ? 'Recorded legacy usage for ' + u.month + ': ' + (u.minutes || 0) + ' call minutes and ' + (u.texts || 0) + ' outbound texts. This is not a complete report of managed service usage or a bill.' : '';
@@ -1243,6 +1251,29 @@
 
   $('cfg').elements['phone.forwarding'].addEventListener('change', function (ev) { document.getElementById('transferGroup').style.display = data?.client?.onboarding?.version === 1 || ev.target.value === 'all' ? 'block' : 'none'; });
   var cfgBaseline = null, cfgBusy = false, cfgConflict = null, cfgFence = 0, cfgClosed = false, cfgEventValues = new WeakMap();
+  // When the session expires, unsaved Business details edits stay in this tab's sessionStorage (like the visit and support drafts):
+  // only the changed fields and the values they were edited from. The next sign-in to this workspace in this tab restores them once.
+  // If one of those fields was changed elsewhere meanwhile, the restored draft goes through the existing Check latest review.
+  var cfgExpiredKey = 'mc-owner-details-draft-v1:' + slug, CFG_EXPIRED_MS = 24 * 3600 * 1000;
+  function cfgKeepExpired() {
+    if (!cfgBaseline || cfgClosed || !data || !$('cfg')) return false;
+    var current = cfgRead(), changed = cfgChanges(current, cfgBaseline), edits = {}, base = {}; if (!changed.length) return false;
+    changed.forEach(function (name) { edits[name] = current[name]; base[name] = cfgBaseline[name]; });
+    try { sessionStorage.setItem(cfgExpiredKey, JSON.stringify({ version: 1, slug: slug, at: Date.now(), edits: edits, base: base })); return true; } catch (error) { return false; }
+  }
+  function cfgRestoreExpired() {
+    var saved = null; try { saved = JSON.parse(sessionStorage.getItem(cfgExpiredKey) || 'null'); if (saved) sessionStorage.removeItem(cfgExpiredKey); } catch (error) { saved = null; }
+    if (!saved || saved.version !== 1 || saved.slug !== slug || typeof saved.at !== 'number' || saved.at > Date.now() || Date.now() - saved.at > CFG_EXPIRED_MS || !saved.edits || !saved.base) return;
+    if (cfgClosed || cfgDirty || cfgBusy || cfgConflict || !cfgBaseline) return;
+    var names = Object.keys(saved.edits).filter(function (name) { return Object.hasOwn(cfgBaseline, name) && typeof saved.edits[name] === typeof cfgBaseline[name] && typeof saved.base[name] === typeof cfgBaseline[name]; }); if (!names.length) return;
+    var moved = names.filter(function (name) { return !cfgSame(name, cfgBaseline[name], saved.base[name]); }), values = Object.assign({}, cfgBaseline);
+    names.forEach(function (name) { values[name] = saved.edits[name]; }); cfgFill(values);
+    if (moved.length) { var base = Object.assign({}, cfgBaseline); moved.forEach(function (name) { base[name] = saved.base[name]; }); cfgBaseline = base; cfgConflict = { latest: null }; $('cfgConflictPanel').hidden = false; $('cfgKeepEdits').hidden = true; }
+    cfgChanged();
+    cfgStatus(moved.length ? 'conflict' : 'dirty', moved.length ? 'Your unsaved edits from before your session expired are restored. Some of those details changed since then, so check the latest version before saving.' : 'Your unsaved edits from before your session expired are restored. Review them, then save.');
+    // Focus on the page heading here comes from this same load's routing (the owner cannot have moved yet), so it moves too.
+    var focused = document.activeElement; if (!focused || focused === document.body || focused === $('pageTitle') || focused === $('p-know')) { routeTo('know'); $('saveMsg').focus({ preventScroll: true }); }
+  }
   var acctBaseline = null, acctBaseClient = null, acctRevision = null, acctEditRevision = null, acctDirty = false, acctBusy = false, acctConflict = null, acctEventValue = null;
   var cfgDays = ['mon','tue','wed','thu','fri','sat','sun'];
   var cfgArrayFields = ['services','business.serviceArea','business.notServed','windows','rules.handoff','rules.never','rules.emergencies.tier0','rules.emergencies.tier1','rules.bypass','widget.allowedOrigins'];
@@ -1386,6 +1417,13 @@
     if (!$('cfgConflictPanel').hidden && (lost || focused === $('saveCfg') || focused === $('saveMsg'))) { $('cfgCheckLatest').focus(); return; }
     if (lost) { if (!$('saveCfg').disabled) $('saveCfg').focus(); else $('saveMsg').focus(); }
   }
+  // The same rule for other busy controls on one page: back to the control when it is usable again, otherwise to its status message.
+  function deskFocusAfter(start, page, control, status) {
+    if (leaving || document.body.dataset.activePage !== page || !start || !start.on || start.mark !== deskInteraction) return;
+    var focused = document.activeElement, lost = !focused || focused === document.body || focused.disabled || !focused.getClientRects().length || focused.closest('[hidden]');
+    if (!lost) return;
+    if (control && control.isConnected && !control.disabled && control.getClientRects().length && !control.closest('[hidden]')) control.focus(); else if (status) status.focus();
+  }
   async function saveCfg() {
     var focusStart=deskFocusStart([$('saveCfg'),$('cfgCheckLatest'),$('cfgKeepEdits'),$('saveMsg')]);
     if(cfgBusy||acctBusy||websiteBusy||cfgClosed||leaving||!data||!cfgBaseline)return;
@@ -1516,7 +1554,7 @@
       var response = await fetch(API_BASE + '/api/access', { method: 'POST', headers: ownerHeaders(), body: JSON.stringify({ action: 'sign_out' }) });
       if (!response.ok) throw new Error('Sign out could not be confirmed. Please retry.');
       websitePrivateClear();ownerSession = null; key = null; data = null; transcript = [];
-      try { sessionStorage.removeItem('mc-owner-visit-pending-v1:'+slug); sessionStorage.removeItem('mc-onboarding-session-v1'); sessionStorage.removeItem(ownerKeyStorage); } catch (error) { /* Session is revoked on the server. */ }
+      try { sessionStorage.removeItem('mc-owner-visit-pending-v1:'+slug); sessionStorage.removeItem('mc-onboarding-session-v1'); sessionStorage.removeItem(ownerKeyStorage); sessionStorage.removeItem(cfgExpiredKey); } catch (error) { /* Session is revoked on the server. */ }
       button.hidden = true; $('retryLoad').hidden = true;
       history.replaceState(null, '', location.pathname);
       try { localStorage.removeItem(RETURN_ROUTE_KEY); } catch (error) { /* Nothing to return to after a chosen sign-out. */ }
@@ -1528,7 +1566,8 @@
   });
   ['expBookings','expLeads','expConvs','expCustomers'].forEach(function (id) {
     $(id).addEventListener('click', async function (event) {
-      event.preventDefault(); var kind = event.currentTarget.dataset.export, generation = portalGeneration; if (!kind || exportBusy || leaving) return;
+      event.preventDefault(); var kind = event.currentTarget.dataset.export, generation = portalGeneration, control = event.currentTarget; if (!kind || exportBusy || leaving) return;
+      var focusStart = deskFocusStart([control]);
       exportBusy = true; var controller = new AbortController(), timeout = setTimeout(function(){controller.abort();},20000);
       var buttons = ['expBookings','expLeads','expConvs','expCustomers']; buttons.forEach(function(button){$(button).disabled=true;});
       $('accountDownloads').setAttribute('aria-busy','true'); $('exportMessage').dataset.error='false'; $('exportMessage').textContent='Preparing your '+(kind==='leads'?'requests':kind)+' CSV…';
@@ -1547,7 +1586,7 @@
         link.href = address; link.download = slug + '-' + kind + '.csv'; document.body.appendChild(link); link.click(); link.remove(); setTimeout(function () { URL.revokeObjectURL(address); }, 1000);
         $('exportMessage').textContent='Your '+(kind==='leads'?'requests':kind)+' CSV download has started. Check your browser’s downloads.';
       } catch (error) { if (generation === portalGeneration && !leaving) { $('exportMessage').dataset.error='true'; $('exportMessage').textContent=(error.name==='AbortError'?'The download timed out. Try again when your connection returns.':error.message); } }
-      finally { clearTimeout(timeout); if(generation===portalGeneration&&!leaving){exportBusy=false;buttons.forEach(function(button){$(button).disabled=false;});$('accountDownloads').setAttribute('aria-busy','false');} }
+      finally { clearTimeout(timeout); if(generation===portalGeneration&&!leaving){exportBusy=false;buttons.forEach(function(button){$(button).disabled=false;});$('accountDownloads').setAttribute('aria-busy','false');deskFocusAfter(focusStart,'account',control,$('exportMessage'));} }
     });
   });
 
