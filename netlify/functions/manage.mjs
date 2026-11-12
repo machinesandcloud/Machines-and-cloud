@@ -5,6 +5,7 @@ import { prospectAudience, prospectsCSV } from './lib/intake.mjs';
 import { platformSMSView } from './lib/platform-sms.mjs';
 import { pendingProviderCleanup } from './lib/data-erasure.mjs';
 import { serviceHealthFailureFacts, schedulerHealthState } from './lib/service-health.mjs';
+import { readPlatformHealth } from './lib/operator-health.mjs';
 
 export const config = { path: '/api/manage' };
 const headers = { 'Cache-Control': 'no-store', 'Netlify-CDN-Cache-Control': 'no-store', 'Referrer-Policy': 'no-referrer', 'X-Robots-Tag': 'noindex', Vary: 'Authorization, Origin' };
@@ -63,9 +64,11 @@ export default async (req, context) => {
       return customer ? reply({ ok: true, customer }) : reply({ error: 'not_found' }, 404);
     }
     const page = await customerPage(url.searchParams.get('cursor') || '');
-    const scheduler = await strictRead('health', 'scheduler:lastRun');
+    // PRA-OPS-02: an unreadable health record must render as unknown, not fail the whole overview or look healthy.
+    const health = await readPlatformHealth();
+    let scheduler = null; try { scheduler = await strictRead('health', 'scheduler:lastRun'); } catch { scheduler = null; }
     const {healthy,minutesAgo:age,blocks}=schedulerHealthState(scheduler);
-    const result = { ok: true, operator: { email: session.email, expiresAt: session.expiresAt }, ...page, inquiries: await prospectAudience('all'), providerCleanupPending: await pendingProviderCleanup(), platformSMS: await platformSMSView(), system: { scheduler: { at: scheduler?.at || null, healthy, minutesAgo: age, blocks: blocks.map(([name, saved]) => { const row=saved && typeof saved === 'object' ? saved : {}; return ({ name, ok: row.ok === true, queued: row.queued, failed: row.failed, uncertain: row.uncertain, openFailures: row.openFailures, pending: row.pending, unresolved: row.unresolved, cleanupPending: row.cleanupPending, inspected: row.inspected, reasonCode: name === 'serviceDeliveryRecovery' ? serviceHealthFailureFacts(row)[0]?.reasonCode || (row.ok === true ? null : 'service_delivery_unresolved') : row.reasonCode, ...(name === 'serviceDeliveryRecovery' ? { failingComponents: serviceHealthFailureFacts(row) } : {}) }); }) }, providerStates: operatorProviderStates() } };
+    const result = { ok: true, operator: { email: session.email, expiresAt: session.expiresAt }, ...page, inquiries: await prospectAudience('all'), providerCleanupPending: await pendingProviderCleanup(), platformSMS: await platformSMSView(), system: { health, scheduler: { readable: health.state !== 'unknown', at: scheduler?.at || null, healthy, minutesAgo: age, blocks: blocks.map(([name, saved]) => { const row=saved && typeof saved === 'object' ? saved : {}; return ({ name, ok: row.ok === true, queued: row.queued, failed: row.failed, uncertain: row.uncertain, openFailures: row.openFailures, pending: row.pending, unresolved: row.unresolved, cleanupPending: row.cleanupPending, inspected: row.inspected, reasonCode: name === 'serviceDeliveryRecovery' ? serviceHealthFailureFacts(row)[0]?.reasonCode || (row.ok === true ? null : 'service_delivery_unresolved') : row.reasonCode, ...(name === 'serviceDeliveryRecovery' ? { failingComponents: serviceHealthFailureFacts(row) } : {}) }); }) }, providerStates: operatorProviderStates() } };
     await requireCurrentOperator(session);
     return reply(result);
   } catch (error) {

@@ -17,6 +17,7 @@ import { recoverWorkspaceOperations } from "./lib/platform-operations.mjs";
 import { recoverLeadConnections } from './lib/lead-connections.mjs';
 import {recoverSupportReports} from './lib/support-reports.mjs';
 import { strictRead } from './lib/accounts.mjs';
+import { healthSnapshot, evaluatePlatformAlert } from "./lib/operator-health.mjs";
 
 export const config = { schedule: "*/10 * * * *" };
 
@@ -422,10 +423,16 @@ export async function run({ forceHour, forceDay, inline, all } = {}) {
   }
   record.ok = Object.values(record.blocks).every((b) => b.ok);
   record.ms = Date.now() - new Date(record.at).getTime();
+  // Keep the last healthy time across failing runs so operators see how long it has been broken.
+  const previousRun = await get("health", "scheduler:lastRun");
+  record.lastGoodAt = record.ok ? record.at : previousRun?.ok === true ? previousRun.at : previousRun?.lastGoodAt || null;
   try { await put("health", "scheduler:lastRun", record); } catch (err) { console.error("run record", err); }
+  // PRA-OPS-02: self-reported failing blocks (and recovery) reach ADMIN_EMAILS once, deduplicated.
+  // A scheduler that stops running cannot reach this line; /api/health covers that case.
+  const healthAlert = await evaluatePlatformAlert(healthSnapshot(record), { source: "scheduler" });
   const digests = fanouts.digest?.done || 0, weeklies = fanouts.weekly?.done || 0, monthlies = fanouts.monthly?.done || 0, autoFlags = fanouts.autoflag?.done || 0;
   console.log(`scheduler: ${dueCount} due`, results, `digests ${digests}`, `weeklies ${weeklies}`, `released ${released}`, record.ok ? "ok" : "with errors");
-  return { due: dueCount, results, digests, weeklies, monthlies, released, alerts, lifecycles, autoFlags, fanouts: wanted, blocks: record.blocks, ok: record.ok };
+  return { due: dueCount, results, digests, weeklies, monthlies, released, alerts, lifecycles, autoFlags, fanouts: wanted, blocks: record.blocks, ok: record.ok, healthAlert };
 }
 
 export default async () => {

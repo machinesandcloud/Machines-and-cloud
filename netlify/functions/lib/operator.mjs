@@ -22,6 +22,7 @@ import { calendarExecutionPolicy } from './calendar-execution.mjs';
 import { workspaceBillingConfiguration } from './workspace-billing.mjs';
 import {voiceRejectionReview,recordVoiceCreateRejection} from './voice-provider-evidence.mjs';
 import {supportReportViews,supportReportIssues,changeSupportReport} from './support-reports.mjs';
+import {classifyIssues,actionableIssues} from './operator-issues.mjs';
 
 export class OperatorError extends Error {
   constructor(code, message, status = 400) { super(message); this.code = code; this.status = status; }
@@ -97,9 +98,11 @@ export async function customerView(c, detail = false) {
   const native=leadConnections?.thumbtack;
   if(!['paused','cancelled','archived'].includes(c.status)&&native?.setupRequest)issues.push({id:'lead:thumbtack:setup',severity:'high',title:'Requested Thumbtack setup needs platform access',detail:'The customer’s request is saved. Configure the Machines & Cloud partner connection before requesting their account permission. No provider job has started.',requestId:native.setupRequest.id,requestedAt:native.setupRequest.requestedAt,responsible:'machines_and_cloud'});
   if(native?.generation&&(native.attention.unconfirmedReplies>0||['setup_unconfirmed','authorization_required'].includes(native.nativeState)))issues.push({id:'lead:thumbtack',severity:'high',title:'Thumbtack connection needs attention',detail:native.attention.unconfirmedReplies>0?'Check the original Thumbtack thread before sending another reply.':native.nativeState==='setup_unconfirmed'?'Check the existing webhook before continuing its saved setup. Do not create another connection.':'The owner must renew Thumbtack permission in the existing connection.'});
+  // PRA-OPS-01: classify, never drop. Expected onboarding states become informational until overdue.
+  const triaged=classifyIssues(issues,{client:c,providerStates:operatorProviderStates()}),openIssues=actionableIssues(triaged).length;
   // Raw lead setup contains a provider endpoint and shared secret. Operators
   // receive the same allowlisted journey facts as owners, never that setup DTO.
-  const row = { slug: c.slug, name: c.business?.name || c.slug, owner: { name: c.owner?.name || '', email: c.owner?.email || '', phone: c.owner?.phone || '' }, plan: c.plan, status: c.status, revision: managementRevision(c), configurationRevision: configurationRevision(c), selfService, createdAt: c.createdAt || null, setup, operations, phoneActivation, services, serviceChecks, connections, leadSources, issues, supportReports: selfService ? supportReportViews(c,{operator:true}) : [], aiAllowance, metrics: { bookings: 0, leads: 0, conversations: 0, openIssues: issues.length }, activity: (c.management?.audit || []).filter(record=>belongsToWorkspace(c,record)).slice(-100).reverse().map(sanitizedActivity), notes: (c.management?.notes || []).filter(record=>belongsToWorkspace(c,record)).slice(-100).map(n => ({ id: n.id, at: n.at, actor: n.actor, text: trim(n.text, 2000) })) };
+  const row = { slug: c.slug, name: c.business?.name || c.slug, owner: { name: c.owner?.name || '', email: c.owner?.email || '', phone: c.owner?.phone || '' }, plan: c.plan, status: c.status, revision: managementRevision(c), configurationRevision: configurationRevision(c), selfService, createdAt: c.createdAt || null, setup, operations, phoneActivation, services, serviceChecks, connections, leadSources, issues: triaged, supportReports: selfService ? supportReportViews(c,{operator:true}) : [], aiAllowance, metrics: { bookings: 0, leads: 0, conversations: 0, openIssues, waitingIssues: triaged.length - openIssues }, activity: (c.management?.audit || []).filter(record=>belongsToWorkspace(c,record)).slice(-100).reverse().map(sanitizedActivity), notes: (c.management?.notes || []).filter(record=>belongsToWorkspace(c,record)).slice(-100).map(n => ({ id: n.id, at: n.at, actor: n.actor, text: trim(n.text, 2000) })) };
   if (detail && selfService) row.voiceRejectionReview=await voiceRejectionReview(c);
   if (detail) {
     for (const operation of operations) {
@@ -135,7 +138,7 @@ export async function customerPage(cursor = '') {
   const keys = (await list('clients', '')).sort(), page = keys.filter(key => key > cursor).slice(0, 50);
   const customers = [];
   for (const key of page) { const c = await strictRead('clients', key); if (c) customers.push(await customerView(c)); }
-  return { customers, total: keys.length, nextCursor: keys.some(key => key > (page.at(-1) || cursor)) ? page.at(-1) : null, summary: { customers: customers.length, active: customers.filter(c => c.status === 'live').length, needsAttention: customers.filter(c => c.issues.length).length, setupPending: customers.filter(c => c.selfService && !closedStatus(c.status) && c.connections.some(x => x.requested && !['active','connected'].includes(x.status))).length, scope: 'Current page' } };
+  return { customers, total: keys.length, nextCursor: keys.some(key => key > (page.at(-1) || cursor)) ? page.at(-1) : null, summary: { customers: customers.length, active: customers.filter(c => c.status === 'live').length, needsAttention: customers.filter(c => actionableIssues(c.issues).length).length, waitingOnly: customers.filter(c => c.issues.length && !actionableIssues(c.issues).length).length, setupPending: customers.filter(c => c.selfService && !closedStatus(c.status) && c.connections.some(x => x.requested && !['active','connected'].includes(x.status))).length, scope: 'Current page' } };
 }
 function validatedPatch(patch) {
   if (!patch || typeof patch !== 'object' || Array.isArray(patch) || !Object.keys(patch).length) throw new OperatorError('invalid_patch', 'Choose supported business rules to update.');

@@ -28,6 +28,8 @@ const FAILURE_CODES = {
   managedDelivery: ["managed_delivery_unresolved", "managed_delivery_failed", "managed_delivery_recovery_stale"],
   inboundSMS: ["inbound_sms_processing_failed"],
 };
+// Read-only catalogue for the operator alert email allowlist (lib/operator-health.mjs).
+export const SERVICE_FAILURE_CODES = Object.freeze(Object.fromEntries(Object.entries(FAILURE_CODES).map(([component, codes]) => [component, Object.freeze([...codes])])));
 export function serviceFailureFacts(value) {
   if (!Array.isArray(value)) return [];
   // Iterate the finite schema, never an unbounded stored array or arbitrary keys.
