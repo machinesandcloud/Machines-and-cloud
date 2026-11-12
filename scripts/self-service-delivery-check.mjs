@@ -71,13 +71,24 @@ check(() => assert.equal(emergency.id, callback.id));
 check(() => assert.equal(emergency.urgency, "emergency"));
 check(() => assert.equal(emergency.callbackDueAt, undefined));
 await flagLead(c, { ...input, phone: "+17135550144", reason: "lead" }, { channel: "web", contact: "quiet-lead" });
-const noAlerts = await listRecords("alerts", c.slug, 100), noTasks = await list("tasks", "");
-check(() => assert.equal(noAlerts.length, 0));
-check(() => assert.equal(noTasks.length, 0));
+// PRA-HOMEOWNER-03: a website callback that became an emergency opens one workspace alert (now an
+// emergency) and one tenant-bound escalation task. The quiet lead opens none. Still no provider send.
+const alerts = await listRecords("alerts", c.slug, 100), tasks = (await Promise.all((await list("tasks", "")).map(key => get("tasks", key)))).filter(Boolean);
+check(() => assert.equal(alerts.length, 1));
+check(() => assert.equal(alerts[0].leadId, callback.id));
+check(() => assert.equal(alerts[0].kind, "emergency"));
+check(() => assert.equal(alerts[0].status, "waiting"));
+check(() => assert.equal(alerts[0].deliveryMode, "workspace_only"));
+check(() => assert.equal(tasks.length, 1));
+check(() => assert.equal(tasks[0].type, "escalate"));
+check(() => assert.equal(tasks[0].data.alertId, callback.id));
+check(() => assert.match(tasks[0].data.tenantIdentity, /^[a-f0-9]{64}$/));
 check(() => assert.equal(outbound.length, 0));
 check(() => assert.equal(callbackPromise(c), ""));
 const directAlert = await openAlert(c, emergency, "emergency");
-check(() => assert.equal(directAlert.status, "channel_not_active"));
+check(() => assert.equal(directAlert.id, callback.id));
+const alertsAfterDirect = await listRecords("alerts", c.slug, 100);
+check(() => assert.equal(alertsAfterDirect.length, 1));
 // Old queued escalation work must not fall through to the unscoped Steve sender.
 await put("alerts", `${c.slug}/stale-alert`, { id: "stale-alert", slug: c.slug, leadId: emergency.id, kind: "emergency", status: "waiting", step: 2, history: [] });
 const beforeAlert = await get("alerts", `${c.slug}/stale-alert`);
@@ -163,4 +174,4 @@ check(() => assert.ok(outbound.some(value => value.includes("api.twilio.com"))))
 check(() => assert.ok(outbound.some(value => value.includes("api.resend.com"))));
 check(() => assert.notEqual(callbackPromise(legacy), ""));
 const source = "netlify/functions/lib/desk.mjs";
-console.log(JSON.stringify({ ok: true, checks, newTenantOutboundRequests: 0, newTenantTasksCreated: 0, newTenantConsentFabricated: false, legacyInterceptedRequests: outbound.length, realNetworkRequests: 0, source, sourceSHA256: createHash("sha256").update(await readFile(source)).digest("hex"), mode: "memory; all HTTP intercepted; no provider acceptance" }, null, 2));
+console.log(JSON.stringify({ ok: true, checks, newTenantOutboundRequests: 0, newTenantTasksCreated: tasks.length, newTenantTaskTypes: tasks.map(task => task.type), newTenantConsentFabricated: false, legacyInterceptedRequests: outbound.length, realNetworkRequests: 0, source, sourceSHA256: createHash("sha256").update(await readFile(source)).digest("hex"), mode: "memory; all HTTP intercepted; no provider acceptance" }, null, 2));

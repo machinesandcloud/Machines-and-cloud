@@ -68,7 +68,9 @@ export async function handleManagedSMS(req) {
     if (consent.duplicate && consent.keyword !== "message") return twiml();
     if (consent.keyword === "stop") return consent.alreadySuppressed || fields.OptOutType === "STOP" ? twiml() : twiml(`${c.business.name}: texts stopped. Reply START or EMPEZAR to remove the block.`);
     if (consent.keyword === "start") return fields.OptOutType === "START" ? twiml() : twiml(c.serviceFollowupProgram?.version==='requested_service_followups_v1'?`${String(c.business.name).trim().slice(0,100)}: your texting block is removed. Each text program needs its own new permission. Use the full instruction for your visit or request. HELP for help; STOP/ALTO/PARAR to end.`:`${c.business.name}: your texting block is removed. Appointment updates need a separate YES. Reply STOP or ALTO to stop.`);
-    if (consent.keyword === "help") return consent.suppressed || fields.OptOutType === "HELP" ? twiml() : twiml(`${c.business.name}: for help contact ${c.phone?.businessNumber || c.owner.email}. Reply STOP, ALTO or PARAR to stop texts.`);
+    // AYUDA gets the Spanish reply (needs Spanish reviewer); HELP and INFO keep the English one. The
+    // contact choice is unchanged here (PRA-HOMEOWNER-07 owns it).
+    if (consent.keyword === "help") { if (consent.suppressed || fields.OptOutType === "HELP") return twiml(); const { str } = await import("./desk.mjs"); return twiml(str("managed_help", { language: /^\s*AYUDA\s*$/i.test(String(fields.Body || "")) ? "es" : "en" })(c, c.phone?.businessNumber || c.owner.email)); }
     if (consent.suppressed || !managedDeliveryEnabled()) return twiml();
     const probe = await pendingMessagingProbe(c);
     const kind = probe && probe.to===fields.From && String(fields.Body).trim()===probe.nonce ? "probe" : "conversation";

@@ -68,7 +68,7 @@ async function currentClient(c) {
   if (!current || !isSupportedSelfServiceClient(current) || deliveryTenant(c) !== deliveryTenant(current)) throw new Error("Delivery workspace changed");
   return current;
 }
-export async function queueManagedMessage(c, { eventId, channel, purpose, to, body, source = null, dueAt = null, consentAsk = false, preserveSnapshot = false, probe = null, followup = null }) {
+export async function queueManagedMessage(c, { eventId, channel, purpose, to, body, source = null, dueAt = null, consentAsk = false, preserveSnapshot = false, probe = null, followup = null, subject = null, alert = null }) {
   const scope = await managedDeliveryProofScope();
   if (!proofClientAllowed(scope,c) || scope && (channel !== 'email' || to !== scope.email)) return null;
   await currentClient(c);
@@ -76,8 +76,13 @@ export async function queueManagedMessage(c, { eventId, channel, purpose, to, bo
   if (channel === "email" && !["owner_booking", "owner_lead"].includes(purpose)) throw new Error("Unsupported email purpose");
   const id = messageId(c,channel,eventId);
   const answer = channel === 'sms' ? await paidAnswerForDelivery(c, eventId, to, body) : {};
-  const payload = { tenant: deliveryTenant(c), channel, purpose, to, body, source, dueAt, consentAsk, probe, ...(followup?{followup}:{}), ...answer }, digest = hash(JSON.stringify(canonical(payload)));
-  const identity = hash(JSON.stringify(canonical({ ...payload, body: null })));
+  if (subject !== null && (channel !== "email" || typeof subject !== "string" || !subject.trim() || subject.length > 120)) throw new Error("Invalid delivery intent");
+  if (alert !== null && (channel !== "email" || !/^[a-f0-9]{10,32}$/.test(alert?.id || "") || ![1, 2].includes(alert.step))) throw new Error("Invalid delivery intent");
+  const payload = { tenant: deliveryTenant(c), channel, purpose, to, body, source, dueAt, consentAsk, probe, ...(followup?{followup}:{}), ...(subject?{subject}:{}), ...(alert?{alert:{id:alert.id,step:alert.step,...(alert.epoch?{epoch:alert.epoch}:{})}}:{}), ...answer }, digest = hash(JSON.stringify(canonical(payload)));
+  // Like the body, the subject is display text: a re-queue of an existing snapshot keeps the
+  // snapshot, and jobs written before subjects existed keep their original identity.
+  const { subject: _subject, ...identityPayload } = payload;
+  const identity = hash(JSON.stringify(canonical({ ...identityPayload, body: null })));
   const previous=await strictRead(STORE,id);
   if(previous && previous.digest!==digest && !(preserveSnapshot && previous.identity===identity))throw new Error("Delivery identity already used");
   const snapshot=previous || {...payload,dueAt:dueAt || stamp(),id,slug:c.slug,digest,identity,state:"queued",createdAt:stamp(),updatedAt:stamp(),attempts:0};
@@ -103,6 +108,62 @@ async function indexPending(job) {
     return {value:{version:1,entries,failures,cursor:value?.cursor || ""}};
   });
 }
+// Owner email headline: urgency and reason first, from the customer's saved fields only. Never
+// infers urgency. Short enough to scan as a phone notification. Owner-facing copy stays English.
+// Control characters and bidi overrides/isolates (QA-URG note 1) become spaces, so a subject stays one
+// readable line.
+const oneLine = value => String(value || "").replace(/[\u0000-\u001f\u007f\u200e\u200f\u202a-\u202e\u2066-\u2069]+/g, " ").replace(/\s+/g, " ").trim();
+function clip(value, limit) {
+  const text = oneLine(value); if (text.length <= limit) return text;
+  const cut = text.slice(0, limit - 3), space = cut.lastIndexOf(" ");
+  return (space > limit / 2 ? cut.slice(0, space) : cut).replace(/[\s,.;:]+$/, "") + "...";
+}
+export function ownerRequestHeadline(record, kind = "leads") {
+  const issue = clip(record?.issue, 48), what = issue ? `: ${issue}` : "";
+  if (kind === "bookings") {
+    if (record.status === "cancelled") return `Visit cancelled${what}`;
+    if (record.urgency === "emergency") return `EMERGENCY visit request${what}`;
+    const when = clip([record.date, record.window].filter(Boolean).join(" "), 32);
+    const requested = record.status === "booked" && ["web", "sms", "call", "voice"].includes(record.channel);
+    return `${requested ? "Visit request" : "Visit"}${when ? ": " + when : what}`;
+  }
+  if (record.reason === "status_check") return `Status check${what}`;
+  if (record.reason === "emergency" || record.urgency === "emergency") return `EMERGENCY${what}`;
+  if (record.reason === "wants_call") { const wanted = clip(record.wanted, 40); return `Callback requested${wanted ? ": " + wanted : what}`; }
+  if (record.reason === "handoff") return `Needs action${what}`;
+  if (record.nobook_reason === "out_of_area") return `Outside service area${what}`;
+  if (record.reason === "question") return `Question${record.nobook_reason === "wanted_price" ? " (price)" : ""}${what}`;
+  return `New request${what}`;
+}
+export const ownerRequestSubject = (record, kind = "leads") => clip(ownerRequestHeadline(record, kind) + (record?.language === "es" ? " (Spanish)" : ""), 78);
+const urgentLead = record => record.reason !== "status_check" && (record.reason === "emergency" || record.urgency === "emergency" || record.reason === "wants_call");
+function ownerRecordBody(current, saved, kind, requestedVisit, changeLine = "") {
+  const urgent = kind === "leads" && urgentLead(saved), mins = Number(current.rules?.ackMinutes) || 10;
+  return [
+    ownerRequestHeadline(saved, kind),
+    ...(urgent ? [`Urgent: acknowledge it in your workspace. If it is still unacknowledged after ${mins} minutes, a reminder email follows.`] : []),
+    `${current.business.name}: ${kind === "bookings" ? requestedVisit ? "Visit request" : "Visit" : "Customer request"} ${saved.id}`,
+    ...(changeLine ? [changeLine.replace(/\n$/, "")] : []),
+    `${saved.customer_name || "Customer"} ${saved.phone || ""}`,
+    saved.issue || "",
+    saved.address || "",
+    `${saved.date || saved.wanted || ""} ${saved.window || ""}`,
+    ...(saved.urgency && saved.urgency !== "emergency" ? [`Urgency: ${String(saved.urgency).replace(/_/g, " ")}`] : []),
+    ...(saved.language === "es" ? ["Language: Spanish"] : []),
+    "Open your workspace to review and respond.",
+  ].join("\n");
+}
+// One reminder email per escalation step of a still-waiting managed alert. The alert reference is
+// rechecked at send time, so acknowledging in the workspace stops a reminder that has not gone out.
+export async function queueManagedAlertReminder(c, lead, alert, step, minutes) {
+  const scope = await managedDeliveryProofScope(); if (!proofClientAllowed(scope,c)) return null;
+  if (!isSupportedSelfServiceClient(c) || lead?.slug !== c.slug || alert?.leadId !== lead.id || alert.status !== "waiting" || lead.websiteSetupCheck || lead.simulation) return null;
+  const current = await currentClient(c), saved = await strictRead("leads", `${c.slug}/${lead.id}`);
+  if (!saved || saved.status !== "open" || saved.delivery?.tenantIdentity !== deliveryTenant(c) || !belongsToWorkspace(c, saved)) return null;
+  const headline = ownerRequestHeadline(saved, "leads"), source = { kind: "leads", id: saved.id, revision: revision(saved) };
+  const body = [`NOT ACKNOWLEDGED after ${minutes} minutes. ${headline}`, `${current.business.name}: Customer request ${saved.id}`, `${saved.customer_name || "Customer"} ${saved.phone || ""}`, saved.issue || "", saved.address || "", ...(saved.language === "es" ? ["Language: Spanish"] : []), "Open your workspace and acknowledge it."].join("\n");
+  return queueManagedMessage(current, { eventId: `alert:${alert.id}:${Number(alert.epoch) ? `e${Number(alert.epoch)}:` : ""}step${step}`, channel: "email", purpose: "owner_lead", to: current.owner.email, body, subject: clip(`Reminder: ${headline}`, 78), source, alert: { id: alert.id, step, ...(Number(alert.epoch) ? { epoch: Number(alert.epoch) } : {}) }, preserveSnapshot: true });
+}
 export async function queueManagedRecord(c, record, kind = "bookings") {
   const scope = await managedDeliveryProofScope(); if (!proofClientAllowed(scope,c)) return;
   if (!isSupportedSelfServiceClient(c) || !["bookings", "leads"].includes(kind) || record?.slug !== c.slug || record.status === "spam" || record.ownerVisitCreationAborted === true || record.websiteSetupCheck || record.simulation) return;
@@ -113,18 +174,20 @@ export async function queueManagedRecord(c, record, kind = "bookings") {
   // A change made by the customer on a verified channel says so, with the old and new time.
   const last = kind === 'bookings' && saved.ownerVisitMutation ? saved.ownerVisitHistory?.at(-1) : null, byCustomer = typeof last?.actor === 'string' && last.actor.startsWith('customer:') && last.at === saved.ownerVisitMutation.at;
   const changeLine = byCustomer ? `${last.action === 'cancel_visit' ? 'CANCELLED BY THE CUSTOMER' : 'MOVED BY THE CUSTOMER'} (${last.actor === 'customer:call' ? 'phone call' : 'text'})${last.previous ? `, was ${last.previous.date} ${last.previous.window}` : ''}${last.action === 'cancel_visit' ? '' : `, now ${last.next.date} ${last.next.window}`}.${last.customerReason ? ` Reason: ${String(last.customerReason).slice(0, 200)}` : ''}\n` : '';
-  const body = `${current.business.name}: ${kind === "bookings" ? requestedVisit ? "Visit request" : "Visit" : "Customer request"} ${saved.id}\n${changeLine}${saved.customer_name || "Customer"} ${saved.phone || ""}\n${saved.issue || ""}\n${saved.address || ""}\n${saved.date || saved.wanted || ""} ${saved.window || ""}\nOpen your workspace to review and respond.`;
-  await queueManagedMessage(current, { eventId: `${eventId}:owner`, channel: "email", purpose: kind === "bookings" ? "owner_booking" : "owner_lead", to: current.owner.email, body, source, preserveSnapshot: true });
+  const body = ownerRecordBody(current, saved, kind, requestedVisit, changeLine);
+  await queueManagedMessage(current, { eventId: `${eventId}:owner`, channel: "email", purpose: kind === "bookings" ? "owner_booking" : "owner_lead", to: current.owner.email, body, subject: ownerRequestSubject(saved, kind), source, preserveSnapshot: true });
   if (scope) return; // This internal phase proves owner email only, not customer SMS.
   if (kind !== "bookings" || !saved.phone || !["booked", "confirmed", "on_the_way", "cancelled"].includes(saved.status)) return;
   const cancelled = saved.status === "cancelled";
+  // Customer texts follow the booking's saved language (TEMPLATES_ES/STRINGS via str()).
+  const { str } = await import("./desk.mjs");
   if (cancelled || !await confirmationAlreadySent(current, saved)) await queueManagedMessage(current, { eventId: `${eventId}:customer`, channel: "sms", purpose: cancelled ? "cancelled" : "confirmation", to: saved.phone,
-    body: cancelled ? `${current.business.name}: visit ${saved.id} has been cancelled.` : `${current.business.name}: visit ${saved.id} is saved for ${saved.date}, ${saved.window}. The shop confirms arrival details directly. Reply STOP to end texts.`, source, preserveSnapshot: true });
+    body: str(cancelled ? "managed_cancelled" : "managed_confirmation", saved)(current, saved), source, preserveSnapshot: true });
   if (!cancelled && saved.date && saved.window) {
     const start = arrivalInstant(saved.date, saved.window);
     for (const [purpose, hours] of [["reminder_24h", 24], ["reminder_1h", 1]]) {
       const due = start - hours * 3600000;
-      if (due > Date.now()) await queueManagedMessage(current, { eventId: `${eventId}:${purpose}`, channel: "sms", purpose, to: saved.phone, body: `${current.business.name}: reminder of ${requestedVisit ? "your requested visit" : "visit"} ${saved.id} on ${saved.date}, ${saved.window}.${requestedVisit ? " The shop confirms arrival details directly." : ""} Reply here if anything changes. Reply STOP to end texts.`, source, dueAt: new Date(due).toISOString(), preserveSnapshot: true });
+      if (due > Date.now()) await queueManagedMessage(current, { eventId: `${eventId}:${purpose}`, channel: "sms", purpose, to: saved.phone, body: str("managed_reminder", saved)(current, saved, requestedVisit), source, dueAt: new Date(due).toISOString(), preserveSnapshot: true });
     }
   }
 }
@@ -144,6 +207,7 @@ async function confirmationAlreadySent(c, saved) {
   return false;
 }
 async function inspectSource(job, c) {
+  if (job.alert) { const alert = await strictRead("alerts", `${c.slug}/${job.alert.id}`); if (!alert || alert.status !== "waiting" || (Number(alert.epoch) || 0) !== (Number(job.alert.epoch) || 0) || !belongsToWorkspace(c, alert)) return false; }
   if(job.followup){const {inspectRequestFollowup}=await import("./request-followup.mjs");if(!await inspectRequestFollowup(c,job))return false;}
   if (!job.source) return true;
   const record = await strictRead(job.source.kind, `${c.slug}/${job.source.id}`);
@@ -263,7 +327,7 @@ function providerAdapter(deadlineAt=Date.now()+10000) {
         await assertManagedEmailReservation(c, job, job.emailBudget);
         assertManagedEmailDispatchPolicy(job.emailBudget);
         assertProofPolicy(scope);
-        const { response, data } = await request("https://api.resend.com/emails", { method: "POST", headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, "Content-Type": "application/json", "Idempotency-Key": `delivery/${hash(job.id)}` }, body: JSON.stringify({ from: process.env.FROM_EMAIL, to: [job.to], subject: job.purpose === "owner_booking" ? "Your front desk: visit update" : "Your front desk: customer request", text: job.body }) });
+        const { response, data } = await request("https://api.resend.com/emails", { method: "POST", headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, "Content-Type": "application/json", "Idempotency-Key": `delivery/${hash(job.id)}` }, body: JSON.stringify({ from: process.env.FROM_EMAIL, to: [job.to], subject: job.subject || (job.purpose === "owner_booking" ? "Your front desk: visit update" : "Your front desk: customer request"), text: job.body }) });
         if (!response.ok || typeof data.id !== "string") throw new Error("Email result unconfirmed");
         return { id: data.id, status: "accepted" };
       }

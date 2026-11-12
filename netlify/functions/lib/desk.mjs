@@ -2,7 +2,7 @@
 // records, owner alerts (job tickets), acknowledge-and-escalate, calendar, confirm and
 // reschedule by reply, the follow-up timers that match the plan, the daily digest, line health.
 import { addRecord, createRecordOnce, finishStableBookingWindow, saveRecord, getRecord, scheduleTask, cancelTasks, logEvent, listRecords, list, get, del, put, getConversation, saveConversation, addToIndex, recordsFor, id, bookingWindowTaken, reserveBookingWindow, finishBookingWindow, canonicalWindow, getAvailability, assertCurrentWorkspace, listWorkspaceRecords } from "./store.mjs";
-import { AvailabilityInputError } from "./availability.mjs";
+import { AvailabilityInputError, appointmentWindowRange } from "./availability.mjs";
 import { notifyOwner, sendSMS, sendEmail, notifySteve, e164, optOutStatus, placeCall, STEVE_PHONE } from "./send.mjs";
 import { createEvent, updateEvent, visitDate, windowHours, houstonISO, normalizeDate, friendlyDate } from "./calendar.mjs";
 import { PLANS, isBusinessHours, houstonNow, normalizeHours, NOBOOK_REASONS, opensLaterToday, tradeKey } from "./config.mjs";
@@ -10,7 +10,7 @@ import { getUsage, usageView } from "./usage.mjs";
 import { auditNeedsAttention, actionableAuditReasons } from "./audit-policy.mjs";
 import { isSelfServiceClient } from "./setup.mjs";
 import { deliveryTenant } from "./managed-consent.mjs";
-import { queueManagedRecord, dispatchManagedDeliveryWave } from "./managed-delivery.mjs";
+import { queueManagedRecord, queueManagedAlertReminder, dispatchManagedDeliveryWave } from "./managed-delivery.mjs";
 import { queueCalendarBooking, dispatchCalendarDeliveryWave } from "./calendar-delivery.mjs";
 import { strictRead } from "./accounts.mjs";
 import { atomicUpdate } from './store.mjs';
@@ -94,7 +94,11 @@ export const TEMPLATES = {
 // Steve names reviews them before the first Spanish-speaking customer goes live (DECISIONS.md).
 // "8 to 12" -> "8 a 12", "tomorrow" -> "mañana", "today" -> "hoy", weekday names translated.
 const DAYS_ES = { monday: "lunes", tuesday: "martes", wednesday: "miércoles", thursday: "jueves", friday: "viernes", saturday: "sábado", sunday: "domingo" };
-export const winEs = (w) => String(w || "").replace(/\s+to\s+/gi, " a ").replace(/\b(\d{1,2})\s*(am)\b/gi, "$1 de la mañana").replace(/\b(\d{1,2})\s*(pm)\b/gi, "$1 de la tarde");
+// Legacy Spanish templates (already UCS-2) use natural period words. needs Spanish reviewer:
+// 12 pm is "12 del mediodía"; 1 to 6:59 pm "de la tarde"; 7 to 11:59 pm and 12 am "de la noche";
+// 1 to 11:59 am "de la mañana". "8 a.m." with dots is read like "8 am". Unqualified times stay as written.
+const periodEs = (h, ap) => { const n = Number(h) % 12, pm = /^p/i.test(ap); return !pm ? (n === 0 ? "de la noche" : "de la mañana") : n === 0 ? "del mediodía" : n < 7 ? "de la tarde" : "de la noche"; };
+export const winEs = (w) => String(w || "").replace(/\s+to\s+/gi, " a ").replace(/\b(\d{1,2})(:\d{2})?\s*([ap])\.?\s?m\b\.?/gi, (_, h, min, ap) => `${h}${min || ""} ${periodEs(h, ap)}`);
 export const dateEs = (d) => { const t = String(d || "").toLowerCase().trim(); if (!t || t === "today") return "hoy"; if (t === "tomorrow") return "mañana"; if (/^\d{4}-\d{2}-\d{2}$/.test(t)) return friendlyDate(t, "es"); for (const [en, es] of Object.entries(DAYS_ES)) if (t.startsWith(en.slice(0, 3))) return "el " + es; return t; };
 export const when = (b) => `${b.date ? friendlyDate(b.date) + ", " : ""}${b.window}`;
 export const TEMPLATES_ES = {
@@ -129,6 +133,46 @@ export const STRINGS = {
 STRINGS.en.consent_ask = (c) => `${c.business.name}: want a text when your next tune-up is due? Reply YES. Nothing else changes.`;
 STRINGS.es.consent_ask = (c) => `${c.business.name}: ¿quiere un mensaje cuando toque su próximo mantenimiento? Responda SÍ. Nada más cambia.`;
 STRINGS.en.consent_yes = (c) => `${c.business.name}: thanks, we will text you when your next tune-up is due. Reply STOP any time.`;
+// Managed (self-service) appointment texts, chosen by the booking's saved language with str().
+// English bodies are the existing managed wording, unchanged byte for byte. The Spanish set needs the
+// Spanish reviewer Steve names (DECISIONS.md), like TEMPLATES_ES. It is written GSM-7-safe on purpose:
+// á, í, ó and ú are not in GSM 03.38 and would switch the whole SMS to UCS-2 (70 characters for one
+// segment, 67 per segment after). é, ñ, ü, ¿ and ¡ are GSM-7. So the Spanish copy uses an absolute date
+// ("24 de octubre", no weekday because "sábado" is UCS-2, no "mañana" because a reminder is written
+// days before it is sent) and avoids "aquí", "más" and similar words. Segment counts: PROPOSALS.md.
+const MONTHS_ES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+export const managedDateEs = (d) => { const m = String(d || "").match(/^(\d{4})-(\d{2})-(\d{2})$/); return m ? `${Number(m[3])} de ${MONTHS_ES[Number(m[2]) - 1]}` : String(d || ""); };
+// Managed Spanish texts must stay GSM-7, and "mediodía"/"del día" carry í (UCS-2: a confirmation would
+// become 3 segments). So managed windows use the clear a. m./p. m. form (RAE abbreviation; 12 p. m. is
+// noon, 12 a. m. midnight), resolved through the same parser as availability, with the period said once
+// when both ends share it and the start is not 12: "8 to 12" -> "8 a. m. a 12 p. m.", "12 to 5" -> "12 p. m. a 5 p. m.",
+// "6 pm to 8 pm" -> "6 a 8 p. m.". An unparseable window falls back to the legacy text. needs Spanish reviewer.
+const clockEs = (m) => { const h = Math.floor(m / 60) % 24, min = m % 60; return { t: `${h % 12 || 12}${min ? ":" + String(min).padStart(2, "0") : ""}`, p: h < 12 ? "a. m." : "p. m." }; };
+export const managedWinEs = (w) => {
+  const r = appointmentWindowRange(w);
+  if (!r || r.requiresPeriod) return String(w || "").replace(/\s+to\s+/gi, " a ").replace(/\b(\d{1,2})(:\d{2})?\s*([ap])\.?\s?m\b\.?/gi, (_, h, min, ap) => `${h}${min || ""} ${ap.toLowerCase()}. m.`);
+  const a = clockEs(r.start), b = clockEs(r.end);
+  return a.p === b.p && !/^12\b/.test(a.t) ? `${a.t} a ${b.t} ${b.p}` : `${a.t} ${a.p} a ${b.t} ${b.p}`;
+};
+// A visit counts as moved only after a reschedule. owner-visits also stamps rescheduledAt on create.
+export const managedVisitMoved = (b) => b?.ownerVisitMutation ? b.ownerVisitMutation.action === "reschedule_visit" : !!b?.rescheduledAt;
+// A window that ends in "p. m." closes its own sentence: no doubled period.
+const oneDot = (t) => t.replace(/ m\.\./g, " m.");
+const visitWhenEs = (b) => [b.date ? "el " + managedDateEs(b.date) : "", b.window ? "de " + managedWinEs(b.window) : ""].filter(Boolean).join(", ");
+STRINGS.en.managed_confirmation = (c, b) => `${c.business.name}: visit ${b.id} is saved for ${b.date}, ${b.window}. The shop confirms arrival details directly. Reply STOP to end texts.`;
+STRINGS.en.managed_reminder = (c, b, requested) => `${c.business.name}: reminder of ${requested ? "your requested visit" : "visit"} ${b.id} on ${b.date}, ${b.window}.${requested ? " The shop confirms arrival details directly." : ""} Reply here if anything changes. Reply STOP to end texts.`;
+STRINGS.en.managed_cancelled = (c, b) => `${c.business.name}: visit ${b.id} has been cancelled.`;
+STRINGS.en.managed_help = (c, contact) => `${c.business.name}: for help contact ${contact}. Reply STOP, ALTO or PARAR to stop texts.`;
+// needs Spanish reviewer
+STRINGS.es.managed_confirmation = (c, b) => oneDot(managedVisitMoved(b)
+  ? `${c.business.name}: su visita ahora es ${visitWhenEs(b)}. El negocio le confirma la hora de llegada. Responda STOP o ALTO para terminar.`
+  : `${c.business.name}: su visita queda guardada para ${visitWhenEs(b)}. El negocio le confirma la hora de llegada. Responda STOP o ALTO para terminar.`);
+// needs Spanish reviewer
+STRINGS.es.managed_reminder = (c, b, requested) => oneDot(`${c.business.name}: recordatorio de su visita${requested ? " solicitada" : ""} para ${visitWhenEs(b)}.${requested ? " El negocio le confirma la hora de llegada." : ""} Si algo cambia, responda a este mensaje. Responda STOP o ALTO para terminar.`);
+// needs Spanish reviewer
+STRINGS.es.managed_cancelled = (c, b) => `${c.business.name}: su visita${visitWhenEs(b) ? " " + visitWhenEs(b).replace(/^el /, "del ") + "," : ""} fue cancelada.`;
+// needs Spanish reviewer
+STRINGS.es.managed_help = (c, contact) => `${c.business.name}: para ayuda, llame o escriba a ${contact}. Responda STOP, ALTO o PARAR para terminar los mensajes.`;
 STRINGS.es.consent_yes = (c) => `${c.business.name}: gracias, le escribiremos cuando toque su próximo mantenimiento. Responda STOP o ALTO cuando quiera.`;
 TEMPLATES.maintenance_reminder = (c, j) => `${c.business.name}: it has been about six months since your last visit${j.issue ? " (" + j.issue + ")" : ""}. A tune-up keeps the system running through the season. Reply here with a day and we will fit you in. Reply STOP to end these.`;
 TEMPLATES_ES.maintenance_reminder = (c, j) => `${c.business.name}: ya pasaron unos seis meses desde su última visita${j.issue ? " (" + j.issue + ")" : ""}. Un mantenimiento mantiene el sistema funcionando toda la temporada. Responda con un día y lo agendamos. Responda STOP o ALTO para no recibir más.`;
@@ -446,6 +490,15 @@ export async function runCallbackCheck(c, task) {
   return "overdue";
 }
 
+// Self-service: an emergency or a call-me-back request opens a workspace alert on every channel
+// (website chat, SMS, voice), like legacy flagLead. Only the customer's own reason/urgency count;
+// a status check is never urgent. Idempotent: one alert and one task per lead.
+const urgentKind = (r) => r?.reason === "status_check" ? null : (r?.reason === "emergency" || r?.urgency === "emergency") ? "emergency" : r?.reason === "wants_call" ? "wants_call" : null;
+async function openManagedUrgentAlert(c, lead) {
+  if (!isSelfServiceClient(c) || !lead || lead.websiteSetupCheck || lead.simulation || lead.status !== "open") return null;
+  const kind = urgentKind(lead);
+  return kind ? openAlert(c, lead, kind) : null;
+}
 export async function flagLead(c, input, ctx = {}) {
   await assertCurrentWorkspace(c);
   const portalOnly = isSelfServiceClient(c);
@@ -454,7 +507,7 @@ export async function flagLead(c, input, ctx = {}) {
   const stable = portalOnly && /^[a-f0-9]{64}$/.test(ctx.managedActionId || "");
   if (stable) {
     const existing = await strictRead("leads", `${c.slug}/${ctx.managedActionId.slice(0,32)}`);
-    if (existing) { if (existing.managedActionId !== ctx.managedActionId || !belongsToWorkspace(c,existing)) throw new Error("Lead identity mismatch"); await savedRecordEvidence(ctx, 'leads', existing); await queueSavedDelivery(c, existing, "leads"); return existing; }
+    if (existing) { if (existing.managedActionId !== ctx.managedActionId || !belongsToWorkspace(c,existing)) throw new Error("Lead identity mismatch"); await savedRecordEvidence(ctx, 'leads', existing); await queueSavedDelivery(c, existing, "leads"); await openManagedUrgentAlert(c, existing); return existing; }
   }
   const prior = stable || reason === "spam" ? null : await recentOpenLead(c, phone, ctx.contact, reason);
   if (prior) {
@@ -473,6 +526,7 @@ export async function flagLead(c, input, ctx = {}) {
     await saveRecord("leads", prior);
     await savedRecordEvidence(ctx, 'leads', prior);
     await queueSavedDelivery(c, prior, "leads");
+    if (portalOnly) await openManagedUrgentAlert(c, prior);
     if (!portalOnly) {
       noteSends(prior, changed.length ? { ownerAlert: await alertOwner(c, `UPDATE ref ${prior.id} (${changed.join(", ")}):\n` + ownerSummary(c, prior.reason, prior), { type: "owner_alert" }) } : { merged: true });
       const waiting = (await workspaceRows(c,"alerts",100)).some((a) => a.leadId === prior.id && a.status === "waiting");
@@ -495,6 +549,7 @@ export async function flagLead(c, input, ctx = {}) {
   await addToIndex("leads", c, l.phone, l.id);
   await savedRecordEvidence(ctx, 'leads', l);
   await queueSavedDelivery(c, l, "leads");
+  if (portalOnly && reason !== "spam") await openManagedUrgentAlert(c, l);
   if (!portalOnly && reason !== "spam") {
     if (reason === "wants_call" || reason === "handoff") { await trackCallback(c, l); await saveRecord("leads", l); }
     noteSends(l, { ownerAlert: await alertOwner(c, ownerSummary(c, reason, l), { type: "owner_alert" }) });
@@ -562,15 +617,30 @@ export async function receivePlatformLead(c, source, { id, name, phone, email, a
 // ---- Acknowledge and escalate ----
 export async function openAlert(c, lead, kind) {
   if (isSelfServiceClient(c)) {
-    if (lead?.channel!=='call' || !/^[a-f0-9]{64}$/.test(lead.managedActionId || '') || lead.id!==lead.managedActionId.slice(0,32)) return {status:'channel_not_active'};
+    // Website chat leads use ordinary 10-hex ids; SMS/call leads use their 32-hex action id.
+    if (!['call','sms','web'].includes(lead?.channel) || lead.managedActionId!==undefined && (!/^[a-f0-9]{64}$/.test(lead.managedActionId || '') || lead.id!==lead.managedActionId.slice(0,32))) return {status:'channel_not_active'};
     await assertCurrentWorkspace(c);
-    if (!belongsToWorkspace(c,lead) || !/^[a-f0-9]{32}$/.test(lead.id || '')) throw new Error('Alert source changed');
-    const deadlineAt=Number.isFinite(Date.parse(lead.managedHumanDeadlineAt))?lead.managedHumanDeadlineAt:new Date(Date.parse(lead.createdAt)+(Number(c.rules?.ackMinutes)||10)*60000).toISOString();
+    if (!belongsToWorkspace(c,lead) || !/^(?:[a-f0-9]{10}|[a-f0-9]{32})$/.test(lead.id || '')) throw new Error('Alert source changed');
+    const mins=Number(c.rules?.ackMinutes)||10, key=`${c.slug}/${lead.id}`, prior=await strictRead('alerts',key);
+    // QA-URG D2: an emergency after an acknowledged callback reopens the alert as a new epoch.
+    if (prior && belongsToWorkspace(c,prior) && prior.status==='acked' && prior.kind!=='emergency' && kind==='emergency' && lead.status==='open') {
+      const at=new Date().toISOString(), dueAt=new Date(Date.now()+mins*60000).toISOString(), epoch=(Number(prior.epoch)||0)+1;
+      await atomicUpdate('tasks',`${dueAt}_${lead.id}`,old=>old?{result:old}:{value:{id:lead.id,slug:c.slug,type:'escalate',dueAt,data:{alertId:lead.id,tenantIdentity:workspaceTenant(c),epoch},createdAt:at}});
+      return atomicUpdate('alerts',key,a=>{ if(!a||a.status!=='acked'||a.kind==='emergency') return {result:a}; const {attentionDueAt:_d,ackedAt:_a,ackedBy:_b,...rest}=a; const v={...rest,kind:'emergency',status:'waiting',step:0,epoch,deadlineAt:dueAt,history:[...(a.history||[]),{step:0,how:`Reopened as an emergency after the earlier ${a.kind} acknowledgment`,at}]}; return {value:v,result:v}; });
+    }
+    // QA-URG D1: the acknowledgment period starts when the alert opens, not when a merged lead was first saved.
+    const deadlineAt=prior && belongsToWorkspace(c,prior) && Number.isFinite(Date.parse(prior.deadlineAt))?prior.deadlineAt:Number.isFinite(Date.parse(lead.managedHumanDeadlineAt))?lead.managedHumanDeadlineAt:new Date(Math.max(Date.parse(lead.createdAt)||0,Date.now())+mins*60000).toISOString();
     // The existing task is also creation intent. Replays restore the same task,
     // and its tenant binding prevents a former workspace's task reaching a new one.
     const taskKey=`${deadlineAt}_${lead.id}`;
     await atomicUpdate('tasks',taskKey,old=>old?{result:old}:{value:{id:lead.id,slug:c.slug,type:'escalate',dueAt:deadlineAt,data:{alertId:lead.id,tenantIdentity:workspaceTenant(c)},createdAt:new Date().toISOString()}});
-    return createRecordOnce('alerts',c.slug,{id:lead.id,tenantIdentity:workspaceTenant(c),leadId:lead.id,kind,status:'waiting',step:0,deadlineAt,createdAt:lead.createdAt,history:[],deliveryMode:'workspace_only'});
+    const alert=await createRecordOnce('alerts',c.slug,{id:lead.id,tenantIdentity:workspaceTenant(c),leadId:lead.id,kind,status:'waiting',step:0,deadlineAt,createdAt:lead.createdAt,history:[],deliveryMode:'workspace_only'});
+    if (kind!=='emergency' || alert?.kind==='emergency' || alert?.status!=='waiting' || !belongsToWorkspace(c,alert)) return alert;
+    // A waiting callback that becomes an emergency escalates as an emergency. If its first reminder
+    // already went out, the second emergency reminder follows one acknowledgment period from now.
+    const upgraded=await atomicUpdate('alerts',`${c.slug}/${lead.id}`,a=>a && a.status==='waiting' && a.kind!=='emergency'?{value:{...a,kind:'emergency'},result:{...a,kind:'emergency'}}:{result:a});
+    if (upgraded?.kind==='emergency' && Number(upgraded.step)===1) { const dueAt=new Date(Date.now()+(Number(c.rules?.ackMinutes)||10)*60000).toISOString(); await atomicUpdate('tasks',`${dueAt}_${lead.id}_2`,old=>old?{result:old}:{value:{id:`${lead.id}_2`,slug:c.slug,type:'escalate',dueAt,data:{alertId:lead.id,tenantIdentity:workspaceTenant(c),step:2,...(Number(upgraded.epoch)?{epoch:Number(upgraded.epoch)}:{})},createdAt:new Date().toISOString()}}); }
+    return upgraded;
   }
   const a = await addRecord("alerts", c.slug, { ...(isSelfServiceClient(c)?{tenantIdentity:workspaceTenant(c)}:{}),leadId: lead.id, kind, status: "waiting", step: 0, sentAt: new Date().toISOString(), history: [] });
   const mins = Number(c.rules?.ackMinutes) || 10;
@@ -607,15 +677,35 @@ export async function runEscalation(c, task) {
       lead=await flagLead(c,r.input,{channel:'call',contact:r.contact,managedActionId:r.actionId,managedHumanDeadlineAt:r.deadlineAt});
     }
     if (!belongsToWorkspace(c,lead)) return 'workspace_changed';
-    if (!await strictRead('alerts',`${c.slug}/${task.data.alertId}`) && lead.status==='open') await openAlert(c,lead,lead.urgency==='emergency'?'emergency':'wants_call');
-    return atomicUpdate('alerts',`${c.slug}/${task.data.alertId}`,a=>{
+    const alertKey=`${c.slug}/${task.data.alertId}`;
+    if (!await strictRead('alerts',alertKey) && lead.status==='open') await openAlert(c,lead,urgentKind(lead)||'wants_call');
+    // Managed escalation stays inside the owner's own channels: the workspace flag plus a reminder
+    // email to the verified owner address. No call, text, founder contact or callback promise.
+    // Emergencies get a second reminder one acknowledgment period later; callbacks get one.
+    const step=task.data?.step===2?2:1, mins=Number(c.rules?.ackMinutes)||10;
+    const before=await strictRead('alerts',alertKey);
+    // A task from an earlier alert epoch (a callback later reopened as an emergency) retires quietly;
+    // the reopened alert has its own task. Without this it would throw "not due" until the new deadline.
+    if (before && belongsToWorkspace(c,before) && (Number(task.data?.epoch)||0)!==(Number(before.epoch)||0)) return 'superseded';
+    const due=a=>step===1?Date.parse(a.deadlineAt):Math.min(Date.parse(a.deadlineAt)+mins*60000,Date.parse(task.dueAt)||Infinity);
+    const pending=before && belongsToWorkspace(c,before) && before.status==='waiting' && lead.status==='open' && due(before)<=Date.now() && (Number(before.step)||0)<step && !(step===1 && before.attentionDueAt);
+    let reminder=false;
+    if (pending) {
+      try { reminder=!!await queueManagedAlertReminder(c,lead,before,step,mins*step); } catch { /* The workspace flag below still records attention. */ }
+      if (step===1 && before.kind==='emergency') {
+        const dueAt=new Date(due(before)+mins*60000).toISOString();
+        await atomicUpdate('tasks',`${dueAt}_${before.id}_2`,old=>old?{result:old}:{value:{id:`${before.id}_2`,slug:c.slug,type:'escalate',dueAt,data:{alertId:before.id,tenantIdentity:workspaceTenant(c),step:2,...(Number(before.epoch)?{epoch:Number(before.epoch)}:{})},createdAt:new Date().toISOString()}});
+      }
+    }
+    return atomicUpdate('alerts',alertKey,a=>{
       if (!a || !belongsToWorkspace(c,a)) return {result:'workspace_changed'};
       if (a.status!=='waiting') return {result:a.status};
       if (lead.status!=='open') return {value:{...a,status:'closed'},result:'lead closed'};
-      if (Date.parse(a.deadlineAt)>Date.now()) throw new Error('Alert is not due');
-      if (a.attentionDueAt) return {result:'attention_due'};
+      if (due(a)>Date.now()) throw new Error('Alert is not due');
+      if ((Number(a.step)||0)>=step || step===1 && a.attentionDueAt) return {result:'attention_due'};
       const at=new Date().toISOString();
-      return {value:{...a,attentionDueAt:at,history:[...a.history,{step:1,how:'Workspace attention due; no external contact or callback promise',at}]},result:'attention_due'};
+      const how=`${step===1?'Workspace attention due':'Still not acknowledged'}; owner reminder email ${reminder?'queued':'not queued'}; no external call, text or callback promise`;
+      return {value:{...a,step,attentionDueAt:a.attentionDueAt||at,history:[...a.history,{step,how,at}]},result:'attention_due'};
     });
   }
   const a = await getRecord("alerts", c.slug, task.data?.alertId);

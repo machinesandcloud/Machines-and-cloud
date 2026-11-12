@@ -1,7 +1,7 @@
 // Owner visit changes are local transactions. Provider reconcilers receive saved source
 // records separately; neither a visit save nor a queue attempt is a delivery receipt.
 import { createHash } from 'node:crypto';
-import { list, atomicUpdate, reserveBookingWindow, finishStableBookingWindow, finishBookingWindow, capacityKey, indexWorkspaceRecord, addToIndex, getAvailability } from './store.mjs';
+import { list, atomicUpdate, reserveBookingWindow, finishStableBookingWindow, finishBookingWindow, capacityKey, indexWorkspaceRecord, addToIndex, recordsFor, getAvailability } from './store.mjs';
 import { strictRead, normalizeAccountEmail } from './accounts.mjs';
 import { configurationRevision, isSupportedSelfServiceClient } from './setup.mjs';
 import { e164 } from './send.mjs';
@@ -132,6 +132,15 @@ export async function pendingOwnerVisitChange(client, visitId) {
   const operation = await strictRead(OPERATIONS, `${client.slug}/${tenant}/${lock.operationId}`);
   if (!operation || operation.tenantIdentity !== tenant || operation.input.visitId !== visitId) return null;
   return { state: operation.state, input: operation.input };
+}
+// An owner-made visit texts the customer in the language this workspace already knows for the number:
+// the newest saved booking or request from it that carries one. With no such record nothing is known
+// (the owner form has no language field and a name is not evidence), so the texts stay English.
+async function knownCustomerLanguage(client, phone) {
+  const rows = (await Promise.all(['bookings', 'leads'].map(kind => recordsFor(kind, client, phone)))).flat()
+    .filter(row => row && row.phone === phone && ['es', 'en'].includes(row.language) && !row.websiteSetupCheck && !row.simulation);
+  rows.sort((a, b) => String(b.updatedAt || b.createdAt || '').localeCompare(String(a.updatedAt || a.createdAt || '')));
+  return rows[0]?.language;
 }
 export const ownerVisitId = (client, submissionId) => hash(`${deliveryTenant(client)}:${submissionId.toLowerCase()}`).slice(0,32);
 // Text permission belongs to one number. A changed callback number is reported with its own
@@ -276,6 +285,7 @@ async function changeOwnerVisitCore(client, session, originalBody) {
       concurrentRead = !!(claim.full && claim.concurrentRead);
       if (claim.full) throw new OwnerVisitError(claim.reason || 'window_full', claim.message || (claim.reason === 'blocked' ? 'That arrival window is blocked. Your original visit is unchanged.' : 'That arrival window is unavailable. Your original visit is unchanged.'), claim.reason==='calendar_unavailable'?503:409, 'window');
       await indexWorkspaceRecord('bookings', { id: body.visitId, slug: current.slug, delivery: { tenantIdentity: tenant } });
+      const knownLanguage = creating ? await knownCustomerLanguage(current, e164(body.phone)) : undefined;
       booking = await atomicUpdate('bookings', `${client.slug}/${body.visitId}`, async saved => {
         current = await authority(client, session, body.expectedRevision, { checkRevision:false });
         if (!creating && !owns(saved, current) || creating && saved && !owns(saved, current)) throw new OwnerVisitError('visit_not_found', 'This visit is no longer available.', 404);
@@ -287,7 +297,7 @@ async function changeOwnerVisitCore(client, session, originalBody) {
         const capacity = await strictRead('index', capacityKey(client));
         if (capacity?.mutations?.[body.visitId] !== operationId) throw new Error('Visit capacity ownership could not be confirmed');
         if (creating ? !!saved : ownerVisitRevision(saved) !== body.expectedVisitRevision || !active(saved.status)) throw new OwnerVisitError('visit_changed', 'This visit changed. Refresh its details before trying again.');
-        const source = saved || { id: body.visitId, slug: client.slug, createdAt: operation.mutationAt, customer_name: body.customer_name.trim(), phone: e164(body.phone), address: body.address.trim(), issue: body.issue.trim(), status: 'booked', outcome: 'booked', channel: 'owner', customerType: 'new', managedActionId: operationId, ...(body.requestId ? { sourceRequestId: body.requestId } : {}), delivery: { mode: 'portal_only', ownerContactConfirmed: false, tenantIdentity: tenant } };
+        const source = saved || { id: body.visitId, slug: client.slug, createdAt: operation.mutationAt, customer_name: body.customer_name.trim(), phone: e164(body.phone), address: body.address.trim(), issue: body.issue.trim(), status: 'booked', outcome: 'booked', channel: 'owner', customerType: 'new', managedActionId: operationId, ...(body.requestId ? { sourceRequestId: body.requestId } : {}), ...(knownLanguage ? { language: knownLanguage } : {}), delivery: { mode: 'portal_only', ownerContactConfirmed: false, tenantIdentity: tenant } };
         const value = { ...source, ...(cancel ? { status: 'cancelled', cancelledAt: operation.mutationAt } : { date: claim.date, dateSaid: claim.date, window: claim.window, rescheduledAt: operation.mutationAt }), updatedAt: operation.mutationAt,
           ownerVisitMutation: { id: operationId, action: body.action, at: operation.mutationAt }, ownerVisitHistory: [...(source.ownerVisitHistory || []), { action: body.action, at: operation.mutationAt, actor: actorLabel(session), ...(session.customer ? { customerReason: session.customer.reason || '' } : {}), previous: saved ? { date: saved.date, window: saved.window, status: saved.status } : null, next: { date: cancel ? source.date : claim.date, window: cancel ? source.window : claim.window, status: cancel ? 'cancelled' : source.status } }] };
         return { value, result: value };
