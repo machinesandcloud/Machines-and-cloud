@@ -3,7 +3,7 @@
 // 6 pm Houston daily digest to every live shop.
 import { dueTasks, del, getRecord, getClient, saveRecord, saveClient, logEvent, list, getConversation, saveConversation, get, put, listRecords, lastInbound } from "./lib/store.mjs";
 import { fanout, claimFanout } from "./lib/fanout.mjs";
-import { sendSMS, sendEmail, notifyOwner, notifySteve, optedOut } from "./lib/send.mjs";
+import { sendSMS, sendEmail, notifyOwner, notifySteve, optOutStatus } from "./lib/send.mjs";
 import { template, runEscalation, runCallbackCheck, runVisitCheck, runConsentAsk, getCustomer, day7Draft } from "./lib/desk.mjs";
 import { forwardingInstructions } from "./lib/forwarding.mjs";
 import { PLANS, ACTIVE } from "./lib/config.mjs";
@@ -20,6 +20,7 @@ import { strictRead } from './lib/accounts.mjs';
 export const config = { schedule: "*/10 * * * *" };
 
 const D = 24 * 3600 * 1000;
+const HELD_TRIES = 4; // rev 4: a text held because the opt-out state is unknown is retried up to 3 more runs
 
 async function runTask(t) {
   const managedAlert=t.type==='escalate' && /^[a-f0-9]{64}$/.test(t.data?.tenantIdentity || '');
@@ -38,7 +39,7 @@ async function runTask(t) {
   const rec = t.data?.bookingId ? await getRecord("bookings", c.slug, t.data.bookingId) : t.data?.leadId ? await getRecord("leads", c.slug, t.data.leadId) : null;
   if (!rec || rec.status === "cancelled") return "no record";
   if (!rec.phone) return "no number";
-  if (await optedOut(rec.phone)) return "opted out";
+  if ((await optOutStatus(rec.phone)) === true) return "opted out"; // unreadable: sendSMS below holds and logs it
   const tpl = template(t.type, rec);
   if (!tpl) return "no template";
   if (["reminder_24h", "reminder_1h"].includes(t.type) && !["booked", "confirmed", "on_the_way"].includes(rec.status)) return "booking not active";
@@ -50,6 +51,7 @@ async function runTask(t) {
   if (t.type === "maintenance_reminder" && !(await getCustomer(c.slug, rec.phone)).marketingConsent) return "no marketing consent";
   const body = t.type === "lead_chase" ? tpl(c, rec, t.data.n) : tpl(c, rec);
   const r = await sendSMS({ to: rec.phone, client: c, type: t.type, body });
+  if (r.held) return "held"; // opt-out state unknown: nothing sent; the run loop keeps the task for a bounded retry
   if (r.ok || r.logged) {
     // The front desk should know what it sent when the customer replies to it.
     const conv = await getConversation(c, "sms", rec.phone);
@@ -155,7 +157,8 @@ export async function run({ forceHour, forceDay, inline, all } = {}) {
     let managedFailures=0;
     for (const { key, task } of due) {
       let retain=false;
-      try { results.push([task.type, await runTask(task)]); }
+      try { const out = await runTask(task); results.push([task.type, out]);
+        if (out === "held") { const tries = (task.heldTries || 0) + 1; if (tries < HELD_TRIES) { await put("tasks", key, { ...task, heldTries: tries }); retain = true; } else await logEvent(task.slug, "task_dropped_held", { type: task.type, tries }); } }
       catch (err) { retain=task.type==='escalate' && /^[a-f0-9]{64}$/.test(task.data?.tenantIdentity || ''); if(retain)managedFailures++; console.error("task failed", task.type, err); results.push([task.type, "error"]); try { await logEvent(task.slug, "task_error", { type: task.type, error: String(err?.message || err).slice(0, 200) }); } catch { /* ignore */ } }
       if (!retain) await del("tasks", key);
     }

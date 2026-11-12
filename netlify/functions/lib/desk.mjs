@@ -3,7 +3,7 @@
 // reschedule by reply, the follow-up timers that match the plan, the daily digest, line health.
 import { addRecord, createRecordOnce, finishStableBookingWindow, saveRecord, getRecord, scheduleTask, cancelTasks, logEvent, listRecords, list, get, del, put, getConversation, saveConversation, addToIndex, recordsFor, id, bookingWindowTaken, reserveBookingWindow, finishBookingWindow, canonicalWindow, getAvailability, assertCurrentWorkspace, listWorkspaceRecords } from "./store.mjs";
 import { AvailabilityInputError } from "./availability.mjs";
-import { notifyOwner, sendSMS, sendEmail, notifySteve, e164, optedOut, placeCall, STEVE_PHONE } from "./send.mjs";
+import { notifyOwner, sendSMS, sendEmail, notifySteve, e164, optOutStatus, placeCall, STEVE_PHONE } from "./send.mjs";
 import { createEvent, updateEvent, visitDate, windowHours, houstonISO, normalizeDate, friendlyDate } from "./calendar.mjs";
 import { PLANS, isBusinessHours, houstonNow, normalizeHours, NOBOOK_REASONS, opensLaterToday, tradeKey } from "./config.mjs";
 import { getUsage, usageView } from "./usage.mjs";
@@ -354,7 +354,8 @@ export async function bookVisit(c, input, ctx = {}) {
     if (b.consent) { b.consent = null; b.textsHeld = { at: new Date().toISOString(), reason: customerText.reason || "confirmation_not_sent" }; await saveRecord("bookings", b); }
     reminders = [];
   }
-  if (!portalOnly) noteSends(b, { ownerAlert: await alertOwner(c, ownerSummary(c, "booking", b), { type: "owner_alert" }), ...(customerText ? { customerText, reminders } : {}) });
+  const unsent = customerText && !customerText.ok && !customerText.logged ? "\nThe customer's confirmation text was not sent and no reminder texts are scheduled. Please confirm the visit with them." : "";
+  if (!portalOnly) noteSends(b, { ownerAlert: await alertOwner(c, ownerSummary(c, "booking", b) + unsent, { type: "owner_alert" }), ...(customerText ? { customerText, reminders } : {}) });
   await logEvent(c, "booking", { id: b.id, channel: ctx.channel, ...(ctx.websiteSetupCheck ? { setupCheck: true } : {}) });
   // A customer who books no longer needs a callback: close their open leads from the last 24 hours.
   const since = Date.now() - D;
@@ -523,7 +524,7 @@ export async function receivePlatformLead(c, source, { id, name, phone, email, a
   await notifyOwner(c, `${label} lead: ` + summary, { type: "owner_alert" });
   if (unmapped) await notifySteve(`${label} field names differ: ${c.business.name}`, `A ${label} post reached ${c.slug} with no recognized fields. The lead was created from the raw body (ref ${l.id}). Body:\n${JSON.stringify(raw).slice(0, 3000)}`);
   let texted = false;
-  if (p && !(await optedOut(p))) {
+  if (p && (await optOutStatus(p)) !== true) { // unreadable: sendSMS holds and logs it, texted stays false
     const first = (l.customer_name || "").split(" ")[0];
     const r = await sendSMS({ to: p, client: c, type: "text_back", body: `Hi${first ? " " + first : ""}, this is ${c.business.name}. We got your ${label} request${l.issue ? " about " + l.issue.slice(0, 80) : ""}. What is going on, and when works for a visit? We offer ${(c.windows || []).join(" or ")}. Reply STOP to opt out.` });
     texted = !!(r.ok || r.logged);
@@ -743,7 +744,8 @@ export async function ownerCommand(c, text) {
     await logEvent(c, "called", { id: b.id, kept: b.callbackDueAt ? b.calledAt <= b.callbackDueAt : null });
     return `Logged: you reached ${b.customer_name || b.phone}.`;
   }
-  const blocked = b.phone ? await optedOut(b.phone) : false;
+  // Only a confirmed opt-out stops here. An unreadable store is held by sendSMS (and by the scheduler at send time).
+  const blocked = b.phone ? (await optOutStatus(b.phone)) === true : false;
   if (cmd === "otw") {
     if (blocked) { await logEvent(c, "sms_blocked", { to: b.phone, type: "on_my_way" }); return `${b.customer_name || b.phone} opted out of texts; nothing sent.`; }
     // Persist under the booking's CAS ownership before sending; a competing move/cancel must

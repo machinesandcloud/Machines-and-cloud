@@ -7,7 +7,7 @@ import { getClient, getConversation, saveConversation, logEvent } from "./lib/st
 import { runAgent, toApiMessages } from "./lib/agent.mjs";
 import { buildSystemPrompt, BOOK_VISIT, NOTIFY_OWNER, UPDATE_VISIT, GET_AVAILABILITY } from "./lib/config.mjs";
 import { bookVisit, flagLead, upcomingBookings, confirmVisit, rescheduleVisit, cancelRequest, availabilityToolResult, deliveryNote } from "./lib/desk.mjs";
-import { sendSMS, e164, optedOut } from "./lib/send.mjs";
+import { sendSMS, e164, optOutStatus } from "./lib/send.mjs";
 
 export default async (req) => {
   const key = process.env.ADMIN_KEY;
@@ -52,7 +52,8 @@ export default async (req) => {
   const fresh = await getConversation(c, "sms", from);
   fresh.messages.push({ role: "assistant", content: done ? reply + "\n" + done : reply, at: new Date().toISOString() });
   await saveConversation(fresh);
-  if (!(await optedOut(from))) await sendSMS({ to: from, client: c, type: "reply", body: reply.slice(0, 1200) });
+  // Only a confirmed opt-out skips the reply here; an unreadable store is held and logged by sendSMS.
+  if ((await optOutStatus(from)) !== true) await sendSMS({ to: from, client: c, type: "reply", body: reply.slice(0, 1200) });
   await logEvent(c, "sms_reply", { from });
   return new Response("ok");
 };

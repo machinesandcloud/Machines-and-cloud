@@ -121,6 +121,13 @@ export async function handlePlatformSMS(req) {
     return new Response('Message handling unavailable',{status:503});
   }
 }
+// A STOP on the shared platform sender applies to every send from that sender, including
+// legacy shop texts sent through it by lib/send.mjs. Storage failure throws (fail closed).
+export async function platformSMSSuppressed(to) {
+  const config = settings(); if (!phone(to) || !phone(config.number)) return false;
+  const binding = hash(JSON.stringify([config.account,config.service,config.number])), ledger = await strictRead(STORE,KEY);
+  return ledger?.directives?.[`${binding}/${to}`]?.suppressed === true;
+}
 export async function platformSMSView({limit=60}={}) {
   if (!Number.isInteger(limit) || limit<1 || limit>100) throw new Error('Choose a bounded history view');
   const ledger = await strictRead(STORE,KEY), entries = Object.values(ledger?.entries || {});

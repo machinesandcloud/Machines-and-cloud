@@ -4,7 +4,7 @@
 // Paused or cancelled shops: the call rings the owner's cell (never the forwarded line) or hears a short message.
 // Numbers on the owner's always-ring-through list ring the cell, then record a voicemail that is texted to the owner.
 import { clientByNumber, getConversation, saveConversation, logEvent, saveClient, noteInbound } from "./lib/store.mjs";
-import { sendSMS, notifyOwner, twilioSignatureValid, e164, optedOut } from "./lib/send.mjs";
+import { sendSMS, notifyOwner, twilioSignatureValid, e164, optOutStatus } from "./lib/send.mjs";
 import { ACTIVE } from "./lib/config.mjs";
 import { cellIsForwardedLine } from "./lib/desk.mjs";
 
@@ -87,7 +87,8 @@ export default async (req) => {
   if (c.phone?.textBack !== false && from) {
     const conv = await getConversation(c, "sms", from);
     const recent = [...conv.messages].reverse().find((m) => m.system === "missed-call text-back");
-    if (await optedOut(from)) { textBack = "skipped"; skipReason = "opted_out"; await logEvent(c, "text_back_skipped", { from, reason: "opted_out" }); }
+    // Only a confirmed opt-out skips; an unreadable store is held by sendSMS and reported as not sent.
+    if ((await optOutStatus(from)) === true) { textBack = "skipped"; skipReason = "opted_out"; await logEvent(c, "text_back_skipped", { from, reason: "opted_out" }); }
     else if (recent && Date.now() - new Date(recent.at).getTime() < 24 * 3600 * 1000) { textBack = "skipped"; skipReason = "recent"; await logEvent(c, "text_back_skipped", { from, reason: "recent" }); }
     else {
       const text = c.business?.spanish
@@ -109,8 +110,11 @@ export default async (req) => {
     : skipReason === "opted_out" ? "They opted out, so no text-back. Please call them back."
     : skipReason === "recent" ? "They were already sent a text-back in the last 24 hours, so no new one."
     : !from ? "No caller ID, so no text-back and no number to call back." : "Text-back is off for this line, so no text-back. Please call them back.";
-  try { await notifyOwner(c, `${name} front desk: missed call from ${from || "unknown"}. ${ownerLine}`, { type: "owner_note" }); }
-  catch (err) { console.error("missed-call owner alert failed", err); await logEvent(c, "owner_alert_failed", { from, kind: "missed_call" }); }
+  // 12-03: notifyOwner now catches a thrown owner text (sms_unconfirmed) and still tries the email; log it as a throw was.
+  let alerts = null;
+  try { alerts = await notifyOwner(c, `${name} front desk: missed call from ${from || "unknown"}. ${ownerLine}`, { type: "owner_note" }); }
+  catch (err) { console.error("missed-call owner alert failed", err); }
+  if (!alerts || alerts.some((r) => r?.reason === "sms_unconfirmed")) await logEvent(c, "owner_alert_failed", { from, kind: "missed_call" });
   const say = textBack === "sent"
     ? (c.business?.spanish
       ? `<Say voice="Polly.Joanna">Thanks for calling ${esc(name)}. We are on a job right now. We are texting you this second so we can get you scheduled.</Say><Say voice="Polly.Lupe" language="es-US">Gracias por llamar. Le enviamos un mensaje de texto ahora mismo.</Say>`

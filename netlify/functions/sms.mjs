@@ -5,7 +5,7 @@ import { clientByNumber, getClient, get, getConversation, saveConversation, logE
 import { runAgent, toApiMessages } from "./lib/agent.mjs";
 import { buildSystemPrompt, BOOK_VISIT, NOTIFY_OWNER, UPDATE_VISIT, ACTIVE } from "./lib/config.mjs";
 import { bookVisit, flagLead, ownerCommand, upcomingBookings, confirmVisit, rescheduleVisit, cancelRequest, noteReviewReply, noteConsentReply, when, dateEs, winEs } from "./lib/desk.mjs";
-import { sendSMS, twilioSignatureValid, e164, recordOptOut, clearOptOut, notifyOwner, optedOut } from "./lib/send.mjs";
+import { sendSMS, twilioSignatureValid, e164, recordOptOut, clearOptOut, notifyOwner, optOutStatus } from "./lib/send.mjs";
 
 export const config = { path: "/api/sms" };
 
@@ -16,6 +16,11 @@ const STOP_RE = /^\s*(stop|stopall|unsubscribe|end|quit|cancel|revoke|opt\s*out|
 const STOP_PHRASE = /\b(stop texting|stop messaging|do not text|don't text|no more texts|remove me|no me (escriban?|manden?|env[ií]en?|texteen?)( m[aá]s)?( mensajes)?|no m[aá]s mensajes|dejen? de (escribir|mandar|enviar)|no quiero m[aá]s mensajes)\b/i;
 const SPANISH_STOP = /\b(alto|parar|cancelar|basta|detener|no me (escriban?|manden?|env[ií]en?|texteen?)|no m[aá]s mensajes|dejen? de|no quiero m[aá]s)\b/i;
 const START_RE = /^\s*(start|unstop|yes|empezar|iniciar|s[ií])\s*[.!]*\s*$/i;
+// Rev 4 (QA-12 r3): Twilio's default long-code opt-out keywords, matched exactly (whitespace only). Twilio confirms and
+// blocks these at the sender itself; phrases, ALTO/PARAR/BASTA and punctuated forms rely on our store alone.
+const TWILIO_STOP = /^\s*(stop|stopall|unsubscribe|end|quit|cancel|revoke|optout)\s*$/i;
+// While the opt-out state is unknown only an explicit opt-in keyword re-subscribes: "yes"/"sí" can answer a question.
+const START_KEYWORD = /^\s*(start|unstop|empezar|iniciar)\s*[.!]*\s*$/i;
 
 async function resolveClient(to, from) {
   let c = await clientByNumber(to);
@@ -38,12 +43,40 @@ export default async (req) => {
   if (!c || !body) return twiml("");
   const name = c.business?.name || "We";
 
-  // Owner commands
-  if (c.owner?.phone && from === c.owner.phone) {
-    if (/^help$/i.test(body)) return twiml(HELP);
+  const isOwner = !!c.owner?.phone && from === c.owner.phone;
+
+  // Opt-out and opt-in come before anything else (FCC: any reasonable means), including texts
+  // from the owner's phone and from always-ring-through numbers. The owner's phone uses only the
+  // whole-message keywords, so a command or free-text reply is never read as an opt-out.
+  if (STOP_RE.test(body) || !isOwner && STOP_PHRASE.test(body)) {
+    // Already out: one confirmation is all CTIA allows, so repeats are silent. An unreadable store (null) confirms again.
+    if ((await optOutStatus(from)) === true) return twiml("");
+    const stored = await recordOptOut(from, c.slug, body.slice(0, 80));
+    const n = await cancelTasksForNumber(from);
+    await logEvent(c, "opt_out", { from, cancelled: n, viaTwilio: !!params.OptOutType, ...(isOwner ? { owner: true } : {}) });
+    await notifyOwner(c, isOwner ? `${name} front desk: your phone ${from} opted out of texts. Alerts now go to your email only. Reply START to resume.` : `${name} front desk: ${from} opted out of texts. Nothing more will be sent to them.`, { type: "owner_note" });
+    // "cancel" from someone with a visit on the books is also a cancellation request: the owner decides.
+    let told = "";
+    if (!isOwner && /^\s*cancel\b/i.test(body) && ACTIVE.includes(c.status)) {
+      const visits = await upcomingBookings(c, from);
+      for (const b of visits) await cancelRequest(c, b);
+      if (visits.length) told = ` We've told ${c.owner?.name || "the owner"} about your visit.`;
+    }
+    if (params.OptOutType) return twiml(""); // Twilio already sent the carrier-standard confirmation
+    // Not stored and not a keyword Twilio enforces (a phrase, ALTO...): do not claim it is done; ask for STOP.
+    if (!stored && !TWILIO_STOP.test(body)) return twiml(SPANISH_STOP.test(body) ? `${name}: no pudimos completar su solicitud ahora. Responda STOP para no recibir más mensajes.` : `${name}: we could not complete your request right now. Please reply STOP to stop all texts from this number.`);
+    if (SPANISH_STOP.test(body)) return twiml(`${name}: ya no recibirá más mensajes de este número.${told ? ` Le avisamos a ${c.owner?.name || "el dueño"} sobre su visita.` : ""} Responda EMPEZAR para volver a recibirlos.`);
+    return twiml(`${name}: you're unsubscribed and will get no more texts from this number.${told} Reply START to resume.`);
+  }
+  const optState = await optOutStatus(from), isOptedOut = optState !== false, unknownState = optState === null;
+  if (isOptedOut && (unknownState ? START_KEYWORD.test(body) : START_RE.test(body))) { await clearOptOut(from); await logEvent(c, "opt_in", { from }); return twiml(/^\s*(empezar|iniciar|s[ií])/i.test(body) ? `${name}: volverá a recibir nuestros mensajes. Responda STOP o ALTO cuando quiera.` : `${name}: you're subscribed again. Reply STOP any time.`); }
+
+  // Owner commands. An opted-out owner's command still runs, but no text is sent back.
+  if (isOwner) {
+    if (/^help$/i.test(body)) return twiml(isOptedOut ? "" : HELP);
     const reply = await ownerCommand(c, body);
-    if (reply) { await logEvent(c, "owner_command", { body }); return twiml(reply); }
-    return twiml(`Did not catch that. ${HELP}`);
+    if (reply) { await logEvent(c, "owner_command", { body }); return twiml(isOptedOut ? "" : reply); }
+    return twiml(isOptedOut ? "" : `Did not catch that. ${HELP}`);
   }
 
   // Numbers on the owner's always-ring-through list: relay the text, never answer it.
@@ -53,28 +86,17 @@ export default async (req) => {
     return twiml("");
   }
 
-  // Opt-out and opt-in come before anything else (FCC: any reasonable means).
-  if (STOP_RE.test(body) || STOP_PHRASE.test(body)) {
-    if (await optedOut(from)) return twiml(""); // already out: one confirmation is all CTIA allows, so repeats are silent
-    await recordOptOut(from, c.slug, body.slice(0, 80));
-    const n = await cancelTasksForNumber(from);
-    await logEvent(c, "opt_out", { from, cancelled: n, viaTwilio: !!params.OptOutType });
-    await notifyOwner(c, `${name} front desk: ${from} opted out of texts. Nothing more will be sent to them.`, { type: "owner_note" });
-    // "cancel" from someone with a visit on the books is also a cancellation request: the owner decides.
-    let told = "";
-    if (/^\s*cancel\b/i.test(body) && ACTIVE.includes(c.status)) {
-      const visits = await upcomingBookings(c, from);
-      for (const b of visits) await cancelRequest(c, b);
-      if (visits.length) told = ` We've told ${c.owner?.name || "the owner"} about your visit.`;
-    }
-    if (params.OptOutType) return twiml(""); // Twilio already sent the carrier-standard confirmation
-    if (SPANISH_STOP.test(body)) return twiml(`${name}: ya no recibirá más mensajes de este número.${told ? ` Le avisamos a ${c.owner?.name || "el dueño"} sobre su visita.` : ""} Responda EMPEZAR para volver a recibirlos.`);
-    return twiml(`${name}: you're unsubscribed and will get no more texts from this number.${told} Reply START to resume.`);
+  if (unknownState) {
+    // Rev 4 (QA-12 r3 F4): no reply and no model while the opt-out state is unknown, but keep the message and tell the
+    // owner. notifyOwner emails even when the owner text is held (settle: 04's flag; without 04 it always does).
+    const conv = await getConversation(c, "sms", from);
+    conv.messages.push({ role: "user", content: body.slice(0, 1600), at: new Date().toISOString(), held: "optout_unreadable" });
+    await saveConversation(conv).catch((e) => console.error("held inbound not saved", e?.message));
+    await logEvent(c, "inbound_held", { from, reason: "optout_unreadable" }).catch(() => {});
+    await notifyOwner(c, `${name} front desk: a text from ${from} could not be answered automatically (texting is paused for a moment). Please reply yourself: "${body.slice(0, 300)}"`, { type: "owner_alert", settle: true }).catch(() => {});
+    return twiml("");
   }
-  if (await optedOut(from)) {
-    if (START_RE.test(body)) { await clearOptOut(from); await logEvent(c, "opt_in", { from }); return twiml(/^\s*(empezar|iniciar|s[ií])/i.test(body) ? `${name}: volverá a recibir nuestros mensajes. Responda STOP o ALTO cuando quiera.` : `${name}: you're subscribed again. Reply STOP any time.`); }
-    return twiml(""); // opted out: no replies, no model
-  }
+  if (isOptedOut) return twiml(""); // opted out: no replies, no model
 
   // Paused or cancelled: one reply per number per 24 hours pointing at the main line, no model.
   if (!ACTIVE.includes(c.status)) {
