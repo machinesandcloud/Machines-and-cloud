@@ -19,13 +19,21 @@ export function calendarWallInstant(date,minutes=0,zone=ZONE) {
   const target=Date.parse(date+'T00:00:00Z')+minutes*60000;
   let instant=target,formatter;
   try{formatter=new Intl.DateTimeFormat('en-US',{timeZone:zone,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'});}catch{fail();}
-  for(let n=0;n<6;n++){const p=Object.fromEntries(formatter.formatToParts(new Date(instant)).filter(v=>v.type!=='literal').map(v=>[v.type,Number(v.value)])),local=Date.UTC(p.year,p.month-1,p.day,p.hour,p.minute,p.second);if(local===target)return instant;instant+=target-local;}
-  fail();
+  const localAt=t=>{const p=Object.fromEntries(formatter.formatToParts(new Date(t)).filter(v=>v.type!=='literal').map(v=>[v.type,Number(v.value)]));return Date.UTC(p.year,p.month-1,p.day,p.hour,p.minute,p.second);};
+  for(let n=0;n<6;n++){const local=localAt(instant);if(local===target)return instant;instant+=target-local;}
+  // A spring-forward gap has no such wall time: use the first instant after the gap
+  // (02:00-02:59 all become 03:00 daylight time), which keeps wall-time order.
+  let lo=target-(localAt(target+86400000)-(target+86400000)),hi=target-(localAt(target-86400000)-(target-86400000));
+  if(!(localAt(lo)<target&&localAt(hi)>target&&hi-lo<=3*3600000))fail();
+  while(hi-lo>60000){const mid=lo+Math.floor((hi-lo)/120000)*60000;if(localAt(mid)<target)lo=mid;else hi=mid;}
+  return hi;
 }
 export function calendarWindowInterval(date,window) {
   const p=/^(\d+)-(\d+)$/.exec(canonicalWindow(window));
   if(!p||Number(p[2])<=Number(p[1]))fail();
-  return {start:calendarWallInstant(date,Number(p[1])),end:calendarWallInstant(date,Number(p[2]))};
+  const start=calendarWallInstant(date,Number(p[1])),end=calendarWallInstant(date,Number(p[2]));
+  if(end<=start)fail(); // A window wholly inside a spring-forward gap does not exist that night.
+  return {start,end};
 }
 function eventInstant(value,zone) {
   if(value?.date&&value.dateTime===undefined)return calendarWallInstant(value.date,0,zone);

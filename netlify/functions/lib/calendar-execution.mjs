@@ -123,6 +123,13 @@ export async function reserveCalendarExecution(c, action, options = {}) {
   return receipt;
 }
 export async function guardedCalendarFetch(c, action, url, init, options = {}) {
+  // Any rejection before fetch means the request never left this server.
+  try { await prepareCalendarFetch(c, action, url, init, options); }
+  catch (error) { if (error && typeof error === 'object') error.dispatched = false; throw error; }
+  // Redirects could create uncounted requests or replay credentials to another host.
+  return fetch(url, { ...init, redirect: 'error' });
+}
+async function prepareCalendarFetch(c, action, url, init, options = {}) {
   options = { ...options, localOnly: false }; // A local queue admission never authorizes transport.
   if (options.deadline !== undefined && (!Number.isFinite(options.deadline) || Date.now() >= options.deadline)) throw new CalendarExecutionError('calendar_deadline_reached');
   if (action === 'oauthStart' || !ACTIONS.includes(action)) throw new CalendarExecutionError('calendar_action_invalid');
@@ -145,6 +152,4 @@ export async function guardedCalendarFetch(c, action, url, init, options = {}) {
   if (options.deadline !== undefined && Date.now() >= options.deadline) throw new CalendarExecutionError('calendar_deadline_reached');
   if (process.env.CALENDAR_CONNECTION_ENABLED !== 'true' || deliveryAction && (process.env.CALENDAR_DELIVERY_ENABLED !== 'true' || (process.env.SERVICE_WORKER_KEY || '').length < 32)) throw new CalendarExecutionError('calendar_gate_closed');
   if(["eventCreate","eventUpdate"].includes(action))await assertPaidServiceAuthority(c,"calendar");
-  // Redirects could create uncounted requests or replay credentials to another host.
-  return fetch(url, { ...init, redirect: 'error' });
 }

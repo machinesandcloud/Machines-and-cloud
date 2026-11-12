@@ -22,6 +22,19 @@ const ownerTag = (tenantIdentity, bookingId) => hash(`${tenantIdentity}:${bookin
 const source = booking => ({ status: ["cancelled", "canceled"].includes(booking.status) ? "cancelled" : "active", customer_name: String(booking.customer_name || ""), phone: String(booking.phone || ""), address: String(booking.address || ""), issue: String(booking.issue || ""), date: String(booking.date || ""), window: String(booking.window || ""), urgency: String(booking.urgency || ""), notes: String(booking.notes || "") });
 const sourceRevision = booking => hash(JSON.stringify(source(booking)));
 const keyFor = (slug, bookingId) => `${slug}/${bookingId}`;
+// An unconfirmed create older than the claim lease is no longer being sent by this server. It reuses
+// the deterministic ID, but Google answers 409 for an ID it already holds only as best effort: its
+// documentation does not guarantee collision detection at creation time. So a re-POST also needs a
+// second absent read at least 5 minutes after the first, by which a lagging commit is expected to be
+// visible. The remaining duplicate window is an accepted residual (PROPOSALS.md, Revision 2).
+// Google also purges a deleted event's record eventually; after that a 404 cannot tell "never
+// committed" from "committed, then removed by the owner". An unconfirmed create is therefore re-sent
+// automatically only within a week of its latest send, or after the owner edits the visit.
+const CREATE_SETTLE_MS = 60000, CANCEL_ABSENCE_RECHECK_MS = 120000, CREATE_ABSENCE_RECHECK_MS = 300000, CREATE_REPOST_MAX_AGE_MS = 7 * 86400000;
+const createSettled = attempt => ["sending", "uncertain", "acknowledged"].includes(attempt?.state) && Date.parse(attempt.startedAt) <= Date.now() - CREATE_SETTLE_MS;
+const createExpired = (attempt, job) => attempt.version === job.version && Date.parse(attempt.startedAt) <= Date.now() - CREATE_REPOST_MAX_AGE_MS;
+const expiredCreate = () => new CalendarError("creation_unconfirmed_expired", "Google never confirmed an earlier Calendar event for this visit, and it is more than a week old. It is not sent again automatically, so an event you removed in Google is not re-added. Check your Google calendar; to send this visit again, edit it in Schedule.", 503);
+const OWNER_ACTION_REASONS = new Set(["creation_unconfirmed_expired"]);
 function bodyFor(job) {
   const b = job.desired, clock = canonicalWindow(b.window), parts = /^(\d+)-(\d+)$/.exec(clock);
   const [start, end] = parts ? parts.slice(1).map(Number) : [NaN, NaN];
@@ -48,7 +61,12 @@ export async function calendarDeliveryView(client) {
   const projected = jobs.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)).map(job => dto(job, connection));
   const current = projected.filter(job => job.currentConnection), confirmed = current.filter(job => job.deliveryConfirmed).sort((a,b) => b.verifiedAt.localeCompare(a.verifiedAt));
   const pending = current.filter(job => !['synced','cancelled'].includes(job.state));
-  return { enabled: calendarDeliveryEnabled() && await calendarExecutionAvailable(client, { actions:['tokenRefresh','calendarRead'],anyActions:['eventCreate','eventUpdate','eventDelete'] }), counts, total: jobs.length, verification: { delivered: confirmed.length > 0, verifiedAt: confirmed[0]?.verifiedAt || null, attention: pending.some(job => !!job.reasonCode), paymentHoldOnly: pending.length > 0 && pending.every(job => job.reasonCode === 'paid_service_unconfirmed'), pending: pending.length > 0 }, jobs: projected.slice(0, 30), scope: "Latest 30 calendar jobs; counts include all retained jobs. Connected owned-calendar busy time is checked before new visit reservations and calendar creates or moves; saved arrival windows remain yours." };
+  // Saved changes for events on a previous (or now disconnected) calendar cannot reach Google.
+  // Only visits dated today or later count: a passed visit no longer needs the owner to fix Google.
+  const today = houstonToday(), elsewhere = jobs.filter(job => (!connection || job.targetId !== connection.targetId) && !['synced','cancelled'].includes(job.state) && String(job.desired?.date || '') >= today);
+  // Who acts: elsewhere events and expired creates need the owner in Google; other reasons are ours.
+  const ownerCheck = pending.filter(job => OWNER_ACTION_REASONS.has(job.reasonCode)).length, currentAttention = pending.some(job => !!job.reasonCode && !OWNER_ACTION_REASONS.has(job.reasonCode));
+  return { enabled: calendarDeliveryEnabled() && await calendarExecutionAvailable(client, { actions:['tokenRefresh','calendarRead'],anyActions:['eventCreate','eventUpdate','eventDelete'] }), counts, total: jobs.length, verification: { delivered: confirmed.length > 0, verifiedAt: confirmed[0]?.verifiedAt || null, attention: pending.some(job => !!job.reasonCode) || elsewhere.length > 0, undeliveredElsewhere: elsewhere.length, ownerCheckNeeded: ownerCheck, currentAttention, paymentHoldOnly: pending.length > 0 && pending.every(job => job.reasonCode === 'paid_service_unconfirmed'), pending: pending.length > 0 }, jobs: projected.slice(0, 30), scope: "Latest 30 calendar jobs; counts include all retained jobs. Connected owned-calendar busy time is checked before new visit reservations and calendar creates or moves; saved arrival windows remain yours." };
 }
 export async function queueCalendarBooking(client, booking) {
   await supportedClient(client);
@@ -66,9 +84,13 @@ export async function queueCalendarBooking(client, booking) {
     if (saved.delivery?.tenantIdentity !== calendarTenantIdentity(current) || !belongsToWorkspace(current, saved) || saved.websiteSetupCheck || saved.simulation) return { result: null };
     const connection = await getCalendarConnection(current.slug), revision = sourceRevision(saved);
     if (!job && (!connection || !ACTIVE.has(saved.status) || saved.date < houstonToday())) return { result: null };
-    if (job?.sourceRevision === revision && job.lifecycleVersion === (current.operationLifecycleVersion || 0) && (!connection || job.connectionId === connection.connectionId)) return { result: job };
+    const unchanged = job?.sourceRevision === revision && job.lifecycleVersion === (current.operationLifecycleVersion || 0);
+    if (unchanged && (!connection || job.connectionId === connection.connectionId)) return { result: job };
+    // A reconnect alone neither revisits finished history nor bumps the event version, so
+    // reconciliation reads the event and leaves the owner's own Google edits in place.
+    if (unchanged && (job.state === "synced" && saved.date < houstonToday() || job.state === "cancelled" && job.desired?.status === "cancelled")) return { result: job };
     const targetId = job?.targetId || connection?.targetId;
-    const next = { ...(job || {}), slug: current.slug, storageKey: key, tenantIdentity: calendarTenantIdentity(current), bookingId: saved.id, eventId: calendarEventId(current, saved.id), targetId, connectionId: connection?.connectionId || job?.connectionId || null, targetHash: job?.targetHash || connection?.targetHash, sourceRevision: revision, desired: source(saved), version: (job?.version || 0) + 1, lifecycleVersion: current.operationLifecycleVersion || 0, state: "queued", attempts: 0, claim: null, nextAttemptAt: null, reasonCode: null, detail: "Saved visit is waiting to sync.", createdAt: job?.createdAt || stamp(), updatedAt: stamp(), completedAt: null };
+    const next = { ...(job || {}), slug: current.slug, storageKey: key, tenantIdentity: calendarTenantIdentity(current), bookingId: saved.id, eventId: calendarEventId(current, saved.id), targetId, connectionId: connection?.connectionId || job?.connectionId || null, targetHash: job?.targetHash || connection?.targetHash, sourceRevision: revision, desired: source(saved), version: (job?.version || 0) + (unchanged ? 0 : 1), lifecycleVersion: current.operationLifecycleVersion || 0, state: "queued", attempts: 0, claim: null, nextAttemptAt: null, reasonCode: null, detail: "Saved visit is waiting to sync.", createdAt: job?.createdAt || stamp(), updatedAt: stamp(), completedAt: null };
     return { value: next, result: next };
   });
   return result ? dto(result) : null;
@@ -87,7 +109,13 @@ async function requestGoogle(job, connection, token, method, eventId, body, etag
   let response;
   const client = await strictRead('clients', job.slug);
   try { response = await guardedCalendarFetch(client, ({ GET:'calendarRead',POST:'eventCreate',PATCH:'eventUpdate',DELETE:'eventDelete' })[method], url, { method, headers: { Authorization: `Bearer ${token}`, ...(body ? { "Content-Type": "application/json" } : {}), ...(etag ? { "If-Match": etag } : {}) }, ...(body ? { body: JSON.stringify(body) } : {}), signal: AbortSignal.timeout(Math.max(1, deadline - Date.now())) }, { targetId: connection.targetId, bookingId: job.bookingId, deadline, authorize: async () => { const current = await latestJob(job); return calendarDeliveryEnabled() && current.connectionId === connection.connectionId; } }); }
-  catch (error) { if(error instanceof PaidServiceAuthorityError)throw paymentError(error); if (error.code?.startsWith('calendar_')) throw new CalendarError(error.code, error.message, 503); throw new CalendarError("delivery_uncertain", "Google did not confirm the change. The next attempt will check the same event reference before writing.", 503); }
+  catch (error) {
+    const unsent = error?.dispatched === false;
+    if (unsent && error instanceof CalendarError) throw error;
+    const wrapped = error instanceof PaidServiceAuthorityError ? paymentError(error) : error.code?.startsWith('calendar_') ? new CalendarError(error.code, error.message, 503) : unsent ? new CalendarError("storage_or_provider_unavailable", "Calendar work is saved. No Google change was sent; it will be tried again.", 503) : new CalendarError("delivery_uncertain", "Google did not confirm the change. The next attempt will check the same event reference before writing.", 503);
+    if (unsent) wrapped.dispatched = false;
+    throw wrapped;
+  }
   const data = await response.json().catch(() => ({}));
   return { response, data };
 }
@@ -98,7 +126,7 @@ async function latestJob(job) {
   if (!client || !isSupportedSelfServiceClient(client) || calendarTenantIdentity(client) !== job.tenantIdentity || !["testing", "live"].includes(client.status) || (client.operationLifecycleVersion || 0) !== job.lifecycleVersion) throw new CalendarError("workspace_changed", "Workspace status changed. Refresh calendar setup before resuming.");
   if (!booking || booking.websiteSetupCheck || booking.simulation || booking.delivery?.tenantIdentity !== job.tenantIdentity || !belongsToWorkspace(client, booking) || sourceRevision(booking) !== job.sourceRevision) throw new CalendarError("superseded", "A newer saved visit will be synced instead.");
   if (!connection) throw new CalendarError("reconnect_required", "Connect Calendar to resume saved work.");
-  if (connection.targetId !== job.targetId) throw new CalendarError("calendar_target_changed", "A different Google calendar is connected. Existing event references are retained for review.");
+  if (connection.targetId !== job.targetId) throw new CalendarError("calendar_target_changed", "A different Google calendar is now connected. This visit's event stays on the calendar connected before, and changes or cancellations no longer reach it. Update or remove that event in Google yourself.");
   await assertCalendarExecution(client, { targetId: connection.targetId, bookingId: job.bookingId });
   return connection;
 }
@@ -115,7 +143,15 @@ async function reconcile(job, deadline) {
   if (job.desired.status === "cancelled") {
     if ([404, 410].includes(remote.response.status)) {
       const latest = await strictRead("calendar_deliveries", job.storageKey);
-      if (latest?.createAttempt && ["sending", "uncertain", "acknowledged"].includes(latest.createAttempt.state)) throw new CalendarError("creation_unconfirmed", "An earlier calendar creation is still unconfirmed. Cancellation will keep checking the same reference; no second event will be created.", 503);
+      const prior = latest?.createAttempt;
+      if (prior && ["sending", "uncertain", "acknowledged"].includes(prior.state)) {
+        // A settled, unconfirmed create still absent on a second read at least 2 minutes later is
+        // treated as never committed. A client abort does not stop a request Google already received,
+        // so this is a strong likelihood, not a guarantee; nothing is ever POSTed on this path.
+        if (createSettled(prior) && Date.parse(prior.absentAt) <= Date.now() - CANCEL_ABSENCE_RECHECK_MS) return { cancelled: true };
+        if (createSettled(prior) && !prior.absentAt) await atomicUpdate("calendar_deliveries", job.storageKey, row => row?.createAttempt?.token === prior.token && !row.createAttempt.absentAt ? { value: { ...row, createAttempt: { ...row.createAttempt, absentAt: stamp() } } } : {});
+        throw new CalendarError("creation_unconfirmed", "An earlier calendar creation is still unconfirmed. Cancellation will check the same reference again shortly; no second event will be created.", 503);
+      }
       return { cancelled: true };
     }
     if (remote.response.ok && remote.data.status === "cancelled") {
@@ -144,26 +180,33 @@ async function reconcile(job, deadline) {
   }
   const body = bodyFor(job);
   if (remote.response.status === 404) {
+    const pending = (await strictRead("calendar_deliveries", job.storageKey))?.createAttempt;
+    if (pending && pending.state !== "observed" && createSettled(pending) && createExpired(pending, job)) throw expiredCreate();
+    if (pending && pending.state !== "observed" && createSettled(pending) && !pending.absentAt) await atomicUpdate("calendar_deliveries", job.storageKey, row => row?.createAttempt?.token === pending.token && !row.createAttempt.absentAt ? { value: { ...row, createAttempt: { ...row.createAttempt, absentAt: stamp() } } } : {});
+    // Not yet re-POSTable: skip the busy read and keep the same reference under check.
+    const recheck = await strictRead("calendar_deliveries", job.storageKey), settled = recheck?.createAttempt;
+    if (settled && settled.state !== "observed" && !recheck.receipt && !(createSettled(settled) && Date.parse(settled.absentAt) <= Date.now() - CREATE_ABSENCE_RECHECK_MS)) throw new CalendarError("creation_unconfirmed", "An earlier calendar creation is unconfirmed. The same reference will be checked again shortly; no second event will be created.", 503);
     const client=await strictRead('clients',job.slug);
     if(!await checkCalendarBookingWindow(client,job.desired.date,job.desired.window,job.bookingId,{accessToken:token,deadline}))throw new CalendarError('calendar_conflict','A conflicting calendar appointment appeared. Your saved visit is retained; no Google event was created. Calendar delivery will check again.',503);
     connection = await latestJob(job);
     const createToken = randomBytes(16).toString("hex");
     await atomicUpdate("calendar_deliveries", job.storageKey, async row => {
       if (!row || row.version !== job.version || row.claim?.token !== job.claim.token) throw new CalendarError("superseded", "A newer saved visit will be synced instead.");
-      if (row.createAttempt) throw new CalendarError(row.createAttempt.state === "observed" || row.receipt ? "remote_event_deleted" : "creation_unconfirmed", row.createAttempt.state === "observed" || row.receipt ? "The previously observed calendar event is missing. Its reference is retained for review." : "An earlier calendar creation is unconfirmed. The same reference will be checked; no second event will be created.", 503);
+      if (row.createAttempt && row.createAttempt.state !== "observed" && !row.receipt && createSettled(row.createAttempt) && createExpired(row.createAttempt, job)) throw expiredCreate();
+      if (row.createAttempt && (row.createAttempt.state === "observed" || row.receipt || !createSettled(row.createAttempt) || !(Date.parse(row.createAttempt.absentAt) <= Date.now() - CREATE_ABSENCE_RECHECK_MS))) throw new CalendarError(row.createAttempt.state === "observed" || row.receipt ? "remote_event_deleted" : "creation_unconfirmed", row.createAttempt.state === "observed" || row.receipt ? "The previously observed calendar event is missing. Its reference is retained for review." : "An earlier calendar creation is unconfirmed. The same reference will be checked; no second event will be created.", 503);
       // A known payment hold must not become evidence of an uncertain create.
       try{await assertPaidServiceAuthority(client,'calendar');}catch(error){throw paymentError(error);}
-      return { value: { ...row, createAttempt: { token: createToken, version: job.version, state: "sending", startedAt: stamp() } } };
+      return { value: { ...row, createAttempt: { token: createToken, version: job.version, state: "sending", startedAt: stamp(), ...(row.createAttempt ? { retries: (row.createAttempt.retries || 0) + 1, prior: { ...row.createAttempt, prior: undefined } } : {}) } } };
     });
     let inserted;
     try { inserted = await requestGoogle(job, connection, token, "POST", null, { id: job.eventId, ...body }, null, deadline); }
     catch (error) {
-      if (["calendar_budget_exhausted","paid_service_unconfirmed","workspace_inactive"].includes(error.code)) {
-        // Reservation rejects before fetch. Remove only this invocation's
-        // undispatched marker; a prior or actually dispatched create stays retained.
+      if (error.dispatched === false) {
+        // Every rejection before fetch (deadline, gate, budget, payment, superseded) sent nothing.
+        // Remove only this invocation's undispatched marker; a dispatched create stays retained.
         await atomicUpdate("calendar_deliveries", job.storageKey, row => {
-          if (row?.createAttempt?.token !== createToken || row.createAttempt.state !== "sending" || row.version!==job.version || row.sourceRevision!==job.sourceRevision || row.claim?.token!==job.claim.token || row.createAttempt.version!==job.version) return {};
-          const value = { ...row }; delete value.createAttempt; return { value };
+          if (row?.createAttempt?.token !== createToken || row.createAttempt.state !== "sending") return {};
+          const value = { ...row }; if (row.createAttempt.prior) value.createAttempt = row.createAttempt.prior; else delete value.createAttempt; return { value };
         });
       } else await recordCreateState(job, createToken, "uncertain");
       throw error;
@@ -217,7 +260,7 @@ async function processJob(key, deadline) {
   const budgetWait = failure?.code === "calendar_budget_exhausted" && calendarExecutionPolicy()?.mode === "self_service";
   await atomicUpdate("calendar_deliveries", key, row => {
     if (!row || row.version !== job.version || row.claim?.token !== token) return {};
-    const permanent = failure && ["event_ownership_conflict", "event_etag_missing", "remote_event_deleted", "calendar_target_changed", "invalid_booking"].includes(failure.code);
+    const permanent = failure && ["event_ownership_conflict", "event_etag_missing", "remote_event_deleted", "calendar_target_changed", "invalid_booking", "creation_unconfirmed_expired"].includes(failure.code);
     const waiting = failure && ["reconnect_required", "workspace_changed", "calendar_consent_required"].includes(failure.code);
     const superseded = failure?.code === "superseded";
     const state = !failure ? (result.cancelled ? "cancelled" : "synced") : budgetWait || conflictWait || paymentWait ? "queued" : permanent || row.attempts >= 5 ? "needs_attention" : waiting ? "waiting_connection" : "retry";
