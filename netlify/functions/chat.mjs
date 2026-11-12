@@ -17,6 +17,7 @@ import { getSalesAllowance, reserveSalesTurn } from "./lib/sales-budget.mjs";
 import { claimWebsiteTurn, validateWebsiteTurn, websiteActionId, websiteRecordContext, noteWebsiteRecord, finishWebsiteTurn, failWebsiteTurn, WebsiteInstallationError, exactWebsiteOrigin } from './lib/website-installation.mjs';
 
 import { WorkspaceIdentityError } from './lib/workspace-identity.mjs';
+import { bindWebConversation, forkWebConversation, forkedTurn, claimWebConversation, grantRecoveredAccess, accessHeaders } from './lib/conversation-access.mjs';
 import { savedPortalAcknowledgment } from "./lib/self-service-ack.mjs";
 import { appointmentTextInvitation } from './lib/appointment-texts.mjs';
 // Proposal 10: a separate import line, so the config/desk import lines that other proposals edit stay untouched.
@@ -122,9 +123,17 @@ export default async (req, context) => {
       if (!clientOriginAllowed(c, origin)) return refused(origin, body, "forbidden", "Website chat is not available on this page. Please contact the shop directly.");
       if (!["testing", "live"].includes(c.status)) return refused(origin, body, c.status === "paused" ? "paused" : "not_live");
     }
-    const contact = String(body.contact || "anon").slice(0, 60).replace(/[^a-zA-Z0-9_-]/g, "");
+    let contact = String(body.contact || "anon").slice(0, 60).replace(/[^a-zA-Z0-9_-]/g, "");
     const incoming = sanitizeMessages(body?.messages);
-    if (!incoming) return json({ error: "invalid_messages" }, 400);
+    // Rejected before any read or write, so it is truthfully "not processed"; readable cross-origin so a widget never keeps
+    // a pending turn for it (an old widget tab that kept an unanswered message sends two user messages in a row).
+    if (!incoming) return json({ error: "invalid_messages", turnNotProcessed: true, message: "This chat needs to restart. Please reload the page and send your message again." }, 400, cors(origin));
+    // Rev 6: the legacy owner test line has no turn ledger either; its recoverTurn is refused too (web: see the binding below).
+    const RECOVERY_UNAVAILABLE = "We can't check a saved reply for this chat. Please contact the shop before sending the request again.";
+    // Rev 7 (QA09 r6 R6-3): a tokenless legacy recoverTurn is what a pre-token (old) widget tab sends. That widget keeps its strip and
+    // a disabled box after any 409 that is not turnNotProcessed; a reload loads the current widget, which retires the strip. Say so.
+    const RELOAD_HINT = ' If this window stops responding, reload the page.';
+    if (channel === 'test' && !isSelfServiceClient(c) && body.recoverTurn === true) return json({ error: 'conversation_recovery_unavailable', message: RECOVERY_UNAVAILABLE }, 409, cors(origin));
     if (body.websiteCheck !== undefined && (!isSelfServiceClient(c) || isOwner || channel !== 'web')) return json({ error: 'invalid_website_check', message: 'Use the installed public widget for a website setup check.' }, 400, cors(origin));
     const fence = async () => {
       const current = await assertCurrentWorkspace(c);
@@ -137,25 +146,76 @@ export default async (req, context) => {
     let websiteContext = null;
     try { websiteContext = await claimWebsiteTurn(c, body.websiteCheck, contact, origin); }
     catch (error) { if (error instanceof WebsiteInstallationError) return json({ error: error.code, message: error.message }, error.status, cors(origin)); return json({ error: 'website_check_unavailable' }, 503, cors(origin)); }
-    let conv, ordinaryTurnId=null;
+    let conv, ordinaryTurnId=null, access=null;
+    // Responses after binding carry the conversation id/token the widget must use next (lib/conversation-access.mjs).
+    const hdrs = () => ({ ...cors(origin), ...accessHeaders(origin, access) });
     if (channel !== 'test') {
       try {
         conv = await getConversation(c, channel, contact);
+        // Ordinary website turns: the contact id alone never unlocks history (lib/conversation-access.mjs). A setup check
+        // is bound by its challenge instead. On a mismatch the presented conversation is never loaded into the model and
+        // never appended to; only read-only turn-ledger answers about this exact turnId come from it.
+        if (channel === 'web' && !websiteContext) {
+          // Rev 4 (QA09 r3 N1): the legacy window binds to the platform-supplied client address only. The rate limiter's
+          // x-nf-client-connection-ip fallback is a request header a caller can set, so it is never used here; with no
+          // context.ip a window is never opened or continued (the reload notice).
+          const bindIp = typeof context?.ip === 'string' ? context.ip : '';
+          access = await bindWebConversation(c, channel, contact, conv, body.conversationToken, { ip: bindIp });
+          if (access.state === 'mismatch') {
+            const otherClient = access.reason === 'legacy_client' || access.reason === 'no_client_ip';
+            access = null;
+            const presented = contact, content = incoming.at(-1).content;
+            const reload = () => new ConversationHistoryError('conversation_reload_required', 'This chat needs to restart. Please reload the page and send your message again.');
+            // Legacy (non-self-service) tenants have no turn ledger, so nothing can trace or recover a moved turn there:
+            // any mismatched turn, including recoverTurn, is refused before anything is written.
+            if (!isSelfServiceClient(c)) throw reload();
+            // 1. This exact turn on the presented conversation: its completed reply (and a token, since the 128-bit
+            //    turnId proves this browser sent it), or its unconfirmed/duplicate-turn guard, which a fork must not bypass.
+            if (body.turnId !== undefined) {
+              let resumed = null;
+              try { resumed = await beginConversationTurn(conv, body.turnId, { content, origin }, { recoverOnly: true }); }
+              catch (error) { if (['conversation_previous_unconfirmed', 'conversation_turn_uncertain', 'conversation_turn_conflict'].includes(error.code)) throw error; }
+              if (resumed?.completed) { await fence(); access = await grantRecoveredAccess(c, channel, presented); return wantStream ? ndjsonResponse(async () => resumed.output, hdrs()) : json(resumed.output, 200, hdrs()); }
+              // 2. This turn already ran on a fork of the presented conversation: say so, never "nothing was submitted".
+              const moved = await forkedTurn(c, channel, presented, body.turnId);
+              if (moved) {
+                let ran = null;
+                try { ran = await beginConversationTurn(await getConversation(c, channel, moved.contact), body.turnId, { content, origin }, { recoverOnly: true }); }
+                catch (error) { if (error.code !== 'conversation_turn_not_found') throw error; }
+                if (ran?.completed) throw new ConversationHistoryError('conversation_turn_moved', 'This message was answered in a separate chat that this window can no longer show. Reload the page to keep chatting, and contact the shop before sending the same request again.');
+              }
+            }
+            if (body.recoverTurn === true) throw new ConversationHistoryError('conversation_turn_not_found', 'This message was not admitted. No reply or request was submitted by this turn.');
+            // 3. A tokenless turn from another network client while this conversation's legacy window is open (an old tab
+            //    that changed network, or anyone else holding the id): the reload notice, never a fork that would burn the
+            //    visitor's fork slot. 4. Otherwise move this turn to a new conversation (bounded, lib/conversation-access.mjs).
+            if (otherClient) throw reload();
+            access = await forkWebConversation(c, channel, presented, body.turnId);
+            if (!access) throw reload();
+            contact = access.contact; conv = await getConversation(c, channel, contact);
+          }
+          // Rev 6 (QA09 r5 C2, as 9601528b): a legacy tenant has no turn ledger, so "Check previous reply" can never be
+          // answered there and must never run the turn again (a second owner request or booking). Every legacy recoverTurn
+          // is refused: a mismatch above with the reload notice, anything else (a valid token, an open legacy window, a
+          // fresh id) here, before anything is written or any allowance is spent. The outcome stays unknown, so this is
+          // not turnNotProcessed: the widget retires its recovery strip and does not put the text back in the box.
+          else if (!isSelfServiceClient(c) && body.recoverTurn === true) { access = null; throw new ConversationHistoryError('conversation_recovery_unavailable', RECOVERY_UNAVAILABLE + (body.conversationToken ? '' : RELOAD_HINT)); }
+        }
         if (isSelfServiceClient(c) && !websiteContext) {
           ordinaryTurnId=body.turnId===undefined?id(16):body.turnId;
           try {
             const resumed = await beginConversationTurn(conv,ordinaryTurnId,{content:incoming.at(-1).content,origin},{recoverOnly:true});
-            if(resumed.completed){await fence();return wantStream?ndjsonResponse(async()=>resumed.output,cors(origin)):json(resumed.output,200,cors(origin));}
+            if(resumed.completed){await fence();return wantStream?ndjsonResponse(async()=>resumed.output,hdrs()):json(resumed.output,200,hdrs());}
           } catch(error) { if(error.code!=='conversation_turn_not_found'||body.recoverTurn===true)throw error; }
         }
-      } catch(error) { try { await failWebsiteTurn(websiteContext); } catch {} return json({error:error.code||'client_unavailable',message:error instanceof ConversationHistoryError?error.message:undefined,turnNotProcessed:error.code==='conversation_turn_not_found'},error.status||503,cors(origin)); }
+      } catch(error) { try { await failWebsiteTurn(websiteContext); } catch {} return json({error:error.code||'client_unavailable',message:error instanceof ConversationHistoryError?error.message:undefined,turnNotProcessed:['conversation_turn_not_found','conversation_reload_required'].includes(error.code)},error.status||503,hdrs()); }
     }
     let aiProof;
     if (isSelfServiceClient(c)) {
       let budget;
       try { budget = await reserveAIRequest(c, channel === "test" ? "private" : "web"); }
-      catch { try { await failWebsiteTurn(websiteContext); } catch {} return json({ error: "ai_allowance_unavailable",turnNotProcessed:!!ordinaryTurnId, message: "AI chat is temporarily unavailable. Please try again later." }, 503, cors(origin)); }
-      if (!budget.allowed) { try { await failWebsiteTurn(websiteContext); } catch {} return json({ error: "ai_daily_limit",turnNotProcessed:!!ordinaryTurnId, message: channel === "test" ? "Today's practice AI allowance is used up. Your saved rules are safe; try again after the Houston daily reset." : "Chat is unavailable for the rest of today. Please contact the shop directly.", ...(isOwner ? { aiAllowance: budget.aiAllowance } : {}) }, 429, cors(origin)); }
+      catch { try { await failWebsiteTurn(websiteContext); } catch {} return json({ error: "ai_allowance_unavailable",turnNotProcessed:!!ordinaryTurnId, message: "AI chat is temporarily unavailable. Please try again later." }, 503, hdrs()); }
+      if (!budget.allowed) { try { await failWebsiteTurn(websiteContext); } catch {} return json({ error: "ai_daily_limit",turnNotProcessed:!!ordinaryTurnId, message: channel === "test" ? "Today's practice AI allowance is used up. Your saved rules are safe; try again after the Houston daily reset." : "Chat is unavailable for the rest of today. Please contact the shop directly.", ...(isOwner ? { aiAllowance: budget.aiAllowance } : {}) }, 429, hdrs()); }
       aiProof = budget.proof;
     }
     if (channel === "test") {
@@ -164,11 +224,21 @@ export default async (req, context) => {
       try { return json(await runTest(), 200, cors(origin)); }
       catch (err) { const e = err instanceof WorkspaceIdentityError ? { error: err.code, status: err.status } : classifyError(err); return json({ error: e.error }, e.status, cors(origin)); }
     }
+    // A binding (fresh, legacy window, fork) is written only now that the turn is admitted, before any durable input.
+    // Losing a first claim means another request started this contact first: only a completed duplicate of this same
+    // turnId is answered (from its saved reply, without a token); anything else is refused before any input is written.
+    const claim = await claimWebConversation(c, channel, access);
+    if (claim !== 'ok') {
+      access = null;
+      if (claim === 'fork_limit') return json({ error: 'conversation_reload_required', turnNotProcessed: true, message: 'This chat needs to restart. Please reload the page and send your message again.' }, 409, cors(origin));
+      if (ordinaryTurnId) { let resumed = null; try { resumed = await beginConversationTurn(conv, ordinaryTurnId, { content: incoming.at(-1).content, origin }, { recoverOnly: true }); } catch {} if (resumed?.completed) { await fence(); return wantStream ? ndjsonResponse(async () => resumed.output, cors(origin)) : json(resumed.output, 200, cors(origin)); } }
+      return json({ error: 'conversation_changed', turnNotProcessed: true, message: 'This chat changed in another window. Please send your message again.' }, 409, cors(origin));
+    }
     // Recovery probes never spend another allowance; new durable input follows the
     // existing shared logical admission so public contacts cannot bypass its write cap.
     if(ordinaryTurnId){
-      try{const resumed=await beginConversationTurn(conv,ordinaryTurnId,{content:incoming.at(-1).content,origin});if(resumed.completed){await fence();return wantStream?ndjsonResponse(async()=>resumed.output,cors(origin)):json(resumed.output,200,cors(origin));}}
-      catch(error){return json({error:error.code||'client_unavailable',message:error instanceof ConversationHistoryError?error.message:undefined},error.status||503,cors(origin));}
+      try{const resumed=await beginConversationTurn(conv,ordinaryTurnId,{content:incoming.at(-1).content,origin});if(resumed.completed){await fence();return wantStream?ndjsonResponse(async()=>resumed.output,hdrs()):json(resumed.output,200,hdrs());}}
+      catch(error){return json({error:error.code||'client_unavailable',message:error instanceof ConversationHistoryError?error.message:undefined},error.status||503,hdrs());}
     }
     // Persist the conversation so the owner can read it and the desk keeps context across reloads.
     if (websiteContext) conv.websiteSetupCheck = { checkId: websiteContext.checkId, origin };
@@ -226,8 +296,8 @@ export default async (req, context) => {
         return await finish(terminalCheckReply ? {...out,reply:terminalCheckReply} : out);
       } catch (error) { try { await failWebsiteTurn(websiteContext); } catch {} throw error; }
     };
-    if (wantStream) return ndjsonResponse(run, cors(origin));
-    try { return json(await run(), 200, cors(origin)); } catch (err) { const e = err instanceof WorkspaceIdentityError ? { error: err.code, status: err.status } : classifyError(err); return json({ error: e.error }, e.status, cors(origin)); }
+    if (wantStream) return ndjsonResponse(run, hdrs());
+    try { return json(await run(), 200, hdrs()); } catch (err) { const e = err instanceof WorkspaceIdentityError ? { error: err.code, status: err.status } : classifyError(err); return json({ error: e.error }, e.status, hdrs()); }
   }
 
   // ---- Machines & Cloud's own desk, and the homepage example companies ----

@@ -90,8 +90,13 @@ export default async (req) => {
   }
   if (b.action === "put_conversation") {
     const { getConversation, saveConversation } = await import("./lib/store.mjs");
+    const { lastActivity } = await import("./lib/conversation-access.mjs");
     const conv = await getConversation(c, String(b.channel || "sms"), String(b.contact || "test"));
-    conv.messages = (b.messages || []).map((m) => ({ role: m.role === "user" ? "user" : "assistant", content: String(m.content || "").slice(0, 1500), at: m.at || new Date().toISOString() }));
+    // Web: an operator write is never visitor activity (lib/conversation-access.mjs). Messages keep their timestamps as
+    // before; user messages are marked source "admin" and the conversation keeps its previous visitor-activity time.
+    const web = conv.channel === "web", activity = web ? lastActivity(conv) : 0;
+    conv.messages = (b.messages || []).map((m) => ({ role: m.role === "user" ? "user" : "assistant", content: String(m.content || "").slice(0, 1500), at: m.at || new Date().toISOString(), ...(web && m.role === "user" ? { source: "admin" } : {}) }));
+    if (web) conv.visitorActivityAt = activity ? new Date(activity).toISOString() : null;
     conv.autoFlag = null; await saveConversation(conv);
     return json({ ok: true, messages: conv.messages.length });
   }
@@ -158,7 +163,8 @@ export default async (req) => {
     try { if (c.voice?.assistantId) released.voice = await releaseVoice(c); } catch (e) { released.voiceError = String(e.message); }
     // Recordings we made (VIP voicemails) are deleted at Twilio when keys allow; Twilio and Vapi keep their own logs.
     try { const { deleteRecording, twilioEnabled: tw } = await import("./lib/twilio.mjs"); if (tw()) { for (const e of await listJSON("events", c.slug + "/", 2000)) if (e.type === "vip_voicemail" && e.data?.sid) { try { await deleteRecording(e.data.sid); (released.recordings = released.recordings || []).push(e.data.sid); } catch (err) { released.recordingError = String(err.message); } } } } catch { /* ignore */ }
-    for (const kind of ["bookings", "leads", "alerts", "conversations", "events", "usage", "customers"]) for (const k of await list(kind, c.slug + "/")) await del(kind, k);
+    // conversation_access / conversation_forks (lib/conversation-access.mjs) hold token hashes and the legacy-window IP digest.
+    for (const kind of ["bookings", "leads", "alerts", "conversations", "conversation_access", "conversation_forks", "events", "usage", "customers"]) for (const k of await list(kind, c.slug + "/")) await del(kind, k);
     for (const k of await list("tasks", "")) { const t = await get("tasks", k); if (t?.slug === c.slug) await del("tasks", k); }
     // Opt-outs are keyed by phone across shops (the bridge sender is shared): keep them, forget the shop.
     for (const k of await list("optouts", "")) { const o = await get("optouts", k); if (o?.slug === c.slug) await put("optouts", k, { ...o, slug: "", formerSlug: c.slug }); }
