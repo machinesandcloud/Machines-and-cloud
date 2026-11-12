@@ -46,12 +46,10 @@ export function standardGreeting(client) {
 
 export function voicePrompt(client) {
   const owner = client.owner?.name || "the owner";
-  const r = client.rules || {};
-  const window = `${r.callbackHours || "within 30 minutes"} during business hours or ${r.callbackAfterHours || "by 8 am tomorrow"} after hours`;
   const allCalls = client.phone?.forwarding === "all" && !!client.phone?.transferTo && !loopCheck(client);
   const person = allCalls
-    ? `If the caller asks for a person, the owner, or anything on the handoff list, say you will connect them and call transferCall. If the transfer fails or nobody answers, say ${owner} will call them ${window}, take their number, and call notify_owner with reason wants_call.`
-    : `If the caller asks for a person or the owner, say you are the front desk assistant, say ${owner} will call them ${window}, take their number, and call notify_owner with reason wants_call. Never say "someone will call you back" without the window.`;
+    ? `If the caller asks for a person, the owner, or anything on the handoff list, say you will connect them and call transferCall. If the transfer fails or nobody answers, say ${owner} will get their details and follow up, take their number, and call notify_owner with reason wants_call. Never promise a callback time.`
+    : `If the caller asks for a person or the owner, say you are the front desk assistant, say ${owner} will get their details and follow up, take their number, and call notify_owner with reason wants_call. Never promise a callback time or say someone will call within a set time.`;
   return buildSystemPrompt(client, "voice") + `
 
 You are on a phone call. Speak in short, natural sentences, one idea at a time. Never read URLs, reference codes, or markdown aloud. Confirm phone numbers and addresses back to the caller digit by digit before booking. ${person} When the caller is done, say goodbye and end the call.

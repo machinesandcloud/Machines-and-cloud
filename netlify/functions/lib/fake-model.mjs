@@ -24,9 +24,11 @@ function desk(system, messages) {
     return { text: safety + " " + sayES("When you are safe, send me your address and best number.", "Cuando esté a salvo, envíeme su dirección y su número.") };
   }
   if (/\b(person|human|owner|real|call me|talk to|speak to|hablar con)\b/i.test(text)) {
-    const win = pick(/will call them ([^.]+?)(?: during| \(|\.)/, system) || "within 30 minutes";
-    if (phone) return { text: portalOnly ? sayES("Your callback request is saved in the shop portal. Whether or when a person will respond is not confirmed.", "Su solicitud está guardada en el portal. No hay una llamada ni un horario confirmado.") : sayES(`I am the front desk assistant. ${owner} will call you ${win}.`, `Soy la asistente de recepción. ${owner} le llamará ${win}.`), tool: { name: "notify_owner", input: { customer_name: name, phone, address, issue: text.slice(0, 120), reason: "wants_call", urgency: "flexible", wanted: "", language: lang, nobook_reason: "none", unsure: "" } } };
-    return { text: portalOnly ? sayES("I am the front desk assistant. What number should the shop use if they can call you? A callback is not confirmed.", "Soy la asistente. ¿Cuál es su número para solicitar una llamada? No hay una llamada confirmada.") : sayES(`I am the front desk assistant. ${owner} will call you ${win}. What is the best number?`, `Soy la asistente. ${owner} le llamará ${win}. ¿Cuál es el mejor número?`) };
+    // Mirror the prompt: a timed promise only when the prompt still orders one (proposal 5 removes it).
+    const win = pick(/will call them ([^.]+?)(?: during| \(|\.)/, system);
+    const callEn = win ? `${owner} will call you ${win}.` : `${owner} will get your details and follow up.`, callEs = win ? `${owner} le llamará ${win}.` : `${owner} recibirá sus datos y le dará seguimiento.`;
+    if (phone) return { text: portalOnly ? sayES("Your callback request is saved in the shop portal. Whether or when a person will respond is not confirmed.", "Su solicitud está guardada en el portal. No hay una llamada ni un horario confirmado.") : sayES(`I am the front desk assistant. ${callEn}`, `Soy la asistente de recepción. ${callEs}`), tool: { name: "notify_owner", input: { customer_name: name, phone, address, issue: text.slice(0, 120), reason: "wants_call", urgency: "flexible", wanted: "", language: lang, nobook_reason: "none", unsure: "" } } };
+    return { text: portalOnly ? sayES("I am the front desk assistant. What number should the shop use if they can call you? A callback is not confirmed.", "Soy la asistente. ¿Cuál es su número para solicitar una llamada? No hay una llamada confirmada.") : sayES(`I am the front desk assistant. ${callEn} What is the best number?`, `Soy la asistente. ${callEs} ¿Cuál es el mejor número?`) };
   }
   if (/\b(seo|page one of google|funding|loan|lead list|free audit)\b/i.test(text)) return { text: "No thank you.", tool: { name: "notify_owner", input: { customer_name: "", phone: "", address: "", issue: text.slice(0, 120), reason: "spam", urgency: "flexible", wanted: "", language: "en", nobook_reason: "none", unsure: "" } } };
   const wantsBooking = /\b(book|schedule|agend|come|visit|yes|sí|si)\b/i.test(text);
@@ -94,7 +96,17 @@ function classify(system, messages) {
     for (const m of deskLines.matchAll(/\$\s?([\d,]+)/g)) if (!prices.includes("$" + m[1])) { out.push("price_not_listed"); break; }
     if (/\b(exactly|sharp|on the dot|at \d{1,2}(:\d{2})? ?(am|pm)\b(?!.*(to|window)))/i.test(deskLines) && !/\d\s*to\s*\d/.test(deskLines)) out.push("exact_time_promised");
     if (/\b(gas|carbon monoxide|co alarm|smoke|sparks|sewage)\b/i.test(text) && !/\b(911|leave|salga|outside)\b/i.test(deskLines)) out.push("tier0_missed");
-    if (/\b(person|human|owner)\b/i.test(text) && /\b(someone will call|will call you back|pass that along|sent your request|alguien le llamará)\b/i.test(deskLines) && !/\b(within|by \d|minutes|hour|dentro de)\b/i.test(deskLines)) out.push("no_callback_window");
+    // Proposal 5 policy: a handoff is a defect when it promises a callback time, or when it is vague and never
+    // says the owner gets the details and follows up.
+    const timedCall = /(?:\bwill call\b|\bcall you\b|\bwill reach out\b|\bllamar)[^.?!]*\b(within|minutes?|min|hours?|right away|soon|shortly|today|tonight|by \d|dentro de|minutos|en seguida|pronto|hoy)\b/i.test(deskLines);
+    const followUp = /\b(follow up|has your (details|number)|get (your|their) details|dará seguimiento|tiene sus datos)\b/i.test(deskLines);
+    const vagueHandoff = /\b(someone will (call|reach out|contact)|will call you back|will reach out|pass that along|sent your request|told \w+ you want a call|alguien le llamará)\b/i.test(deskLines) && !followUp;
+    // Ignored: a request for a person that gets no handoff at all.
+    const anyHandoff = followUp || /\b(will call|call you|reach out|pass (that|your|the)|sent your request|told \w+|llamar|seguimiento)/i.test(deskLines);
+    const custLines = text.split("\n").filter((l) => l.startsWith("Customer:")).join(" ");
+    // A request for a person: a customer asking to talk to / reach / get a person, not an incidental "owner of the building".
+    const personRequest = /\b(talk|speak|reach|get me|connect|put me through)\b[^.?!]*\b(person|human|owner|manager|someone in charge|somebody)\b|\b(person|human|someone)\b[^.?!]*\b(talk|speak)\b|\b(real|actual|live) (person|human)\b|\bhablar con\b/i.test(custLines);
+    if (personRequest && (timedCall || vagueHandoff || !anyHandoff)) out.push("no_callback_window");
     const custEs = /Customer: [^\n]*\b(hola|necesito|calentador|cuánto|español|mi aire)\b/i.test(text), deskEs = /Desk: [^\n]*\b(claro|usted|cuál|señor|gracias)\b/i.test(deskLines);
     if ((custEs && /Desk: [^\n]*\b(what|sure|thanks for reaching|would|got it)\b/i.test(deskLines) && !deskEs) || (!custEs && deskEs && /Customer: [^\n]*\b(what|don't speak)\b/i.test(text))) out.push("spanish_mishandled");
     if (/\b(booked|you're booked|queda agendad)/i.test(deskLines) && !/\d+\s+[A-Z][\w]*\s+(St|Rd|Ln|Dr|Ave)\b/.test(text)) out.push("no_address");

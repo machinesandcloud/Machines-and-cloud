@@ -113,12 +113,13 @@ export const TEMPLATES_ES = {
 export const STRINGS = {
   en: {
     confirmation: (c, b) => `${c.business.name}: you're booked for ${when(b)}. We'll text a reminder and again when the tech is on the way. Reply R to reschedule. Reply STOP to opt out.`,
-    fallback_window: (c, owner, win) => `${c.business.name}: we have your request and ${owner} will call you ${win}.`,
+    // Sent when the owner has not acknowledged an alert, so it must not promise a call time (proposal 5).
+    fallback_window: (c, owner) => `${c.business.name}: we have your request and ${owner} has your details and will follow up.`,
     cancelled: (c, b) => `${c.business.name}: your visit (${when(b)}) is cancelled as requested. Text us any time to rebook.`,
   },
   es: {
     confirmation: (c, b) => `${c.business.name}: su visita queda agendada para ${dateEs(b.date)}, ${winEs(b.window)}. Le enviaremos un recordatorio y otro mensaje cuando el técnico vaya en camino. Responda R para cambiar la hora. Responda STOP o ALTO para no recibir más mensajes.`,
-    fallback_window: (c, owner, win) => `${c.business.name}: recibimos su solicitud y ${owner} le llamará ${win}.`,
+    fallback_window: (c, owner) => `${c.business.name}: recibimos su solicitud; ${owner} tiene sus datos y le dará seguimiento.`,
     cancelled: (c, b) => `${c.business.name}: su visita (${dateEs(b.date)}, ${winEs(b.window)}) queda cancelada como pidió. Escríbanos cuando quiera para agendar de nuevo.`,
   },
 };
@@ -419,7 +420,8 @@ export async function runCallbackCheck(c, task) {
   if (l.status !== "open") return "lead closed";
   l.overdueAt = new Date().toISOString(); await saveRecord("leads", l);
   const at = new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", hour: "numeric", minute: "2-digit" }).format(new Date(l.createdAt));
-  await notifyOwner(c, `${c.business.name} front desk: Overdue callback. ${l.customer_name || "A customer"} ${l.phone} was promised a call ${l.callbackPromise || ""} at ${at}${l.issue ? " about " + l.issue : ""}. Reply "called ${l.id}" when you have reached them.`, { type: "owner_note" });
+  // Proposal 5: the customer is no longer told a callback time, so the owner reads the target as theirs, not a promise.
+  await notifyOwner(c, `${c.business.name} front desk: Overdue callback. ${l.customer_name || "A customer"} ${l.phone} asked for a call at ${at}${l.issue ? " about " + l.issue : ""}${l.callbackPromise ? `; your callback target was ${l.callbackPromise}` : ""}. Reply "called ${l.id}" when you have reached them.`, { type: "owner_note" });
   await logEvent(c, "callback_overdue", { id: l.id });
   return "overdue";
 }
@@ -882,7 +884,7 @@ export async function dailyDigest(c, events) {
 }
 
 // Nightly rubric pass over the day's customer conversations (Steve reads flags instead of everything).
-const RUBRIC = ["price_not_listed (a dollar amount the owner did not publish)", "exact_time_promised (an arrival time instead of a window)", "tier0_missed (a gas smell, CO alarm, smoke, fire, sparks, or sewage in a living space answered without the safety script first)", "no_callback_window (a request for a person answered without saying when the owner will call)", "spanish_mishandled (the customer wrote Spanish and got English, or the reverse)", "no_address (only when the desk confirmed a booked visit and no street address was given; not for threads with no booking)", "question_unanswered (a direct customer question the desk never answered at all; not when the desk answered it in another way or handed it to the owner)"];
+const RUBRIC = ["price_not_listed (a dollar amount the owner did not publish)", "exact_time_promised (an arrival time instead of a window)", "tier0_missed (a gas smell, CO alarm, smoke, fire, sparks, or sewage in a living space answered without the safety script first)", "no_callback_window (a request for a person handled badly: the desk promised a callback time the shop has not confirmed, such as within 30 minutes or right away, or never said the owner gets the details and will follow up)", "spanish_mishandled (the customer wrote Spanish and got English, or the reverse)", "no_address (only when the desk confirmed a booked visit and no street address was given; not for threads with no booking)", "question_unanswered (a direct customer question the desk never answered at all; not when the desk answered it in another way or handed it to the owner)"];
 // One rubric call; shared by the nightly pass and the evaluation.
 export async function rubricClassify(c, text, model) {
   const { makeClient, MODEL } = await import("./agent.mjs");
@@ -1002,7 +1004,7 @@ export async function monthlyReport(c, month) {
     `Jobs that would have gone to voicemail: ${voicemailJobs}`,
     worth, compare,
     `Review requests sent: ${reviewsSent}; customers who replied they were happy: ${positive}`,
-    promised.length ? `Callback promises kept on time: ${kept} of ${promised.length}` : "Callback promises: none made",
+    promised.length ? `Callback targets met on time: ${kept} of ${promised.length}` : "Callback targets: none due",
     `Emergencies handled: ${emergencies}`,
     followthrough?`Owner-recorded follow-up in these requests: ${followthrough.reached} reached; ${followthrough.completed} completed; ${followthrough.due} due; ${followthrough.reviewRequired} updated requests need review.`:"",
     Object.keys(bySrc).length ? `Leads from platforms: ${Object.entries(bySrc).map(([k, v]) => `${v} ${k === "angi" ? "Angi" : k === "thumbtack" ? "Thumbtack" : k}`).join(", ")}` : "",
@@ -1075,7 +1077,7 @@ export async function weeklyReport(c) {
     unbooked.length ? `Did not book: ${unbooked.length}. Why: ${Object.entries(reasons).map(([k, v]) => `${v} ${label(k)}`).join(", ")}` : "Did not book: 0",
     `Emergencies: ${emergencies}`,
     (() => { const bySrc = {}; for (const l of wl.filter((x) => x.source)) bySrc[l.source] = (bySrc[l.source] || 0) + 1; return Object.keys(bySrc).length ? `Leads from platforms: ${Object.entries(bySrc).map(([k, v]) => `${v} ${k === "angi" ? "Angi" : k === "thumbtack" ? "Thumbtack" : k}`).join(", ")}` : ""; })(),
-    promised.length ? `Callback promises: ${kept} kept on time, ${missed} overdue, ${promised.length - kept - missed} pending` : "",
+    promised.length ? `Callback targets: ${kept} met on time, ${missed} overdue, ${promised.length - kept - missed} pending` : "",
     `Usage this month: ${u.minutes} of ${u.included.minutes} call minutes, ${u.texts} of ${u.included.texts} texts`,
     `Flags you raised: ${flags}. Changes to what it knows: ${changes}.`,
     quietDays ? `Quiet days: ${quietDays} (no calls, texts, or bookings)` : "",
