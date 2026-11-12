@@ -422,7 +422,9 @@
     var focusedId=host.contains(document.activeElement)&&document.activeElement.id?document.activeElement.id:null;
     returnWebsiteTask();
     var card=host.closest('#connectionsCard');card.classList.add('has-setup-guide','has-connector-pages');card.classList.remove('has-connection-preparation');
-    document.body.dataset.connectorFlow=pageScreen==='overview'?'overview':'step';
+    // Legacy owner-key workspaces have no setup facts (desk.js renderSetup returns early so its legacy details stay
+    // shown); body[data-connector-flow] would hide those details (desk-setup-guide.css), so the guide flow is not marked.
+    if(data.setup)document.body.dataset.connectorFlow=pageScreen==='overview'?'overview':'step';else delete document.body.dataset.connectorFlow;
     if(!/^details-\d(?:-\d)?$/.test(pageScreen)&&window.MCServiceIntake?.isOpen(selected))window.MCServiceIntake.close();
     ['connectionPreferencesDetails','connectionStatusOptions','leadPlatformOptions','connectionServiceDetails','websiteSetupDetails','setupOverview'].forEach(function(id){if($(id))$(id).hidden=true;});
     host.hidden=false;
