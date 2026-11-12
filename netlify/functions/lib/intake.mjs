@@ -1,6 +1,7 @@
 // Public acquisition is a lead record, never account authority or a provider order.
 import { createHash } from "node:crypto";
 import { atomicUpdate, list } from "./store.mjs";
+import { networkBucket } from "./network-bucket.mjs";
 import { normalizeAccountEmail, accountKey, strictRead, findVerifiedAccount } from "./accounts.mjs";
 
 export class IntakeError extends Error {
@@ -51,9 +52,10 @@ export async function captureIntake(body, ip) {
   const prior = await strictRead("intake_submissions", submissionKey);
   if (prior && prior.payloadHash !== payloadHash) throw new IntakeError("submission_changed", "This form was already submitted. Start a new form to change your answers.", 409);
   if (!prior) {
-    await spendRate("global", 200, 3600000);
-    await spendRate("ip:" + hash(String(ip || "unknown")), 8, 600000);
+    // Per-caller and per-email limits first, so their rejections never spend the shared hourly allowance.
+    await spendRate("ip:" + hash(networkBucket(ip)), 8, 600000);
     await spendRate("email:" + accountKey(fields.email), 3, 3600000);
+    await spendRate("global", 200, 3600000);
   }
   const reservation = await atomicUpdate("intake_submissions", submissionKey, current => {
     if (current) {

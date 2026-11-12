@@ -3,7 +3,7 @@
 // GET with &export=bookings|leads|conversations returns a CSV download (owner only).
 // POST actions: go_live, pause, resume, cancel, ack, flag, unflag, digest, test_sms, provision, forwarding_verified.
 import { getClient, saveClient, indexClient, listRecords, listJSON, logEvent, getConversation, saveConversation, cancelTasks, lastInbound, getAvailabilityBlocks, setAvailabilityBlock, atomicUpdate, assertCurrentWorkspace, listWorkspaceRecords, conversationHeadsForExport, conversationReference, readConversationArchive, readArchivedMessages, ConversationHistoryError } from "./lib/store.mjs";
-import { getAIAllowance } from "./lib/self-service-ai.mjs";
+import { getAIAllowance, getPublicAIAllowance } from "./lib/self-service-ai.mjs";
 import { getAccessSession, accessOriginAllowed } from "./lib/access.mjs";
 import { strictRead, normalizeAccountEmail } from "./lib/accounts.mjs";
 import { setupReadiness, configurationRevision, isSelfServiceClient, isSupportedSelfServiceClient } from "./lib/setup.mjs";
@@ -103,14 +103,14 @@ async function currentConnectionSnapshot(req,client) {
   return {client:ownerView(client),setup:{...serviceSetupView(client,connections,plan,installation,leads,intake),connectionPreparation:preparation},connections,leadConnections:leads,websiteInstallation:installation,serviceIntake:intake,serviceOnboarding:plan,configurationRevision:configurationRevision(client),editRevision:workspaceEditRevision(client)};
 }
 
-export default async (req) => {
+export default async (req, context) => {
   let out;
-  try { out = await handle(req); } catch(error) { if(error instanceof ServiceIntakeError)out=json({error:error.code,message:error.message,...(error.fieldErrors?{fieldErrors:error.fieldErrors}:{})},error.status,{'Cache-Control':'no-store'});else if(error instanceof ConnectionPreparationError)out=json({error:error.code,message:error.message,...(error.field?{field:error.field}:{})},error.status,{'Cache-Control':'no-store'});else if(error instanceof SupportReportError)out=json({error:error.code,message:error.message,field:error.field,...(Object.hasOwn(error,'supportReport')?{supportReport:error.supportReport}:{})},error.status,{'Cache-Control':'no-store'});else if(error instanceof ConversationHistoryError)out=json({error:error.code,message:error.message},error.status,{'Cache-Control':'no-store'});else if(error instanceof RequestFollowthroughError || error instanceof LeadConnectionError)out=json({error:error.code,message:error.message,field:error.field},error.status,{'Cache-Control':'no-store'});else if(error?.code==="history_incomplete")out=json({error:error.code,message:error.message},503);else out = json({ error: "client_unavailable", message: "Your desk could not be read or saved. Please try again." }, 503); }
+  try { out = await handle(req, context); } catch(error) { if(error instanceof ServiceIntakeError)out=json({error:error.code,message:error.message,...(error.fieldErrors?{fieldErrors:error.fieldErrors}:{})},error.status,{'Cache-Control':'no-store'});else if(error instanceof ConnectionPreparationError)out=json({error:error.code,message:error.message,...(error.field?{field:error.field}:{})},error.status,{'Cache-Control':'no-store'});else if(error instanceof SupportReportError)out=json({error:error.code,message:error.message,field:error.field,...(Object.hasOwn(error,'supportReport')?{supportReport:error.supportReport}:{})},error.status,{'Cache-Control':'no-store'});else if(error instanceof ConversationHistoryError)out=json({error:error.code,message:error.message},error.status,{'Cache-Control':'no-store'});else if(error instanceof RequestFollowthroughError || error instanceof LeadConnectionError)out=json({error:error.code,message:error.message,field:error.field},error.status,{'Cache-Control':'no-store'});else if(error?.code==="history_incomplete")out=json({error:error.code,message:error.message},503);else out = json({ error: "client_unavailable", message: "Your desk could not be read or saved. Please try again." }, 503); }
   const origin = req.headers.get("origin") || "";
   if (origin && out instanceof Response) for (const [k, v] of Object.entries(CORS(origin))) out.headers.set(k, v);
   return out;
 };
-async function handle(req) {
+async function handle(req, context) {
   const url = new URL(req.url);
   const origin = req.headers.get("origin") || "";
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS(origin) });
@@ -191,9 +191,9 @@ async function handle(req) {
   if (req.method === "GET") {
     if (!isOwner) {
       if (url.searchParams.get("export")) return json({ error: "forbidden" }, 403);
-      const aiAllowance = selfService ? await getAIAllowance(c) : null;
+      const aiAllowance = selfService ? await getPublicAIAllowance(c, context?.ip || req.headers.get("x-nf-client-connection-ip") || "") : null;
       const web = selfService ? setupReadiness(c).channels.web : null;
-      return json({ ...publicView(c), ...(selfService ? { webAvailable: web.ready && web.active && aiAllowance.available } : {}) }, 200, selfService ? { ...CORS(origin), "Cache-Control": "no-store", "Netlify-CDN-Cache-Control": "no-store", Vary: "Origin, Authorization" } : { ...CORS(origin), "Cache-Control": "public, max-age=60", "Netlify-CDN-Cache-Control": "public, max-age=60, durable" });
+      return json({ ...publicView(c), ...(selfService ? { webAvailable: web.ready && web.active && aiAllowance.available, ...(web.ready && web.active && aiAllowance.closed === "daily_limit" ? { webClosed: "daily_limit" } : {}) } : {}) }, 200, selfService ? { ...CORS(origin), "Cache-Control": "no-store", "Netlify-CDN-Cache-Control": "no-store", Vary: "Origin, Authorization" } : { ...CORS(origin), "Cache-Control": "public, max-age=60", "Netlify-CDN-Cache-Control": "public, max-age=60, durable" });
     }
     const exp = url.searchParams.get("export");
     if (exp) return exportCSV(c, exp, session, req);

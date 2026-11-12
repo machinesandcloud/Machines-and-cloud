@@ -3,6 +3,7 @@
 import { createHash } from 'node:crypto';
 import { atomicUpdate } from './store.mjs';
 import { addDays, houstonToday, isoDateValid } from './availability.mjs';
+import { networkBucket } from './network-bucket.mjs';
 
 export const SALES_BUDGET_KIND = 'sales_ai';
 export const SALES_BUDGET_KEY = 'daily';
@@ -21,7 +22,8 @@ function ipKey(ip) {
   if (typeof ip !== 'string' || ip.length > 128 || /[\u0000-\u001f]/.test(ip)) throw new Error('Invalid sales IP bucket');
   // Netlify's context.ip is authoritative; a missing IP shares one restricted bucket.
   // A stable digest avoids raw addresses in this record, without claiming anonymization.
-  return createHash('sha256').update('mc-sales-v1\0' + (ip.trim() || 'unknown')).digest('hex');
+  // IPv6 callers share one bucket per /64 so address rotation inside one allocation is one caller.
+  return createHash('sha256').update('mc-sales-v1\0' + networkBucket(ip)).digest('hex');
 }
 function resetAt(day) {
   const target = Date.parse(addDays(day, 1) + 'T00:00:00Z');

@@ -13,6 +13,7 @@ import { run as runScheduler } from "./scheduler.mjs";
 import { releaseNumber, twilioEnabled } from "./lib/twilio.mjs";
 import { auditNeedsAttention } from "./lib/audit-policy.mjs";
 import { isSelfServiceClient } from "./lib/setup.mjs";
+import { networkBucket } from "./lib/network-bucket.mjs";
 
 import { workspaceTenant, belongsToWorkspace } from "./lib/workspace-identity.mjs";
 
@@ -68,7 +69,7 @@ export default async (req) => {
   if (b.action === "fanout") { const { fanout, KINDS } = await import("./lib/fanout.mjs"); if (!KINDS.includes(String(b.kind))) return json({ error: "unknown_kind" }, 400); return json({ ok: true, ...(await fanout(String(b.kind))) }); }
   if (b.action === "brake") { const on = !!b.on; await put("health", "brake", { on, at: new Date().toISOString(), by: "admin" }); return json({ ok: true, brake: on }); }
   if (b.action === "last_run") return json({ ok: true, lastRun: await get("health", "scheduler:lastRun") });
-  if (b.action === "ratelimit_reset") { const ip = String(b.ip || "").trim(); if (!ip) return json({ error: "missing_ip" }, 400); let n = 0; for (const k of await list("ratelimit", ip + "/")) { await del("ratelimit", k); n++; } return json({ ok: true, cleared: n }); }
+  if (b.action === "ratelimit_reset") { const ip = String(b.ip || "").trim(); if (!ip) return json({ error: "missing_ip" }, 400); let n = 0; for (const k of await list("ratelimit", networkBucket(ip) + "/")) { await del("ratelimit", k); n++; } return json({ ok: true, cleared: n }); }
   const c = await getClient(b.slug || "");
   if (!c) return json({ error: "not_found" }, 404);
   // New customer support uses scoped, revisioned, audited managed actions.

@@ -6,6 +6,7 @@ import { workspaceTenant, supportedWorkspace } from './workspace-identity.mjs';
 import { addDays, houstonToday } from './availability.mjs';
 import { strictRead, normalizeAccountEmail } from './accounts.mjs';
 import { createHash, randomBytes } from 'node:crypto';
+import { networkBucket } from './network-bucket.mjs';
 export const AI_BUDGET_KIND = 'self_service_ai';
 export const AI_BUDGET_KEY = 'daily';
 const PRIVATE_LIMIT = 20, WEB_LIMIT = 50;
@@ -17,6 +18,29 @@ function globalLimit() {
   if (!/^\d+$/.test(raw) || Number(raw) > 500) throw new Error('Invalid self-service AI limit');
   return Number(raw); // Zero is the operator kill switch; invalid configuration fails closed.
 }
+// Anonymous public website turns are additionally bounded per caller network (IPv4 address or
+// IPv6 /64), and together they may not use the last PRIVATE_RESERVE turns of the shared global
+// pool, so one public source cannot close website chat for every tenant and anonymous traffic
+// cannot take owner practice offline. The reserve is at most half the global pool, so lowering the
+// global limit as a throttle never silently closes public chat. Owner-private, managed voice/SMS and per-tenant limits are unchanged.
+function boundedEnv(name, fallback, maximum) {
+  const raw = process.env[name];
+  if (raw === undefined || raw === '') return fallback;
+  if (!/^\d+$/.test(raw) || Number(raw) > maximum) throw new Error('Invalid self-service AI limit');
+  return Number(raw);
+}
+const privateReserve = global => Math.min(Math.floor(global / 2), boundedEnv('MC_SELF_SERVICE_AI_PRIVATE_RESERVE', 10, 500));
+// A network's daily share is a fraction of the anonymous pool (default 75%, at most 90%), further capped by an
+// absolute count (default 150). With the default share one source leaves at least a quarter of the pool to every other
+// network, and one long conversation, or several visitors behind one NAT, is not cut off by a small fixed count. The
+// share follows the global limit when the owner raises it. Zero for either is a kill switch; a pool too small for the
+// share to reach one turn still admits one turn per network rather than closing public chat.
+function publicIpLimit(global) {
+  const absolute = boundedEnv('MC_SELF_SERVICE_AI_PUBLIC_IP_DAILY_LIMIT', 150, 500), percent = boundedEnv('MC_SELF_SERVICE_AI_PUBLIC_IP_POOL_PERCENT', 75, 90);
+  if (!absolute || !percent) return 0;
+  return Math.min(absolute, Math.max(1, Math.floor((global - privateReserve(global)) * percent / 100)));
+}
+const publicKey = ip => createHash('sha256').update('mc-self-service-public-v1\0' + networkBucket(ip)).digest('hex');
 function tenantSlug(client) {
   if (client?.onboarding?.version !== 1 || !/^[a-z0-9-]{1,40}$/.test(client.slug || '')) throw new Error('Invalid self-service AI tenant');
   return client.slug;
@@ -42,6 +66,15 @@ function currentDay(previous, day) {
       total += row.private + row.web;
     }
     if (total !== previous.used) throw new Error('Inconsistent AI allowance record');
+    if (previous.publicIps !== undefined) {
+      if (!previous.publicIps || typeof previous.publicIps !== 'object' || Array.isArray(previous.publicIps)) throw new Error('Invalid public AI allowance record');
+      let publicTotal = 0;
+      for (const [key, n] of Object.entries(previous.publicIps)) {
+        if (!/^[a-f0-9]{64}$/.test(key) || !integer(n) || n < 1 || n > 500) throw new Error('Invalid public AI network count');
+        publicTotal += n;
+      }
+      if (publicTotal > previous.used) throw new Error('Inconsistent public AI allowance record');
+    }
   }
   if (previous && previous.day > day) throw new Error('AI allowance clock moved backwards');
   return previous?.day === day ? previous : { version: 1, day, used: 0, tenants: {} };
@@ -61,19 +94,55 @@ export async function getAIAllowance(client) {
   });
   return projectProofAllowance(client, current);
 }
-export async function reserveAIRequest(client, mode, {service='web'}={}) {
+// The anonymous public pool is closed for this caller when its own network has used its daily share,
+// or when all anonymous turns together have reached the global pool less the owner-practice reserve.
+function publicClosed(state, network, global) {
+  const publicIps = state.publicIps || {};
+  return (Object.hasOwn(publicIps, network) ? publicIps[network] : 0) >= publicIpLimit(global) || Object.values(publicIps).reduce((n, v) => n + v, 0) >= global - privateReserve(global);
+}
+// True when a fresh Houston day would admit this caller under the current configuration, i.e. the closure
+// is only today's counters. A zero kill switch (global or per-network) does not reopen at midnight.
+function reopensTomorrow(day, slug, key, network, global) {
+  const fresh = { version: 1, day, used: 0, tenants: {} };
+  return allowance(fresh, slug, key, global).available && !(network && publicClosed(fresh, network, global));
+}
+// One wording for a public website turn closed by the daily counters, used by the 429 refusal and (as a
+// fixed copy in embed.js) by the widget's closed state. Every counter behind it resets at Houston midnight.
+export const PUBLIC_WEB_DAILY_CLOSED = "Website chat has reached today's limit and reopens after midnight, Houston time. Please contact the shop directly.";
+// Public widget availability for an anonymous caller: the same tenant/global decision plus the
+// anonymous pool and the caller's own network, from one strong read. It reveals nothing about other networks.
+// `closed: 'daily_limit'` is set only when the daily counters close it and the proof envelope (if any) would not,
+// so the widget can say it reopens at the daily reset; a proof-envelope closure keeps the generic wording.
+export async function getPublicAIAllowance(client, ip) {
+  const slug = tenantSlug(client), key = `${slug}:${workspaceTenant(client)}`, network = publicKey(ip);
+  const current = await atomicUpdate(AI_BUDGET_KIND, AI_BUDGET_KEY, previous => {
+    const global = globalLimit(), state = currentDay(previous, houstonToday()), view = allowance(state, slug, key, global);
+    const closed = view.available && publicClosed(state, network, global) ? { ...view, available: false } : view;
+    return { result: closed.available ? closed : { ...closed, reopens: reopensTomorrow(state.day, slug, key, network, global) } };
+  });
+  const { reopens, ...counted } = current;
+  const projected = await projectProofAllowance(client, { ...counted, available: true });
+  return counted.available ? projected : { ...projected, available: false, ...(projected.available && reopens ? { closed: 'daily_limit' } : {}) };
+}
+// `ip` is passed only for anonymous public website turns; it adds the per-network sub-limit.
+export async function reserveAIRequest(client, mode, {service='web',ip}={}) {
   if(mode==='web'&&service!=='web')await assertPaidServiceAuthority(client,service);
   const slug = tenantSlug(client), key = `${slug}:${workspaceTenant(client)}`;
   if (mode !== 'private' && mode !== 'web') throw new Error('Invalid AI mode');
   const current = await atomicUpdate(AI_BUDGET_KIND, AI_BUDGET_KEY, previous => {
     const at = new Date(), day = houstonToday(at), global = globalLimit();
     const state = currentDay(previous, day), before = allowance(state, slug, key, global);
-    if (before[mode].remaining <= 0) return { result: { allowed: false, aiAllowance: before } };
+    const network = ip === undefined || mode !== 'web' ? null : publicKey(ip), publicIps = state.publicIps || {};
+    if (before[mode].remaining <= 0 || network && publicClosed(state, network, global)) return { result: { allowed: false, aiAllowance: before, reopens: mode === 'web' && reopensTomorrow(day, slug, key, network, global) } };
     const own = Object.hasOwn(state.tenants, key) ? state.tenants[key] : { private: 0, web: 0 };
-    const next = { ...state, used: state.used + 1, tenants: { ...state.tenants, [key]: { ...own, [mode]: own[mode] + 1 } }, updatedAt: at.toISOString() };
+    const next = { ...state, used: state.used + 1, tenants: { ...state.tenants, [key]: { ...own, [mode]: own[mode] + 1 } }, ...(network ? { publicIps: { ...publicIps, [network]: (publicIps[network] || 0) + 1 } } : {}), updatedAt: at.toISOString() };
     return { value: next, result: { allowed: true, aiAllowance: allowance(next, slug, key, global) } };
   });
-  if (!current.allowed) return current;
+  if (!current.allowed) {
+    // `closed: 'daily_limit'` only when the next Houston day reopens it and the proof envelope (if any) would admit.
+    const { reopens, ...refused } = current;
+    return reopens && (await projectProofAllowance(client, { ...refused.aiAllowance, available: true })).available ? { ...refused, closed: 'daily_limit' } : refused;
+  }
   const proof = await reserveAIProofTurn(client, mode);
   return { ...current, ...(proof ? { proof } : {}), aiAllowance: await projectProofAllowance(client, current.aiAllowance) };
 }

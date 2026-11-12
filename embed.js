@@ -136,6 +136,8 @@
   }
   function render() { list.innerHTML = ''; add('a', notice || cfg.greeting); state.transcript.forEach(function (m) { add(m.role, m.content); if(m.role==='user'&&m.unconfirmed)add('a',UNCONFIRMED_NOTE); if(m.role==='assistant'){appointmentTexts(m.appointmentTexts);followupTexts(m.followupTexts,m);} }); rendered = true; }
 
+  // Same wording as PUBLIC_WEB_DAILY_CLOSED in netlify/functions/lib/self-service-ai.mjs (the 429 refusal).
+  var DAILY_CLOSED='Website chat has reached today\'s limit and reopens after midnight, Houston time. Please contact the shop directly.';
   function unavailable(message) { configReady=false;cfg.available = false; notice = message || 'Website chat is unavailable right now. Please use the shop’s contact details on this website.'; input.disabled = true; sendBtn.disabled = true;recoveryControls(); if (rendered) render(); cfgControls(); }
   function recoveryControls(){var refused=!!(state.pendingTurn&&state.pendingTurn.refused);recovery.hidden=!!setupCheck||!state.pendingTurn;recoverButton.hidden=refused;recoverButton.disabled=busy;var text=refused?REFUSED_COPY:RECOVERY_COPY;if(recoveryText.textContent!==text)recoveryText.textContent=text;}
   // Config reads made because of a refused or failed check keep the open/online spacing (5s) and any 429 back-off.
@@ -191,7 +193,7 @@
       if(!response.ok){var failure=new Error('unavailable');failure.closed=response.status===404;if(response.status===429)failure.retryAfter=retryAfterMs(response.headers.get('Retry-After'));throw failure;}var d=await response.json();
       if(!d||!d.name)throw new Error('unavailable');if(sequence!==configSequence)return;
       cfg.name=d.name;cfg.greeting=d.greeting||cfg.greeting;root.querySelector('.h b').textContent=cfg.name;
-      if(d.webAvailable===false||d.status==='paused'||d.status==='cancelled'){configState='closed';configClosed();unavailable();return;}
+      if(d.webAvailable===false||d.status==='paused'||d.status==='cancelled'){configState='closed';configClosed();unavailable(d.webClosed==='daily_limit'?DAILY_CLOSED:undefined);return;}
       var recovered=configState==='failed',reopened=configOpen();configState='ready';autoRetries=0;notBefore=0;busyConfig=false;notice=null;
       configReady=true;checkControls();if(rendered)render();if(root.classList.contains('open')&&(recovered||reopened))announce(reopened?'Chat is available again. You can check your earlier message.':'Chat is ready.');
     }catch(error){if(sequence===configSequence){configState=error&&error.closed?'closed':'failed';if(configState==='closed')configClosed();else recheckPending=false;

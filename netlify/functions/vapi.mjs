@@ -6,6 +6,7 @@ import { json } from "./lib/agent.mjs";
 import { e164, notifyOwner } from "./lib/send.mjs";
 import { addUsage } from "./lib/usage.mjs";
 import { standardGreeting } from "./lib/vapi.mjs";
+import { timingSafeEqual } from "node:crypto";
 
 export const config = { path: "/api/vapi" };
 
@@ -63,7 +64,11 @@ async function resolveClient(m) {
 
 export default async (req) => {
   if (req.method !== "POST") return new Response("method", { status: 405 });
-  if (process.env.VAPI_WEBHOOK_SECRET && req.headers.get("x-vapi-secret") !== process.env.VAPI_WEBHOOK_SECRET) return json({ error: "forbidden" }, 403);
+  // Fail closed: a missing secret rejects every request (previews share production data).
+  const secret = process.env.VAPI_WEBHOOK_SECRET || "";
+  if (!secret) return json({ error: "webhook_not_configured" }, 503);
+  const given = Buffer.from(req.headers.get("x-vapi-secret") || ""), expected = Buffer.from(secret);
+  if (given.length !== expected.length || !timingSafeEqual(given, expected)) return json({ error: "forbidden" }, 403);
   let body; try { body = await req.json(); } catch { return json({ error: "bad_json" }, 400); }
   const m = body?.message || {};
   const c = await resolveClient(m);

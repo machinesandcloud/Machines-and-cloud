@@ -29,7 +29,9 @@ export default async (req) => {
   const adminOk = process.env.ADMIN_KEY && req.headers.get("x-admin-key") === process.env.ADMIN_KEY;
   const path = new URL(req.url).pathname.replace(/\/$/, "");
   const sigUrl = (process.env.URL || new URL(req.url).origin) + path;
-  if (!adminOk && process.env.TWILIO_AUTH_TOKEN && !twilioSignatureValid(sigUrl, params, req.headers.get("x-twilio-signature") || "")) return new Response("bad signature", { status: 403 });
+  // Fail closed: without a configured token no unsigned request is accepted (previews share production data).
+  if (!adminOk && !process.env.TWILIO_AUTH_TOKEN) return new Response("webhook not configured", { status: 503 });
+  if (!adminOk && !twilioSignatureValid(sigUrl, params, req.headers.get("x-twilio-signature") || "")) return new Response("bad signature", { status: 403 });
 
   const to = e164(params.To), from = e164(params.From);
   // Our own escalation call bouncing back through the owner's forwarding: hang up, no events.

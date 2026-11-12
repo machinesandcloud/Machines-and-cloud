@@ -1,6 +1,7 @@
 // Verified owner access. No client is created or disclosed before mailbox proof.
 import { createHash, randomBytes } from "node:crypto";
 import { atomicUpdate, put } from "./store.mjs";
+import { networkBucket } from "./network-bucket.mjs";
 import { emailEnabled, sendEmail } from "./send.mjs";
 import { normalizeAccountEmail, findVerifiedAccount, strictRead } from "./accounts.mjs";
 import { intakeBindingForEmail, adoptIntake, marketingState, saveMarketingPreference, INTAKE_GOALS, INTAKE_CHANNELS } from "./intake.mjs";
@@ -25,6 +26,33 @@ export function accessOriginAllowed(origin) {
   return [accessSite(), "https://machinesandcloud.com", "https://www.machinesandcloud.com", process.env.URL, process.env.DEPLOY_PRIME_URL, ...String(process.env.SITE_ORIGINS || "").split(",").map(value => value.trim())].filter(Boolean).includes(origin);
 }
 
+// Daily sign-in emails to one recipient. Counted per (recipient, caller network) so a stranger's requests
+// cannot exhaust the owner's own allowance, plus a recipient-wide ceiling that networks which already
+// completed a sign-in for this email (within 30 days) are exempt from. Zero disables sign-in email.
+function emailLimit(name, fallback, maximum) {
+  const raw = process.env[name];
+  if (raw === undefined || raw === "") return fallback;
+  if (!/^\d+$/.test(raw) || Number(raw) > maximum) throw new Error("Invalid sign-in email limit");
+  return Number(raw);
+}
+const KNOWN_NETWORK_MS = 30 * 86400000;
+async function knownNetwork(emailHash, netHash) {
+  const row = await atomicUpdate("access_rate", `known:${emailHash}:${netHash}`, current => ({ result: current }));
+  return !!row && Number(row.until) > Date.now();
+}
+// Returns one unit to a shared pool when a narrower daily counter refused the request, so refusals never
+// exhaust the pool. Best effort: a failed refund only overcounts.
+async function refundRate(key) {
+  await atomicUpdate("access_rate", key, previous => previous && previous.until > Date.now() && previous.count > 0 ? { value: { ...previous, count: previous.count - 1 }, result: true } : { result: false });
+}
+// The first network to request a link for this email in a 24 h window is exempt from the recipient-wide
+// ceiling (it still has its own per-network limits), so later traffic cannot lock out a signup that asked first.
+async function firstNetwork(emailHash, netHash) {
+  return atomicUpdate("access_rate", `first:${emailHash}`, current => {
+    if (current && Number(current.until) > Date.now()) return { result: current.net === netHash };
+    return { value: { net: netHash, until: Date.now() + 86400000 }, result: true };
+  });
+}
 async function spendRate(key, limit, duration) {
   const allowed = await atomicUpdate("access_rate", key, previous => {
     const now = Date.now();
@@ -41,9 +69,30 @@ export async function requestAccessLink(emailValue, ip, planValue, intakeToken, 
   if (!email) throw new AccessError("invalid_email", "Enter a valid email address.");
   const testInbox = process.env.MC_MEMORY_STORE === "1" && process.env.MC_FAKE_MODEL === "1" && !!localOrigin();
   if (!testInbox && !emailEnabled()) throw new AccessError("email_unavailable", "Sign-in email is temporarily unavailable. Please try again shortly.", 503);
-  await spendRate("global", 100, 3600000);
-  await spendRate("ip:" + accessHash(String(ip || "unknown")), 5, 600000);
-  await spendRate("email:" + accessHash(email), 3, 900000);
+  // Per-caller and 15-minute per-(recipient, network) limits first: a request they reject never spends
+  // the shared hourly allowance, so one source cannot lock every owner (or the operator) out of sign-in.
+  // The shared pool comes before the daily counters, so a request it refuses never spends a recipient's
+  // daily allowance; a request the daily counters refuse returns its pool unit, so refusals never exhaust
+  // the pool either. A network that completed a sign-in for this email is exempt from the shared pool and
+  // the recipient ceiling. Operator links have their own pool per allow-listed email (at most 10 emails).
+  // Only requests the daily counters admit keep a pool unit. One hour overlaps at most two recipient-ceiling
+  // windows and two first-network tenures, and each first network's own 24 h window can also roll inside the
+  // hour, so admitted traffic is at most 2 x ceiling + 4 x per-network: the pool is one above that, so traffic
+  // for one operator email can never fill its pool, and cannot touch another operator's.
+  const emailHash = accessHash(email), netHash = accessHash(networkBucket(ip));
+  const perNetworkDay = emailLimit("MC_ACCESS_EMAIL_DAILY_LIMIT", 6, 50), recipientDay = emailLimit("MC_ACCESS_EMAIL_RECIPIENT_DAILY_LIMIT", 24, 200);
+  const operator = purpose === "operator", pool = operator ? `global:operator:${emailHash}` : "global";
+  await spendRate("ip:" + netHash, 5, 600000);
+  await spendRate(`email:${emailHash}:${netHash}`, 3, 900000);
+  const known = await knownNetwork(emailHash, netHash);
+  if (!known) await spendRate(pool, operator ? 2 * recipientDay + 4 * perNetworkDay + 1 : 100, 3600000);
+  try {
+    await spendRate(`email-day:${emailHash}:${netHash}`, perNetworkDay, 86400000);
+    if (!known && !(await firstNetwork(emailHash, netHash))) await spendRate("email-day:" + emailHash, recipientDay, 86400000);
+  } catch (error) {
+    if (!known) await refundRate(pool).catch(() => {});
+    throw error;
+  }
   const token = randomBytes(32).toString("hex"), key = accessHash(token);
   const createdAt = stamp(), expiresAt = new Date(Date.now() + 20 * 60000).toISOString();
   const intakeHash = await intakeBindingForEmail(intakeToken, email);
@@ -74,7 +123,7 @@ export async function requestAccessLink(emailValue, ip, planValue, intakeToken, 
 
 export async function exchangeAccessToken(token, ip, purpose = "onboarding") {
   if (!["onboarding", "operator"].includes(purpose)) throw new AccessError("invalid_request", "Invalid sign-in destination.");
-  await spendRate("exchange:" + accessHash(String(ip || "unknown")), 15, 600000);
+  await spendRate("exchange:" + accessHash(networkBucket(ip)), 15, 600000);
   if (!hex(token)) throw new AccessError("invalid_link", "This sign-in link is invalid. Request a new one.", 410);
   const session = randomBytes(32).toString("hex"), sessionHash = accessHash(session);
   const claim = await atomicUpdate("access_tokens", accessHash(token), row => {
@@ -88,6 +137,8 @@ export async function exchangeAccessToken(token, ip, purpose = "onboarding") {
     if (row) throw new Error("Access session collision");
     return { value: { email: claim.email, scope: purpose, status: "active", createdAt, expiresAt, ...(claim.intakeHash ? { intakeHash: claim.intakeHash } : {}) } };
   });
+  // The network that opened a valid link is this recipient's known network for the next 30 days.
+  try { await put("access_rate", `known:${accessHash(claim.email)}:${accessHash(networkBucket(ip))}`, { until: Date.now() + KNOWN_NETWORK_MS }); } catch { /* best effort */ }
   return { ok: true, session, email: claim.email, expiresAt };
 }
 

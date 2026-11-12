@@ -3,17 +3,19 @@
 // "client" runs a customer's front desk from their stored config (website chat, owner test line);
 // the named personas are the homepage example companies.
 import { runAgent, sanitizeMessages, toApiMessages, json, ndjsonResponse, classifyError } from "./lib/agent.mjs";
-import { getConversation, saveConversation, id, get, put, assertCurrentWorkspace, beginConversationTurn, ConversationHistoryError } from "./lib/store.mjs";
+import { getConversation, saveConversation, id, atomicUpdate, assertCurrentWorkspace, beginConversationTurn, ConversationHistoryError } from "./lib/store.mjs";
 import { buildSystemPrompt, BOOK_VISIT, NOTIFY_OWNER, GET_AVAILABILITY } from "./lib/config.mjs";
 import { bookVisit, flagLead, availabilityToolResult, deliveryNote } from "./lib/desk.mjs";
 import { PERSONAS, OWNER_SUMMARY, personaSystem } from "./lib/practice-personas.mjs";
 import { runOwnerTest } from "./lib/owner-test.mjs";
-import { reserveAIRequest, selfServiceAIModelFetch, reserveAIProofMutation } from "./lib/self-service-ai.mjs";
+import { reserveAIRequest, selfServiceAIModelFetch, reserveAIProofMutation, PUBLIC_WEB_DAILY_CLOSED } from "./lib/self-service-ai.mjs";
 import { getAccessSession, accessOriginAllowed } from "./lib/access.mjs";
 import { strictRead, normalizeAccountEmail } from "./lib/accounts.mjs";
 import { isSelfServiceClient, setupReadiness } from "./lib/setup.mjs";
 import { salesSystem, SALES_TOOLS, sanitizeSalesMessages, executeSalesTool } from "./lib/sales-desk.mjs";
 import { getSalesAllowance, reserveSalesTurn } from "./lib/sales-budget.mjs";
+import { reservePublicChatTurn } from "./lib/public-chat-budget.mjs";
+import { networkBucket } from "./lib/network-bucket.mjs";
 import { claimWebsiteTurn, validateWebsiteTurn, websiteActionId, websiteRecordContext, noteWebsiteRecord, finishWebsiteTurn, failWebsiteTurn, WebsiteInstallationError, exactWebsiteOrigin } from './lib/website-installation.mjs';
 
 import { WorkspaceIdentityError } from './lib/workspace-identity.mjs';
@@ -55,15 +57,27 @@ function refused(origin, body, error, message = CHAT_UNAVAILABLE) {
   return json({ error, message, turnNotProcessed: body?.recoverTurn !== true }, 403, cors(origin));
 }
 
-// 60 messages per IP per 10 minutes for legacy tenants and fictional practice only. Keys carry the bucket, so old ones are simply
-// never read again. The owner's test line (valid key) and the admin key are exempt.
+// 60 messages per network (IPv4 address or IPv6 /64) per 10 minutes for legacy tenants and fictional practice only.
+// Keys carry the bucket, so old ones are simply never read again. A missing IP shares one "unknown" bucket.
+// The count is a conditional write, so a concurrent burst cannot pass more than the limit.
+// The owner's test line (valid key) and the admin key are exempt. Daily ceilings live in public-chat-budget.mjs.
 const RATE_LIMIT = 60;
 async function rateLimited(ip) {
-  if (!ip) return false;
-  const key = `${ip}/${Math.floor(Date.now() / 600000)}`;
-  const n = (Number(await get("ratelimit", key)) || 0) + 1;
-  await put("ratelimit", key, n);
-  return n > RATE_LIMIT;
+  const key = `${networkBucket(ip)}/${Math.floor(Date.now() / 600000)}`;
+  return atomicUpdate("ratelimit", key, previous => {
+    const n = Number(previous) || 0;
+    return n >= RATE_LIMIT ? { result: true } : { value: n + 1, result: false };
+  });
+}
+// Daily per-network and global turn ceiling, charged once per admitted model turn.
+// Stacked (with 02/09 and the widget chain): every refusal here is made before any conversation input or model work, so a
+// first send was certainly not processed (turnNotProcessed, as in refused()); a recoverTurn probe's outcome stays unknown.
+async function publicTurnDenied(pool, ip, origin, body) {
+  const turnNotProcessed = body?.recoverTurn !== true;
+  let budget;
+  try { budget = await reservePublicChatTurn(pool, ip); }
+  catch { return json({ error: "chat_allowance_unavailable", turnNotProcessed, message: "Chat is temporarily unavailable. Please try again later." }, 503, cors(origin)); }
+  return budget.allowed ? null : json({ error: pool === "practice" ? "practice_daily_limit" : "busy", turnNotProcessed, message: "Today's chat allowance is used up. Please try again after the daily reset." }, 429, cors(origin));
 }
 
 export default async (req, context) => {
@@ -103,7 +117,9 @@ export default async (req, context) => {
       ownerExempt = isSelfServiceClient(requestedClient) ? !!session : !!requestedClient && body.key === requestedClient.ownerKey;
     } catch { return json({ error: "client_unavailable" }, 503, cors(origin)); }
   }
-  if (!salesMode && !isSelfServiceClient(requestedClient) && !adminOk && !ownerExempt && (await rateLimited(ip))) return json({ error: "busy" }, 429, cors(origin));
+  const publicLimited = !salesMode && !isSelfServiceClient(requestedClient) && !adminOk && !ownerExempt;
+  try { if (publicLimited && (await rateLimited(ip))) return json({ error: "busy", turnNotProcessed: body?.recoverTurn !== true }, 429, cors(origin)); }
+  catch { return json({ error: "busy", turnNotProcessed: body?.recoverTurn !== true }, 429, cors(origin)); }
 
   // ---- Client mode: a real shop's front desk ----
   if (typeof body?.client === "string" && body.client) {
@@ -213,9 +229,9 @@ export default async (req, context) => {
     let aiProof;
     if (isSelfServiceClient(c)) {
       let budget;
-      try { budget = await reserveAIRequest(c, channel === "test" ? "private" : "web"); }
+      try { budget = await reserveAIRequest(c, channel === "test" ? "private" : "web", isOwner ? {} : { ip }); }
       catch { try { await failWebsiteTurn(websiteContext); } catch {} return json({ error: "ai_allowance_unavailable",turnNotProcessed:!!ordinaryTurnId, message: "AI chat is temporarily unavailable. Please try again later." }, 503, hdrs()); }
-      if (!budget.allowed) { try { await failWebsiteTurn(websiteContext); } catch {} return json({ error: "ai_daily_limit",turnNotProcessed:!!ordinaryTurnId, message: channel === "test" ? "Today's practice AI allowance is used up. Your saved rules are safe; try again after the Houston daily reset." : "Chat is unavailable for the rest of today. Please contact the shop directly.", ...(isOwner ? { aiAllowance: budget.aiAllowance } : {}) }, 429, hdrs()); }
+      if (!budget.allowed) { try { await failWebsiteTurn(websiteContext); } catch {} return json({ error: "ai_daily_limit",turnNotProcessed:!!ordinaryTurnId, message: channel === "test" ? "Today's practice AI allowance is used up. Your saved rules are safe; try again after the Houston daily reset." : budget.closed === "daily_limit" ? PUBLIC_WEB_DAILY_CLOSED : "Website chat is unavailable right now. Please contact the shop directly.", ...(isOwner ? { aiAllowance: budget.aiAllowance } : {}) }, 429, hdrs()); }
       aiProof = budget.proof;
     }
     if (channel === "test") {
@@ -227,6 +243,9 @@ export default async (req, context) => {
     // A binding (fresh, legacy window, fork) is written only now that the turn is admitted, before any durable input.
     // Losing a first claim means another request started this contact first: only a completed duplicate of this same
     // turnId is answered (from its saved reply, without a token); anything else is refused before any input is written.
+    // Stacked: 15's legacy daily turn is charged here, after 09's token gate (a refused or mismatched token, and every legacy
+    // recoverTurn, is answered above without spending it) and before the binding claim writes anything.
+    if (publicLimited) { const denied = await publicTurnDenied("legacy", ip, origin, body); if (denied) return denied; }
     const claim = await claimWebConversation(c, channel, access);
     if (claim !== 'ok') {
       access = null;
@@ -315,6 +334,7 @@ export default async (req, context) => {
   }
   const messages = sanitizeMessages(body?.messages);
   if (!messages) return json({ error: "invalid_messages" }, 400);
+  if (publicLimited) { const denied = await publicTurnDenied("practice", ip, origin, body); if (denied) return denied; }
   const system = personaSystem(persona);
   const tools = [OWNER_SUMMARY];
   let summaryUpdated = false;

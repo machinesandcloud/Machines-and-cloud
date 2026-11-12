@@ -1,7 +1,7 @@
 // Outbound messages: SMS through Twilio, email through Resend. Each degrades to a
 // console log when its keys are missing, so the rest of the system keeps working.
 import { isSelfServiceClient } from "./setup.mjs";
-import { createHmac } from "node:crypto";
+import { createHmac, timingSafeEqual } from "node:crypto";
 import { get, put, del, logEvent, atomicUpdate } from "./store.mjs";
 
 const TW_SID = process.env.TWILIO_ACCOUNT_SID;
@@ -148,12 +148,14 @@ export async function notifySteve(subject, text) {
 }
 
 // Twilio request signature (X-Twilio-Signature) over the full URL plus sorted POST params.
+// Fails closed when no token is configured: an unsigned request is never valid.
 export function twilioSignatureValid(url, params, signature) {
-  if (!TW_TOKEN) return true; // nothing to validate against in dev
+  const token = process.env.TWILIO_AUTH_TOKEN || TW_TOKEN;
+  if (!token || typeof signature !== "string" || !signature) return false;
   const keys = Object.keys(params).sort();
   const data = url + keys.map((k) => k + params[k]).join("");
-  const expected = createHmac("sha1", TW_TOKEN).update(data).digest("base64");
-  return expected === signature;
+  const expected = Buffer.from(createHmac("sha1", token).update(data).digest("base64")), given = Buffer.from(signature);
+  return expected.length === given.length && timingSafeEqual(expected, given);
 }
 
 // A plain phone call with a spoken line (no AI voice): used to escalate an unacknowledged alert.
