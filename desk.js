@@ -1,6 +1,13 @@
 (function () {
   var brandMark = typeof window.MCBrandMark === 'function' ? window.MCBrandMark : function () { return ''; };
   var q = new URLSearchParams(location.search), slug = q.get('c'), key = q.get('k');
+  // The emailed owner link carries the workspace owner key as ?k=. Keep it for this tab only (memory, plus
+  // sessionStorage so a reload works) and take it out of the address bar, so it is not kept in history or copied links.
+  var ownerKeyStorage = 'mc-owner-key-v1:' + slug, ownerKeyRecovery = null;
+  // Email sign-in opens only self-service workspaces; an owner-key owner returns through the link in their welcome email.
+  var OWNER_KEY_INVALID = 'This workspace link is no longer valid. If our team set up your workspace, open the link from your welcome email, or contact support.';
+  if (q.has('k')) { q.delete('k'); try { history.replaceState(history.state, '', location.pathname + (String(q) ? '?' + q : '') + location.hash); } catch (error) { /* The key still works on this page. */ } }
+  try { if (slug && key) sessionStorage.setItem(ownerKeyStorage, key); else if (slug) key = sessionStorage.getItem(ownerKeyStorage); } catch (error) { /* Without storage, a reload needs the emailed link. */ }
   var ownerSession = null; try { ownerSession = sessionStorage.getItem('mc-onboarding-session-v1'); } catch (error) { /* Email sign-in is available when storage is disabled. */ }
   // A signed-out owner keeps their place: the next successful sign-in to this workspace within 30 minutes returns there.
   var RETURN_ROUTE_KEY = 'mc-return-route-v1', RETURN_ROUTE_MS = 30 * 60 * 1000;
@@ -31,8 +38,10 @@
     $('portalContent').hidden = true; $('portalRecovery').hidden = false; document.body.dataset.workspaceState = 'recovery'; $('deskRail').hidden = true; $('railBusiness').textContent = 'Your front desk';
     $('title').textContent = 'Your workspace'; $('status').textContent = signedOut ? 'Signed out' : 'Unable to open workspace';
     $('recoveryMessage').textContent = message; if ($('liveBtns')) $('liveBtns').innerHTML = '';
+    if (ownerKeyRecovery) { $('recoveryMessage').textContent = ownerKeyRecovery; ownerKeyRecovery = null; }
   }
   document.addEventListener('mc:session-expired',function () {
+    ownerKeyRecovery = key && !ownerSession ? OWNER_KEY_INVALID : null; // an owner key is fixed, so a refusal means it is wrong or was replaced
     if (leaving && !ownerSession && !key) return;
     rememberReturnRoute(location.hash);
     leaving = true; portalGeneration++; ownerSession = null; key = null; data = null; transcript = []; cancelPracticeReply(); availabilityReset();
@@ -40,7 +49,7 @@
     preferenceBaseline=[];preferenceDirty=false;preferenceBusy=false;homeActivityChosen=false;
     cfgBaseline = null; cfgRevision = null; cfgEditRevision = null; cfgConflict = null; cfgDirty = false; cfgBusy = false; reviewBusy = false; cfgClosed = true;
     acctBaseline = null; acctBaseClient = null; acctRevision = null; acctEditRevision = null; acctConflict = null; acctDirty = false; acctBusy = false;
-    try { sessionStorage.removeItem('mc-owner-visit-pending-v1:'+slug); sessionStorage.removeItem('mc-onboarding-session-v1'); sessionStorage.removeItem('mc-calendar-pending-v1'); } catch (error) { /* Private content is still cleared. */ }
+    try { sessionStorage.removeItem('mc-owner-visit-pending-v1:'+slug); sessionStorage.removeItem('mc-onboarding-session-v1'); sessionStorage.removeItem('mc-calendar-pending-v1'); sessionStorage.removeItem(ownerKeyStorage); } catch (error) { /* Private content is still cleared. */ }
     closeTour(false, false);
     recover('Your session expired. Sign in by email to reopen your workspace.', true); $('portalContent').innerHTML = ''; $('deskSignOut').hidden = true; $('retryLoad').hidden = true;
   });
@@ -1175,7 +1184,7 @@
       [['expBookings','bookings'],['expLeads','leads'],['expConvs','conversations'],['expCustomers','customers']].forEach(function (item) { $(item[0]).dataset.export = item[1]; });
       // setup
       $('snippet').textContent = '<script src="' + d.site + '/embed.js" data-client="' + c.slug + '" async><\/script>';
-      $('calBtn').href = '/api/google/auth?c=' + c.slug + '&k=' + key; $('calText').textContent = c.calendar.connected ? 'Connected.' : (d.integrations.google ? 'Bookings go on your Google Calendar once connected.' : 'Coming online; bookings are texted to you meanwhile.'); if (!d.integrations.google) $('calBtn').addEventListener('click', function (e) { e.preventDefault(); toast('Calendar connection is being switched on. Bookings are texted to you meanwhile.'); });
+      $('calBtn').href = '/api/google/auth?c=' + encodeURIComponent(c.slug); $('calText').textContent = c.calendar.connected ? 'Connected.' : (d.integrations.google ? 'Bookings go on your Google Calendar once connected.' : 'Coming online; bookings are texted to you meanwhile.'); if (!d.integrations.google) $('calBtn').addEventListener('click', function (e) { e.preventDefault(); toast('Calendar connection is being switched on. Bookings are texted to you meanwhile.'); });
       var ph = c.phone || {}, fw = d.forwarding || {}, dlc = ph.tenDlc || 'not_started';
       var dlcText = { not_started: 'Not filed yet.', waiting_keys: 'Being filed by Machines & Cloud.', needs_business_details: 'We need your legal business name, EIN, and address to file it. Add them below.', brand_pending: 'Filed. Carriers are reviewing your business (usually 1 to 2 weeks). Your front desk texts from Machines & Cloud\'s registered number until then, with your name on every message.', campaign_pending: 'Business approved. Carriers are reviewing the texting use case (one to six weeks). Same bridge until then.', approved: 'Approved. Your front desk texts customers from your number.', failed: 'The carriers rejected the filing. Steve has been notified and will fix it with you.' }[dlc] || dlc;
       $('numberText').textContent = ph.twilioNumber ? ph.twilioNumber + ' (calls you forward and all customer texts go here; you keep your main number).' : (c.provision && c.provision.status === 'running' ? 'Being set up now.' : 'Being assigned. You will get it by text and email.');
@@ -1507,7 +1516,7 @@
       var response = await fetch(API_BASE + '/api/access', { method: 'POST', headers: ownerHeaders(), body: JSON.stringify({ action: 'sign_out' }) });
       if (!response.ok) throw new Error('Sign out could not be confirmed. Please retry.');
       websitePrivateClear();ownerSession = null; key = null; data = null; transcript = [];
-      try { sessionStorage.removeItem('mc-owner-visit-pending-v1:'+slug); sessionStorage.removeItem('mc-onboarding-session-v1'); } catch (error) { /* Session is revoked on the server. */ }
+      try { sessionStorage.removeItem('mc-owner-visit-pending-v1:'+slug); sessionStorage.removeItem('mc-onboarding-session-v1'); sessionStorage.removeItem(ownerKeyStorage); } catch (error) { /* Session is revoked on the server. */ }
       button.hidden = true; $('retryLoad').hidden = true;
       history.replaceState(null, '', location.pathname);
       try { localStorage.removeItem(RETURN_ROUTE_KEY); } catch (error) { /* Nothing to return to after a chosen sign-out. */ }
