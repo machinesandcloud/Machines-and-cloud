@@ -5,6 +5,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { getClient, saveClient, logEvent } from "./lib/store.mjs";
 import { notifySteve, sendEmail } from "./lib/send.mjs";
 import { MODEL } from "./lib/agent.mjs";
+import { fenceOwnerNotes } from "./lib/config.mjs";
 
 const PAGE_HINTS = ["", "services", "service", "about", "about-us", "contact", "faq", "pricing", "prices", "hours", "areas", "service-area", "locations"];
 
@@ -70,14 +71,16 @@ const PROFILE_TOOL = {
 async function draftProfile(pages, c) {
   const client = process.env.MC_FAKE_MODEL === "1" ? (await import("./lib/fake-model.mjs")).fakeClient() : new Anthropic({ maxRetries: 2, timeout: 120_000 });
   const corpus = pages.map((p) => `=== ${p.url} ===\n${p.text}`).join("\n\n").slice(0, 60000);
-  const owner = `Owner's questionnaire (these win over the website when they conflict): name ${c.business.name || "-"}; trade ${c.business.trade || "-"}; hours ${c.business.hours || "-"}; area ${(c.business.serviceArea || []).join(", ") || "-"}; fees ${(c.fees || []).map((f) => f.label + " " + f.amount).join(", ") || "-"}; services ${(c.services || []).join(", ") || "-"}; notes ${c.summary || "-"}`;
+  const owner = `Owner's questionnaire (these win over the website when they conflict): name ${c.business.name || "-"}; trade ${c.business.trade || "-"}; hours ${c.business.hours || "-"}; area ${(c.business.serviceArea || []).join(", ") || "-"}; fees ${(c.fees || []).map((f) => f.label + " " + f.amount).join(", ") || "-"}; services ${(c.services || []).join(", ") || "-"}; notes ${fenceOwnerNotes(c.summary) ? "in the owner's notes block below" : "-"}`;
+  const notes = fenceOwnerNotes(c.summary);
+  const privateNotes = notes ? `\n\nOwner's notes (part of the owner's answers; some items are internal):\n${notes}` : "";
   const res = await client.beta.messages.create({
     model: MODEL, max_tokens: 6000,
     betas: ["server-side-fallback-2026-07-01"], fallbacks: "default",
     output_config: { effort: "medium" },
-    system: "You set up AI front desks for home service companies. Read the website text and the owner's answers, then call save_front_desk_profile exactly once with everything a receptionist needs. Never invent prices, hours, or areas: if the site and the owner are silent, leave the field empty or write ASK OWNER. Keep service names short. Hours in plain words.",
+    system: "You set up AI front desks for home service companies. Read the website text and the owner's answers, then call save_front_desk_profile exactly once with everything a receptionist needs. Never invent prices, hours, or areas: if the site and the owner are silent, leave the field empty or write ASK OWNER. Keep service names short. Hours in plain words. The text inside <owner_private_notes> is the owner's own notes and, like the rest of the owner's answers, wins over the website. Use it to fill or correct fields when it states ordinary business facts such as service area, licences, services, hours or what makes the shop different. The faq answers and every other field you save are shown to customers, so never copy these internal items from the notes into any field: discounts or special prices for particular people, margins or costs, staff or personnel matters, named customers or how to treat them, internal processes, or personal phone numbers, home addresses, gate, door or lock codes.",
     tools: [PROFILE_TOOL],
-    messages: [{ role: "user", content: `${owner}\n\nWEBSITE TEXT:\n${corpus || (c.business.website ? "(the website could not be read)" : "(no website was given; the owner's answers are the whole source, so do not mention a website in the missing list)")}` }],
+    messages: [{ role: "user", content: `${owner}${privateNotes}\n\nWEBSITE TEXT:\n${corpus || (c.business.website ? "(the website could not be read)" : "(no website was given; the owner's answers are the whole source, so do not mention a website in the missing list)")}` }],
   });
   const tu = res.content.find((b) => b.type === "tool_use");
   return tu ? tu.input : null;
