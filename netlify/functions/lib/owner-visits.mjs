@@ -16,8 +16,16 @@ const stamp = () => new Date().toISOString();
 const active = status => ['booked', 'confirmed', 'on_the_way'].includes(status);
 const OPERATIONS = 'owner_visit_operations', LOCKS = 'owner_visit_locks';
 export class OwnerVisitError extends Error {
-  constructor(code, message, status = 409, field = null) { super(message); this.code = code; this.status = status; this.field = field; }
+  constructor(code, message, status = 409, field = null, retryAt = null) { super(message); this.code = code; this.status = status; this.field = field; this.retryAt = retryAt; }
 }
+// A transient refusal (5xx, such as calendar_unavailable) that never claimed capacity or
+// fenced a booking may be re-attempted by the same submission after this delay. Definite
+// refusals and fenced aborts stay final for their submission.
+export const OWNER_VISIT_TRANSIENT_RETRY_MS = 60000;
+const transientRefusal = op => op?.state === 'rejected' && op.error?.status >= 500 && !op.abortError && typeof op.retryAt === 'string';
+// finishAbort keeps an earlier retryAt on the row; only a still-transient refusal may advertise it.
+const storedRefusal = (op, final = false) => new OwnerVisitError(op.error.code, op.error.message, op.error.status, op.error.field, final || !transientRefusal(op) ? null : op.retryAt);
+const reopenable = op => transientRefusal(op) && Date.parse(op.retryAt) <= Date.now();
 export const ownerVisitRevision = booking => hash(JSON.stringify(canonical(booking)));
 export function ownerVisitView(booking) {
   return { id: booking.id, customer_name: booking.customer_name, phone: booking.phone, issue: booking.issue, address: booking.address, date: booking.date, window: booking.window, status: booking.status, revision: ownerVisitRevision(booking), canChange: active(booking.status) };
@@ -109,10 +117,18 @@ export async function changeOwnerVisit(client, session, originalBody) {
   const tenant = deliveryTenant(client), operationId = hash(`${tenant}:${body.submissionId.toLowerCase()}`), key = `${client.slug}/${tenant}/${operationId}`, lockKey = `${client.slug}/${tenant}/${body.visitId}`;
   const input = { ...body, submissionId: body.submissionId.toLowerCase() }, digest = hash(JSON.stringify(canonical(input)));
   let operation = await strictRead(OPERATIONS, key);
-  let current = await authority(client, session, body.expectedRevision, { checkRevision: !operation });
+  // An expired transient refusal is re-attempted as a fresh admission with current checks.
+  // A sibling attempt that claimed capacity or fenced the booking makes the refusal final.
+  let reopen = false, fenced = false;
+  if (operation?.digest === digest && transientRefusal(operation)) {
+    const [saved, capacity] = await Promise.all([strictRead('bookings', `${client.slug}/${body.visitId}`), strictRead('index', capacityKey(client))]);
+    fenced = saved?.ownerVisitAbortFence === operationId || saved?.ownerVisitMutation?.id === operationId || capacity?.mutations?.[body.visitId] === operationId;
+    reopen = !fenced && reopenable(operation);
+  }
+  let current = await authority(client, session, body.expectedRevision, { checkRevision: !operation || reopen });
   if (operation && operation.digest !== digest) throw new OwnerVisitError('submission_conflict', 'This submission was already used for a different visit change.');
-  if (operation?.state === 'rejected') { await releaseLock(lockKey,operationId); throw new OwnerVisitError(operation.error.code, operation.error.message, operation.error.status, operation.error.field); }
-  if (!operation) {
+  if (operation?.state === 'rejected' && !reopen) { await releaseLock(lockKey,operationId); throw storedRefusal(operation, fenced); }
+  if (!operation || reopen) {
     // Reject invalid date/window choices before retaining an operation or capacity claim.
     if (['create_visit','reschedule_visit'].includes(body.action)) {
       try { requestedDate(body.date, { isoOnly: true }); } catch (error) { if (!(error instanceof AvailabilityInputError)) throw error; throw new OwnerVisitError(error.code, error.message, 400, 'date'); }
@@ -125,11 +141,12 @@ export async function changeOwnerVisit(client, session, originalBody) {
     }
     operation = await atomicUpdate(OPERATIONS, key, row => {
       if (row && row.digest !== digest) throw new OwnerVisitError('submission_conflict', 'This submission was already used for a different change.');
-      const value = row || { version: 1, id: operationId, slug: client.slug, tenantIdentity: tenant, digest, input, state: 'pending', createdAt: stamp(), actorEmail: session.email };
-      return row ? { result: row } : { value, result: value };
+      if (row && !(reopen && reopenable(row))) return { result: row };
+      const value = { version: 1, id: operationId, slug: client.slug, tenantIdentity: tenant, digest, input, state: 'pending', createdAt: row?.createdAt || stamp(), actorEmail: session.email, ...(row ? { attempt: (row.attempt || 1) + 1, reopenedAt: stamp(), previousRefusals: [...(row.previousRefusals || []), { at: row.rejectedAt || null, code: row.error.code }].slice(-10) } : {}) };
+      return { value, result: value };
     });
   }
-  if (operation.state === 'rejected') { await releaseLock(lockKey,operationId); throw new OwnerVisitError(operation.error.code,operation.error.message,operation.error.status,operation.error.field); }
+  if (operation.state === 'rejected') { await releaseLock(lockKey,operationId); throw storedRefusal(operation); }
   if (operation.state === 'complete') {
     await releaseLock(lockKey, operationId);
     const saved = await strictRead('bookings', `${client.slug}/${body.visitId}`);
@@ -149,7 +166,7 @@ export async function changeOwnerVisit(client, session, originalBody) {
       current = await authority(client, session, body.expectedRevision);
       if (creating ? !!booking : ownerVisitRevision(booking) !== body.expectedVisitRevision || !active(booking.status)) throw new OwnerVisitError('visit_changed', 'This visit changed. Refresh its details before trying again.');
       operation = await operationChange(key, row => row.source ? row : { ...row, source: booking || { id: body.visitId }, mutationAt: stamp() });
-      if (operation.state === 'rejected') { await releaseLock(lockKey,operationId); throw new OwnerVisitError(operation.error.code,operation.error.message,operation.error.status,operation.error.field); }
+      if (operation.state === 'rejected') { await releaseLock(lockKey,operationId); throw storedRefusal(operation); }
       if (operation.state === 'complete') { await releaseLock(lockKey,operationId); const latest=await strictRead('bookings',`${client.slug}/${body.visitId}`); if(!owns(latest,current))throw new OwnerVisitError('visit_not_found','This visit is no longer available.',404);return {...result(operation,latest),superseded:latest.ownerVisitMutation?.id!==operationId}; }
       const cancel = body.action === 'cancel_visit';
       const claim = await reserveBookingWindow(current, body.visitId, cancel ? booking.date : body.date, cancel ? booking.window : body.window, creating ? undefined : { date: operation.source.date, window: operation.source.window }, { requireExisting: cancel, mutationId: operationId });
@@ -161,7 +178,7 @@ export async function changeOwnerVisit(client, session, originalBody) {
         if (saved?.ownerVisitMutation?.id === operationId) return { result:saved };
         current = await authority(client, session, body.expectedRevision);
         const latestOperation = await strictRead(OPERATIONS,key);
-        if (latestOperation?.state === 'rejected') throw new OwnerVisitError(latestOperation.error.code,latestOperation.error.message,latestOperation.error.status,latestOperation.error.field);
+        if (latestOperation?.state === 'rejected') throw storedRefusal(latestOperation);
         if (latestOperation?.state === 'complete') throw new Error('A concurrent retry already completed this visit');
         const capacity = await strictRead('index', capacityKey(client));
         if (capacity?.mutations?.[body.visitId] !== operationId) throw new Error('Visit capacity ownership could not be confirmed');
@@ -186,7 +203,7 @@ export async function changeOwnerVisit(client, session, originalBody) {
     }
     operation = await operationChange(key, row => ({ ...row, state: 'local_saved', localSavedAt: row.localSavedAt || stamp() }));
     if (operation.state === 'complete') { await releaseLock(lockKey, operationId); const latest = await strictRead('bookings', `${client.slug}/${body.visitId}`); if (!owns(latest,current)) throw new OwnerVisitError('visit_not_found','This visit is no longer available.',404); return { ...result(operation,latest), superseded:latest.ownerVisitMutation?.id !== operationId }; }
-    if (operation.state === 'rejected') { await releaseLock(lockKey,operationId); throw new OwnerVisitError(operation.error.code,operation.error.message,operation.error.status,operation.error.field); }
+    if (operation.state === 'rejected') { await releaseLock(lockKey,operationId); throw storedRefusal(operation); }
     // Queue writes are local-only and replay safely from the authoritative booking.
     try {
       if (booking.phone) await addToIndex('bookings', current, booking.phone, booking.id);
@@ -222,8 +239,9 @@ export async function changeOwnerVisit(client, session, originalBody) {
       }
       const after = await strictRead('index', capacityKey(client));
       if (saved?.ownerVisitMutation?.id !== operationId && after?.mutations?.[body.visitId] !== operationId) {
-        await operationChange(key, row => ({ ...row, state: 'rejected', error: { code: error.code, message: error.message, status: error.status, field: error.field } }));
-        await releaseLock(lockKey, operationId); throw error;
+        const rejectedAt = stamp(), retryAt = error.status >= 500 ? new Date(Date.parse(rejectedAt) + OWNER_VISIT_TRANSIENT_RETRY_MS).toISOString() : null;
+        const rejected = await operationChange(key, row => ({ ...row, state: 'rejected', rejectedAt, retryAt, error: { code: error.code, message: error.message, status: error.status, field: error.field } }));
+        await releaseLock(lockKey, operationId); throw rejected?.state === 'rejected' ? storedRefusal(rejected) : error;
       }
     }
     throw new OwnerVisitError('visit_outcome_uncertain', 'The visit change is still being confirmed. Retry the same saved change; do not submit a different one yet.', 503);

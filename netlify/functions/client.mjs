@@ -345,7 +345,7 @@ async function handle(req) {
       if (!selfService || !accessOriginAllowed(origin)) return json({ error: "forbidden" }, 403, { "Cache-Control": "no-store" });
       try { return json(await (b.action==='visit_availability'?previewOwnerVisitAvailability(c,session,b):changeOwnerVisit(c, session, b)), 200, { "Cache-Control": "no-store", "Netlify-CDN-Cache-Control":"no-store" }); }
       catch (error) {
-        if (error instanceof OwnerVisitError) return json({ error: error.code, message: error.message, field: error.field }, error.status, { "Cache-Control": "no-store" });
+        if (error instanceof OwnerVisitError) return json({ error: error.code, message: error.message, field: error.field, ...(error.retryAt ? { retryAt: error.retryAt } : {}) }, error.status, { "Cache-Control": "no-store" });
         return json({ error: b.action==='visit_availability'?"availability_unavailable":"visit_outcome_uncertain", message: b.action==='visit_availability'?"Available times could not be confirmed. Try again; no visit has been changed.":"The visit change could not be confirmed. Retry the same saved change." }, 503, { "Cache-Control": "no-store" });
       }
     }
