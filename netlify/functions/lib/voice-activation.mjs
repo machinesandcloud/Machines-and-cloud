@@ -732,7 +732,7 @@ export async function handleManagedVapiWebhook(req, { dispatchTool } = {}) {
         const currentVoice=async()=>{const saved=await strictRead(STORE,row.id),active=await strictRead(CALLS,callKey);if (!saved || saved.generation!==row.generation || !active || active.endReportAt || active.vapiCallId!==vapiCallId || ['completed','busy','failed','no-answer','canceled'].includes(active.twilioStatus)) return null;const state=await serving(saved);return state.valid?state:null;};
         if(!await assertPaidVoiceParent(currentRow,latest.c,callKey))throw new Error('Paid parent unavailable');
         const result = name==='request_human' ? await requestManagedHuman({row:currentRow,call:currentCall,input,site:siteUrl(),reserve:reserveVoiceBudget,redirectCall:args=>createManagedVoiceProvider({executionAllowed:()=>productionPolicy().enabled}).redirectCall(args),current:currentVoice,paid:paidHandoff(currentRow,callKey,currentVoice)}) : await dispatchTool({ client: latest.c, callId: vapiCallId, toolCallId: id, name, input, caller: call.from, operationId: row.id }); results.push({ toolCallId: id, result: typeof result === "string" ? result : JSON.stringify(result) }); }
-      catch { results.push({ toolCallId: id, error: "This request could not be confirmed. Do not claim it was booked or delivered." }); }
+      catch { results.push({ toolCallId: id, error: "This request could not be confirmed. It may or may not be saved. Do not claim it was booked or delivered, do not promise a callback, and do not repeat this action." }); }
     }
     return json({ results });
   }

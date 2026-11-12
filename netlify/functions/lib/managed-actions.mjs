@@ -21,9 +21,20 @@ export async function dispatchManagedVoiceTool({ client, callId, toolCallId, nam
     return result.content;
   }
   if (!["book_visit", "notify_owner"].includes(name)) throw new Error("Unknown front desk action");
-  const actionId = hash(JSON.stringify([deliveryTenant(c), channel, callId, toolCallId])), key = `${c.slug}/${actionId}`;
   const args = { ...input, phone: /^\+1[2-9]\d{9}$/.test(input.phone || "") ? input.phone : /^\+1[2-9]\d{9}$/.test(caller) ? caller : "" };
   const digest = hash(JSON.stringify(canonical({ name, input: args }))), token = randomBytes(16).toString("hex");
+  // The same details on the same call or text join its first action, even under a new tool
+  // call ID (for example a repeat after an unconfirmed answer), so they cannot save twice.
+  const ownActionId = hash(JSON.stringify([deliveryTenant(c), channel, callId, toolCallId]));
+  const requestKey = `${c.slug}/request-${hash(JSON.stringify([deliveryTenant(c), channel, callId, digest]))}`;
+  let actionId = await atomicUpdate("managed_actions", requestKey, row => /^[a-f0-9]{64}$/.test(row?.actionId || "") ? { result: row.actionId } : { value: { actionId: ownActionId, createdAt: new Date().toISOString() }, result: ownActionId });
+  // A completed "nothing was saved" answer (window full, calendar unavailable) can change during the call,
+  // so a later identical request under a new tool call ID is a new action, not a replay of that answer.
+  if (actionId !== ownActionId) {
+    const prior = await strictRead("managed_actions", `${c.slug}/${actionId}`);
+    if (prior?.state === "completed" && prior.saveOutcome === "not_saved" && prior.recordId === null) { const stale = actionId; actionId = await atomicUpdate("managed_actions", requestKey, row => !row || row.actionId === stale ? { value: { ...(row || {}), actionId: ownActionId, createdAt: row?.createdAt || new Date().toISOString(), replacedNotSaved: stale }, result: ownActionId } : { result: row.actionId }); }
+  }
+  const key = `${c.slug}/${actionId}`;
   const reportSavedRecord = async recordId => {
     if (!onSavedRecord) return;
     const kind = name === "book_visit" ? "bookings" : "leads";
