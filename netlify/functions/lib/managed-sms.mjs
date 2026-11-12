@@ -6,7 +6,7 @@ import { recordManagedInbound, managedSMSConsent, managedAppointmentConsentQuest
 import { managedDeliveryEnabled, managedDeliveryProofScope, queueManagedMessage, recordManagedSMSReceipt, dispatchManagedDeliveryWave } from "./managed-delivery.mjs";
 import { findMessagingClientByNumber, messagingInboundBinding, messagingSender, pendingMessagingProbe, recordMessagingProbe } from "./messaging-activation.mjs";
 import { getAcquiredPhoneResource } from "./phone-activation.mjs";
-import { buildSystemPrompt, BOOK_VISIT, NOTIFY_OWNER, GET_AVAILABILITY } from "./config.mjs";
+import { buildSystemPrompt, BOOK_VISIT, NOTIFY_OWNER, GET_AVAILABILITY, agentFallbackLanguage } from "./config.mjs";
 import { runAgent, MANAGED_TEXT_MODEL } from "./agent.mjs";
 import { reserveAIRequest, selfServiceAIModelFetch } from "./self-service-ai.mjs";
 import { savedPortalAcknowledgment } from "./self-service-ack.mjs";
@@ -213,7 +213,7 @@ export async function processManagedSMS(id) {
     const received=Date.parse(job.providerDate), receivedDay=capacity&&Number.isFinite(received)?houstonToday(new Date(received)):null;
     const receivedContext=receivedDay?`\nThe current customer message was received on ${receivedDay} in Houston. Interpret this message's relative days (today, tomorrow or a weekday) from that received date. Use absolute YYYY-MM-DD dates in tools. Availability is checked at processing time; do not move an old request to a different day or promise a past window. If its requested timing has passed, ask for a new preference.`:'';
     let savedActionCount=0,savedCheckReply=null,terminalCheckReply=null,savedBookingLanguage=null;
-    const out=await runAgent({system:buildSystemPrompt(c,"sms")+"\nThis customer is using your verified texting channel. Save real visits and requests with tools. Only the final reply is queued for delivery; never claim a separate notification was delivered. Do not infer recurring texting consent. No promotional outreach."+receivedContext,tools:[GET_AVAILABILITY,BOOK_VISIT,NOTIFY_OWNER],messages,dropToolPreamble:true,maxTokens:capacity?800:1200,maxRetries:0,requireComplete:true,modelFetch,...(capacity?{model:MANAGED_TEXT_MODEL}:{}),stopAfterTools:async({toolUses,results})=>{
+    const out=await runAgent({system:buildSystemPrompt(c,"sms")+"\nThis customer is using your verified texting channel. Save real visits and requests with tools. Only the final reply is queued for delivery; never claim a separate notification was delivered. Do not infer recurring texting consent. No promotional outreach."+receivedContext,tools:[GET_AVAILABILITY,BOOK_VISIT,NOTIFY_OWNER],messages,dropToolPreamble:true,fallbackLanguage:agentFallbackLanguage(c),logSlug:c.slug,maxTokens:capacity?800:1200,maxRetries:0,requireComplete:true,modelFetch,...(capacity?{model:MANAGED_TEXT_MODEL}:{}),stopAfterTools:async({toolUses,results})=>{
       if(savedActionCount!==1||!savedCheckReply||toolUses.length!==1||toolUses[0].name!=='notify_owner'||toolUses[0].input.reason!=='status_check'||results.some(result=>result.is_error))return false;
       if(!await freshAuthority())throw new Error("Channel authority changed");
       if(capacity)await assertPaidUsage(c,job.paidAnswerCapacity,paidAnswerExpected(job));
@@ -223,7 +223,7 @@ export async function processManagedSMS(id) {
       if (!await freshAuthority()) throw new Error("Channel authority changed");
       if(capacity)await assertPaidUsage(c,job.paidAnswerCapacity,paidAnswerExpected(job));
       if(receivedDay&&['get_availability','book_visit'].includes(name)&&typeof input?.date==='string')input={...input,date:normalizeBookingDate(input.date,receivedDay)||input.date};
-      const toolCallId=name==="get_availability"?"availability":`mutation_${mutationIndex++}`;
+      const toolCallId=name==="get_availability"?"availability":`mutation_${mutationIndex++}`, savedBefore=savedActionCount;
       let availabilityError=false;
       const content=await dispatchManagedVoiceTool({client:c,callId:job.messageSid,toolCallId,name,input,caller:job.from,channel:"sms",onAvailabilityResult:result=>{availabilityError=result.is_error===true;},onSavedRecord:(action,record)=>{
         savedActionCount++;
@@ -231,7 +231,7 @@ export async function processManagedSMS(id) {
         if(action==='notify_owner'&&input.reason==='status_check'&&record.reason===input.reason)savedCheckReply=savedPortalAcknowledgment(action,record);
       }});
       if (name==="book_visit" && content.startsWith("Visit saved")) booked=true;
-      return {content,...(availabilityError?{is_error:true}:{})};
+      return {content,...(availabilityError?{is_error:true}:{}),...(savedActionCount>savedBefore?{event:{type:"saved",...(name==="notify_owner"&&input?.reason==="spam"?{reason:"spam"}:{})}}:{})};
     }});
     if (!await freshAuthority()) { await updateInbound(id,row=>({...row,state:"suppressed",claim:null,reasonCode:"authority_changed"})); return {ok:true,suppressed:true}; }
     const ask=booked && !consent.transactional && !consent.pendingAsk, reply=String(terminalCheckReply || out.reply || "Please contact the shop directly for help with your request.").slice(0,1200)+(ask?"\n"+managedAppointmentConsentQuestion(c,savedBookingLanguage||'en'):"");

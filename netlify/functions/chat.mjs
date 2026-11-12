@@ -19,6 +19,8 @@ import { claimWebsiteTurn, validateWebsiteTurn, websiteActionId, websiteRecordCo
 import { WorkspaceIdentityError } from './lib/workspace-identity.mjs';
 import { savedPortalAcknowledgment } from "./lib/self-service-ack.mjs";
 import { appointmentTextInvitation } from './lib/appointment-texts.mjs';
+// Proposal 10: a separate import line, so the config/desk import lines that other proposals edit stay untouched.
+import { agentFallbackLanguage } from "./lib/config.mjs";
 
 export const config = { path: "/api/chat" };
 
@@ -211,7 +213,7 @@ export default async (req, context) => {
           if (onText) onText(terminalCheckReply);
           return true;
         } : undefined;
-        const out = await runAgent({ system, tools, messages: history, onText, execTool, maxTokens: 1500, dropToolPreamble: true, modelFetch, stopAfterTools });
+        const out = await runAgent({ system, tools, messages: history, onText, execTool, maxTokens: 1500, dropToolPreamble: true, modelFetch, stopAfterTools, logSlug: c.slug, fallbackLanguage: agentFallbackLanguage(c) });
         return await finish(terminalCheckReply ? {...out,reply:terminalCheckReply} : out);
       } catch (error) { try { await failWebsiteTurn(websiteContext); } catch {} throw error; }
     };
@@ -228,7 +230,7 @@ export default async (req, context) => {
     try { budget = await reserveSalesTurn(ip); }
     catch { return json({ error: "sales_allowance_unavailable", message: "Chat is temporarily unavailable. Your question has not been sent to anyone; please try again later." }, 503, cors(origin)); }
     if (!budget.allowed) return json({ error: "sales_daily_limit", message: "Today's AI chat allowance is used up. You can still explore the examples, create a workspace or contact us directly.", resetAt: budget.allowance.resetAt }, 429, cors(origin));
-    const run = onText => runAgent({ system: salesSystem(), tools: SALES_TOOLS, messages, onText, execTool: executeSalesTool, dropToolPreamble: true, adaptiveThinking: true, effort: "medium", maxTokens: 3072, maxIterations: 3, requireComplete: true, includeUsage: true, maxRetries: 0, exhaustedReply: "I couldn’t finish that reliably. Your question hasn’t been sent to anyone; you can try again or contact us directly." });
+    const run = onText => runAgent({ system: salesSystem(), tools: SALES_TOOLS, messages, onText, execTool: executeSalesTool, dropToolPreamble: true, adaptiveThinking: true, effort: "medium", maxTokens: 3072, maxIterations: 3, requireComplete: true, includeUsage: true, maxRetries: 0, safetyLine: false, exhaustedReply: "I couldn’t finish that reliably. Your question hasn’t been sent to anyone; you can try again or contact us directly." });
     if (wantStream) return ndjsonResponse(run, cors(origin));
     try { return json(await run(), 200, cors(origin)); } catch (err) { const e = classifyError(err); return json({ error: e.error }, e.status, cors(origin)); }
   }

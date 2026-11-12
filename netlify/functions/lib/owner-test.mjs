@@ -2,7 +2,7 @@
 // It writes only labeled test history and a revision-bound setup receipt.
 import { runAgent, toApiMessages } from "./agent.mjs";
 import { atomicUpdate, id, assertCurrentWorkspace } from "./store.mjs";
-import { buildSystemPrompt, BOOK_VISIT, NOTIFY_OWNER, GET_AVAILABILITY } from "./config.mjs";
+import { buildSystemPrompt, BOOK_VISIT, NOTIFY_OWNER, GET_AVAILABILITY, agentFallbackLanguage } from "./config.mjs";
 import { addDays, isElapsedWindow, listedWindow, listedWindows, requestedDate } from "./availability.mjs";
 import { configurationRevision } from "./setup.mjs";
 
@@ -84,7 +84,9 @@ export async function runOwnerTest({ client, contact, messages, onText, aiProof 
   const tools = [BOOK_VISIT, NOTIFY_OWNER, GET_AVAILABILITY].map((tool) => ({
     ...tool, description: tool.name === "get_availability" ? `PRIVATE TEST PREVIEW ONLY. ${tool.description}` : "PRIVATE TEST PREVIEW ONLY: save a labeled preview in the isolated test history. No actual booking, contact, text, call, calendar write or reservation happens.",
   }));
-  let toolFailed = false;
+  // A rehearsal whose final turn was withheld (cut off or refused) did not show a complete answer,
+  // so it must not certify the revision.
+  let toolFailed = false, turnWithheld = false;
   const testMode = process.env.MC_FAKE_MODEL === "1" ? "fake" : "live";
   await assertCurrentWorkspace(client);
   const modelFetch = await selfServiceAIModelFetch(client, aiProof);
@@ -94,7 +96,7 @@ export async function runOwnerTest({ client, contact, messages, onText, aiProof 
       const result = ownerTestTool(client, name, input);
       if (result.is_error) toolFailed = true;
       return result;
-    }, maxTokens: 1500, dropToolPreamble: true, modelFetch });
+    }, maxTokens: 1500, dropToolPreamble: true, modelFetch, logSlug: client.slug, fallbackLanguage: agentFallbackLanguage(client), onWithheld: () => { turnWithheld = true; } });
   await assertCurrentWorkspace(client);
   const reply = PREFIX + out.reply;
   const completedAt = new Date().toISOString();
@@ -106,7 +108,7 @@ export async function runOwnerTest({ client, contact, messages, onText, aiProof 
   await atomicUpdate("owner_tests", key, () => ({ value: test }));
   // A stale test must not certify newer owner rules. Preserve every unrelated client field.
   const proofRecorded = await atomicUpdate("clients", client.slug, (current) => {
-    if (toolFailed || !current || current.ownerKey !== client.ownerKey || supportedWorkspace(client) && (!supportedWorkspace(current) || workspaceTenant(current) !== workspaceTenant(client)) || configurationRevision(current) !== revision) return { result: false };
+    if (toolFailed || turnWithheld || !current || current.ownerKey !== client.ownerKey || supportedWorkspace(client) && (!supportedWorkspace(current) || workspaceTenant(current) !== workspaceTenant(client)) || configurationRevision(current) !== revision) return { result: false };
     return { value: { ...current, setupProof: { ...current.setupProof, testedRevision: revision, testedAt: completedAt, testMode } }, result: true };
   });
   await assertCurrentWorkspace(client);

@@ -1,5 +1,8 @@
 // Runs the front desk on one inbound text and sends the reply through the Messages API.
 // Started by sms.mjs after it has already answered Twilio's webhook.
+// Proposal 10: its own import lines, so the shared import lines below stay unchanged.
+import { runAgent as runAgentLoop } from "./lib/agent.mjs";
+import { agentFallbackLanguage } from "./lib/config.mjs";
 import { getClient, getConversation, saveConversation, logEvent } from "./lib/store.mjs";
 import { runAgent, toApiMessages } from "./lib/agent.mjs";
 import { buildSystemPrompt, BOOK_VISIT, NOTIFY_OWNER, UPDATE_VISIT, GET_AVAILABILITY } from "./lib/config.mjs";
@@ -15,6 +18,10 @@ export default async (req) => {
   if (!c || !from) return new Response("ok");
   const conv = await getConversation(c, "sms", from);
   const bookings = await upcomingBookings(c, from);
+  // A withheld (cut-off or refused) reply falls back in this number's upcoming-visit language, else
+  // bilingual on a Spanish-enabled shop (agentFallbackLanguage); the call below is otherwise unchanged.
+  // This local runAgent shadows the imported one inside this handler only.
+  const runAgent = (options) => runAgentLoop({ ...options, logSlug: c.slug, fallbackLanguage: agentFallbackLanguage(c, bookings[0]) });
   const history = toApiMessages(conv.messages);
   const tools = bookings.length ? [BOOK_VISIT, NOTIFY_OWNER, UPDATE_VISIT, GET_AVAILABILITY] : [BOOK_VISIT, NOTIFY_OWNER, GET_AVAILABILITY];
   const execTool = async (tool, input) => {
