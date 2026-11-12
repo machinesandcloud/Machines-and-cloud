@@ -1,0 +1,428 @@
+ok   no-settle: text throws, email ok -> text sms_unconfirmed (channel text), email ok
+ok   no-settle: legacy optouts store unreadable -> text held (sms_unconfirmed, 0 posts), email ok
+ok   no-settle: platform ledger unreadable -> text withheld (sms_unconfirmed), email ok
+ok   no-settle: provider rejects text (400), email ok -> text ok:false, email ok, no throw
+ok   no-settle: text ok, email throws -> notifyOwner rejects (text result lost; pre-existing, recorded)
+ok   no-settle: text throws and email throws -> rejects
+ok   no-settle: opted-out owner -> text opted_out (refusal), email ok
+ok   no-settle: both ok -> two ok results
+ok   no-settle: no phone, no email -> []
+ok   settle: text throws, email ok -> text send_error (channel text), email ok
+ok   settle: legacy optouts store unreadable -> text held (sms_unconfirmed, 0 posts), email ok
+ok   settle: platform ledger unreadable -> text withheld (send_error), email ok
+ok   settle: provider rejects text (400), email ok -> text ok:false, email ok, no throw
+ok   settle: text ok, email throws -> email send_error, text ok
+ok   settle: text throws and email throws -> both send_error
+ok   settle: opted-out owner -> text opted_out (refusal), email ok
+ok   settle: both ok -> two ok results
+ok   settle: no phone, no email -> []
+ok   voice: all ok -> 0
+ok   voice: no owner phone and no email -> 0 (nothing to alert, not a failure)
+ok   voice: owner text throws, no email -> 1
+FAIL voice: owner text throws, email accepted -> variant 1 (email reached owner) / fix 0
+FAIL voice: platform ledger unreadable, email accepted -> variant 1 / fix 0 (never double)
+FAIL voice: legacy optouts unreadable, email accepted -> variant 1 / fix 0 (text held, never double)
+ok   voice: legacy optouts unreadable, no email -> 1 (both)
+FAIL voice: text ok, email throws -> variant 1 although the text was accepted (pre-existing false event) / fix 0
+ok   voice: text throws and email throws -> exactly 1 (no double)
+FAIL voice: provider rejects owner text, no email -> variant 0 (QA6 N2 gap, unchanged) / fix 1
+FAIL voice: opted-out owner, no email -> variant 0 (QA6 N2 gap, unchanged) / fix 1
+ok   voice: provider rejects owner text, email accepted -> 0 (both)
+ok   voice: owner text ok, email rejected (422) -> 0 (both)
+{
+ "check": "p12-owner-alert",
+ "mode": "variant",
+ "pass": 27,
+ "total": 33,
+ "physical": 0,
+ "blockedRequests": [],
+ "recordedTwilioPosts": 17,
+ "recordedEmails": 17,
+ "results": [
+  {
+   "name": "no-settle: text throws, email ok -> text sms_unconfirmed (channel text), email ok",
+   "pass": true,
+   "r": {
+    "value": [
+     {
+      "channel": "text",
+      "ok": false,
+      "reason": "sms_unconfirmed"
+     },
+     {
+      "channel": "email",
+      "ok": true
+     }
+    ]
+   }
+  },
+  {
+   "name": "no-settle: legacy optouts store unreadable -> text held (sms_unconfirmed, 0 posts), email ok",
+   "pass": true,
+   "r": {
+    "value": [
+     {
+      "channel": "text",
+      "ok": false,
+      "reason": "sms_unconfirmed"
+     },
+     {
+      "channel": "email",
+      "ok": true
+     }
+    ]
+   },
+   "ownerPosts": 0
+  },
+  {
+   "name": "no-settle: platform ledger unreadable -> text withheld (sms_unconfirmed), email ok",
+   "pass": true,
+   "r": {
+    "value": [
+     {
+      "channel": "text",
+      "ok": false,
+      "reason": "sms_unconfirmed"
+     },
+     {
+      "channel": "email",
+      "ok": true
+     }
+    ]
+   }
+  },
+  {
+   "name": "no-settle: provider rejects text (400), email ok -> text ok:false, email ok, no throw",
+   "pass": true,
+   "r": {
+    "value": [
+     {
+      "channel": "text",
+      "ok": false
+     },
+     {
+      "channel": "email",
+      "ok": true
+     }
+    ]
+   }
+  },
+  {
+   "name": "no-settle: text ok, email throws -> notifyOwner rejects (text result lost; pre-existing, recorded)",
+   "pass": true,
+   "r": {
+    "threw": "fetch failed (synthetic email)"
+   }
+  },
+  {
+   "name": "no-settle: text throws and email throws -> rejects",
+   "pass": true,
+   "r": {
+    "threw": "fetch failed (synthetic email)"
+   }
+  },
+  {
+   "name": "no-settle: opted-out owner -> text opted_out (refusal), email ok",
+   "pass": true,
+   "r": {
+    "value": [
+     {
+      "channel": "text",
+      "ok": false,
+      "reason": "opted_out"
+     },
+     {
+      "channel": "email",
+      "ok": true
+     }
+    ]
+   }
+  },
+  {
+   "name": "no-settle: both ok -> two ok results",
+   "pass": true,
+   "r": {
+    "value": [
+     {
+      "channel": "text",
+      "ok": true
+     },
+     {
+      "channel": "email",
+      "ok": true
+     }
+    ]
+   }
+  },
+  {
+   "name": "no-settle: no phone, no email -> []",
+   "pass": true,
+   "r": {
+    "value": []
+   }
+  },
+  {
+   "name": "settle: text throws, email ok -> text send_error (channel text), email ok",
+   "pass": true,
+   "r": {
+    "value": [
+     {
+      "channel": "text",
+      "ok": false,
+      "reason": "send_error"
+     },
+     {
+      "channel": "email",
+      "ok": true
+     }
+    ]
+   }
+  },
+  {
+   "name": "settle: legacy optouts store unreadable -> text held (sms_unconfirmed, 0 posts), email ok",
+   "pass": true,
+   "r": {
+    "value": [
+     {
+      "channel": "text",
+      "ok": false,
+      "reason": "sms_unconfirmed"
+     },
+     {
+      "channel": "email",
+      "ok": true
+     }
+    ]
+   },
+   "ownerPosts": 0
+  },
+  {
+   "name": "settle: platform ledger unreadable -> text withheld (send_error), email ok",
+   "pass": true,
+   "r": {
+    "value": [
+     {
+      "channel": "text",
+      "ok": false,
+      "reason": "send_error"
+     },
+     {
+      "channel": "email",
+      "ok": true
+     }
+    ]
+   }
+  },
+  {
+   "name": "settle: provider rejects text (400), email ok -> text ok:false, email ok, no throw",
+   "pass": true,
+   "r": {
+    "value": [
+     {
+      "channel": "text",
+      "ok": false
+     },
+     {
+      "channel": "email",
+      "ok": true
+     }
+    ]
+   }
+  },
+  {
+   "name": "settle: text ok, email throws -> email send_error, text ok",
+   "pass": true,
+   "r": {
+    "value": [
+     {
+      "channel": "text",
+      "ok": true
+     },
+     {
+      "channel": "email",
+      "ok": false,
+      "reason": "send_error"
+     }
+    ]
+   }
+  },
+  {
+   "name": "settle: text throws and email throws -> both send_error",
+   "pass": true,
+   "r": {
+    "value": [
+     {
+      "channel": "text",
+      "ok": false,
+      "reason": "send_error"
+     },
+     {
+      "channel": "email",
+      "ok": false,
+      "reason": "send_error"
+     }
+    ]
+   }
+  },
+  {
+   "name": "settle: opted-out owner -> text opted_out (refusal), email ok",
+   "pass": true,
+   "r": {
+    "value": [
+     {
+      "channel": "text",
+      "ok": false,
+      "reason": "opted_out"
+     },
+     {
+      "channel": "email",
+      "ok": true
+     }
+    ]
+   }
+  },
+  {
+   "name": "settle: both ok -> two ok results",
+   "pass": true,
+   "r": {
+    "value": [
+     {
+      "channel": "text",
+      "ok": true
+     },
+     {
+      "channel": "email",
+      "ok": true
+     }
+    ]
+   }
+  },
+  {
+   "name": "settle: no phone, no email -> []",
+   "pass": true,
+   "r": {
+    "value": []
+   }
+  },
+  {
+   "name": "voice: all ok -> 0",
+   "pass": true,
+   "status": 200,
+   "failed": 0,
+   "missed": 1
+  },
+  {
+   "name": "voice: no owner phone and no email -> 0 (nothing to alert, not a failure)",
+   "pass": true,
+   "failed": 0
+  },
+  {
+   "name": "voice: owner text throws, no email -> 1",
+   "pass": true,
+   "status": 200,
+   "failed": 1,
+   "missed": 1
+  },
+  {
+   "name": "voice: owner text throws, email accepted -> variant 1 (email reached owner) / fix 0",
+   "pass": false,
+   "error": "owner_alert_failed count\n\n0 !== 1\n",
+   "status": 200,
+   "failed": 0,
+   "missed": 1
+  },
+  {
+   "name": "voice: platform ledger unreadable, email accepted -> variant 1 / fix 0 (never double)",
+   "pass": false,
+   "error": "owner_alert_failed count\n\n0 !== 1\n",
+   "status": 200,
+   "failed": 0,
+   "missed": 1
+  },
+  {
+   "name": "voice: legacy optouts unreadable, email accepted -> variant 1 / fix 0 (text held, never double)",
+   "pass": false,
+   "error": "owner_alert_failed count\n\n0 !== 1\n",
+   "status": 200,
+   "failed": 0,
+   "missed": 1
+  },
+  {
+   "name": "voice: legacy optouts unreadable, no email -> 1 (both)",
+   "pass": true,
+   "status": 200,
+   "failed": 1,
+   "missed": 1
+  },
+  {
+   "name": "voice: text ok, email throws -> variant 1 although the text was accepted (pre-existing false event) / fix 0",
+   "pass": false,
+   "error": "owner_alert_failed count\n\n0 !== 1\n",
+   "status": 200,
+   "failed": 0,
+   "missed": 1
+  },
+  {
+   "name": "voice: text throws and email throws -> exactly 1 (no double)",
+   "pass": true,
+   "status": 200,
+   "failed": 1,
+   "missed": 1
+  },
+  {
+   "name": "voice: provider rejects owner text, no email -> variant 0 (QA6 N2 gap, unchanged) / fix 1",
+   "pass": false,
+   "error": "owner_alert_failed count\n\n1 !== 0\n",
+   "status": 200,
+   "failed": 1,
+   "missed": 1
+  },
+  {
+   "name": "voice: opted-out owner, no email -> variant 0 (QA6 N2 gap, unchanged) / fix 1",
+   "pass": false,
+   "error": "owner_alert_failed count\n\n1 !== 0\n",
+   "status": 200,
+   "failed": 1,
+   "missed": 1
+  },
+  {
+   "name": "voice: provider rejects owner text, email accepted -> 0 (both)",
+   "pass": true,
+   "status": 200,
+   "failed": 0,
+   "missed": 1
+  },
+  {
+   "name": "voice: owner text ok, email rejected (422) -> 0 (both)",
+   "pass": true,
+   "status": 200,
+   "failed": 0,
+   "missed": 1
+  },
+  {
+   "name": "unconfigured: both channels logged, none ok, no throw",
+   "pass": true,
+   "r": {
+    "value": [
+     {
+      "channel": "text",
+      "ok": false,
+      "reason": "disabled",
+      "logged": true
+     },
+     {
+      "channel": "email",
+      "ok": false,
+      "reason": "disabled",
+      "logged": true
+     }
+    ]
+   }
+  },
+  {
+   "name": "unconfigured voice: no owner_alert_failed (logged, not failed)",
+   "pass": true,
+   "failed": 0
+  }
+ ]
+}

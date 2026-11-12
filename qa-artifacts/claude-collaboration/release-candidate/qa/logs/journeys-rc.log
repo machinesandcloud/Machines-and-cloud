@@ -1,0 +1,65 @@
+PASS J1-signup-390 :: homepage renders headline and inquiry form
+PASS J1-signup-390 :: inquiry submits through /api/intake and hands off to onboarding
+PASS J1-signup-390 :: onboarding shows the email gate with the inquiry email carried over
+PASS J1-signup-390 :: email link (fake mailbox) verifies and opens the questionnaire
+PASS J1-signup-390 :: questionnaire completes and creates one workspace
+PASS J1-signup-390 :: workspace link opens the desk with the business name, no owner key in URL
+PASS J1-signup-390 :: Front desk / Connections page renders truthful channel states
+PASS J2-website-chat-390 :: owner sees the install snippet for the website
+PASS J2-website-chat-390 :: widget loads on the shop site and opens
+PASS J2-website-chat-390 :: first visitor turn is answered and a conversation token is issued
+PASS J2-website-chat-390 :: second turn (token carried) books a visit through book_visit
+PASS J3-inbox-emergency-390 :: emergency visitor message saves an urgent owner request
+PASS J3-inbox-emergency-390 :: a normal callback request is also saved
+PASS J3-inbox-emergency-390 :: Inbox lists the emergency first, labelled urgent, newest first
+PASS J3-inbox-emergency-390 :: Home shows the urgent request needing attention
+PASS J4-visits-390 :: Schedule lists the booked visit and its details open
+PASS J4-visits-390 :: Edit details saves a corrected address, keeps date/window
+PASS J4-visits-390 :: empty required detail is refused inline
+PASS J4-visits-390 :: Schedule a visit from the request pre-fills Add visit and saves a linked visit
+PASS J5-connections-390 :: Connections show website chat on, phone/text/Calendar not falsely active
+PASS J5-connections-390 :: service buttons listed
+PASS J6-admin-390 :: operator sign-in opens admin with health banner and issues
+PASS J6-admin-390 :: customer detail lists issues for the live shop
+[email:disabled] to=qa-rc-operator@example.test :: Platform health needs attention (degraded)
+Platform health needs attention.
+State: degraded. Last scheduler run: not recorded. Last healthy run: not recorded.
+Failing (details are only in the admin System view):
+- scheduler: scheduler (no_run_recorded)
+
+Open System in the admin portal: http://127.0.0.1:8961/admin.html
+This alert repeats at most every 6 hours while unchanged, a recovery notice follows, and at most 12 alert emails are sent in 24 hours.
+PASS J6-admin-390 :: owner session cannot use the operator API; anonymous health is sanitized
+PASS J7-account-390 :: Pause workspace
+PASS J7-account-390 :: Resume workspace
+PASS J7-account-390 :: Stop service (cancel) with confirmation
+PASS J7-account-390 :: Reopen your workspace
+PASS J1-signup-1440 :: homepage renders headline and inquiry form
+PASS J1-signup-1440 :: inquiry submits through /api/intake and hands off to onboarding
+PASS J1-signup-1440 :: onboarding shows the email gate with the inquiry email carried over
+PASS J1-signup-1440 :: email link (fake mailbox) verifies and opens the questionnaire
+PASS J1-signup-1440 :: questionnaire completes and creates one workspace
+PASS J1-signup-1440 :: workspace link opens the desk with the business name, no owner key in URL
+PASS J1-signup-1440 :: Front desk / Connections page renders truthful channel states
+PASS J2-website-chat-1440 :: owner sees the install snippet for the website
+PASS J2-website-chat-1440 :: widget loads on the shop site and opens
+PASS J2-website-chat-1440 :: first visitor turn is answered and a conversation token is issued
+PASS J2-website-chat-1440 :: second turn (token carried) books a visit through book_visit
+PASS J3-inbox-emergency-1440 :: emergency visitor message saves an urgent owner request
+PASS J3-inbox-emergency-1440 :: a normal callback request is also saved
+PASS J3-inbox-emergency-1440 :: Inbox lists the emergency first, labelled urgent, newest first
+PASS J3-inbox-emergency-1440 :: Home shows the urgent request needing attention
+PASS J4-visits-1440 :: Schedule lists the booked visit and its details open
+PASS J4-visits-1440 :: Edit details saves a corrected address, keeps date/window
+PASS J4-visits-1440 :: empty required detail is refused inline
+PASS J4-visits-1440 :: Schedule a visit from the request pre-fills Add visit and saves a linked visit
+PASS J5-connections-1440 :: Connections show website chat on, phone/text/Calendar not falsely active
+PASS J5-connections-1440 :: service buttons listed
+PASS J6-admin-1440 :: operator sign-in opens admin with health banner and issues
+PASS J6-admin-1440 :: customer detail lists issues for the live shop
+PASS J6-admin-1440 :: owner session cannot use the operator API; anonymous health is sanitized
+PASS J7-account-1440 :: Pause workspace
+PASS J7-account-1440 :: Resume workspace
+PASS J7-account-1440 :: Stop service (cancel) with confirmation
+PASS J7-account-1440 :: Reopen your workspace
+{"passed":56,"failed":0,"pageErrors":0,"consoleErrors":0,"overflow":0,"blockedServer":0,"unhandledApi":[]}

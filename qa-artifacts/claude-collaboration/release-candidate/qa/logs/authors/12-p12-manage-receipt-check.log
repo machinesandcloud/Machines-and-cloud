@@ -1,0 +1,52 @@
+[email:disabled] to=p12-1@example.test :: QA Air: front desk paused by support
+Machines & Cloud support paused the QA Air workspace on 2026-11-12.
+
+Reason: Machines & Cloud support made this change.
+
+Your records and settings are kept. You can resume from Account when you are ready, or reply to our email with questions.
+
+Sign in to your workspace to see the current status. Reply to this email with any questions.
+[email:disabled] to=p12-5@example.test :: QA Air: front desk paused by support
+Machines & Cloud support paused the QA Air workspace on 2026-11-12.
+
+Reason: Machines & Cloud support made this change.
+
+Your records and settings are kept. You can resume from Account when you are ready, or reply to our email with questions.
+
+Sign in to your workspace to see the current status. Reply to this email with any questions.
+{
+ "check": "p12-manage-receipt",
+ "pass": 7,
+ "total": 7,
+ "blockedRequests": 0,
+ "results": [
+  {
+   "name": "pause: session revoked after commit is reported as saved, without customer data",
+   "pass": true
+  },
+  {
+   "name": "save_note: session revoked after commit is reported as saved, without customer data",
+   "pass": true
+  },
+  {
+   "name": "pause: allowlist removed after commit is reported as saved, without customer data",
+   "pass": true
+  },
+  {
+   "name": "save_note: allowlist removed after commit is reported as saved, without customer data",
+   "pass": true
+  },
+  {
+   "name": "revoked before the request: 401 and nothing written",
+   "pass": true
+  },
+  {
+   "name": "revoked while the action is in flight (before commit): 401 and nothing written",
+   "pass": true
+  },
+  {
+   "name": "ordinary saved change still returns the customer view",
+   "pass": true
+  }
+ ]
+}

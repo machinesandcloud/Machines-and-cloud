@@ -1,0 +1,155 @@
+diff --git a/embed.js b/embed.js
+index aae1218e..d0832e5e 100644
+--- a/embed.js
++++ b/embed.js
+@@ -25,7 +25,17 @@
+   var state = { contact: null, transcript: [] };
+   try { var saved = JSON.parse(sessionStorage.getItem(STORE) || 'null'); if (saved && saved.contact) state = saved; } catch (e) { /* ignore */ }
+   if(setupCheck)state.contact=setupCheck.contact;
+-  if (!state.contact) state.contact = 'w' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
++  // The contact id keys this visitor's saved conversation on the server, so a new one is 'w' + 32 hex (128 random bits,
++  // within chat.mjs's [a-zA-Z0-9_-]{<=60}). A stored id is kept as is so a returning visitor's chat continues; rotating it
++  // would not protect the server copy of an older, weaker id. Without crypto.getRandomValues (very old browsers only),
++  // the same format is filled from Math.random: still random and unique in practice, but not cryptographically strong.
++  function newContact() {
++    var hex = '', i, bytes, c = window.crypto || window.msCrypto;
++    try { if (c && c.getRandomValues && typeof Uint8Array === 'function') { bytes = new Uint8Array(16); c.getRandomValues(bytes); for (i = 0; i < 16; i++) hex += (bytes[i] < 16 ? '0' : '') + bytes[i].toString(16); } } catch (e) { hex = ''; }
++    if (hex.length !== 32) for (hex = '', i = 0; i < 32; i++) hex += Math.floor(Math.random() * 16).toString(16);
++    return 'w' + hex;
++  }
++  if (!state.contact) state.contact = newContact();
+   function persist() { try { sessionStorage.setItem(STORE, JSON.stringify({ contact: state.contact, transcript: state.transcript.slice(-20), pendingTurn:state.pendingTurn||null })); } catch (e) { /* ignore */ } }
+ 
+   var css = '#mcDesk{position:fixed;right:16px;bottom:calc(16px + var(--mcd-kb,0px));z-index:2147483000;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;font-size:14px;line-height:1.45}' +
+@@ -69,6 +79,10 @@
+   var checkBanner=null,checkMessage=null,checkStatusButton=null,checkAckButton=null,sampleButton=null,sampleDetails={service:'',area:''};
+   var cfg = { name: 'Front desk', greeting: 'Hi! What can we help with today?', available: false };
+   var busy = false, rendered = false, configSequence = 0;
++  // A refused "Check previous reply" (403 or paused/not_live/forbidden) says nothing about the original turn, so the pending
++  // turn is kept, but the check is not offered again until a later config read shows chat back (closed -> ready), or a
++  // ready read arrives REFUSAL_HOLD after the refusal (for refusals config cannot see, such as a forbidden origin).
++  var recoveryText=root.querySelector('.recovery p'),RECOVERY_COPY=recoveryText.textContent,REFUSED_COPY='Chat isn’t available right now, so we couldn’t check your earlier message. It may already be saved. Please contact the shop directly instead of sending it again.',REFUSAL_HOLD=300000,recheckTimer=null,pollTimer=null,recheckPending=false,recoveryBubble=null;
+ 
+   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+   function add(role, text) { var el = document.createElement('div'); el.className = 'b ' + (role === 'user' ? 'u' : 'a'); el.innerHTML = esc(text).replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>'); list.appendChild(el); list.scrollTop = list.scrollHeight; return el; }
+@@ -98,7 +112,19 @@
+   }
+   function render() { list.innerHTML = ''; add('a', notice || cfg.greeting); state.transcript.forEach(function (m) { add(m.role, m.content); if(m.role==='assistant'){appointmentTexts(m.appointmentTexts);followupTexts(m.followupTexts,m);} }); rendered = true; }
+ 
+-  function unavailable(message) { configReady=false;cfg.available = false; notice = message || 'Website chat is unavailable right now. Please use the shop’s contact details on this website.'; input.disabled = true; sendBtn.disabled = true;recovery.hidden=!!setupCheck||!state.pendingTurn; if (rendered) render(); cfgControls(); }
++  function unavailable(message) { configReady=false;cfg.available = false; notice = message || 'Website chat is unavailable right now. Please use the shop’s contact details on this website.'; input.disabled = true; sendBtn.disabled = true;recoveryControls(); if (rendered) render(); cfgControls(); }
++  function recoveryControls(){var refused=!!(state.pendingTurn&&state.pendingTurn.refused);recovery.hidden=!!setupCheck||!state.pendingTurn;recoverButton.hidden=refused;recoverButton.disabled=busy;var text=refused?REFUSED_COPY:RECOVERY_COPY;if(recoveryText.textContent!==text)recoveryText.textContent=text;}
++  // Config reads made because of a refused or failed check keep the open/online spacing (5s) and any 429 back-off.
++  function recheckConfig(){if(recheckTimer)return;var wait=Math.max(notBefore-Date.now(),lastConfigRead+5000-Date.now());if(wait<=0&&!configLoading){refreshConfig();return;}recheckTimer=setTimeout(function(){recheckTimer=null;if(configLoading)recheckConfig();else refreshConfig();},Math.max(wait,250));}
++  function refuseRecovery(code){if(!state.pendingTurn)return;state.pendingTurn.refused={at:new Date().toISOString(),code:String(code||'refused').slice(0,20),closedSeen:false};persist();recheckConfig();}
++  // Config said chat is closed: a refused check stays held; a check that failed without a readable answer is now known refused.
++  function configClosed(){var pending=state.pendingTurn;if(pending&&!setupCheck){if(!pending.refused&&recheckPending)pending.refused={at:new Date().toISOString(),code:'unavailable',closedSeen:true};else if(pending.refused)pending.refused.closedSeen=true;persist();}recheckPending=false;}
++  function configOpen(){var pending=state.pendingTurn,refused=pending&&pending.refused;recheckPending=false;if(!refused||!(refused.closedSeen||Date.now()-Date.parse(refused.at)>=REFUSAL_HOLD))return false;delete pending.refused;persist();return true;}
++  // While a refused check is shown and the panel stays open, re-read config slowly (60-120s, jittered) and once right when
++  // REFUSAL_HOLD ends, so a resumed chat re-offers the check without a close/reopen. Never while closed, failed or backing off.
++  function refusedPoll(){clearTimeout(pollTimer);pollTimer=null;var refused=state.pendingTurn&&state.pendingTurn.refused;if(!refused||setupCheck||!root.classList.contains('open')||configState==='failed')return;
++    var delay=Math.round(60000+Math.random()*60000),hold=Date.parse(refused.at)+REFUSAL_HOLD-Date.now();if(!refused.closedSeen&&hold>0)delay=Math.min(delay,hold+250);
++    delay=Math.max(delay,notBefore-Date.now(),lastConfigRead+5000-Date.now());pollTimer=setTimeout(function(){pollTimer=null;if(configLoading||recheckTimer)return refusedPoll();if(state.pendingTurn&&state.pendingTurn.refused&&root.classList.contains('open')&&Date.now()>=notBefore)refreshConfig();else refusedPoll();},delay);}
+   // Screen-reader announcements go through one persistent polite region; streamed deltas are not announced piecemeal.
+   function announce(text){liveRegion.textContent='';if(text)setTimeout(function(){liveRegion.textContent=text;},30);}
+   // The button is only unavailable while a read is in flight. During a 429 back-off a press schedules the read for when the
+@@ -106,7 +132,7 @@
+   function cfgControls(){var waiting=Date.now()<notBefore;clearTimeout(controlsTimer);controlsTimer=null;cfgRow.hidden=configState!=='failed';cfgButton.setAttribute('aria-disabled',configLoading?'true':'false');
+     cfgText.textContent=configLoading?'Trying again…':!busyConfig?'Chat didn’t load. Check your connection, then try again.':retryTimer?'Chat is busy right now. We’ll try again automatically.':waiting?'Chat is busy right now. Try again in a few minutes.':'Chat is busy right now. Try again in a minute.';
+     if(configState==='failed'&&busyConfig&&waiting&&!retryTimer)controlsTimer=setTimeout(cfgControls,notBefore-Date.now()+50);}
+-  function focusFirst(){fallbackFocus=null;if(!input.disabled){input.focus();return;}var target=!cfgRow.hidden?cfgButton:!recovery.hidden&&!recoverButton.disabled?recoverButton:closeButton;target.focus();if(target===closeButton)fallbackFocus=closeButton;}
++  function focusFirst(){fallbackFocus=null;if(!input.disabled){input.focus();return;}var target=!cfgRow.hidden?cfgButton:!recovery.hidden&&!recoverButton.disabled&&!recoverButton.hidden?recoverButton:closeButton;target.focus();if(target===closeButton)fallbackFocus=closeButton;}
+   // Focus is re-homed only while the customer is working in the panel (their last focus or pointer was inside it)
+   // and the control they were on disappeared or became disabled. Focus on the host page or its body is never pulled into the widget.
+   function focusGone(node){return !node||!node.isConnected||node.disabled||!!node.closest('[hidden]')||!node.getClientRects().length;}
+@@ -116,7 +142,7 @@
+   document.addEventListener('focusin',function(event){focusIntent=root.contains(event.target)?'panel':'host';if(focusIntent==='panel')lastPanelFocus=event.target;},true);
+   document.addEventListener('pointerdown',function(event){focusIntent=root.contains(event.target)?'panel':'host';},{capture:true,passive:true});
+   function checkNote(text){if(checkMessage)checkMessage.textContent=text;}
+-  function checkControls(){var available=configReady&&(!setupCheck&&!setupInvalid||checkReady&&!setupCheck.pending);recovery.hidden=!!setupCheck||!state.pendingTurn;recoverButton.disabled=busy;if(!setupCheck&&state.pendingTurn)available=false;cfg.available=!!available;input.disabled=!available;sendBtn.disabled=busy||!available;if(sampleButton)sampleButton.disabled=!available;}
++  function checkControls(){var available=configReady&&(!setupCheck&&!setupInvalid||checkReady&&!setupCheck.pending);recoveryControls();if(!setupCheck&&state.pendingTurn)available=false;cfg.available=!!available;input.disabled=!available;sendBtn.disabled=busy||!available;if(sampleButton)sampleButton.disabled=!available;}
+   function checkPayload(action,extra){return Object.assign({action:action,client:slug,checkId:setupCheck.id,challenge:setupCheck.challenge},extra||{});}
+   async function checkRequest(action,extra){var controller=new AbortController(),timeout=setTimeout(function(){controller.abort();},15000);try{var response=await fetch(BASE+'/api/website-installation',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(checkPayload(action,extra)),signal:controller.signal}),result=await response.json();if(!response.ok||result.error){var error=new Error(result.message||'The website check could not be confirmed. Return to your workspace.');error.status=response.status;throw error;}return result;}finally{clearTimeout(timeout);}}
+   async function acknowledgeCheck(){var focused=document.activeElement===checkAckButton,pending=setupCheck&&setupCheck.pending;if(!pending||!pending.completionRef)return;checkAckButton.disabled=true;try{await checkRequest('acknowledge',{turnId:pending.id,completionRef:pending.completionRef});if(setupCheck.pending!==pending)return;setupCheck.pending=null;persistCheck();checkAckButton.hidden=true;checkNote(pending.record?'Your sample request is saved. Open your workspace to review it.':'Answer confirmed. Continue the sample conversation until a callback request is saved.');}catch(error){checkNote('The answer arrived, but its check receipt is not confirmed. Retry the receipt without sending the message again.');checkAckButton.hidden=false;}finally{checkAckButton.disabled=false;checkControls();if(focused&&document.activeElement===document.body&&root.classList.contains('open')){if(!checkAckButton.hidden)checkAckButton.focus();else if(!input.disabled)input.focus();else checkStatusButton.focus();}}}
+@@ -141,35 +167,37 @@
+       if(!response.ok){var failure=new Error('unavailable');failure.closed=response.status===404;if(response.status===429)failure.retryAfter=retryAfterMs(response.headers.get('Retry-After'));throw failure;}var d=await response.json();
+       if(!d||!d.name)throw new Error('unavailable');if(sequence!==configSequence)return;
+       cfg.name=d.name;cfg.greeting=d.greeting||cfg.greeting;root.querySelector('.h b').textContent=cfg.name;
+-      if(d.webAvailable===false||d.status==='paused'||d.status==='cancelled'){configState='closed';unavailable();return;}
+-      var recovered=configState==='failed';configState='ready';autoRetries=0;notBefore=0;busyConfig=false;notice=null;
+-      configReady=true;checkControls();if(rendered)render();if(recovered&&root.classList.contains('open'))announce('Chat is ready.');
+-    }catch(error){if(sequence===configSequence){configState=error&&error.closed?'closed':'failed';
++      if(d.webAvailable===false||d.status==='paused'||d.status==='cancelled'){configState='closed';configClosed();unavailable();return;}
++      var recovered=configState==='failed',reopened=configOpen();configState='ready';autoRetries=0;notBefore=0;busyConfig=false;notice=null;
++      configReady=true;checkControls();if(rendered)render();if(root.classList.contains('open')&&(recovered||reopened))announce(reopened?'Chat is available again. You can check your earlier message.':'Chat is ready.');
++    }catch(error){if(sequence===configSequence){configState=error&&error.closed?'closed':'failed';if(configState==='closed')configClosed();else recheckPending=false;
+       // 429: honour Retry-After (at least 30s, at most 10 min) for every kind of read, including the customer's own retry.
+       busyConfig=!!(error&&error.retryAfter);if(busyConfig)notBefore=Date.now()+error.retryAfter;unavailable();
+       // Automatic re-reads start only after the customer has opened chat, are jittered and stop after three.
+       if(configState==='failed'){if(root.classList.contains('open'))announce(busyConfig?'Chat is busy right now.':'Chat didn’t load. You can try again.');if(everOpened&&autoRetries<RETRY_DELAYS.length){scheduleConfig(Math.max(notBefore-Date.now(),Math.round(RETRY_DELAYS[autoRetries]*(0.8+Math.random()*0.4))));autoRetries++;}}}}
+-    finally{clearTimeout(timeout);if(sequence===configSequence){configLoading=false;cfgControls();keepFocus();}}
++    finally{clearTimeout(timeout);if(sequence===configSequence){configLoading=false;cfgControls();keepFocus();refusedPoll();}}
+   }
+   function retryAfterMs(value){var seconds=/^\d+$/.test(value||'')?Number(value):value?(Date.parse(value)-Date.now())/1000:NaN;return Math.min(600000,Math.max(30000,isFinite(seconds)?seconds*1000:60000));}
+   function scheduleConfig(delay){var at=Date.now()+Math.max(0,delay);if(retryTimer&&retryAt<=at)return;clearTimeout(retryTimer);retryAt=at;retryTimer=setTimeout(function(){retryTimer=null;if(configState==='failed'&&!configLoading)refreshConfig();else cfgControls();},Math.max(0,delay));cfgControls();}
+   // Open and reconnect re-read at most once per 5s (and never before a 429 Retry-After); the button skips the 5s spacing only.
+   function retryConfig(reason){if(configState!=='failed'||configLoading)return;if(reason!=='button'&&!everOpened)return;var wait=Math.max(notBefore-Date.now(),reason==='button'?0:lastConfigRead+5000-Date.now());if(wait<=0)refreshConfig();else scheduleConfig(wait);}
+   cfgButton.addEventListener('click',function(){retryConfig('button');});
+-  window.addEventListener('online',function(){retryConfig('online');});
++  window.addEventListener('online',function(){retryConfig('online');if(everOpened&&state.pendingTurn&&state.pendingTurn.refused&&configState!=='failed')recheckConfig();});
+   refreshConfig();
+ 
+   function fitViewport(){var view=window.visualViewport;if(!view||!root.classList.contains('open')||Math.abs((view.scale||1)-1)>0.01){root.style.removeProperty('--mcd-kb');root.style.removeProperty('--mcd-vh');return;}root.style.setProperty('--mcd-kb',Math.max(0,Math.round(window.innerHeight-view.height-view.offsetTop))+'px');root.style.setProperty('--mcd-vh',Math.round(view.height)+'px');}
+   if(window.visualViewport){window.visualViewport.addEventListener('resize',fitViewport);window.visualViewport.addEventListener('scroll',fitViewport);}
+-  function open() { root.classList.add('open'); launcher.setAttribute('aria-expanded', 'true'); fitViewport(); if (!rendered) render(); everOpened=true; focusIntent='panel'; retryConfig('open'); setTimeout(function () { var active=document.activeElement; if(root.classList.contains('open')&&focusIntent==='panel'&&(!active||active===document.body||root.contains(active)))focusFirst(); }, 50); }
+-  function close() { root.classList.remove('open'); launcher.setAttribute('aria-expanded', 'false'); fitViewport(); launcher.focus(); }
++  function open() { root.classList.add('open'); launcher.setAttribute('aria-expanded', 'true'); fitViewport(); if (!rendered) render(); everOpened=true; focusIntent='panel'; retryConfig('open'); if(state.pendingTurn&&state.pendingTurn.refused&&configState!=='failed'){recheckConfig();refusedPoll();} setTimeout(function () { var active=document.activeElement; if(root.classList.contains('open')&&focusIntent==='panel'&&(!active||active===document.body||root.contains(active)))focusFirst(); }, 50); }
++  function close() { root.classList.remove('open');clearTimeout(pollTimer);pollTimer=null; launcher.setAttribute('aria-expanded', 'false'); fitViewport(); launcher.focus(); }
+   // Non-modal panel: Tab moves on to the host page as usual. Esc closes (not while an IME composition is open).
+   root.addEventListener('keydown',function(event){if(!root.classList.contains('open')||event.isComposing||event.keyCode===229)return;if(event.key==='Escape'){event.preventDefault();close();}});
+   launcher.addEventListener('click', function () { root.classList.contains('open') ? close() : open(); });
+   closeButton.addEventListener('click', close);
+   input.addEventListener('keydown', function (e) { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && e.keyCode !== 229) { e.preventDefault(); form.requestSubmit(); } });
+   function sendMessage(recover) {
+-    var text = input.value.trim(); if (busy || (!recover && (!text || !cfg.available || input.disabled)) || (recover && (!state.pendingTurn?.request || setupCheck))) return;
++    var text = input.value.trim(); if (busy || (!recover && (!text || !cfg.available || input.disabled)) || (recover && (!state.pendingTurn?.request || state.pendingTurn.refused || setupCheck))) return;
++    // At most one bubble reports the outcome of "Check previous reply": a repeat check replaces the previous one.
++    if(recover&&recoveryBubble){recoveryBubble.remove();recoveryBubble=null;}
+     if(setupCheck){var bytes=new Uint8Array(16);crypto.getRandomValues(bytes);setupCheck.pending={id:Array.from(bytes).map(function(value){return value.toString(16).padStart(2,'0');}).join(''),completionRef:null,record:null};persistCheck();}
+     busy = true; sendBtn.disabled = true; input.value = '';
+     if(!recover){state.transcript.push({ role: 'user', content: text });persist();add('user',text);}
+@@ -186,12 +214,12 @@
+     function bounded(promise) { return Promise.race([promise, deadline]); }
+     function delta(t) { if (!bubble) { tp.remove(); bubble = add('a', ''); } full += t; bubble.textContent = full; list.scrollTop = list.scrollHeight; }
+     function finish(reply,events) { if (done) return; if (typeof reply !== 'string' || !reply.trim()) { fail(interrupted); return; } done = true;state.pendingTurn=null; if (tp.parentNode) tp.remove(); if (!bubble) bubble = add('a', reply); else bubble.textContent = reply; announce(reply); var invitation=Array.isArray(events)&&events.find(function(event){return event.type==='booking'&&event.appointmentTexts;}),followup=Array.isArray(events)&&events.find(function(event){return event.type==='lead'&&event.followupTexts;}),entry={ role: 'assistant', content: reply, ...(invitation?{appointmentTexts:invitation.appointmentTexts}:{}),...(followup?{followupTexts:followup.followupTexts}:{}) };state.transcript.push(entry);if(invitation)appointmentTexts(invitation.appointmentTexts);if(followup)followupTexts(followup.followupTexts,entry);persist();if(setupCheck){var receipt=Array.isArray(events)&&events.find(function(event){return event.type==='website_check'&&event.checkId===setupCheck.id&&event.turnId===setupCheck.pending?.id&&/^[a-f0-9]{64}$/.test(event.completionRef||'');});if(receipt){setupCheck.pending.completionRef=receipt.completionRef;setupCheck.pending.record=receipt.record||null;persistCheck();acknowledgeCheck();}else checkNote('The answer arrived, but this check has no matching receipt. Check the saved outcome in your workspace.');} }
+-    function fail(message) { if (done) return; done = true; if (tp.parentNode) tp.remove(); var text = typeof message === 'string' ? message : interrupted; if (!bubble) bubble = add('a', text); else bubble.textContent = text; bubble.setAttribute('role', 'status');announce(text);if(setupCheck)checkNote('The reply was interrupted. Your request may already be saved; check its status before sending it again.'); }
++    function fail(message) { if (done) return; done = true; if (tp.parentNode) tp.remove(); if (message === null) return; /* the recovery strip (role=status) states the refusal */ var text = typeof message === 'string' ? message : interrupted; if (!bubble) bubble = add('a', text); else bubble.textContent = text; bubble.setAttribute('role', 'status');if(recover)recoveryBubble=bubble;announce(text);if(setupCheck)checkNote('The reply was interrupted. Your request may already be saved; check its status before sending it again.'); }
+     function release() {
+       clearTimeout(timer);
+       // A terminal packet completes the turn; do not wait indefinitely for the connection to close.
+       if (reader) { try { var cancelled = reader.cancel(); if (cancelled && cancelled.catch) cancelled.catch(function () {}); } catch (e) { /* already closed */ } }
+-      busy = false;checkControls();var active=document.activeElement;if(root.classList.contains('open')&&focusIntent==='panel'&&(active&&active!==document.body?root.contains(active):focusGone(lastPanelFocus)||form.contains(lastPanelFocus))){if(!input.disabled)input.focus();else if(setupCheck&&checkStatusButton&&!checkStatusButton.disabled)checkStatusButton.focus();else if(bubble){bubble.tabIndex=-1;bubble.focus();}}
++      busy = false;checkControls();var active=document.activeElement;if(root.classList.contains('open')&&focusIntent==='panel'&&(active&&active!==document.body?root.contains(active):focusGone(lastPanelFocus)||form.contains(lastPanelFocus))){if(!input.disabled)input.focus();else if(setupCheck&&checkStatusButton&&!checkStatusButton.disabled)checkStatusButton.focus();else if(bubble){bubble.tabIndex=-1;bubble.focus();}else focusFirst();}
+     }
+     var body;
+     if(recover)body=Object.assign({},state.pendingTurn.request,{recoverTurn:true});
+@@ -201,7 +229,7 @@
+     bounded(fetch(ENDPOINT, request))
+       .then(function (res) {
+         var type = res.headers.get('content-type') || '';
+-        if (!res.ok) { if (res.status === 429) { configReady=false;cfg.available = false; input.disabled = true; } return bounded(res.json()).then(function(error){if(!setupCheck&&error.turnNotProcessed===true){state.pendingTurn=null;persist();}fail(error.message || (res.status === 429 ? 'Chat has reached its daily limit. Please contact the shop directly using the details on this website.' : interrupted));},function(){fail(interrupted);}); }
++        if (!res.ok) { if (res.status === 429) { configReady=false;cfg.available = false; input.disabled = true; } return bounded(res.json()).then(function(error){error=error&&typeof error==='object'?error:{};var refused=false;if(!setupCheck&&error.turnNotProcessed===true){state.pendingTurn=null;persist();}else if(recover&&(res.status===403||['paused','not_live','forbidden'].includes(error.error))){refused=true;refuseRecovery(error.error||'forbidden');}fail(typeof error.message==='string'&&error.message?error.message:refused?null:res.status === 429 ? 'Chat has reached its daily limit. Please contact the shop directly using the details on this website.' : interrupted);},function(){if(recover&&res.status===403){refuseRecovery('forbidden');fail(null);}else fail(interrupted);}); }
+         if (type.indexOf('ndjson') !== -1 && res.body && res.body.getReader) {
+           reader = res.body.getReader(); var dec = new TextDecoder(), buf = '';
+           function packet(line) {
+@@ -222,7 +250,9 @@
+         }
+         return bounded(res.json()).then(function (d) { if (d && d.t === 'done') finish(d.reply,d.events); else fail(interrupted); });
+       })
+-      .catch(function () { fail(interrupted); })
++      // A cross-origin 403 without CORS headers is indistinguishable here from a lost connection. After a failed check, one
++      // spaced config read tells them apart only when config shows chat closed (paused, cancelled, unavailable).
++      .catch(function () { if(recover&&!done&&state.pendingTurn&&!state.pendingTurn.refused){recheckPending=true;recheckConfig();} fail(interrupted); })
+       .then(release, release);
+   }
+   form.addEventListener('submit',function(event){event.preventDefault();sendMessage(false);});recoverButton.addEventListener('click',function(){sendMessage(true);});

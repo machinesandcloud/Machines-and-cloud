@@ -1,0 +1,36 @@
+{
+ "check": "p13-initial-capacity",
+ "revision": 4,
+ "pass": 4,
+ "total": 4,
+ "results": [
+  {
+   "name": "X1 first-row race: the CAS read the row as absent, the first claim then committed it and indexed its in-flight booking: the second booking is admitted on the committed row",
+   "pass": true,
+   "detail": {
+    "ok": true,
+    "id": "2730ed63a4"
+   }
+  },
+  {
+   "name": "X2 no committed row and an orphan locator (record never written): still refuses with \"needs review\", nothing claimed",
+   "pass": true
+  },
+  {
+   "name": "X3 the committed row is tenant-checked: a row of another workspace incarnation is not adopted",
+   "pass": true,
+   "detail": {
+    "ok": false,
+    "code": "thrown",
+    "message": "This workspace changed. Refresh before continuing."
+   }
+  },
+  {
+   "name": "X4 60 trials of two concurrent first bookings on fresh shops (0-40 ms store jitter, 0-400 ms stagger): no thrown error",
+   "pass": true,
+   "detail": {
+    "trials": 60
+   }
+  }
+ ]
+}

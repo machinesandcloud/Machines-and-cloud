@@ -1,0 +1,170 @@
+diff --git a/desk.css b/desk.css
+index 52717c67..060b76ab 100644
+--- a/desk.css
++++ b/desk.css
+@@ -402,6 +402,7 @@ body.desk-app.guide-tour-open { overflow:hidden; }
+ .desk-inbox-refresh[hidden] { display:none; }
+ .desk-inbox-refresh p { margin:0;flex:1;min-width:180px;color:var(--ui-muted,#526176);font-size:13px;line-height:1.6; }
+ 
++<<<<<<< ours
+ /* 2026-11-11 Inbox triage: urgent badge, Open/Done filter, Home attention rows. Text labels carry the meaning; color only reinforces it. */
+ .desk-urgency{display:inline-flex;align-items:center;gap:5px;margin:6px 0 0;padding:3px 8px;border-radius:4px;font-size:12px;font-weight:650;line-height:1.5;background:#fdecea;color:#8f1d14;border:1px solid #f2b8b1}
+ .desk-urgency .ui-icon{width:14px;height:14px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+@@ -422,6 +423,7 @@ body.desk-app.guide-tour-open { overflow:hidden; }
+ .desk-attention-meta{font-size:12px;color:var(--ui-muted)}
+ .desk-app #todayEvents time,.desk-app #liveEvents time{font-variant-numeric:tabular-nums;color:var(--ui-muted);margin-right:4px}
+ .desk-app #todayEvents .btn-pill{margin-left:6px;min-height:32px;padding:5px 10px;font-size:12px}
++=======
+ /* 2026-11-12 post-visit follow-ups (PRA-HOMEOWNER-08) */
+ .visit-post { margin-top:22px; padding-top:18px; border-top:1px solid #dde4ed; }
+ .visit-post h3 { margin:0 0 6px; font-size:1rem; }
+@@ -436,3 +438,4 @@ body.desk-app.guide-tour-open { overflow:hidden; }
+ .post-visit-toggle small { color:#5b6878; font-size:.88rem; line-height:1.4; }
+ .post-visit-program { padding:14px 16px; background:#f5f7fa; border-radius:12px; display:grid; gap:6px; overflow-wrap:anywhere; }
+ .post-visit-program p { margin:0; }
++>>>>>>> theirs
+diff --git a/desk.js b/desk.js
+index 903a047b..b7ff2019 100644
+--- a/desk.js
++++ b/desk.js
+@@ -161,7 +161,7 @@
+     $('visitWindow').innerHTML=windows.map(function(window){return '<option value="'+esc(window)+'">'+esc(window)+'</option>';}).join(''); $('visitWindow').value=windowValue;
+     $('visitCancelConfirm').checked=!!(pending && pending.action==='cancel_visit'); $('visitChangeForm').hidden=visitEditing || !visitSelected.canChange && !pending;
+     visitFieldsDisabled(!!pending); $('retryVisit').hidden=!pending; $('visitMessage').textContent=pending?'A saved change still needs confirmation. Retry it using the same details.':visitSelected.canChange?(creating?"We’ll check availability when you save.":'Choose a listed arrival window. Full or blocked windows keep the original visit unchanged.'):'This visit is retained for your records.';
+-    renderPostVisit(creating?null:id);
++<<<<<<< ours
+     $('visitDialog').showModal();document.dispatchEvent(new CustomEvent('mc:visit-open',{detail:{visitId:creating?null:visitSelected.id,visitRevision:creating?null:visitSelected.revision,configurationRevision:data.configurationRevision,pending:!!pending || visitEditing,canChange:visitSelected.canChange,preferredWindow:visitPrefill && visitPrefill.window || null}})); $('closeVisit').focus();
+   }
+   // A save re-renders lists, so the opener may be replaced. Return to the same record's
+@@ -175,6 +175,12 @@
+   $('editVisitDetails').addEventListener('click',function(){if(visitSelected && visitSelected.canChange && !visitPending)visitEditMode(true);});
+   $('discardVisitDetails').addEventListener('click',function(){if(!visitPending)visitEditMode(false);});
+   $('visitEditForm').addEventListener('submit',function(event){event.preventDefault();saveVisitChange('edit_visit');});
++=======
++    renderPostVisit(creating?null:id);
++    $('visitDialog').showModal();document.dispatchEvent(new CustomEvent('mc:visit-open',{detail:{visitId:creating?null:visitSelected.id,visitRevision:creating?null:visitSelected.revision,configurationRevision:data.configurationRevision,pending:!!pending,canChange:visitSelected.canChange}})); $('closeVisit').focus();
++  }
++  function closeVisit() { if(visitBusy)return; $('visitDialog').close(); if(visitOpener && visitOpener.isConnected)visitOpener.focus(); }
++>>>>>>> theirs
+   $('closeVisit').addEventListener('click',closeVisit);
+   $('visitDialog').addEventListener('close',function(){var target=visitCalendarReturn;visitCalendarReturn=null;if(target&&!leaving)scheduleEmit('mc:schedule-visit-closed',target);});
+   $('visitDialog').addEventListener('cancel',function(event){if(visitBusy)event.preventDefault();});
+diff --git a/netlify/functions/client.mjs b/netlify/functions/client.mjs
+index 11bbb9b9..7d3dc810 100644
+--- a/netlify/functions/client.mjs
++++ b/netlify/functions/client.mjs
+@@ -52,9 +52,12 @@ import { serviceIntakeView, serviceIntakeRevision, readServiceIntake, changeServ
+ import { connectionPreparationView, prepareConnections, fenceConnectionPreparation, ConnectionPreparationError } from './lib/connection-preparation.mjs';
+ import {reportConversation,reportConnection,connectionAssistanceViews,supportReportViews,SupportReportError} from './lib/support-reports.mjs';
+ import {readOwnerSchedule,ScheduleReadError} from './lib/owner-schedule.mjs';
++<<<<<<< ours
+ import { currentChannelAvailability } from './lib/channel-availability.mjs';
++=======
+ import { changePostVisit, postVisitView, postVisitSettings, postVisitProgramState } from './lib/post-visit.mjs';
+ import { reviewRequestsAvailable } from './lib/messaging-program.mjs';
++>>>>>>> theirs
+ 
+ export const config = { path: "/api/client" };
+ 
+@@ -358,12 +361,16 @@ async function handle(req, context) {
+       try { return json(await startWebsiteCheck(c, session, b), 200, { 'Cache-Control': 'no-store' }); }
+       catch (error) { if (error instanceof WebsiteInstallationError) return json({ error: error.code, message: error.message, ...(error.field ? { field: error.field } : {}) }, error.status, { 'Cache-Control': 'no-store' }); throw error; }
+     }
++<<<<<<< ours
++    if (["create_visit", "reschedule_visit", "cancel_visit", "edit_visit", "visit_availability"].includes(b?.action)) {
++=======
+     if (b?.action === "post_visit") {
+       if (!selfService || !accessOriginAllowed(origin)) return json({ error: "forbidden" }, 403, { "Cache-Control": "no-store" });
+       try { return json(await changePostVisit(c, session, b), 200, { "Cache-Control": "no-store" }); }
+       catch (error) { if (error instanceof OwnerVisitError) return json({ error: error.code, message: error.message, field: error.field }, error.status, { "Cache-Control": "no-store" }); return json({ error: "post_visit_uncertain", message: "The change could not be confirmed. Retry the same action; it will not be applied twice." }, 503, { "Cache-Control": "no-store" }); }
+     }
+-    if (["create_visit", "reschedule_visit", "cancel_visit", "edit_visit", "visit_availability"].includes(b?.action)) {
++    if (["create_visit", "reschedule_visit", "cancel_visit", "visit_availability"].includes(b?.action)) {
++>>>>>>> theirs
+       if (!selfService || !accessOriginAllowed(origin)) return json({ error: "forbidden" }, 403, { "Cache-Control": "no-store" });
+       try { return json(await (b.action==='visit_availability'?previewOwnerVisitAvailability(c,session,b):changeOwnerVisit(c, session, b)), 200, { "Cache-Control": "no-store", "Netlify-CDN-Cache-Control":"no-store" }); }
+       catch (error) {
+diff --git a/netlify/functions/lib/managed-consent.mjs b/netlify/functions/lib/managed-consent.mjs
+index 62149bd0..14ca8eda 100644
+--- a/netlify/functions/lib/managed-consent.mjs
++++ b/netlify/functions/lib/managed-consent.mjs
+@@ -1,8 +1,11 @@
+ import { atomicUpdate } from "./store.mjs";
+ import { strictRead } from "./accounts.mjs";
+ import { workspaceTenant } from './workspace-identity.mjs';
++<<<<<<< ours
+ import { classifySMSKeyword } from './sms-keywords.mjs';
++=======
+ import { reviewRequestsAvailable } from './messaging-program.mjs';
++>>>>>>> theirs
+ export const deliveryTenant = workspaceTenant;
+ const key = (c, phone) => `${c.slug}/${deliveryTenant(c)}/${phone}`;
+ const validPhone = phone => typeof phone === "string" && /^\+1[2-9]\d{9}$/.test(phone);
+diff --git a/netlify/functions/lib/managed-delivery.mjs b/netlify/functions/lib/managed-delivery.mjs
+index ae113499..c4d40c0b 100644
+--- a/netlify/functions/lib/managed-delivery.mjs
++++ b/netlify/functions/lib/managed-delivery.mjs
+@@ -69,7 +69,11 @@ async function currentClient(c) {
+   if (!current || !isSupportedSelfServiceClient(current) || deliveryTenant(c) !== deliveryTenant(current)) throw new Error("Delivery workspace changed");
+   return current;
+ }
+-export async function queueManagedMessage(c, { eventId, channel, purpose, to, body, source = null, dueAt = null, consentAsk = false, preserveSnapshot = false, probe = null, followup = null, subject = null, alert = null, postVisit = null }) {
++<<<<<<< ours
++export async function queueManagedMessage(c, { eventId, channel, purpose, to, body, source = null, dueAt = null, consentAsk = false, preserveSnapshot = false, probe = null, followup = null, subject = null, alert = null }) {
++=======
++export async function queueManagedMessage(c, { eventId, channel, purpose, to, body, source = null, dueAt = null, consentAsk = false, preserveSnapshot = false, probe = null, followup = null, postVisit = null }) {
++>>>>>>> theirs
+   const scope = await managedDeliveryProofScope();
+   if (!proofClientAllowed(scope,c) || scope && (channel !== 'email' || to !== scope.email)) return null;
+   await currentClient(c);
+@@ -78,13 +82,18 @@ export async function queueManagedMessage(c, { eventId, channel, purpose, to, bo
+   if (channel === "sms" && purpose === "owner_visit_check" || channel === "email" && ["review_request", "payment_reminder"].includes(purpose) || ["review_request", "payment_reminder", "owner_visit_check"].includes(purpose) !== !!postVisit) throw new Error("Invalid delivery intent");
+   const id = messageId(c,channel,eventId);
+   const answer = channel === 'sms' ? await paidAnswerForDelivery(c, eventId, to, body) : {};
++<<<<<<< ours
+   if (subject !== null && (channel !== "email" || typeof subject !== "string" || !subject.trim() || subject.length > 120)) throw new Error("Invalid delivery intent");
+   if (alert !== null && (channel !== "email" || !/^[a-f0-9]{10,32}$/.test(alert?.id || "") || ![1, 2].includes(alert.step))) throw new Error("Invalid delivery intent");
+-  const payload = { tenant: deliveryTenant(c), channel, purpose, to, body, source, dueAt, consentAsk, probe, ...(followup?{followup}:{}), ...(postVisit?{postVisit}:{}), ...(subject?{subject}:{}), ...(alert?{alert:{id:alert.id,step:alert.step,...(alert.epoch?{epoch:alert.epoch}:{})}}:{}), ...answer }, digest = hash(JSON.stringify(canonical(payload)));
++  const payload = { tenant: deliveryTenant(c), channel, purpose, to, body, source, dueAt, consentAsk, probe, ...(followup?{followup}:{}), ...(subject?{subject}:{}), ...(alert?{alert:{id:alert.id,step:alert.step,...(alert.epoch?{epoch:alert.epoch}:{})}}:{}), ...answer }, digest = hash(JSON.stringify(canonical(payload)));
+   // Like the body, the subject is display text: a re-queue of an existing snapshot keeps the
+   // snapshot, and jobs written before subjects existed keep their original identity.
+   const { subject: _subject, ...identityPayload } = payload;
+   const identity = hash(JSON.stringify(canonical({ ...identityPayload, body: null })));
++=======
++  const payload = { tenant: deliveryTenant(c), channel, purpose, to, body, source, dueAt, consentAsk, probe, ...(followup?{followup}:{}), ...(postVisit?{postVisit}:{}), ...answer }, digest = hash(JSON.stringify(canonical(payload)));
++  const identity = hash(JSON.stringify(canonical({ ...payload, body: null })));
++>>>>>>> theirs
+   const previous=await strictRead(STORE,id);
+   if(previous && previous.digest!==digest && !(preserveSnapshot && previous.identity===identity))throw new Error("Delivery identity already used");
+   const snapshot=previous || {...payload,dueAt:dueAt || stamp(),id,slug:c.slug,digest,identity,state:"queued",createdAt:stamp(),updatedAt:stamp(),attempts:0};
+@@ -334,7 +343,11 @@ function providerAdapter(deadlineAt=Date.now()+10000) {
+         await assertManagedEmailReservation(c, job, job.emailBudget);
+         assertManagedEmailDispatchPolicy(job.emailBudget);
+         assertProofPolicy(scope);
+-        const { response, data } = await request("https://api.resend.com/emails", { method: "POST", headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, "Content-Type": "application/json", "Idempotency-Key": `delivery/${hash(job.id)}` }, body: JSON.stringify({ from: process.env.FROM_EMAIL, to: [job.to], subject: job.subject || (job.purpose === "owner_booking" ? "Your front desk: visit update" : job.purpose === "owner_visit_check" ? "Your front desk: did this visit happen?" : "Your front desk: customer request"), text: job.body }) });
++<<<<<<< ours
++        const { response, data } = await request("https://api.resend.com/emails", { method: "POST", headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, "Content-Type": "application/json", "Idempotency-Key": `delivery/${hash(job.id)}` }, body: JSON.stringify({ from: process.env.FROM_EMAIL, to: [job.to], subject: job.subject || (job.purpose === "owner_booking" ? "Your front desk: visit update" : "Your front desk: customer request"), text: job.body }) });
++=======
++        const { response, data } = await request("https://api.resend.com/emails", { method: "POST", headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, "Content-Type": "application/json", "Idempotency-Key": `delivery/${hash(job.id)}` }, body: JSON.stringify({ from: process.env.FROM_EMAIL, to: [job.to], subject: job.purpose === "owner_booking" ? "Your front desk: visit update" : job.purpose === "owner_visit_check" ? "Your front desk: did this visit happen?" : "Your front desk: customer request", text: job.body }) });
++>>>>>>> theirs
+         if (!response.ok || typeof data.id !== "string") throw new Error("Email result unconfirmed");
+         return { id: data.id, status: "accepted" };
+       }
+diff --git a/netlify/functions/lib/managed-sms.mjs b/netlify/functions/lib/managed-sms.mjs
+index 69e3523f..6d6b26b8 100644
+--- a/netlify/functions/lib/managed-sms.mjs
++++ b/netlify/functions/lib/managed-sms.mjs
+@@ -6,8 +6,12 @@ import { recordManagedInbound, managedSMSConsent, managedAppointmentConsentQuest
+ import { managedDeliveryEnabled, managedDeliveryProofScope, queueManagedMessage, recordManagedSMSReceipt, dispatchManagedDeliveryWave } from "./managed-delivery.mjs";
+ import { findMessagingClientByNumber, messagingInboundBinding, messagingSender, pendingMessagingProbe, recordMessagingProbe } from "./messaging-activation.mjs";
+ import { getAcquiredPhoneResource } from "./phone-activation.mjs";
+-import { reviewRequestsAvailable } from './messaging-program.mjs';
++<<<<<<< ours
+ import { buildSystemPrompt, BOOK_VISIT, NOTIFY_OWNER, GET_AVAILABILITY, agentFallbackLanguage } from "./config.mjs";
++=======
++import { reviewRequestsAvailable } from './messaging-program.mjs';
++import { buildSystemPrompt, BOOK_VISIT, NOTIFY_OWNER, GET_AVAILABILITY } from "./config.mjs";
++>>>>>>> theirs
+ import { runAgent, MANAGED_TEXT_MODEL } from "./agent.mjs";
+ import { reserveAIRequest, selfServiceAIModelFetch } from "./self-service-ai.mjs";
+ import { savedPortalAcknowledgment } from "./self-service-ack.mjs";

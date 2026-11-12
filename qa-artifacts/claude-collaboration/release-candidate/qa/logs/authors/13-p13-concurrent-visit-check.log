@@ -1,0 +1,518 @@
+{
+ "check": "p13-concurrent-visit",
+ "revision": 4,
+ "pass": 39,
+ "total": 39,
+ "nonFixtureRequests": 0,
+ "syntheticWorkerDispatch": [
+  "/api/calendar-delivery-background"
+ ],
+ "results": [
+  {
+   "name": "two identical concurrent Add visit (busy reads overlap, oldest-first) save exactly one visit",
+   "pass": true,
+   "detail": [
+    {
+     "ok": false,
+     "code": "visit_outcome_uncertain",
+     "status": 503
+    },
+    {
+     "ok": true,
+     "id": "3d9db041eaa6ca6f7f5bb262f0836ead",
+     "status": "booked"
+    }
+   ]
+  },
+  {
+   "name": "two identical concurrent Add visit (busy reads overlap, newest-first) save exactly one visit",
+   "pass": true,
+   "detail": [
+    {
+     "ok": true,
+     "id": "b4c7b7068454e511390e8677fe0cfd1a",
+     "status": "booked"
+    },
+    {
+     "ok": true,
+     "id": "b4c7b7068454e511390e8677fe0cfd1a",
+     "status": "booked"
+    }
+   ]
+  },
+  {
+   "name": "two identical concurrent Add visit with no forced overlap save exactly one visit",
+   "pass": true,
+   "detail": [
+    {
+     "ok": false,
+     "code": "visit_outcome_uncertain",
+     "status": 503
+    },
+    {
+     "ok": true,
+     "id": "1ca6f773970393368a898e9fd70252a7",
+     "status": "booked"
+    }
+   ]
+  },
+  {
+   "name": "three identical concurrent Add visit save exactly one visit",
+   "pass": true,
+   "detail": [
+    {
+     "ok": false,
+     "code": "visit_outcome_uncertain",
+     "status": 503
+    },
+    {
+     "ok": false,
+     "code": "visit_outcome_uncertain",
+     "status": 503
+    },
+    {
+     "ok": true,
+     "id": "09e50de6e979b6cee95a6abde5983d27",
+     "status": "booked"
+    }
+   ]
+  },
+  {
+   "name": "two identical concurrent POSTs through the actual /api/client handler: one visit, 200 or 503 visit_outcome_uncertain",
+   "pass": true,
+   "detail": [
+    {
+     "status": 503,
+     "error": "visit_outcome_uncertain"
+    },
+    {
+     "status": 200,
+     "error": null
+    }
+   ]
+  },
+  {
+   "name": "Calendar delivery: the one concurrent visit produces exactly one Google event after the delivery wave",
+   "pass": true,
+   "detail": {
+    "googleInserts": 1,
+    "jobs": [
+     "synced"
+    ],
+    "runs": [
+     1,
+     0,
+     0,
+     0
+    ]
+   }
+  },
+  {
+   "name": "no double booking: two different concurrent submissions for a one-visit window save one, the other is a definite refusal",
+   "pass": true,
+   "detail": [
+    {
+     "ok": false,
+     "code": "visit_outcome_uncertain",
+     "status": 503
+    },
+    {
+     "ok": true,
+     "id": "0a0dac323c97409736ab2392743bc314",
+     "status": "booked"
+    }
+   ]
+  },
+  {
+   "name": "Calendar conflict under concurrency still refuses both identical submissions and saves nothing",
+   "pass": true,
+   "detail": [
+    {
+     "ok": false,
+     "code": "visit_outcome_uncertain",
+     "status": 503
+    },
+    {
+     "ok": false,
+     "code": "calendar_conflict",
+     "status": 409
+    }
+   ]
+  },
+  {
+   "name": "a genuine Calendar failure on one of two identical attempts never yields two visits or an unbacked success",
+   "pass": true,
+   "detail": {
+    "pair": [
+     {
+      "ok": false,
+      "code": "calendar_unavailable",
+      "status": 503
+     },
+     {
+      "ok": false,
+      "code": "calendar_unavailable",
+      "status": 503
+     }
+    ],
+    "saved": 0
+   }
+  },
+  {
+   "name": "an Add visit whose Calendar read is superseded by another concurrent read is not stored as a refusal; the same submission then saves once",
+   "pass": true,
+   "detail": {
+    "first": "visit_outcome_uncertain"
+   }
+  },
+  {
+   "name": "older identical attempt whose Calendar read answers after the sibling claimed: one visit, the older one is shown it or told it is still being confirmed (run 1)",
+   "pass": true,
+   "detail": [
+    {
+     "ok": false,
+     "code": "visit_outcome_uncertain",
+     "status": 503
+    },
+    {
+     "ok": true,
+     "id": "08c60f4b0b0e660ba9abea6fdf339768",
+     "status": "booked"
+    }
+   ]
+  },
+  {
+   "name": "older identical attempt whose Calendar read answers after the sibling claimed: one visit, the older one is shown it or told it is still being confirmed (run 2)",
+   "pass": true,
+   "detail": [
+    {
+     "ok": false,
+     "code": "visit_outcome_uncertain",
+     "status": 503
+    },
+    {
+     "ok": true,
+     "id": "d681af884e7a50cdb846aee786c0d5d5",
+     "status": "booked"
+    }
+   ]
+  },
+  {
+   "name": "older identical attempt whose Calendar read answers after the sibling claimed: one visit, the older one is shown it or told it is still being confirmed (run 3)",
+   "pass": true,
+   "detail": [
+    {
+     "ok": false,
+     "code": "visit_outcome_uncertain",
+     "status": 503
+    },
+    {
+     "ok": true,
+     "id": "4b5fc3a3eeb2e7add6b6f9c7e057fce2",
+     "status": "booked"
+    }
+   ]
+  },
+  {
+   "name": "the same submission id with a different body concurrently is a submission_conflict, never a second visit",
+   "pass": true,
+   "detail": [
+    {
+     "ok": true,
+     "id": "a72efc3dcc4610d597e2ee628a24ec0e",
+     "status": "booked"
+    },
+    {
+     "ok": false,
+     "code": "submission_conflict",
+     "status": 409
+    }
+   ]
+  },
+  {
+   "name": "M13d: superseded identical Add visit sees the sibling's claim before its booking write: no fence, one visit (run 1)",
+   "pass": true,
+   "detail": {
+    "heldRead": 2,
+    "pair": [
+     "visit_outcome_uncertain",
+     "saved"
+    ]
+   }
+  },
+  {
+   "name": "M13d: superseded identical Add visit sees the sibling's claim before its booking write: no fence, one visit (run 2)",
+   "pass": true,
+   "detail": {
+    "heldRead": 2,
+    "pair": [
+     "visit_outcome_uncertain",
+     "saved"
+    ]
+   }
+  },
+  {
+   "name": "M13d: superseded identical Add visit sees the sibling's claim before its booking write: no fence, one visit (run 3)",
+   "pass": true,
+   "detail": {
+    "heldRead": 2,
+    "pair": [
+     "visit_outcome_uncertain",
+     "saved"
+    ]
+   }
+  },
+  {
+   "name": "M13d: superseded identical Add visit sees the sibling's claim before its booking write: no fence, one visit (run 4)",
+   "pass": true,
+   "detail": {
+    "heldRead": 2,
+    "pair": [
+     "visit_outcome_uncertain",
+     "saved"
+    ]
+   }
+  },
+  {
+   "name": "AI: two customers book the same window concurrently (capacity 3): both booked, 6/6 trials",
+   "pass": true,
+   "detail": {
+    "tally": {
+     "booked+booked": 6
+    }
+   }
+  },
+  {
+   "name": "AI: two customers book different windows on the same day concurrently: both booked",
+   "pass": true,
+   "detail": {
+    "pair": "booked+booked"
+   }
+  },
+  {
+   "name": "AI: three customers book the same window concurrently (capacity 3): all booked, three reservations",
+   "pass": true,
+   "detail": {
+    "trio": "booked+booked+booked"
+   }
+  },
+  {
+   "name": "AI no double booking: capacity 1, two customers concurrently: one booked, the other a definite full/calendar_conflict, one reservation",
+   "pass": true,
+   "detail": {
+    "pair": "booked+calendar_conflict"
+   }
+  },
+  {
+   "name": "AI: a real external Calendar conflict with two concurrent customers: both calendar_conflict, nothing booked",
+   "pass": true,
+   "detail": {
+    "pair": "calendar_conflict+calendar_conflict"
+   }
+  },
+  {
+   "name": "AI: a solo genuine Calendar 503 is still calendar_unavailable after exactly one read (no retry of a real failure)",
+   "pass": true,
+   "detail": {
+    "first": "calendar_unavailable",
+    "reads": 1
+   }
+  },
+  {
+   "name": "AI: a read superseded on every attempt stops after 4 fresh reads with calendar_unavailable and claims nothing",
+   "pass": true,
+   "detail": {
+    "reads": 4
+   }
+  },
+  {
+   "name": "AI: a customer reschedule concurrent with another customer booking the same day: both succeed, one move, no leftover claim",
+   "pass": true,
+   "detail": {
+    "moved": "moved",
+    "other": "booked"
+   }
+  },
+  {
+   "name": "AI managed call actions: two calls book the same window concurrently: both saved, both receipts saved, replay returns the same visit",
+   "pass": true,
+   "detail": {
+    "pair": [
+     "saved",
+     "saved"
+    ]
+   }
+  },
+  {
+   "name": "AI managed: the same action id twice concurrently (stable booking id) never makes a second visit",
+   "pass": true,
+   "detail": {
+    "pair": [
+     "booked",
+     "booked",
+     "booked"
+    ]
+   }
+  },
+  {
+   "name": "R3 time bound: constant supersession with 1200 ms reads on a real clock: no Calendar read starts after 3 s, answered within 3 s + one read, nothing claimed",
+   "pass": true,
+   "detail": {
+    "reads": 2,
+    "readStartsMs": [
+     4,
+     2602
+    ],
+    "totalMs": 3803
+   }
+  },
+  {
+   "name": "R3 time bound: a managed call book_visit with 4000 ms reads and constant supersession answers inside Vapi's 15 s tool timeout after one read",
+   "pass": true,
+   "detail": {
+    "reads": 1,
+    "totalMs": 4005
+   }
+  },
+  {
+   "name": "R3 backoff floor (QA QN4): each re-read waits 20 ms x attempt plus up to 39 ms, never less",
+   "pass": true,
+   "detail": {
+    "reads": 4,
+    "backoffMs": [
+     25,
+     59,
+     82
+    ]
+   }
+  },
+  {
+   "name": "R3 adoption: 10 simultaneous customers, capacity 10, 5-80 ms reads: all 10 booked first try with exactly 10 Calendar reads (6 trials)",
+   "pass": true,
+   "detail": {
+    "trials": [
+     {
+      "booked": 10,
+      "reads": 10
+     },
+     {
+      "booked": 10,
+      "reads": 10
+     },
+     {
+      "booked": 10,
+      "reads": 10
+     },
+     {
+      "booked": 10,
+      "reads": 10
+     },
+     {
+      "booked": 10,
+      "reads": 10
+     },
+     {
+      "booked": 10,
+      "reads": 10
+     }
+    ]
+   }
+  },
+  {
+   "name": "R3 adoption never exceeds capacity: 10 simultaneous customers, capacity 3: exactly 3 booked, 7 definite refusals, at most 10 reads (6 trials)",
+   "pass": true,
+   "detail": {
+    "trials": [
+     {
+      "calendar_conflict": 7,
+      "booked": 3,
+      "reads": 10
+     },
+     {
+      "calendar_conflict": 7,
+      "booked": 3,
+      "reads": 10
+     },
+     {
+      "calendar_conflict": 7,
+      "booked": 3,
+      "reads": 10
+     },
+     {
+      "calendar_conflict": 7,
+      "booked": 3,
+      "reads": 10
+     },
+     {
+      "calendar_conflict": 7,
+      "booked": 3,
+      "reads": 10
+     },
+     {
+      "calendar_conflict": 7,
+      "booked": 3,
+      "reads": 10
+     }
+    ]
+   }
+  },
+  {
+   "name": "R3 adoption counts the external Calendar event: 6 simultaneous customers, capacity 3, one busy external event: exactly 2 booked, 4 calendar_conflict",
+   "pass": true,
+   "detail": {
+    "tally": {
+     "calendar_conflict": 4,
+     "booked": 2
+    },
+    "reads": 6
+   }
+  },
+  {
+   "name": "R3 adoption accepts only a newer, fresh read of the same scope and day, without a Calendar request",
+   "pass": true,
+   "detail": {
+    "older": "superseded",
+    "adopted": "adopted generation 2 after 1",
+    "otherDay": "superseded",
+    "stale": "superseded"
+   }
+  },
+  {
+   "name": "R3 adoption re-checks Calendar authority when the newer read lands: with Calendar switched off meanwhile, the newer row is not adopted",
+   "pass": true,
+   "detail": {
+    "outcome": "calendar_busy_unavailable"
+   }
+  },
+  {
+   "name": "R4 I1 same window, capacity 2, owner adds E (8-12) between two overlapping reads; the older read answers last: its booking never lands on the event",
+   "pass": true,
+   "detail": {
+    "A": "calendar_conflict",
+    "B": "booked",
+    "reads": 3,
+    "localIn8to12": 1
+   }
+  },
+  {
+   "name": "R4 I2 other window, capacity 1, owner adds E (8-12) between two overlapping reads; the older read answers last: its booking never lands on the event",
+   "pass": true,
+   "detail": {
+    "A": "calendar_conflict",
+    "B": "booked",
+    "reads": 3,
+    "localIn8to12": 0
+   }
+  },
+  {
+   "name": "R4 I3 capacity 1, owner moves existing event M (same id) from 13:00 to 8-9 between two overlapping reads; the older read answers last: its booking never lands on the event",
+   "pass": true,
+   "detail": {
+    "A": "calendar_conflict",
+    "B": "calendar_conflict",
+    "reads": 3,
+    "localIn8to12": 0
+   }
+  }
+ ]
+}

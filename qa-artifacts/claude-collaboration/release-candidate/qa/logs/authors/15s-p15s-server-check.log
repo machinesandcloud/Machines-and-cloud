@@ -1,0 +1,7 @@
+PASS legacy daily cap (15 A1): the 429 refusal carries turnNotProcessed:true and CORS
+PASS legacy allowance store failure (15): the 503 refusal carries turnNotProcessed:true and CORS
+PASS legacy recoverTurn (09 rev 6 refusal) never spends 15's daily allowance
+PASS legacy mismatched token (09 reload refusal) never spends 15's daily allowance
+PASS practice daily cap (15 A1): practice_daily_limit carries turnNotProcessed:true
+PASS 10-minute network limit (15 rewrite of the 60/10 min limiter): busy 429 carries turnNotProcessed; a recoverTurn probe does not
+p15s-server-check: 6/6 passed; physical network attempts 0

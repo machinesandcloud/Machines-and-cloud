@@ -1,0 +1,115 @@
+PASS R1 Deadline reached before the create is sent is not recorded as uncertain; the visit syncs
+PASS R1b Every pre-send rejection (gate closed, authority changed, deadline) is tagged as not sent; S1 window
+PASS R2 One network error on create no longer blocks the visit for good; retry is the same ID and creates one event
+PASS C2b Safety control (passes on both): create committed but response lost, then a read returns 404 once: re-POST gets 409 and reconciles one event
+PASS R2c Owner edit clears a historical stuck create (needs_attention creation_unconfirmed)
+PASS R2d Cancelling a visit whose only create failed in transit ends as cancelled, with no event
+PASS R2e Cancel just after a create that commits 150 s late: no absence is counted before the create settles (M3)
+PASS R2f Cancel path needs two absent reads at least 2 minutes apart (M5)
+PASS R2g A re-POST stopped before sending restores the earlier dispatched marker and its absence reads (M10)
+PASS R2h An unconfirmed create older than a week is not re-sent automatically; the owner is told, and an owner edit sends it again
+PASS R7 Already seen, then deleted in Google with no tombstone left: an edit never re-creates it, with or without a receipt (M11 guard)
+PASS R3 After a switch to another Google account, undelivered changes for old-calendar events are counted and explained
+PASS R3b Account-switch attention clears once the affected visit date has passed (D2)
+PASS R3c Control: platform-side attention on the current calendar stays the platform's to act on
+PASS R4 Reconnect to the same calendar spends no Google requests on a past synced visit
+PASS R4b Reconnect with no change to the visit keeps the owner's own edits in Google
+PASS R5 DST spring-forward wall times resolve to the first instant after the gap and keep order
+PASS R6 A visit cancelled while disconnected is flagged, then deleted after reconnecting the same account
+{
+ "check": "p17-calendar-repro",
+ "passed": 18,
+ "failed": 0,
+ "results": [
+  {
+   "id": "R1",
+   "name": "Deadline reached before the create is sent is not recorded as uncertain; the visit syncs",
+   "ok": true
+  },
+  {
+   "id": "R1b",
+   "name": "Every pre-send rejection (gate closed, authority changed, deadline) is tagged as not sent; S1 window",
+   "ok": true
+  },
+  {
+   "id": "R2",
+   "name": "One network error on create no longer blocks the visit for good; retry is the same ID and creates one event",
+   "ok": true
+  },
+  {
+   "id": "C2b",
+   "name": "Safety control (passes on both): create committed but response lost, then a read returns 404 once: re-POST gets 409 and reconciles one event",
+   "ok": true
+  },
+  {
+   "id": "R2c",
+   "name": "Owner edit clears a historical stuck create (needs_attention creation_unconfirmed)",
+   "ok": true
+  },
+  {
+   "id": "R2d",
+   "name": "Cancelling a visit whose only create failed in transit ends as cancelled, with no event",
+   "ok": true
+  },
+  {
+   "id": "R2e",
+   "name": "Cancel just after a create that commits 150 s late: no absence is counted before the create settles (M3)",
+   "ok": true
+  },
+  {
+   "id": "R2f",
+   "name": "Cancel path needs two absent reads at least 2 minutes apart (M5)",
+   "ok": true
+  },
+  {
+   "id": "R2g",
+   "name": "A re-POST stopped before sending restores the earlier dispatched marker and its absence reads (M10)",
+   "ok": true
+  },
+  {
+   "id": "R2h",
+   "name": "An unconfirmed create older than a week is not re-sent automatically; the owner is told, and an owner edit sends it again",
+   "ok": true
+  },
+  {
+   "id": "R7",
+   "name": "Already seen, then deleted in Google with no tombstone left: an edit never re-creates it, with or without a receipt (M11 guard)",
+   "ok": true
+  },
+  {
+   "id": "R3",
+   "name": "After a switch to another Google account, undelivered changes for old-calendar events are counted and explained",
+   "ok": true
+  },
+  {
+   "id": "R3b",
+   "name": "Account-switch attention clears once the affected visit date has passed (D2)",
+   "ok": true
+  },
+  {
+   "id": "R3c",
+   "name": "Control: platform-side attention on the current calendar stays the platform's to act on",
+   "ok": true
+  },
+  {
+   "id": "R4",
+   "name": "Reconnect to the same calendar spends no Google requests on a past synced visit",
+   "ok": true
+  },
+  {
+   "id": "R4b",
+   "name": "Reconnect with no change to the visit keeps the owner's own edits in Google",
+   "ok": true
+  },
+  {
+   "id": "R5",
+   "name": "DST spring-forward wall times resolve to the first instant after the gap and keep order",
+   "ok": true
+  },
+  {
+   "id": "R6",
+   "name": "A visit cancelled while disconnected is flagged, then deleted after reconnecting the same account",
+   "ok": true
+  }
+ ]
+}

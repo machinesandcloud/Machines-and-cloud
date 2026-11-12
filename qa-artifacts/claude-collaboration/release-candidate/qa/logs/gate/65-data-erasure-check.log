@@ -1,0 +1,15 @@
+ok - every store the source names is classified by ERASURE_REGISTRY, plus the conditional 09/15 stores
+ok - workspace erasure removes every key shape, keeps suppression minimized and billing on hold, and never touches a prefix-sharing workspace or a prior incarnation
+ok - legacy workspaces (rows without a tenant identity) sharing a slug prefix are erased independently
+ok - a row a background worker writes during pass 1 is removed by pass 2
+ok - a failed store in pass 1 keeps the client row, saves retry_required, and a retry finishes
+ok - open workspaces and unconfirmed provider IDs (including Vapi assistant/imported ids) are refused before any row is removed
+ok - phone erasure deletes the contact's own records, redacts mentions in place, releases capacity and keeps every conversation readable
+ok - the audit digest is an HMAC under ERASURE_AUDIT_KEY and cannot be reversed from the record
+ok - reasons with personal data, the owner's own numbers and non-E.164 input are refused with nothing changed
+ok - stored phone formats are matched, longer digit runs are not
+ok - website-visitor erasure deletes that visitor's whole chain and records and leaves every other archive readable
+ok - an interrupted contact erasure leaves every chain readable, is audited as retry_required, and a retry finishes
+ok - retention sweep keeps the current and previous rate buckets and recently expired sessions, and removes older rows
+ok - only a current allowlisted operator can erase, with the slug retyped, the current revision and a closed self-service workspace
+data-erasure-check: 14 checks passed

@@ -1,0 +1,35 @@
+ok   new caller: text accepted, promise spoken and kept, owner told it was sent
+ok   new caller, Spanish shop: both promises spoken and kept
+ok   opted-out caller: no text, no promise, owner told they opted out
+ok   opted-out caller, Spanish shop: no promise in either language
+ok   text-back switched off: no text, no promise
+ok   caller texted in the last 24 hours: second call sends nothing and promises nothing
+twilio send failed 400 Synthetic provider refusal
+twilio send failed 400 Synthetic provider refusal
+ok   provider refuses the text: no promise, owner gets the real reason (not 'No texting sender yet')
+text-back send failed TypeError: fetch failed (synthetic network error)
+    at globalThis.fetch (file:///private/tmp/mc-claude-proposals-index-20261110/qa-artifacts/claude-collaboration/proposals-index/stacked/qa/probes/07m-missed-call-promise-check.mjs:41:146)
+    at sendSMS (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/send.mjs:112:21)
+    at async default (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/voice.mjs:108:17)
+    at async call (file:///private/tmp/mc-claude-proposals-index-20261110/qa-artifacts/claude-collaboration/proposals-index/stacked/qa/probes/07m-missed-call-promise-check.mjs:64:15)
+    at async file:///private/tmp/mc-claude-proposals-index-20261110/qa-artifacts/claude-collaboration/proposals-index/stacked/qa/probes/07m-missed-call-promise-check.mjs:127:129
+    at async check (file:///private/tmp/mc-claude-proposals-index-20261110/qa-artifacts/claude-collaboration/proposals-index/stacked/qa/probes/07m-missed-call-promise-check.mjs:80:9)
+    at async file:///private/tmp/mc-claude-proposals-index-20261110/qa-artifacts/claude-collaboration/proposals-index/stacked/qa/probes/07m-missed-call-promise-check.mjs:126:1
+ok   network error on the text-back, English-only shop: spoken TwiML (xmllint), no promise or texting invite, owner told it could not be sent
+text-back send failed TypeError: fetch failed (synthetic network error)
+    at globalThis.fetch (file:///private/tmp/mc-claude-proposals-index-20261110/qa-artifacts/claude-collaboration/proposals-index/stacked/qa/probes/07m-missed-call-promise-check.mjs:41:146)
+    at sendSMS (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/send.mjs:112:21)
+    at async default (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/voice.mjs:108:17)
+    at async call (file:///private/tmp/mc-claude-proposals-index-20261110/qa-artifacts/claude-collaboration/proposals-index/stacked/qa/probes/07m-missed-call-promise-check.mjs:64:15)
+    at async file:///private/tmp/mc-claude-proposals-index-20261110/qa-artifacts/claude-collaboration/proposals-index/stacked/qa/probes/07m-missed-call-promise-check.mjs:134:128
+    at async check (file:///private/tmp/mc-claude-proposals-index-20261110/qa-artifacts/claude-collaboration/proposals-index/stacked/qa/probes/07m-missed-call-promise-check.mjs:80:9)
+    at async file:///private/tmp/mc-claude-proposals-index-20261110/qa-artifacts/claude-collaboration/proposals-index/stacked/qa/probes/07m-missed-call-promise-check.mjs:133:1
+ok   network error on the text-back, Spanish shop: spoken TwiML in both languages, no promise
+ok   network error on the owner alert: caller still gets the kept promise as TwiML (xmllint), failure logged
+ok   no caller ID: no text, no promise, owner note does not mention a voicemail
+ok   no physical transport and no non-Twilio destination
+ok   every TwiML body in this run is well-formed (xmllint --noout)
+ok   texting not configured (send only logged): no promise, owner told texting is not set up
+ok   no physical transport and no non-Twilio destination
+ok   every TwiML body in this run is well-formed (xmllint --noout)
+{"check":"missed-call-promise-check","repo":"/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc","checks":16,"failed":0,"providerCalls":19,"physicalNetwork":0,"result":"PASS"}

@@ -1,0 +1,15 @@
+PASS 1440px Pause then Resume: the server status follows, the page says so, and focus lands on the result
+PASS 1440px Stop service dialog: Keep service and Esc close it with no change and focus back on Stop service
+PASS 1440px Stop service confirmed: the server stops with the reason, the page shows stopped, downloads stay available
+PASS 390px Pause then Resume: the server status follows, the page says so, and focus lands on the result
+PASS 390px Stop service dialog: Keep service and Esc close it with no change and focus back on Stop service
+PASS 390px Stop service confirmed: the server stops with the reason, the page shows stopped, downloads stay available
+PASS 1440px Stop service whose response is lost after the server stopped: reads status, confirms once, never sends Stop twice
+PASS 1440px Stop service refused by a 503: no false "stopped", Stop stays uncertain until the status is checked, nothing changes
+PASS 1440px the four CSV downloads: exact headers, one row per saved record, quoting survives, no other tenant, no owner key in the URL
+PASS 390px the four CSV downloads: exact headers, one row per saved record, quoting survives, no other tenant, no owner key in the URL
+PASS 1440px a download refused by the server (503) shows its reason and no file; the next click downloads
+PASS 1440px customer text that starts with a spreadsheet formula is neutralised in CSV downloads
+PASS 1440px reporting preferences: hidden for self-service; legacy owner saves average job value, the server stores it, reload shows it, bad input is refused locally
+PASS No physical transport, forbidden destinations or page errors; served bytes are the worktree bytes
+{"output":"scratchpad/claude-blind2-qarc-p4-account-actions-ui-check.json","passed":14,"failed":0,"total":14,"physicalNetwork":0,"pageErrors":0,"servedAllBase":false,"sourceStable":true,"failures":[]}

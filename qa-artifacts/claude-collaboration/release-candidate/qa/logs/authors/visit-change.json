@@ -1,0 +1,655 @@
+{
+  "at": "2026-11-12T19:13:59.494Z",
+  "mode": "independent real handler/provider protocol/installed SDK fixtures; fake model only; synthetic common review proof; zero external network",
+  "before": {
+    "netlify/functions/lib/managed-sms.mjs": "360ab93d1cd7f05353ad93149baf1a05426246a505328e2e08866aa108c7cb68",
+    "netlify/functions/lib/managed-actions.mjs": "db98d45691c829e2d2484be4f4ffddc414310ec2219ebaf998ab98ccaae80ab5",
+    "netlify/functions/lib/owner-visits.mjs": "cc85b0b1de5e39f8fa4e0166b7ece6ddea50ce3a322a1025b3e0e73b9f423fe0",
+    "netlify/functions/lib/managed-delivery.mjs": "e126605094468becb5202ae43dbf611c50712673c6faec8c8ab6b7013e3e4f27",
+    "netlify/functions/lib/voice-provider.mjs": "37b7b9ebb52eab7cb1be25468fbba4448a69c6afbbd71ac7cf2933c3897e9de4",
+    "netlify/functions/lib/voice-activation.mjs": "a39e88b15eac10aa375049c2f926e1451e98efae32669f1296250743ec36ad29",
+    "netlify/functions/lib/desk.mjs": "d72c2f9eaed4feac259c485aaa0da34959b161be6b9879ff3c44f1f391da6047",
+    "netlify/functions/chat.mjs": "48f9182899995d3226d8cda06ff1ba410c4ebac41ea7f4946186a0425b7435ec",
+    "netlify/functions/lib/customer-visits.mjs": "62c3065371c0f80b90d2703cf5db364478d7f93a53be80e4c67f231003c7870b",
+    "netlify/functions/lib/workspace-edit.mjs": "6ff7cb0f44a6143bb87a9b72cb47e9650e2f3f482b0f24872acfe9025cb9dec3"
+  },
+  "checks": [
+    {
+      "name": "V01a CANCEL with an upcoming visit: opt-out recorded, visit kept, one owner note linked to the visit, confirmation byte-identical to the standard STOP one; repeat is silent and adds nothing",
+      "pass": true
+    },
+    {
+      "name": "V01b CANCEL without a visit keeps the standard confirmation and creates no owner note",
+      "pass": true
+    },
+    {
+      "name": "V01c Twilio-handled CANCEL (OptOutType=STOP) stays silent but still tells the owner",
+      "pass": true
+    },
+    {
+      "name": "V01d Spanish visit: CANCEL gets the same standard confirmation; the owner note is saved in Spanish context",
+      "pass": true
+    },
+    {
+      "name": "V01e STOP (not CANCEL) with a visit is unchanged: standard confirmation, no owner visit note",
+      "pass": true
+    },
+    {
+      "name": "V01f (QA Q20) paused workspace: CANCEL with a visit booked while live records the opt-out AND saves the owner note; its owner email waits until the workspace is live again",
+      "pass": true
+    },
+    {
+      "name": "V01g (QA Q19) CANCEL with two upcoming visits: one owner note per visit, one standard confirmation",
+      "pass": true
+    },
+    {
+      "name": "V02a default policy: SMS reschedule is direct: same visit moved (no duplicate), capacity re-checked, old slot released, owner told, old reminders superseded",
+      "pass": true
+    },
+    {
+      "name": "V02b default policy: SMS cancel is a REQUEST: visit stays booked, slot held, one linked request for the owner, truthful reply, reminders held; the owner then cancels and reminders stop",
+      "pass": true
+    },
+    {
+      "name": "V02c default policy: if the owner keeps the visit (completes the request), its reminders are released",
+      "pass": true
+    },
+    {
+      "name": "V02d Spanish \"cancelar\" reaches the AI with the visit context; the confirmed cancel is saved as a request",
+      "pass": true
+    },
+    {
+      "name": "V02e policy direct (owner opt-in): SMS cancel cancels the visit, releases capacity, tells the owner, queues the customer cancellation and stops reminders",
+      "pass": true
+    },
+    {
+      "name": "V02f policy requests_only: an SMS reschedule is a request; the visit keeps its time and capacity",
+      "pass": true
+    },
+    {
+      "name": "V02g request idempotency: replay of the same tool call reports the saved request even after the owner then cancels; a repeat under a new tool call adds no second request",
+      "pass": true
+    },
+    {
+      "name": "V03a voice reschedule: without attestation A (none, B, A-Diverted) it is a request; with attestation A it is direct with idempotent replay",
+      "pass": true
+    },
+    {
+      "name": "V03b voice cancel: a request by default even with attestation A; direct only under policy direct",
+      "pass": true
+    },
+    {
+      "name": "V03c source: attestation comes only from the Twilio-signed inbound call (StirVerstat), is stored on the call record and is passed to the assistant context and the tool dispatch",
+      "pass": true
+    },
+    {
+      "name": "V04 another verified number cannot see or change the visit by text or call",
+      "pass": true
+    },
+    {
+      "name": "V07 (QA Q09) a visit whose number was typed (website) or given for someone else on a call is never listed or changeable by that number; a CANCEL from it still notes the owner and flags the number as unverified",
+      "pass": true
+    },
+    {
+      "name": "V05 a full target window leaves the visit unchanged and books nothing new",
+      "pass": true
+    },
+    {
+      "name": "V06 website chat cannot see or change visits; a change request is saved for the owner and the visit is untouched",
+      "pass": true
+    },
+    {
+      "name": "V08 one workspace rule: rules.visitChanges accepts confirm_cancels|requests_only|direct (default confirm_cancels), rejects others, and leaves other workspaces' edit revision untouched",
+      "pass": true
+    },
+    {
+      "name": "Q01 two concurrent customer changes to the same visit: one wins, no duplicate, capacity consistent",
+      "pass": true
+    },
+    {
+      "name": "Q02 customer reschedule racing an owner cancel: exactly one outcome and truthful messages",
+      "pass": true
+    },
+    {
+      "name": "Q03 change after the owner edited the visit applies to the current visit (recorded behaviour)",
+      "pass": true
+    },
+    {
+      "name": "Q04 artificial past date: past visit not listed and not cancelled",
+      "pass": true
+    },
+    {
+      "name": "Q05 artificial past date: reschedule to the future is also refused",
+      "pass": true
+    },
+    {
+      "name": "Q06 completed visits cannot be changed or requested",
+      "pass": true
+    },
+    {
+      "name": "Q07 cross-tenant: same phone, visit in shop A cannot be seen, changed or requested via shop B",
+      "pass": true
+    },
+    {
+      "name": "Q08 spoofed SMS webhook (bad signature) and forged From (REST mismatch) are rejected before any visit logic",
+      "pass": true
+    },
+    {
+      "name": "Q09 (inverted by N4) typed number on web: the holder of that number by SMS does not see the visit",
+      "pass": true
+    },
+    {
+      "name": "Q10 opted-out customer who then cancels by phone: no SMS is sent to the suppressed number",
+      "pass": true
+    },
+    {
+      "name": "Q11 blocked target window: truthful unchanged message",
+      "pass": true
+    },
+    {
+      "name": "Q12 invalid window / elapsed window: unchanged and truthful",
+      "pass": true
+    },
+    {
+      "name": "Q13 second cancel under a new tool-call ID after a cancel: says not found; owner not double-notified",
+      "pass": true
+    },
+    {
+      "name": "Q14 workspace paused from the start: CANCEL still records the opt-out (recorded behaviour)",
+      "pass": true
+    },
+    {
+      "name": "Q15 a held lock: \"still being confirmed\", no claim of success",
+      "pass": true
+    },
+    {
+      "name": "Q04r realistic past visit (clock past its date, never marked done): no cancel, and no cancel request",
+      "pass": true
+    },
+    {
+      "name": "Q05r realistic past visit: customer cannot move it to the future",
+      "pass": true
+    },
+    {
+      "name": "Q16 replay of the SAME cancel tool call (provider retry) reports the cancel, not \"no visit\"",
+      "pass": true
+    },
+    {
+      "name": "Q17 visit already on the way: neither applied nor silently requested; handed to the owner",
+      "pass": true
+    },
+    {
+      "name": "Q18 replay of a customer move after the owner moved it again reports the current time, not the stale success",
+      "pass": true
+    },
+    {
+      "name": "Q21 CANCELAR (exact word): an opt-out (with proposal 01) or an AI turn (without 01); never cancels the visit by itself and never adds a visit sentence",
+      "pass": true
+    },
+    {
+      "name": "P01c control: no request -> the 24h and 1h reminders are sent before arrival",
+      "pass": true
+    },
+    {
+      "name": "P01 cancel REQUEST, owner never acts: before arrival the customer must get some truthful message that the visit is still booked (reminder or status)",
+      "pass": true
+    },
+    {
+      "name": "P02 move REQUEST (requests_only), owner never acts: customer must get a truthful still-booked message before the old time",
+      "pass": true
+    },
+    {
+      "name": "P03 a NEW cancel request after the owner kept the visit (completed the first request) must reach the owner and hold reminders again",
+      "pass": true
+    },
+    {
+      "name": "P04 returning-caller context must not use a WEBSITE-typed record: no first name, not \"returning\"",
+      "pass": true
+    },
+    {
+      "name": "P05 returning-caller context must not use a WEBSITE notify_owner lead with a typed number",
+      "pass": true
+    },
+    {
+      "name": "P06 CANCEL on a web-typed visit: the owner note must not launder the typed name into the texter's returning context",
+      "pass": true
+    },
+    {
+      "name": "P07 RESIDUAL N6 pinned, reassigned number: a new holder of a number that booked by phone sees the visit and can MOVE it directly by text under the default rule",
+      "pass": true
+    },
+    {
+      "name": "P08 RESIDUAL pinned, shared/family number: every verified visit on the number is listed; firstName is the latest record's",
+      "pass": true
+    },
+    {
+      "name": "P09 RESIDUAL N7 pinned, owner-entered visit with a mistyped number counts as verified",
+      "pass": true
+    },
+    {
+      "name": "P10 paused CANCEL note: its owner email is actually sent once the workspace is live again",
+      "pass": true
+    },
+    {
+      "name": "P11 RESIDUAL N8 pinned, distinct move requests each create an owner request and email (no per-visit cap)",
+      "pass": true
+    },
+    {
+      "name": "P12 RESIDUAL N5 pinned, a pending request is not marked in the next conversation's visit context",
+      "pass": true
+    },
+    {
+      "name": "P13 hold is bound to the visit state: after the owner MOVES the visit (request open), the new time's reminders are sent",
+      "pass": true
+    },
+    {
+      "name": "P14 while the request is open and arrival is more than 12 h away, the due 24h reminder is held (not sent)",
+      "pass": true
+    },
+    {
+      "name": "P15 owner closes the request without the follow-through journal (lead not open): the hold releases and the due reminder is sent; the same ask again is a new open request that holds again",
+      "pass": true
+    },
+    {
+      "name": "P16 CANCEL owner note: a name typed with an unverified number stays in the note text and is never saved as the texter's name; a verified visit keeps its name",
+      "pass": true
+    },
+    {
+      "name": "P17 a later booking from the number does not close its open visit-change request or CANCEL note (desk.bookVisit closes only plain leads); the hold stays",
+      "pass": true
+    },
+    {
+      "name": "P18 returning context and hold edges: a number given for someone else on a call is not trusted for that number; a hold needs its visit; the request-mode prompt warns of the reminder",
+      "pass": true
+    },
+    {
+      "name": "Q3-D2 repro: a managed booking of a second visit closes the open cancel request on the first visit, releases its hold, and the 24h reminder for the visit the customer asked to cancel is sent",
+      "pass": true
+    },
+    {
+      "name": "Q3-D3 repro: a non-stable website notify_owner with the same number inside 30 minutes merges into the open request and overwrites its name, issue and reason",
+      "pass": true
+    },
+    {
+      "name": "Q3-D1 impact (latent on rev2+fix): with a website-typed visit and a verified visit on one number, CANCEL leaves desk.callerContext and customerContext naming the verified caller",
+      "pass": true
+    },
+    {
+      "name": "Q3-L1 legit: a customer with an open cancel request who really books a second visit gets it saved, the second visit is not held and its reminder is sent; a plain lead from the number is still closed",
+      "pass": true
+    },
+    {
+      "name": "Q3-L2 legit: a family member typing the same number on the website gets a separate lead; a second website message from them still merges into their own older lead (not skipped because a newer request exists); a CANCEL note is never a merge target",
+      "pass": true
+    },
+    {
+      "name": "Q3-L3 legit: owner completes the request in the portal (real follow-through API): hold releases; a later booking leaves it alone; reopen holds again; asking again after completion is a new request",
+      "pass": true
+    },
+    {
+      "name": "Q3-L4 legit closure: an ordinary SMS lead (no relatedVisitId) from the number is still closed by the booking; owner cancelling the visit ends the hold (request lead itself stays open: residual)",
+      "pass": true
+    },
+    {
+      "name": "Q3-L5 legit/family: a website booking by someone else typing the same number closes only that number's plain web lead, not the open request or CANCEL note on the verified visit",
+      "pass": true
+    }
+  ],
+  "conflicts": 1,
+  "blocked": [],
+  "dispatches": 162,
+  "providerSends": 23,
+  "emailSends": 0,
+  "obs": {
+    "V01a": {
+      "twiml": "Fixture Service: texts stopped. Reply START or EMPEZAR to remove the block."
+    },
+    "V01d": {
+      "twiml": "Fixture Service: texts stopped. Reply START or EMPEZAR to remove the block."
+    },
+    "V01f": {
+      "twiml": "Fixture Service: texts stopped. Reply START or EMPEZAR to remove the block.",
+      "emailState": "waiting_platform",
+      "reasonCode": "workspace_not_live"
+    },
+    "V01g": "Fixture Service: texts stopped. Reply START or EMPEZAR to remove the block.",
+    "V02a": {
+      "tools": [
+        "get_availability",
+        "book_visit",
+        "notify_owner",
+        "change_visit"
+      ]
+    },
+    "V02b held": [
+      [
+        "reminder_24h",
+        "waiting_platform",
+        "customer_change_requested"
+      ]
+    ],
+    "V02c": [
+      [
+        "reminder_24h",
+        "accepted",
+        null,
+        true
+      ]
+    ],
+    "V02f": "The request to move visit ae4bac413c7149de3f2d0b920b8fb1b0 to 2026-10-26, 12 to 5 is saved for the shop. The visit is NOT moved yet; it stays at 2026-10-24, 8 to 12 until the shop confirms. Tell the customer the shop will confirm the new time, and that until then the visit keeps its current time and they may still get its reminder. Do not say it is moved and do not claim any text, email or callback was delivered.",
+    "V02g": {
+      "first": "The cancellation request for visit 5aa413ddd454859b410f1e240a38ce1e is saved for the shop. The visit is NOT cancelled yet; it stays booked for 2026-10-24, 8 to 12 until the shop confirms. Tell the customer the shop will confirm the cancellation, and that until then the visit stays booked and they may still get its reminder. Do not say it is cancelled and do not claim any text, email or callback was delivered.",
+      "replay": "The cancellation request for visit 5aa413ddd454859b410f1e240a38ce1e is saved for the shop. The visit is NOT cancelled yet; it stays booked until the shop confirms. Tell the customer the shop will confirm the cancellation, and that until then the visit stays booked and they may still get its reminder. Do not say it is cancelled and do not claim any text, email or callback was delivered."
+    },
+    "Q03": {
+      "out": "Visit 0c33170e770a030ae1d59ce1440593e7 is cancelled in the shop's workspace and its time is released. Its reminders stop. The shop's workspace shows the change. Do not claim any text, email or calendar update was delivered.",
+      "saved": [
+        "cancelled",
+        "2026-10-25",
+        "12 to 5"
+      ]
+    },
+    "Q14": {
+      "booked": false,
+      "twiml": "Fixture Service: texts stopped. Reply START or EMPEZAR to remove the block.",
+      "leads": 0
+    },
+    "Q18": "Visit d5b1d83ad5fb13710962586e0b009611 was changed again after this request. It is now 2026-10-27, 8 to 12. Report only that; do not repeat the change.",
+    "Q21": {
+      "twiml": "Fixture Service: ya no recibirá más mensajes de este número. Responda EMPEZAR para volver a recibirlos.",
+      "queued": false
+    },
+    "P01c": [
+      [
+        "reminder_1h",
+        "waiting_hours",
+        "quiet_hours",
+        false
+      ],
+      [
+        "reminder_24h",
+        "accepted",
+        null,
+        true
+      ]
+    ],
+    "P01": {
+      "rows": [
+        [
+          "reminder_24h",
+          "accepted",
+          null,
+          true
+        ],
+        [
+          "reminder_1h",
+          "expired",
+          "arrival_window_started",
+          false
+        ]
+      ],
+      "customerTextsAfterRequest": 1,
+      "visit": "booked",
+      "ownerEmails": 3
+    },
+    "P02": [
+      [
+        "reminder_1h",
+        "expired",
+        "arrival_window_started",
+        false
+      ],
+      [
+        "reminder_24h",
+        "accepted",
+        null,
+        true
+      ]
+    ],
+    "P03": {
+      "again": "The cancellation request for visit ce67946aef9936fdd259ce4f75a5f0e0 is saved for the shop.",
+      "requests": 2,
+      "ownerEmailsBefore": 3,
+      "ownerEmailsAfter": 4,
+      "held": true
+    },
+    "P04": {
+      "visits": [],
+      "returning": false,
+      "firstName": "",
+      "modes": {
+        "cancel": "request",
+        "reschedule": "direct"
+      }
+    },
+    "P05": {
+      "visits": [],
+      "returning": false,
+      "firstName": "",
+      "modes": {
+        "cancel": "request",
+        "reschedule": "request"
+      }
+    },
+    "P06": {
+      "ctx": {
+        "visits": [],
+        "returning": false,
+        "firstName": "",
+        "modes": {
+          "cancel": "request",
+          "reschedule": "direct"
+        }
+      },
+      "noteChannel": "sms",
+      "noteContact": true
+    },
+    "P07": {
+      "listed": [
+        "647b8f3a9b7e3e83738c99d2df8a0859"
+      ],
+      "issue": "Kitchen sink leaking",
+      "firstName": "Alex",
+      "moved": true
+    },
+    "P08": {
+      "listed": 2,
+      "firstName": "Kid"
+    },
+    "P09": {
+      "listed": [
+        "15b35a8b5e460271df95dbd4dac82cfe"
+      ],
+      "firstName": "Olive",
+      "created": "15b35a8b5e460271df95dbd4dac82cfe"
+    },
+    "P10": [
+      "waiting_platform",
+      "email_budget_policy_unavailable",
+      false
+    ],
+    "P11": {
+      "requests": 6,
+      "emails": 6
+    },
+    "P12": [
+      {
+        "id": "4be793b56f2efc8d97819cffac3ccec2",
+        "date": "2026-10-24",
+        "window": "8 to 12",
+        "issue": "Kitchen sink leaking",
+        "status": "booked",
+        "language": "en"
+      }
+    ],
+    "P12prompt": false,
+    "P13": [
+      [
+        "reminder_24h",
+        "superseded",
+        "record_changed",
+        false
+      ],
+      [
+        "reminder_1h",
+        "superseded",
+        "record_changed",
+        false
+      ],
+      [
+        "reminder_24h",
+        "accepted",
+        null,
+        true
+      ],
+      [
+        "reminder_1h",
+        "queued",
+        null,
+        true
+      ]
+    ],
+    "P14": [
+      [
+        "reminder_24h",
+        "waiting_platform",
+        "customer_change_requested"
+      ],
+      [
+        "reminder_1h",
+        "queued",
+        null
+      ]
+    ],
+    "P15": {
+      "requests": [
+        "booked",
+        "open"
+      ],
+      "emails": 1
+    },
+    "P15delivery": [
+      "accepted",
+      null,
+      true
+    ],
+    "P16": {
+      "web": [
+        "",
+        "sms"
+      ],
+      "call": [
+        "Alex Fixture",
+        "sms"
+      ]
+    },
+    "P17": {
+      "status": "open",
+      "held": true
+    },
+    "P18": {
+      "visits": [],
+      "returning": false,
+      "firstName": "",
+      "modes": {
+        "cancel": "request",
+        "reschedule": "direct"
+      }
+    },
+    "Q3-D2": {
+      "status": "open",
+      "bookingId": null,
+      "held": true,
+      "a24": [
+        [
+          "waiting_platform",
+          "customer_change_requested",
+          false
+        ]
+      ],
+      "summary": {
+        "needsFollowup": true
+      }
+    },
+    "Q3-D3": {
+      "merged": false,
+      "name": "Alex Fixture",
+      "reason": "handoff",
+      "keepsNotChanged": true
+    },
+    "Q3-D1": {
+      "pre": "Alex",
+      "post": "Alex",
+      "notes": [
+        [
+          "Alex Fixture",
+          "sms",
+          true
+        ],
+        [
+          "",
+          "sms",
+          true
+        ]
+      ],
+      "ctxFirst": "Alex"
+    },
+    "Q3-L1": {
+      "plain": [
+        "booked",
+        true
+      ],
+      "b24": [
+        [
+          "accepted",
+          null,
+          true
+        ]
+      ],
+      "req": [
+        "open"
+      ]
+    },
+    "Q3-L2": {
+      "famMerged": true,
+      "reqUntouched": true,
+      "open": 2
+    },
+    "Q3-L3": {
+      "statusAfterBooking": "open",
+      "reopened": true,
+      "requests": [
+        "open",
+        "open"
+      ],
+      "again": true
+    },
+    "Q3-L4": {
+      "status": "cancelled",
+      "reqStatus": "open",
+      "held": true,
+      "sent24": 0
+    },
+    "Q3-L5": {
+      "req": "open",
+      "fam": "booked"
+    }
+  },
+  "modelCalls": 14,
+  "after": {
+    "netlify/functions/lib/managed-sms.mjs": "360ab93d1cd7f05353ad93149baf1a05426246a505328e2e08866aa108c7cb68",
+    "netlify/functions/lib/managed-actions.mjs": "db98d45691c829e2d2484be4f4ffddc414310ec2219ebaf998ab98ccaae80ab5",
+    "netlify/functions/lib/owner-visits.mjs": "cc85b0b1de5e39f8fa4e0166b7ece6ddea50ce3a322a1025b3e0e73b9f423fe0",
+    "netlify/functions/lib/managed-delivery.mjs": "e126605094468becb5202ae43dbf611c50712673c6faec8c8ab6b7013e3e4f27",
+    "netlify/functions/lib/voice-provider.mjs": "37b7b9ebb52eab7cb1be25468fbba4448a69c6afbbd71ac7cf2933c3897e9de4",
+    "netlify/functions/lib/voice-activation.mjs": "a39e88b15eac10aa375049c2f926e1451e98efae32669f1296250743ec36ad29",
+    "netlify/functions/lib/desk.mjs": "d72c2f9eaed4feac259c485aaa0da34959b161be6b9879ff3c44f1f391da6047",
+    "netlify/functions/chat.mjs": "48f9182899995d3226d8cda06ff1ba410c4ebac41ea7f4946186a0425b7435ec",
+    "netlify/functions/lib/customer-visits.mjs": "62c3065371c0f80b90d2703cf5db364478d7f93a53be80e4c67f231003c7870b",
+    "netlify/functions/lib/workspace-edit.mjs": "6ff7cb0f44a6143bb87a9b72cb47e9650e2f3f482b0f24872acfe9025cb9dec3"
+  },
+  "sourceStable": true,
+  "passed": 70,
+  "total": 70,
+  "ok": true
+}

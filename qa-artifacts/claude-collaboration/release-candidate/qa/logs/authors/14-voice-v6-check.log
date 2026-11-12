@@ -1,0 +1,106 @@
+{
+  "scope": "Actual managed voice handlers, Blobs SDK protocol double, no provider requests",
+  "checks": [
+    {
+      "name": "V6a notify_owner: lost completion, then the same request under a new tool call ID saves one lead",
+      "pass": true,
+      "info": {
+        "leads": 1,
+        "second": "This request could not be confirmed. It may or may not be saved. Do not claim it was booke",
+        "third": "Request saved, reference 78395867d8d3c5a41016d4bce15390df. The shop can review it in its w"
+      }
+    },
+    {
+      "name": "V6b book_visit (window capacity 2): slow first save, Vapi retry and a new tool call ID book one visit",
+      "pass": true,
+      "info": {
+        "bookings": 1,
+        "again": "This request could not be confirmed. It may or may not be saved. Do not claim it was booke"
+      }
+    },
+    {
+      "name": "V6c book_visit (window capacity 1): a repeat after a lost completion never says \"Nothing was booked\" and later reports the saved visit",
+      "pass": true,
+      "info": {
+        "second": "This request could not be confirmed. It may or may not be saved. Do not claim it was booke",
+        "third": "Visit saved, reference af3c97a614d0fd487ab03e3ada4b5436. The shop has the details in its w"
+      }
+    },
+    {
+      "name": "V6d uncertain answer tells the model not to repeat the action",
+      "pass": true
+    },
+    {
+      "name": "V6e control: different details on the same call are still separate actions",
+      "pass": true
+    },
+    {
+      "name": "V6f control: Vapi re-delivery of a completed tool call returns the same answer; reusing its ID with other details is refused",
+      "pass": true
+    },
+    {
+      "name": "V6g control: same details on another call are a new action",
+      "pass": true
+    },
+    {
+      "name": "V6h (QA Q1) two identical book_visit in one tool-calls message (capacity 2) save one visit and give both the same reference",
+      "pass": true
+    },
+    {
+      "name": "V6i (QA Q2) a \"Nothing was booked\" (full) answer is not replayed once the slot frees: the same details then book",
+      "pass": true
+    },
+    {
+      "name": "V6j (QA Q3) a failure before anything is saved: the immediate repeat is uncertain, after the 60 s lease it books once",
+      "pass": true
+    },
+    {
+      "name": "V6k (QA Q4) matching after a lost completion, key order: 1 lead(s), never a wrong merge",
+      "pass": true
+    },
+    {
+      "name": "V6k (QA Q4) matching after a lost completion, caller-ID phone written as (713) 555-0999: 1 lead(s), never a wrong merge",
+      "pass": true
+    },
+    {
+      "name": "V6k (QA Q4) matching after a lost completion, phone omitted (caller ID used): 1 lead(s), never a wrong merge",
+      "pass": true
+    },
+    {
+      "name": "V6k (QA Q4) matching after a lost completion, documented residual: trailing space in issue: 2 lead(s), never a wrong merge",
+      "pass": true
+    },
+    {
+      "name": "V6k (QA Q4) matching after a lost completion, documented residual: name case changed: 2 lead(s), never a wrong merge",
+      "pass": true
+    },
+    {
+      "name": "V6k (QA Q4) matching after a lost completion, documented residual: empty optional fields omitted: 2 lead(s), never a wrong merge",
+      "pass": true
+    },
+    {
+      "name": "V6l (QA Q5) the same call ID and details in two shops, and on call vs text, are separate actions",
+      "pass": true
+    },
+    {
+      "name": "V6m (QA Q6) a tool call ID re-sent with details another action owns returns that action's answer, no new record",
+      "pass": true
+    },
+    {
+      "name": "V6n (QA Q7) a failed alias write is uncertain and saves nothing; the repeat saves one lead",
+      "pass": true
+    },
+    {
+      "name": "V6o (QA Q8) two concurrent identical book_visit on one call (capacity 1): one saved, the other \"already being saved\", one booking",
+      "pass": true
+    },
+    {
+      "name": "V6p two concurrent identical repeats after a \"Nothing was booked\" answer re-point once and book one visit",
+      "pass": true
+    }
+  ],
+  "physicalRequests": 0,
+  "failed": [],
+  "ok": true
+}
+{"ok":true,"checks":21,"failed":[],"physicalRequests":0}

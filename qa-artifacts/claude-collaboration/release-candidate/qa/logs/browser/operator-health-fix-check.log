@@ -1,0 +1,164 @@
+PASS seeded 64 synthetic shops :: 64
+PASS all 64 customers listed across pages :: 64
+PASS no genuine item dropped: every requested platform-blocked channel is still in the payload (51 shops x 3) :: 153
+PASS fresh signup platform waits are informational, not high :: ["info"]
+PASS platform-disabled items carry a platform group key :: ["platform_disabled:voice","platform_disabled:sms","platform_disabled:calendar"]
+PASS operator copy, not owner copy, on platform items :: "Expected while the feature is off. The customer selected it at signup; nothing was sent to a provider and the request is kept. No action for this customer until the feature is enabled in System."
+PASS actionable issues are exactly the real failures and the overdue wait :: ["aa-broken-draft|draft","ab-live-blocked|readiness","ac-long-wait|connection:calendar:platform","ac-long-wait|connection:sms:platform","ac-long-wait|connection:voice:platform"]
+PASS real failures stay high
+PASS customer waiting past threshold becomes medium/overdue
+PASS page-1 needsAttention counts only customers with actionable issues :: {"customers":50,"active":1,"needsAttention":3,"waitingOnly":47,"setupPending":50,"scope":"Current page"}
+PASS /api/health returns 503 for a 40-minute-old failing run :: ["serviceDeliveryRecovery: managed_delivery_failed","workspace_setup: block_timeout"]
+PASS admin payload reports degraded platform health :: {"state":"degraded","checkedAt":"2026-11-12T19:25:21.881Z","lastRunAt":"2026-11-12T18:45:21.825Z","lastGoodAt":"2026-11-12T18:15:21.825Z","minutesAgo":40,"minutesSinceGood":70,"failing":[{"name":"scheduler","reasonCode":"scheduler_stale"},{"name":"serviceDeliveryRecovery","reasonCode":"managed_deliv
+PASS [1440] Overview shows a health banner while /api/health is 503 :: "Platform health needs attention\n\nOperators were emailed Nov 12, 1:25 PM CT about this incident.\n\nscheduler: scheduler stale\nserviceDeliveryRecovery: managed delivery failed\nworkspace setup: storage ti"
+PASS [1440] banner lists failing blocks and time since last good run :: "Platform health needs attention\n\nOperators were emailed Nov 12, 1:25 PM CT about this incident.\n\nscheduler: scheduler stale\nserviceDeliveryRecovery: managed delivery failed\nworkspace setup: storage timeout\n\nLast scheduler run 40 min ago. Last healthy run 70 min ago.\n\nOpen System"
+PASS [1440] System nav item carries a warning badge
+PASS [1440] Issues nav count shows real work only (<= 5), not 150+ :: 5
+PASS [1440] Overview issues lead with real failures, no platform-setup noise :: "Desk draft needs repair\nhigh\n\nSaved customer answers are retained. Queue a workspace rebuild.\n\nBroken Draft Air →\nWebsite chat is blocked\nhigh\n\nCurrent saved rules have not passed all activation checks.\n\nLive Blocked Plumbing →\nPhone answering is turned off platform-wide\nmedium\n\nCust
+PASS [1440] Need attention stat counts 3 customers :: "3"
+PASS [1440] Issues view defaults to needs-action rows :: 5
+PASS [1440] All issues: platform-disabled channels collapse into one row per channel :: {"groupedRows":5,"sample":"Desk draft needs repair\nhigh\n\nSaved customer answers are retained. Queue a workspace rebuild.\n\nBroken Draft Air →\nWebsite chat is blocked\nhigh\n\nCurrent saved rules have not passed all activation checks.\n\nLive Blocked Plumbing →\nPhone answering is turned off pla
+PASS [1440] ungrouping shows every item (nothing hidden) :: 155
+PASS [1440] type filter: incidents only
+PASS [1440] no horizontal page overflow
+PASS [390] Overview shows a health banner while /api/health is 503 :: "Platform health needs attention\n\nOperators were emailed Nov 12, 1:25 PM CT about this incident.\n\nscheduler: scheduler stale\nserviceDeliveryRecovery: managed delivery failed\nworkspace setup: storage ti"
+PASS [390] banner lists failing blocks and time since last good run :: "Platform health needs attention\n\nOperators were emailed Nov 12, 1:25 PM CT about this incident.\n\nscheduler: scheduler stale\nserviceDeliveryRecovery: managed delivery failed\nworkspace setup: storage timeout\n\nLast scheduler run 40 min ago. Last healthy run 70 min ago.\n\nOpen System"
+PASS [390] System nav item carries a warning badge
+PASS [390] Issues nav count shows real work only (<= 5), not 150+ :: 5
+PASS [390] Overview issues lead with real failures, no platform-setup noise :: "Desk draft needs repair\nhigh\n\nSaved customer answers are retained. Queue a workspace rebuild.\n\nBroken Draft Air →\nWebsite chat is blocked\nhigh\n\nCurrent saved rules have not passed all activation checks.\n\nLive Blocked Plumbing →\nPhone answering is turned off platform-wide\nmedium\n\nCust
+PASS [390] Need attention stat counts 3 customers :: "3"
+PASS [390] no horizontal page overflow
+PASS /api/health stays 503 (fail closed) when its record cannot be read :: {"ok":false,"lastRunAt":null,"minutesAgo":null,"failingBlocks":[],"failing":[],"failingComponents":[]}
+PASS admin overview still loads when the health record cannot be read :: 200
+PASS admin payload reports health "unknown", never healthy :: "unknown"
+PASS [1440] banner says health is unknown when the read fails :: "Platform health unknown\n\nOperators were emailed Nov 12, 1:25 PM CT about this incident.\n\nhealth record: health read failed\n\nThe saved health record could not be read. Do not assume background work is "
+PASS [1440] healthy record hides banner and badge
+PASS [1440] failed refresh turns health to unknown instead of keeping a healthy view :: "Platform health unknown\n\nNo operator email is recorded for this incident yet.\n\nThe latest refresh failed, so current platform health cannot be confirmed.\n\nOpen "
+PASS alert: first 503 emails every ADMIN_EMAILS operator once :: [["ops-lead@example.test","ops-second@example.test"]]
+PASS alert: subject/body name failing blocks and carry no owner keys or customer data :: "Platform health needs attention (degraded)"
+PASS alert: repeated 503 probes and admin loads are deduplicated :: 1
+scheduler block serviceDeliveryRecovery SyntaxError: "undefined" is not valid JSON
+    at JSON.parse (<anonymous>)
+    at Object.getWithMetadata (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/store.mjs:20:131)
+    at atomicUpdate (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/store.mjs:56:29)
+    at strictRead (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/accounts.mjs:15:42)
+    at reconciliationHealth (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/service-health.mjs:61:5)
+    at serviceDeliveryHealth (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/service-health.mjs:73:153)
+    at file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/scheduler.mjs:356:62
+    at block (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/scheduler.mjs:262:27)
+    at Module.run (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/scheduler.mjs:356:9)
+    at async file:///private/tmp/mc-claude-operator-health-fix-20261111/qa-artifacts/claude-collaboration/operator-health-fix/operator-health-fix-check.mjs:168:12
+scheduler: 0 due [] digests 0 weeklies 0 released 0 with errors
+PASS scheduler: self-detected failing block is recorded :: ["serviceDeliveryRecovery"]
+PASS alert: changed failure inside 30 minutes is rate-limited :: {"mails":1,"alert":{"sent":false,"reason":"rate_limited"}}
+scheduler block serviceDeliveryRecovery SyntaxError: "undefined" is not valid JSON
+    at JSON.parse (<anonymous>)
+    at Object.getWithMetadata (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/store.mjs:20:131)
+    at atomicUpdate (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/store.mjs:56:29)
+    at strictRead (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/accounts.mjs:15:42)
+    at reconciliationHealth (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/service-health.mjs:61:5)
+    at serviceDeliveryHealth (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/service-health.mjs:73:153)
+    at file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/scheduler.mjs:356:62
+    at block (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/scheduler.mjs:262:27)
+    at Module.run (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/scheduler.mjs:356:9)
+    at async file:///private/tmp/mc-claude-operator-health-fix-20261111/qa-artifacts/claude-collaboration/operator-health-fix/operator-health-fix-check.mjs:172:35
+scheduler: 0 due [] digests 0 weeklies 0 released 0 with errors
+PASS alert: scheduler sends one "changed" alert after the rate-limit window :: {"n":2,"alert":{"sent":true,"kind":"changed","logged":false}}
+scheduler block serviceDeliveryRecovery SyntaxError: "undefined" is not valid JSON
+    at JSON.parse (<anonymous>)
+    at Object.getWithMetadata (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/store.mjs:20:131)
+    at atomicUpdate (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/store.mjs:56:29)
+    at strictRead (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/accounts.mjs:15:42)
+    at reconciliationHealth (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/service-health.mjs:61:5)
+    at serviceDeliveryHealth (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/service-health.mjs:73:153)
+    at file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/scheduler.mjs:356:62
+    at block (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/scheduler.mjs:262:27)
+    at Module.run (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/scheduler.mjs:356:9)
+    at async file:///private/tmp/mc-claude-operator-health-fix-20261111/qa-artifacts/claude-collaboration/operator-health-fix/operator-health-fix-check.mjs:174:1
+scheduler: 0 due [] digests 0 weeklies 0 released 0 with errors
+scheduler block serviceDeliveryRecovery SyntaxError: "undefined" is not valid JSON
+    at JSON.parse (<anonymous>)
+    at Object.getWithMetadata (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/store.mjs:20:131)
+    at atomicUpdate (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/store.mjs:56:29)
+    at strictRead (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/accounts.mjs:15:42)
+    at reconciliationHealth (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/service-health.mjs:61:5)
+    at serviceDeliveryHealth (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/service-health.mjs:73:153)
+    at file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/scheduler.mjs:356:62
+    at block (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/scheduler.mjs:262:27)
+    at Module.run (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/scheduler.mjs:356:9)
+    at async file:///private/tmp/mc-claude-operator-health-fix-20261111/qa-artifacts/claude-collaboration/operator-health-fix/operator-health-fix-check.mjs:174:39
+scheduler: 0 due [] digests 0 weeklies 0 released 0 with errors
+PASS alert: unchanged failure is not re-sent within the 6-hour reminder window :: 2
+scheduler block serviceDeliveryRecovery SyntaxError: "undefined" is not valid JSON
+    at JSON.parse (<anonymous>)
+    at Object.getWithMetadata (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/store.mjs:20:131)
+    at atomicUpdate (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/store.mjs:56:29)
+    at strictRead (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/accounts.mjs:15:42)
+    at reconciliationHealth (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/service-health.mjs:61:5)
+    at serviceDeliveryHealth (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/service-health.mjs:73:153)
+    at file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/scheduler.mjs:356:62
+    at block (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/scheduler.mjs:262:27)
+    at Module.run (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/scheduler.mjs:356:9)
+    at async file:///private/tmp/mc-claude-operator-health-fix-20261111/qa-artifacts/claude-collaboration/operator-health-fix/operator-health-fix-check.mjs:176:19
+scheduler: 0 due [] digests 0 weeklies 0 released 0 with errors
+PASS alert: unchanged failure sends one reminder after 6 hours :: ["Platform health needs attention (degraded)","Platform health changed, still needs attention (degraded)","Still failing: platform health needs attention (degraded)"]
+scheduler: 0 due [] digests 0 weeklies 0 released 0 ok
+PASS scheduler: healthy again after the fault clears :: []
+PASS alert: one recovery notice is sent :: ["Platform health needs attention (degraded)","Platform health changed, still needs attention (degraded)","Still failing: platform health needs attention (degraded)","Recovered: Machines & Cloud platform health is ok"]
+scheduler: 0 due [] digests 0 weeklies 0 released 0 ok
+PASS alert: recovery notice is not repeated :: 4
+PASS scheduler record keeps lastGoodAt for "time since last good run" :: {"at":"2026-11-12T19:25:25.457Z","lastGoodAt":"2026-11-12T19:25:25.457Z"}
+resend failed 500 { message: 'stub failure' }
+PASS alert: provider send failure never breaks /api/health
+PASS alert: failed send is not retried before 10 minutes :: 4
+PASS alert: failed send is retried once after 10 minutes :: ["Platform health needs attention (degraded)","Platform health changed, still needs attention (degraded)","Still failing: platform health needs attention (degraded)","Recovered: Machines & Cloud platform health is ok","Platform health needs attention (degraded)"]
+PASS alert: unreadable alert state does not throw or spam
+PASS probe: QA adversarial probe ran to completion in a fresh offline process :: {"status":0,"signal":null,"tail":["PASS R12-390 run-age change updates the timing line without touching the single role=alert region :: {\"live\":1,\"outer\":null,\"t1\":\"Last scheduler run 1 min ago. Last healthy run not recorded.\",\"t2\":\"Last scheduler run 4 min ago. Last healthy run not recor
+PASS probe A1: texting ON + credentials but invalid offer/policy is actionable (not "waiting") :: {"providerState":"configured","reasonCode":"service_configuration_required","kind":"incident","severity":"high","actionable":true,"title":"Text messaging is blocked while the platform reports configured"}
+PASS probe A2: platform blocked while provider state "configured" (e.g. brake on, policy invalid) is actionable :: {"kind":"incident","severity":"high","group":"platform_config:sms"}
+PASS probe A3: missing provider state ("unknown") is not silently informational :: {"kind":"incident","severity":"high"}
+PASS probe A4: unrecognised platform reasonCode fails toward actionable :: {"kind":"incident","severity":"high","group":"platform_unknown_reason:sms"}
+PASS probe A5: recorded setup waiting 30 days (operation recently touched) with platform configured is overdue/actionable :: {"since":"2026-10-13T19:25:25.616Z","ageHours":720,"severity":"medium"}
+PASS probe A6: control: needs_attention stays a high incident
+PASS probe A7: control: disabled feature is informational
+PASS probe A8: control: every other issue source stays high and actionable :: ["draft:high","readiness:high","svc-op-1:high","support:x:high","calendar:b1:high","service_checks:high","lead:thumbtack:high","calendar_connection:high"]
+PASS probe A9: customer lead-setup request older than 24h escalates to high :: {"severity":"high"}
+PASS probe B1: 100 concurrent unauthenticated 503 probes send exactly one email :: {"emails":1}
+PASS probe B2: scheduler + health evaluations racing send one email :: 1
+PASS probe B3: 1440 probes over 24h of unchanged degradation send <= 5 emails (1 + 6h reminders) :: 4
+PASS probe B4: flapping every 10 minutes for 24h sends at most ALERT_POLICY.dailyCap emails :: {"emails":12,"cap":12}
+PASS probe B5: alert email excludes customer phone/email/secret text carried in block error messages :: "- workspace_setup: block_error"
+PASS probe B6: alert claimed by a send that never completed is retried later :: {"emails":1,"second":{"sent":true,"kind":"degraded","logged":false}}
+PASS probe B7: info: unreadable record emailed as :: "- scheduler: scheduler (no_run_recorded)"
+PASS probe C7: recovery from a rate-limited, never-emailed incident is silent :: ["Platform health needs attention (degraded)","Recovered: Machines & Cloud platform health is ok"]
+PASS probe R1: every provider state other than "disabled" (incl. unknown/future/case variants) is a high actionable incident :: ["configured:incident/high","needs_attention:incident/high","unknown:incident/high","null:incident/high","paused_by_vendor:incident/high","DISABLED:incident/high",":incident/high"]
+PASS probe R2: unrecognised reason code with a configured channel is an incident :: {"kind":"incident","severity":"high"}
+PASS probe R3: overdue clock uses when the wait started (30-day-old wait touched 1h ago is overdue; future times ignored) :: {"since":"2026-10-13T19:25:25.616Z","ageHours":720,"overdue":true,"future":null}
+PASS probe R4: known waiting reason is informational only while disabled; otherwise medium and actionable at once :: {"configured":"medium","disabled":"info"}
+PASS probe R5: alert email has only allowlisted names, fixed categories and catalogue codes, plus the admin link :: ["- scheduler: scheduler (scheduler_stale)","- workspace_setup: block_error","- leadImport: unrecognised_failure","- unnamed_block: block_error","- serviceDeliveryRecovery: reported_code (managed_delivery_failed)"]
+FAIL probe R5b: control: public /api/health failingBlocks strings are byte-unchanged (pre-existing exposure, out of scope; see PROPOSALS r2) :: 4
+PASS probe R6: in-flight claim: concurrent evaluation is refused (in_flight) and the banner state is "sending", not "emailed" :: {"second":{"sent":false,"reason":"in_flight"},"emailState":"sending"}
+PASS probe R7: hung send times out, is recorded as failed (not sent, not alerted) and is retried after retryMs :: {"done":{"sent":false,"reason":"send_timeout","kind":"degraded"},"alerted":false,"emailState":"failed"}
+PASS probe R7b: the timed-out alert is sent on the retry and then reads as emailed :: {"r2":{"sent":true,"kind":"degraded","logged":false},"emails":1}
+PASS probe R8: claim from a killed function: banner says unconfirmed (not emailed) and the alert is re-sent :: {"emailState":"unconfirmed","r":{"sent":true,"kind":"degraded","logged":false}}
+PASS probe R9: cap: exactly dailyCap emails in the window, the last one says so, capped incident reads "capped", next window emails again :: {"n":12,"cap":12,"lastMentionsCap":true,"capView":"capped","after":13}
+PASS probe R10: failed reminder: banner still credits the confirmed first email and reports the follow-up failure :: {"emailState":"emailed","state":"degraded","incidentSince":"2026-11-12T19:25:30.724Z","emailedAt":"2026-11-12T19:25:30.724Z","followUpFailedAt":"2026-11-13T01:26:30.724Z","lastSendFailedAt":"2026-11-13T01:26:30.724Z","lastKind":"degraded"}
+PASS probe C0: setup: 2 emails (degraded, recovered); new incident rate-limited, not emailed :: {"emails":["Platform health needs attention (degraded)","Recovered: Machines & Cloud platform health is ok"],"alerted":false,"lastSentAt":"recovery email time"}
+PASS probe C1-1440: banner does not claim operators were emailed about an incident that was rate-limited :: "Platform health needs attention No operator email is recorded for this incident yet. workspace setup: storage timeout Last scheduler run 1 min ago. Last healthy run not recorded. Open System"
+PASS probe C2-1440: System nav accessible name conveys the health warning (not just "!") :: "- button \"System Platform health needs attention\": System !"
+PASS probe C3-1440: banner visible in first viewport :: 116
+PASS probe C4-1440: no horizontal page overflow
+PASS probe C5-1440: banner action target >= 24px and keyboard reachable :: 40
+PASS probe C6-1440: unchanged role=alert banner is not rewritten on refresh (avoids repeat screen-reader announcements) :: 0
+PASS probe R11-1440: banner: unconfirmed claim reads "being sent"; only a confirmed current-incident alert reads "Operators were emailed" :: {"sending":"Platform health needs attention An operator alert email is being sent; it is not confirmed yet. workspace setup: storage timeout Last scheduler run 1 min ago. L","confirmed":"Platform health needs attention Operators were emailed Nov 12, 1:25 PM CT about this incident. workspace setup: s
+PASS probe R12-1440: run-age change updates the timing line without touching the single role=alert region :: {"live":1,"outer":null,"t1":"Last scheduler run 1 min ago. Last healthy run not recorded.","t2":"Last scheduler run 4 min ago. Last healthy run not recorded.","liveMuts":0}
+PASS probe C1-390: banner does not claim operators were emailed about an incident that was rate-limited :: "Platform health needs attention No operator email is recorded for this incident yet. workspace setup: storage timeout Last scheduler run 1 min ago. Last healthy run not recorded. Open System"
+PASS probe C2-390: System nav accessible name conveys the health warning (not just "!") :: "- button \"System Platform health needs attention\": System !"
+PASS probe C3-390: banner visible in first viewport :: 315
+PASS probe C4-390: no horizontal page overflow
+PASS probe C5-390: banner action target >= 24px and keyboard reachable :: 40
+PASS probe C6-390: unchanged role=alert banner is not rewritten on refresh (avoids repeat screen-reader announcements) :: 0
+PASS probe R11-390: banner: unconfirmed claim reads "being sent"; only a confirmed current-incident alert reads "Operators were emailed" :: {"sending":"Platform health needs attention An operator alert email is being sent; it is not confirmed yet. workspace setup: storage timeout Last scheduler run 1 min ago. L","confirmed":"Platform health needs attention Operators were emailed Nov 12, 1:25 PM CT about this incident. workspace setup: s
+PASS probe R12-390: run-age change updates the timing line without touching the single role=alert region :: {"live":1,"outer":null,"t1":"Last scheduler run 1 min ago. Last healthy run not recorded.","t2":"Last scheduler run 4 min ago. Last healthy run not recorded.","liveMuts":0}
+PASS probe: no physical network in the probe process :: 0
+{"tag":"rc","passed":99,"failed":1,"pageErrors":0,"physicalNetwork":0,"emailsStubbed":6}

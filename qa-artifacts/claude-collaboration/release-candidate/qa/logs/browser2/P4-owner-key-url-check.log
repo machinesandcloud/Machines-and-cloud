@@ -1,0 +1,14 @@
+PASS 1440px legacy owner link desk.html?c=<slug>&k=<key>#today: after load the address, history entries and page links carry no key; slug and #today kept
+PASS 390px legacy owner link desk.html?c=<slug>&k=<key>#today: after load the address, history entries and page links carry no key; slug and #today kept
+PASS 1440px every page (rail and workspace-route buttons), hash routes and Back/Forward never re-add the key; desk API calls keep working with the key
+PASS 1440px Quick tour and Stop service dialog: opening, stepping, Escape and closing never re-add the key
+PASS 1440px reload in the same tab keeps working (key from this tab's sessionStorage), the reloaded desk calls the API with the key, and the address stays keyless
+PASS 1440px exports and the Google Calendar button: the export request carries the key as before; the calendar link carries no key
+PASS 1440px trade-off and copy (QA required): a new tab opened from the keyless address shows recovery that tells an owner-key owner to open the link from their welcome email, and still offers email sign-in
+PASS 1440px expiry clears the tab's stored key and says the link is no longer valid (not "session expired"); a reload shows recovery, not the workspace
+PASS 1440px owner key replaced on the server while the desk is open: the next read is refused (invalid_owner_key) and recovery says the link is no longer valid
+PASS 1440px self-service expiry copy unchanged: "Your session expired. Sign in by email to reopen your workspace."
+PASS 1440px self-service session workspace: no change (address untouched, no stored owner key, API uses the session header and no k)
+PASS 1440px other params and the hash survive: desk.html?c=<slug>&k=<key>&calendar_date=…&calendar_view=week#availability keeps everything but k, and the calendar opens on that date
+PASS No physical transport, forbidden destinations or page errors; served bytes are the worktree bytes
+{"output":"scratchpad/claude-blind2-qarc-p4-owner-key-url-check.json","passed":13,"failed":0,"total":13,"physicalNetwork":0,"pageErrors":0,"servedAllBase":false,"sourceStable":true,"failures":[]}

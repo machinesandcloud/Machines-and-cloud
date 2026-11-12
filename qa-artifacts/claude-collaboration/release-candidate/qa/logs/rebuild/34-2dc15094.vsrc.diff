@@ -1,0 +1,51 @@
+diff --git a/netlify/functions/chat.mjs b/netlify/functions/chat.mjs
+index 880e03c6..6f39f736 100644
+--- a/netlify/functions/chat.mjs
++++ b/netlify/functions/chat.mjs
+@@ -22,9 +22,12 @@ import { WorkspaceIdentityError } from './lib/workspace-identity.mjs';
+ import { bindWebConversation, forkWebConversation, forkedTurn, claimWebConversation, grantRecoveredAccess, accessHeaders } from './lib/conversation-access.mjs';
+ import { savedPortalAcknowledgment } from "./lib/self-service-ack.mjs";
+ import { appointmentTextInvitation } from './lib/appointment-texts.mjs';
++<<<<<<< ours
+ // Proposal 10: a separate import line, so the config/desk import lines that other proposals edit stay untouched.
+ import { agentFallbackLanguage } from "./lib/config.mjs";
++=======
+ import { WEB_VISIT_CHANGE_NOTE } from "./lib/customer-visits.mjs";
++>>>>>>> theirs
+ 
+ export const config = { path: "/api/chat" };
+ 
+diff --git a/netlify/functions/lib/managed-sms.mjs b/netlify/functions/lib/managed-sms.mjs
+index 8638985c..45e73f9a 100644
+--- a/netlify/functions/lib/managed-sms.mjs
++++ b/netlify/functions/lib/managed-sms.mjs
+@@ -218,9 +218,13 @@ export async function processManagedSMS(id) {
+     const received=Date.parse(job.providerDate), receivedDay=capacity&&Number.isFinite(received)?houstonToday(new Date(received)):null;
+     const receivedContext=receivedDay?`\nThe current customer message was received on ${receivedDay} in Houston. Interpret this message's relative days (today, tomorrow or a weekday) from that received date. Use absolute YYYY-MM-DD dates in tools. Availability is checked at processing time; do not move an old request to a different day or promise a past window. If its requested timing has passed, ask for a new preference.`:'';
+     let savedActionCount=0,savedCheckReply=null,terminalCheckReply=null,savedBookingLanguage=null;
++<<<<<<< ours
++    const out=await runAgent({system:buildSystemPrompt(c,"sms")+"\nThis customer is using your verified texting channel. Save real visits and requests with tools. Only the final reply is queued for delivery; never claim a separate notification was delivered. Do not infer recurring texting consent. No promotional outreach."+receivedContext,tools:[GET_AVAILABILITY,BOOK_VISIT,NOTIFY_OWNER],messages,dropToolPreamble:true,fallbackLanguage:agentFallbackLanguage(c),logSlug:c.slug,maxTokens:capacity?800:1200,maxRetries:0,requireComplete:true,modelFetch,...(capacity?{model:MANAGED_TEXT_MODEL}:{}),stopAfterTools:async({toolUses,results})=>{
++=======
+     // Read-only visit context for the provider-verified sender number only.
+     const visitContext=await customerContext(c,job.from,{channel:"sms"});
+-    const out=await runAgent({system:buildSystemPrompt(c,"sms")+"\nThis customer is using your verified texting channel. Save real visits and requests with tools. Only the final reply is queued for delivery; never claim a separate notification was delivered. Do not infer recurring texting consent. No promotional outreach."+customerContextPrompt(visitContext,"sms")+receivedContext,tools:visitContext.visits.length?[GET_AVAILABILITY,BOOK_VISIT,NOTIFY_OWNER,CHANGE_VISIT]:[GET_AVAILABILITY,BOOK_VISIT,NOTIFY_OWNER],messages,dropToolPreamble:true,fallbackLanguage:agentFallbackLanguage(c),logSlug:c.slug,maxTokens:capacity?800:1200,maxRetries:0,requireComplete:true,modelFetch,...(capacity?{model:MANAGED_TEXT_MODEL}:{}),stopAfterTools:async({toolUses,results})=>{
++    const out=await runAgent({system:buildSystemPrompt(c,"sms")+"\nThis customer is using your verified texting channel. Save real visits and requests with tools. Only the final reply is queued for delivery; never claim a separate notification was delivered. Do not infer recurring texting consent. No promotional outreach."+customerContextPrompt(visitContext,"sms")+receivedContext,tools:visitContext.visits.length?[GET_AVAILABILITY,BOOK_VISIT,NOTIFY_OWNER,CHANGE_VISIT]:[GET_AVAILABILITY,BOOK_VISIT,NOTIFY_OWNER],messages,dropToolPreamble:true,maxTokens:capacity?800:1200,maxRetries:0,requireComplete:true,modelFetch,...(capacity?{model:MANAGED_TEXT_MODEL}:{}),stopAfterTools:async({toolUses,results})=>{
++>>>>>>> theirs
+       if(savedActionCount!==1||!savedCheckReply||toolUses.length!==1||toolUses[0].name!=='notify_owner'||toolUses[0].input.reason!=='status_check'||results.some(result=>result.is_error))return false;
+       if(!await freshAuthority())throw new Error("Channel authority changed");
+       if(capacity)await assertPaidUsage(c,job.paidAnswerCapacity,paidAnswerExpected(job));
+@@ -229,8 +233,13 @@ export async function processManagedSMS(id) {
+     },execTool:async(name,input)=>{
+       if (!await freshAuthority()) throw new Error("Channel authority changed");
+       if(capacity)await assertPaidUsage(c,job.paidAnswerCapacity,paidAnswerExpected(job));
+-      if(receivedDay&&['get_availability','book_visit','change_visit'].includes(name)&&typeof input?.date==='string'&&input.date)input={...input,date:normalizeBookingDate(input.date,receivedDay)||input.date};
++<<<<<<< ours
++      if(receivedDay&&['get_availability','book_visit'].includes(name)&&typeof input?.date==='string')input={...input,date:normalizeBookingDate(input.date,receivedDay)||input.date};
+       const toolCallId=name==="get_availability"?"availability":`mutation_${mutationIndex++}`, savedBefore=savedActionCount;
++=======
++      if(receivedDay&&['get_availability','book_visit','change_visit'].includes(name)&&typeof input?.date==='string'&&input.date)input={...input,date:normalizeBookingDate(input.date,receivedDay)||input.date};
++      const toolCallId=name==="get_availability"?"availability":`mutation_${mutationIndex++}`;
++>>>>>>> theirs
+       let availabilityError=false;
+       const content=await dispatchManagedVoiceTool({client:c,callId:job.messageSid,toolCallId,name,input,caller:job.from,channel:"sms",onAvailabilityResult:result=>{availabilityError=result.is_error===true;},onSavedRecord:(action,record)=>{
+         savedActionCount++;

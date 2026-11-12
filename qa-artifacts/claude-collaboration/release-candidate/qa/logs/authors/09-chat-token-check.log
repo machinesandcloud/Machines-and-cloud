@@ -1,0 +1,128 @@
+PASS first turn: fresh contact gets a 64-hex conversation token for that contact, exposed to the cross-origin widget
+PASS first turn: only a hash of the token is stored (raw token absent from every stored row)
+PASS correct token: stored history is loaded into the model and the turn appends to the same conversation
+PASS legacy tenant, missing: the victim's history is not given to the model (refused before any model call)
+PASS legacy tenant, missing: nothing is appended to the victim's conversation and no other conversation is created
+PASS legacy tenant, wrong: the victim's history is not given to the model (refused before any model call)
+PASS legacy tenant, wrong: nothing is appended to the victim's conversation and no other conversation is created
+PASS legacy tenant, otherContactsToken: the victim's history is not given to the model (refused before any model call)
+PASS legacy tenant, otherContactsToken: nothing is appended to the victim's conversation and no other conversation is created
+PASS legacy tenant, malformed: the victim's history is not given to the model (refused before any model call)
+PASS legacy tenant, malformed: nothing is appended to the victim's conversation and no other conversation is created
+PASS legacy tenant, recoverTurnP1: the victim's history is not given to the model (refused before any model call)
+PASS legacy tenant, recoverTurnP1: nothing is appended to the victim's conversation and no other conversation is created
+PASS victim still continues with their own token after the attacks
+[sms:disabled] to=+17135550198 from=- :: Fixture Comfort Air front desk: WANTS A CALL
+Customer: name not given (new)
+Phone: +17135550101
+Where: 14 Oak St Katy
+Issue: Please have the owner call me, Pat Fixture, 713-555-0101, 14 Oak St Katy.
+Urgency: flexible
+Ref 144a62cc83. Reply "called 144a62cc83" once you have reached them.
+[email:disabled] to=token-legacy-2@example.test :: Fixture Comfort Air: Fixture Comfort Air front desk: WANTS A CALL
+Fixture Comfort Air front desk: WANTS A CALL
+Customer: name not given (new)
+Phone: +17135550101
+Where: 14 Oak St Katy
+Issue: Please have the owner call me, Pat Fixture, 713-555-0101, 14 Oak St Katy.
+Urgency: flexible
+Ref 144a62cc83. Reply "called 144a62cc83" once you have reached them.
+PASS rev 6 (C2): legacy tenant + valid token + recoverTurn is refused with conversation_recovery_unavailable (readable, not turnNotProcessed, no token); the turn is not re-run, nothing is appended, no lead, the row is unchanged
+PASS rev 6 (C2): after that refusal the same token keeps chatting normally (the visitor is not stranded)
+PASS rev 6 (C2): a tokenless recoverTurn inside an open legacy window from the opening address is refused too (no history to the model, nothing appended, window row unchanged)
+PASS rev 6 (C2): a recoverTurn on a fresh legacy contact is refused; no access row and no conversation are written
+PASS rev 6 (C2): a mismatched legacy recoverTurn still gets the reload notice (rule 1 unchanged), nothing appended
+PASS rev 6 (C2): the legacy owner test line refuses recoverTurn as well (409 conversation_recovery_unavailable)
+PASS rev 7 (QA r6 R6-3): a tokenless legacy recoverTurn (open window or fresh id) is told to reload if the window stops responding; a tokened one and the owner test line get the plain copy; none claims an outcome
+PASS rev 6 (C1): visitor activity dated 125 s, 10 min, 1 day or 10 years in the future gets the reload notice: no history, no row, nothing appended
+PASS rev 6 (C1): activity 115 s in the future (inside the 2-minute clock skew) and 5 min in the past open the window; 31 min in the past does not
+PASS rev 6 (QA r5 S2): a 129-character context.ip is treated as no address (reload, no row); a 128-character one opens the window
+PASS inbox: a tokenless old-widget tab on a legacy tenant produces one conversation; later turns ask for a reload, nothing hidden
+PASS legacy window: tokenless history active within the 30-minute grace keeps working for tokenless turns, with a token issued each turn
+PASS legacy window: once it ends a tokenless turn is refused and appends nothing; an issued token keeps working
+PASS legacy window: presenting an issued token closes the window early for tokenless callers (and clears the client digest)
+PASS D3 storage: the open window keeps only a 64-hex digest of the opener network client, never the raw IP
+PASS legacy window: tokenless history idle beyond the grace (2 h) is never loaded and never appended to
+PASS legacy window: MC_CHAT_LEGACY_GRACE_MINUTES=0 disables it (1-minute-old legacy history not loaded)
+[email:disabled] to=ngoumnaisteve@gmail.com :: Flagged by Fixture Comfort Air: web wk3j9x0ab18fc3c35
+check
+
+Customer: My name is Dana Victim, 713-555-0123, 12 Elm St. AC is out.
+Desk: Thanks Dana.
+
+https://platform.chat-token.test/desk?c=token-legacy-1&k=PRIVATE-FIXTURE-1#convs
+PASS D1: owner flag/unflag of a 3-day-idle pre-token conversation does not reopen the legacy window
+PASS D1: the nightly autoFlagDay rewrite, or any fresh updatedAt with an old last visitor message, does not reopen the window
+PASS D1: user messages without `at` count as never active (strict direction: no window)
+PASS D3: inside an open window a tokenless turn from another IP (outsider, or the old tab after a network change) gets the reload notice, sees nothing, appends nothing
+PASS D3: a request without a client address never opens a legacy window
+PASS X2a (adopted): with context.ip present, forged x-forwarded-for / x-real-ip / client-ip / x-nf-client-connection-ip never continue the opener window
+PASS N1: with context.ip absent (or not a string), a forged x-nf-client-connection-ip of the opener gets the reload notice, sees nothing and appends nothing
+PASS N1: a request whose only address is the x-nf-client-connection-ip header never opens a window (reload notice, no access row)
+[sms:disabled] to=+17135550198 from=- :: Fixture Comfort Air front desk: WANTS A CALL
+Customer: name not given (new)
+Phone: +17135550123
+Where: 12 Elm St
+Issue: opener with a real context.ip
+Urgency: flexible
+Ref bacd770459. Reply "called bacd770459" once you have reached them.
+[email:disabled] to=token-legacy-1@example.test :: Fixture Comfort Air: Fixture Comfort Air front desk: WANTS A CALL
+Fixture Comfort Air front desk: WANTS A CALL
+Customer: name not given (new)
+Phone: +17135550123
+Where: 12 Elm St
+Issue: opener with a real context.ip
+Urgency: flexible
+Ref bacd770459. Reply "called bacd770459" once you have reached them.
+PASS rev 5: a context.ip that is only whitespace (spaces, NBSP, U+3000) or contains a control character (C0, DEL, C1) is no address: the reload notice, no access row, nothing appended or seen
+PASS rev 5 control: the same window-eligible conversation opened with a real context.ip (surrounding spaces trimmed) continues (200, window opened)
+PASS X3a (adopted): the stored digest equals sha256("mc-chat-legacy-client-v1\0" + convKey + "\0" + ip); one IP on two conversations gives two digests; no raw IP
+PASS X5c (adopted): a 1-minute-old assistant line after a 3-day-old visitor message is not activity (closed, nothing appended)
+PASS X5d (adopted): an old first visitor message plus a 5-minute-old one opens the window (newest, not first)
+PASS D1 residual: admin put_conversation (no `at`, an explicit fresh `at`, or a new id) never opens a legacy window; messages still get their timestamps
+PASS D1 residual: an admin put keeps the previous visitor-activity time (a visitor 5 minutes in still continues), and other channels are written exactly as before
+PASS X3d fixed: admin workspace delete removes the shop's conversation_access (token hashes, IP digest) and conversation_forks rows, and no other shop's
+[sms:disabled] to=+17135550198 from=- :: UPDATE ref bacd770459 (issue):
+Fixture Comfort Air front desk: WANTS A CALL
+Customer: name not given (new)
+Phone: +17135550123
+Where: 12 Elm St
+Issue: real visitor next turn with its token
+Urgency: flexible
+Ref bacd770459. Reply "called bacd770459" once you have reached them.
+[email:disabled] to=token-legacy-1@example.test :: Fixture Comfort Air: UPDATE ref bacd770459 (issue):
+UPDATE ref bacd770459 (issue):
+Fixture Comfort Air front desk: WANTS A CALL
+Customer: name not given (new)
+Phone: +17135550123
+Where: 12 Elm St
+Issue: real visitor next turn with its token
+Urgency: flexible
+Ref bacd770459. Reply "called bacd770459" once you have reached them.
+PASS D2: five same-client tokenless continuations and four outsiders never evict the visitor token; a full row continues without issuing a token
+PASS N2: a tokenless continuation does not extend legacyUntil (fixed, not sliding)
+PASS N3: fresh claim race, exactly one first turn wins; the loser gets 409 conversation_changed, turnNotProcessed, no token, nothing written
+PASS D4: a user,user message list gets a CORS-readable 400 invalid_messages with turnNotProcessed and a reload message; nothing appended
+PASS self-service: first turn mints a token; with it the second turn gives the model the stored first message
+PASS self-service, missing token: exact model input excludes the stored conversation; archive head unchanged; turn forked
+PASS forked visitor continues: the new contact + token carry history on the next turn
+PASS allowance-refused first turns write no binding row and issue no token (no new write path for refused turns)
+PASS P6: an allowance-refused turn on a legacy-window conversation writes no binding row and issues no token
+PASS recovery: owner browser (contact + token) gets the saved reply without another model call
+PASS recovery without the token: exact turnId returns only that saved reply plus a token for that conversation; no load, no model call
+PASS recovery without the token: a guessed turnId gets no reply, no history and no token (4xx), no model call
+PASS duplicate delivery of a completed turn without the token is answered from its saved reply (no fork, no model call)
+PASS W4 server side: a turnId-proven recovery token unlocks the same conversation for the next turn (lost first response keeps context)
+PASS recovery after a fork: the adopted contact + token recover the turn that ran in the new conversation
+PASS P9: recovering a forked turn on the original contact says it ran elsewhere (409 conversation_turn_moved), never "not submitted"
+PASS P9: a duplicate delivery of the forked turn is not run a second time (same moved answer, no model call, no new fork)
+PASS inbox: a tokenless self-service tab makes at most 2 conversations for 4 turns (one disclosed fork with its origin), then reload_required
+PASS dup-booking guard: a tokenless or wrong-token turn on a conversation with an unconfirmed turn gets 409 previous_unconfirmed, no fork, no model, no allowance
+PASS recovery of a pre-token pending turn inside the legacy grace still returns its saved reply
+PASS N4: three concurrent mismatched turns make at most one fork; the others are refused (409, turnNotProcessed) before any write
+PASS D2 recovery: completed-turnId recoveries fill free slots only; on a full row they return the saved reply without a token and the first token survives
+PASS D3 self-service: an outsider IP in the window gets reload_required (no fork, no model call); the turnId holder still recovers; the opener continues
+PASS N1 self-service: no context.ip (forged header only) on a window-eligible conversation gets reload_required, no fork, no model call, no access row; the real opener still opens it
+PASS website setup check: challenge-bound turns keep working (receipt event, contact websitecheck_<id>, history across its turns)
+PASS website setup check: its contact without the challenge is still refused (403) and is not forked into a chat
+{"ok":true,"passed":73,"total":73,"physical":0,"fixtureModelRequests":28,"failures":[]}

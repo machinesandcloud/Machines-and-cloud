@@ -1,0 +1,52 @@
+PASS multi-turn: first reply issues a token; the widget stores it beside the contact and sends it on turns 2 and 3
+PASS multi-turn: the model sees turn 1 on turn 3 and the server keeps one conversation of three turns
+PASS reload in the same tab: contact + token survive; turn 4 continues the same conversation with its history
+PASS recovery (first turn of a new chat, reply cut mid-stream): token from the cut response is adopted into the pending turn
+PASS recovery (first turn): "Check previous reply" returns the saved reply with no model call and clears the pending turn
+PASS recovery (later turn): saved reply returned with the stored token, no model call; conversation continues
+PASS fork: tokenless reuse of another contact id gives no history to the model and appends nothing to it
+PASS fork: the widget adopts the new server contact + token and the next turn continues there
+PASS legacy tab inside the grace: stored history is used, the issued token is adopted and sent next turn, same contact
+PASS website setup check: the challenge-bound turn is answered, sends no conversation token and gets none
+PASS first turn lost before any header: "Check previous reply" still returns the saved reply (turnId rule), no model call
+PASS first turn lost before any header: the turnId-proven recovery carries a token the widget adopts; the next turn keeps the same conversation and its context
+PASS W4: after a lost first response and recovery, a second lost response is recovered (200, saved reply), never shown as "not submitted"
+PASS D5 reload_required: the unsent text is back in the input box (not lost), the input is enabled, and it is not left in the transcript to resend
+PASS reload_required: the widget shows a restart notice, starts a new contact itself and the next turn is answered there; the old conversation is untouched
+PASS D4 old-storage: "Check previous reply" sends alternating messages (no 400), clears the pending turn and re-enables the input
+PASS D4 old-storage: the next Send is a valid exchange and is answered (visitor not stranded); the old conversation is unchanged
+PASS D4 a 400 on "Check previous reply" is read (CORS), clears the pending turn with a not-sent message (no false "couldn't confirm"), and the next Send is answered
+PASS D5 turn_moved: the widget restarts with the input enabled and its copy says so (contact the shop), not "Reload the page"
+PASS N2: a 503 not-processed send puts the message back in the box, takes it off the screen and out of the transcript, and says so beside the server message
+PASS N2: pressing Send again delivers that message once; the server stores it and the model sees it
+PASS N2: text typed while the refused send was pending is kept; the unsent message goes back in the box ahead of it (nothing silently dropped)
+PASS rev 5 (Q4-11): a 429 not-processed send puts the text back in the box (disabled for the day), off the screen and out of the transcript, and says it was not sent
+PASS rev 5 (W3): a restored + typed box over 1,500 characters shows a visible note at once, is not sent by Send or Enter, and keeps every character (nothing cut)
+PASS rev 5 (W3): once shortened the note goes away as the visitor edits (before Send), and the message is sent and stored whole
+PASS rev 5 (W1): with an IME composition open, the restore waits for the commit: restored text first, then the typed text with the committed word, and no stray reading
+PASS rev 5 (W5): a recovery answered with reload_required puts the text back in the box and takes its sent bubble off the screen (shown once, not twice)
+PASS rev 6 (QA r5 A1): an over-length restore leaves the live region on one announcement that carries both "not sent" and the length note
+PASS rev 6 (QA r5 A1a / E5): while over the limit the textarea’s accessible description is the note and it is aria-invalid
+PASS rev 6 (QA r5 A4): after a keyboard edit (box tooLong to the browser) Send and Enter raise no native validation bubble, post nothing, and announce the widget note
+PASS rev 6 (QA r5 E7): a clicked Send that is blocked by the length returns focus to the box, both before and after a keyboard edit
+PASS rev 6 (QA r5 E2): a box of exactly 1,501 characters is over the limit: the note names 1,501, Send posts nothing, every character is kept
+PASS rev 6 (QA r5 E1): the limit counts trimmed characters, as the server does: 1,500 characters plus surrounding whitespace show no note and are sent and stored whole
+PASS rev 6 (QA r5 E3): when a held restore is merged after the IME commit and the box is over the limit, the note is announced without any key press
+PASS rev 6 (QA r5 E4): with an over-length box, "Check previous reply" still posts its recovery and shows the saved reply; the typed text stays in the box
+PASS rev 6 (C2, end to end): on a legacy shop "Check previous reply" is refused by the server (409 recovery unavailable) and does not run the turn again: no model call, nothing appended
+PASS rev 6 (C2, end to end): the recovery strip disappears, the box is enabled and focused, the visitor is told to contact the shop, the sent message stays on screen and is not put back in the box
+PASS rev 6 (C2, end to end): after a reload no strip comes back, and the next message is answered on the same conversation with its token
+PASS rev 7 (QA r6 E6): the refusal is announced to screen readers exactly once
+PASS rev 7 (QA r6 R6-1, E2): after a reload the lost message is still on screen and the next bubble says its outcome is unconfirmed (contact the shop); the stored transcript keeps it, marked
+PASS rev 7 (QA r6 R6-1): a message that never reached the server gets the same refusal (plain copy, no reload hint) and, after a reload, the same "couldn't confirm" note; nothing stored; the next message is answered
+PASS rev 7 (QA r6 R6-3): a current widget whose first token never arrived sends a tokenless check and shows the server's refusal with the reload wording; the box is enabled
+PASS rev 7 (QA r6 R6-3): the fbe08789 embed is supplied (--old-embed) for the old-tab case
+PASS rev 7 (QA r6 R6-3, S1, S2, S4): the old tab's tokenless check is refused (409) without running the turn again or writing anything: no model call, history and the access row unchanged
+PASS rev 7 (QA r6 R6-3, S3): the old widget shows the server's refusal with the reload wording, so the visitor knows how to get out
+PASS rev 7 (QA r6 R6-3): a reload into this embed retires the old strip on the next check, reopens the box and the next message is answered
+PASS rev 7 (QA r6 R6-2, panel open): a host page validating all forms never pulls focus into the widget or speaks the length note; the host field gets every key and the box keeps its text
+PASS rev 7 (QA r6 R6-2, panel closed): a host page validating all forms never pulls focus into the widget or speaks the length note; the host field gets every key and the box keeps its text
+PASS rev 7 (QA r6 E8): when the widget's own count is fine it never silences the browser's validation message: a Send is either posted or the browser explains why not
+PASS B4 (adopted): a 400 on a new send puts the text back in the box, off the screen, and says it was not sent
+PASS B5 (adopted): an old-widget run of unanswered messages sends a valid exchange whose last message is exactly what the visitor just typed; the server stores it
+{"ok":true,"passed":51,"total":51,"embedSha":"99585989e30ca6d619de66fae741b5e5d3779b484f308c3576768d46057df3f7","physical":0,"forbidden":0,"pageErrors":0,"sourceStable":true,"failures":[]}

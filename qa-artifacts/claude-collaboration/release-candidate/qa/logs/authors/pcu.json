@@ -1,0 +1,170 @@
+{
+ "check": "pcu-calendar-unconnected-check",
+ "revision": 2,
+ "date": "2026-11-16",
+ "pass": 24,
+ "total": 24,
+ "nonFixtureRequests": [],
+ "fixtureWorkerDispatchCaptured": 9,
+ "results": [
+  {
+   "name": "U website chat: Calendar chosen but never connected books from saved hours and capacity",
+   "pass": true,
+   "detail": {
+    "result": "Visit saved in the shop portal. Ref 139c9815d5. This result confirms the saved visit; separate text, calendar or owner-contact delivery is not confirmed here. T",
+    "reply": "Thanks, Pat."
+   }
+  },
+  {
+   "name": "U SMS: Calendar chosen but never connected books from saved hours and capacity",
+   "pass": true,
+   "detail": {
+    "result": "Visit saved, reference 230689883e25dee59bbfddcb3922efe7. The shop has the details in its workspace and confirms arrival details directly. Do not claim a message"
+   }
+  },
+  {
+   "name": "U voice call: Calendar chosen but never connected books from saved hours and capacity",
+   "pass": true,
+   "detail": {
+    "result": "Visit saved, reference cd2b4a1e7e4268785a23c2e2f759c125. The shop has the details in its workspace and confirms arrival details directly. Do not claim a message"
+   }
+  },
+  {
+   "name": "U manual desk visit: Calendar chosen but never connected books from saved hours and capacity",
+   "pass": true,
+   "detail": {
+    "result": "Visit added in your workspace. Calendar and customer notifications have separate delivery status."
+   }
+  },
+  {
+   "name": "U AI tool wording: website-chat tool result confirms the save and never says full",
+   "pass": true,
+   "detail": {
+    "toolResult": "Visit saved in the shop portal. Ref cd9ebe48f7. This result confirms the saved visit; separate text, calendar or owner-c"
+   }
+  },
+  {
+   "name": "U capacity still applies: the second booking of a capacity-1 window is refused as full, not as Calendar",
+   "pass": true,
+   "detail": {
+    "reason": "full"
+   }
+  },
+  {
+   "name": "U OAuth started but not finished (pending row, no connection) still books",
+   "pass": true
+  },
+  {
+   "name": "U Calendar platform switched off (audit offline mode) still books",
+   "pass": true
+  },
+  {
+   "name": "K Calendar not chosen, never connected: books (unchanged)",
+   "pass": true
+  },
+  {
+   "name": "K Connected Calendar: busy protection applies (busy window refused, free window booked)",
+   "pass": true
+  },
+  {
+   "name": "K Never connected, then connected: protection starts at connection",
+   "pass": true
+  },
+  {
+   "name": "K Connected, then Google access lost (invalid_grant): nothing is booked on any channel",
+   "pass": true,
+   "detail": {
+    "status": "reconnect_required",
+    "outcomes": [
+     "website chat: Nothing was booked. Calendar availability could not be confirmed. Offer an owner callback ",
+     "SMS: Nothing was booked. Calendar availability could not be confirmed. Offer an owner callback ",
+     "voice call: Nothing was booked. Calendar availability could not be confirmed. Offer an owner callback ",
+     "manual desk visit: Nothing was booked. Calendar availability could not be confirmed. Offer an owner callback "
+    ]
+   }
+  },
+  {
+   "name": "K Connected, then owner disconnected while still chosen: fails closed (unchanged)",
+   "pass": true
+  },
+  {
+   "name": "K Connected with outdated availability consent: fails closed (unchanged)",
+   "pass": true
+  },
+  {
+   "name": "N Never connected, owner pressed Disconnect first: books from saved hours, no Google request",
+   "pass": true,
+   "detail": {
+    "status": "disconnected"
+   }
+  },
+  {
+   "name": "N Retained row owned by a different tenant identity (slug reused after admin delete): treated as never connected",
+   "pass": true
+  },
+  {
+   "name": "L website chat, first request after Google access revoked (invalid_grant): clean Calendar refusal, nothing saved, no throw",
+   "pass": true,
+   "detail": {
+    "status": "reconnect_required",
+    "result": "Nothing was booked. Calendar availability could not be confirmed. Offer an owner callback instead of promising a window."
+   }
+  },
+  {
+   "name": "L SMS, first request after Google access revoked (invalid_grant): clean Calendar refusal, nothing saved, no throw",
+   "pass": true,
+   "detail": {
+    "status": "reconnect_required",
+    "result": "Nothing was booked. Calendar availability could not be confirmed. Offer an owner callback instead of promising a window."
+   }
+  },
+  {
+   "name": "L voice call, first request after Google access revoked (invalid_grant): clean Calendar refusal, nothing saved, no throw",
+   "pass": true,
+   "detail": {
+    "status": "reconnect_required",
+    "result": "Nothing was booked. Calendar availability could not be confirmed. Offer an owner callback instead of promising a window."
+   }
+  },
+  {
+   "name": "L manual desk visit, first request after Google access revoked (invalid_grant): clean Calendar refusal, nothing saved, no throw",
+   "pass": true,
+   "detail": {
+    "status": "reconnect_required",
+    "result": "Nothing was booked. Calendar availability could not be confirmed. Offer an owner callback instead of promising a window."
+   }
+  },
+  {
+   "name": "L website chat, first request after Google token endpoint down (5xx): clean Calendar refusal, nothing saved, no throw",
+   "pass": true,
+   "detail": {
+    "status": "connected",
+    "result": "Nothing was booked. Calendar availability could not be confirmed. Offer an owner callback instead of promising a window."
+   }
+  },
+  {
+   "name": "L SMS, first request after Google token endpoint down (5xx): clean Calendar refusal, nothing saved, no throw",
+   "pass": true,
+   "detail": {
+    "status": "connected",
+    "result": "Nothing was booked. Calendar availability could not be confirmed. Offer an owner callback instead of promising a window."
+   }
+  },
+  {
+   "name": "L voice call, first request after Google token endpoint down (5xx): clean Calendar refusal, nothing saved, no throw",
+   "pass": true,
+   "detail": {
+    "status": "connected",
+    "result": "Nothing was booked. Calendar availability could not be confirmed. Offer an owner callback instead of promising a window."
+   }
+  },
+  {
+   "name": "L manual desk visit, first request after Google token endpoint down (5xx): clean Calendar refusal, nothing saved, no throw",
+   "pass": true,
+   "detail": {
+    "status": "connected",
+    "result": "Nothing was booked. Calendar availability could not be confirmed. Offer an owner callback instead of promising a window."
+   }
+  }
+ ]
+}

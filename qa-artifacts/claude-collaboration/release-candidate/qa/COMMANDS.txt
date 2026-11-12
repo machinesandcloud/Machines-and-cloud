@@ -1,0 +1,54 @@
+QA-RC independent release QA, 2026-11-12. Commands as run (paths abbreviated: Q = session scratchpad/qarc).
+Every test process: tools/run1.sh = (cd <copy> && env -i PATH HOME TMPDIR MC_MEMORY_STORE=1 MC_FAKE_MODEL=1 MC_LOCAL_NO_KEYS=1 [EXTRA_ENV]
+  sandbox-exec -f tools/deny-net.sb perl -e 'alarm 900; exec @ARGV' <cmd>). deny-net.sb denies all remote outbound, allows loopback.
+  Verified: node fetch("https://example.com") inside run1 -> DENIED EPERM; env shows only the 6 listed vars (logs/denytest.log).
+No .env, no keys, no push/deploy/merge/commit. route.fetch never used. Bundled chromium_headless_shell-1223.
+
+Copies (max 2 at a time, git archive, node_modules -> scratchpad/p10/nm incl. oauth4webapi):
+  Q/rc       = git archive ac10dc85 (minus scratchpad; qa-artifacts/claude-collaboration from ac10 for the QA suites); later git-init'ed for site-ui/P3
+  Q/rebuild  = step-by-step rebuild repo (alternates -> main object DB), later deleted
+  Q/a54      = git archive a54c5874 (created after Q/rebuild was deleted)
+
+1. Rebuild and byte compare
+  tools/rebuild.sh   (steps from tools/steps.tsv: commit -> documented patch paths, in commit order)
+    per step: git apply --index <patch>; on failure git apply --index -3 <patch>
+              git diff <RC commit> -- <paths touched>  -> logs/rebuild/NN-<commit>.vsrc.diff (empty = byte-identical)
+              then adopt the RC commit's files for those paths and continue (so each later step is compared on the RC's own parent)
+    final: git diff --stat ac10dc85 -- . -> logs/rebuild/final-vs-ac10.txt (empty)
+  tools/regions.py logs/rebuild/NN-*.vsrc.diff   (token diff of each conflict region: RC vs ours, RC vs theirs)
+  Patch sha256 values recomputed with shasum -a 256 and matched against every commit message (all match).
+  git diff 0f412212 fbe08789 -- embed.js | shasum -a 256  == 0c941f3c... (widget-chain prerequisite)
+
+2. Deploy gate (netlify.toml build line, 67 && commands, one fresh process each)
+  tools/gate.sh Q/rc  Q/out/gate        -> logs/gate/SUMMARY.tsv
+  tools/gate.sh Q/rebuild(+fix) Q/out/gate-fixed -> logs/gate-fixed/SUMMARY.tsv
+
+3. Proposal checks
+  tools/authors.sh Q/rc Q/out/authors    (builder's authors.sh with RC= pointing at tools/; same sources) -> logs/authors/
+  tools/browser.sh Q/rc Q/out/browser    (builder's browser.sh, site-ui port 8987)       -> logs/browser/
+  tools/browser2.sh Q/rc Q/out/browser2  (builder's browser2.sh output names + site-ui + widget-stream) -> logs/browser2/
+
+4. "Expected" failures
+  v15 with the 09 token (harness change only: say() carries X-MC-Conversation-Token as body.conversationToken):
+    EXTRA_ENV="SRC=Q/rc" run1 Q/rc node tools/v15tok/proposal-15/verify/v15-fixes-token.mjs   -> logs/v15/
+  p12 owner-alert --fix:            run1 Q/rc node scripts/p12-owner-alert-check.mjs --fix          -> logs/expected/p12-owner-alert-fix.log
+  post-visit-inbound (valid path):  run1 Q/rc node scripts/post-visit-inbound-check.mjs --output scratchpad/qa-rc-pv-inbound.json
+  a54-10 with one IP per turn:      run1 Q/rc node --import tools/a10/p10-model-stub.mjs tools/a10/a54-10m-agent-truncation-check.mjs --repo Q/rc
+  urgency-spanish orig and token:   head(managed-sms-qa-check setup) + urgency-spanish-tail[-token].mjs, URG_OUT=... run1 Q/rc node scripts/urg-<v>.composed.mjs
+  a54 baseline: tools/base.sh Q/a54 Q/out/base-a54 (desk-daily-work, customer-onboarding full, widget-stream, website-concurrency, site-ui port 8988)
+                plus customer-onboarding full rerun alone (first a54 run hit a reload timeout under CPU contention)
+
+5. Browser journeys (actual handlers by config.path via context.route; Anthropic protocol double in-process)
+  run1 Q/rc node tools/journeys.mjs --playwright <npx playwright index.mjs> --exe <chrome-headless-shell-1223> --out Q/out/journeys-rc
+    -> logs/journeys-rc/journeys.json + 58 screenshots, logs/journeys-rc.log
+
+6. Security probes
+  run1 Q/rc      node tools/erasure-cvr-probe.mjs  -> logs/erasure-cvr-probe-rc.log  (exit 1: defect)
+  tools/stores.mjs Q/rc (static scan: every store name, consts resolved, vs ERASURE_REGISTRY)
+  Fix: fix/QA-FIX-erasure-customer-visit-requests.patch (sha256 71c7525a...), applied in Q/rebuild (== ac10dc85):
+    run1 node scripts/data-erasure-check.mjs with only the check regex change -> FAILS naming customer_visit_requests (logs/fix/check-only-unfixed-registry.log)
+    run1 node scripts/data-erasure-check.mjs  -> 14 ok
+    run1 node tools/erasure-cvr-probe.mjs     -> exit 0
+    run1 node scripts/account-lifecycle-check.mjs -> 24/24
+    tools/gate.sh (fixed copy) -> 67/67
+  git apply --check fix/QA-FIX-erasure-customer-visit-requests.patch  (in the RC worktree; check only) -> applies cleanly

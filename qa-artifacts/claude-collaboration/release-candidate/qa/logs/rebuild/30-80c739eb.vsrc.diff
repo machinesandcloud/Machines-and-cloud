@@ -1,0 +1,72 @@
+diff --git a/desk-activity.js b/desk-activity.js
+index 38751b06..4ddddf12 100644
+--- a/desk-activity.js
++++ b/desk-activity.js
+@@ -34,7 +34,19 @@
+   function valid(value) {
+     return value?.version === 1 && value.complete === true && value.timeZone === 'America/Chicago' && [7,30,90].includes(value.period?.days) && ['from','until'].every(function(k){return Number.isFinite(Date.parse(value.period[k]));}) && Number.isFinite(Date.parse(value.generatedAt)) && ['inquiries','visitRequests','followupsCompleted','contactsMarkedReached'].every(function(k){return Number.isInteger(value.activity?.[k]) && value.activity[k] >= 0;}) && Array.isArray(value.attention?.items) && value.attention.total === value.attention.items.length && value.attention.total <= 2000 && Number.isInteger(value.attention.overdue) && value.attention.overdue >= 0 && value.attention.overdue <= value.attention.total && value.attention.items.every(function(row){return /^[a-zA-Z0-9_-]{1,80}$/.test(row.id) && typeof row.name === 'string' && (!row.dueAt || Number.isFinite(Date.parse(row.dueAt)));});
+   }
++  // View report is disabled while it loads, which drops keyboard focus. Return it only when it was lost and the owner has not moved on
++  // (the same rule as Business details): pointer, touch and wheel count; modifier keys and keys pressed while focus is lost do not.
++  var interaction = 0;
++  ['pointerdown', 'wheel', 'touchstart'].forEach(function (type) { document.addEventListener(type, function () { interaction++; }, { capture: true, passive: true }); });
++  document.addEventListener('keydown', function (event) { var focused = document.activeElement; if (['Shift', 'Control', 'Alt', 'Meta'].indexOf(event.key) >= 0 || !focused || focused === document.body) return; interaction++; }, { capture: true, passive: true });
++  function focusAfter(start) {
++    var button = $('activityReportLoad'), focused = document.activeElement;
++    if (!start.on || start.mark !== interaction || !button || document.body.dataset.activePage !== 'today') return;
++    if (focused && focused !== document.body && !focused.disabled && focused.getClientRects().length && !focused.closest('[hidden]')) return;
++    if (!button.disabled && button.getClientRects().length) button.focus(); else { $('activityReportStatus').tabIndex = -1; $('activityReportStatus').focus(); }
++  }
+   async function load() {
++    var focusStart = { on: document.activeElement === $('activityReportLoad'), mark: interaction };
+     if (!active || controller || !card.isConnected) return;
+     var token; try { token = sessionStorage.getItem('mc-onboarding-session-v1'); } catch (error) { token = null; }
+     if (!token) { document.dispatchEvent(new CustomEvent('mc:session-expired')); return; }
+@@ -54,8 +66,13 @@
+       [['New inquiries','inquiries'],['Visit requests','visitRequests'],['Follow-ups completed','followupsCompleted'],['New inquiries marked reached','contactsMarkedReached']].forEach(function (metric) { var group = document.createElement('div'), label = document.createElement('dt'), value = document.createElement('dd'); label.textContent = metric[0]; value.textContent = report.activity[metric[1]]; group.append(label, value); $('activityReportMetrics').append(group); });
+       $('activityReportExplanation').textContent = 'Visit requests are not confirmed arrivals. Contact and completion reflect actions recorded by your team. Follow-ups needing attention include older requests, outside this period.';
+       $('activityReportResults').hidden = false; $('activityReportStatus').textContent = 'Updated ' + new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', hour: 'numeric', minute: '2-digit' }).format(new Date(report.generatedAt)) + ' CT. Setup checks and spam are excluded.'; work();
++<<<<<<< ours
+     } catch (error) { if (isCurrent(sequence)) $('activityReportStatus').textContent = error.name === 'AbortError' ? 'The report took too long to check. Please try again.' : error.definite ? error.message : 'The report couldn’t be checked. Check your connection and try again.'; }
+     finally { clearTimeout(timeout); if (sequence === generation) { controller = null; if (card.isConnected && $('activityReportLoad')) { $('activityReportLoad').disabled = false; card.setAttribute('aria-busy', 'false'); if (refocus && (document.activeElement === document.body || !document.activeElement) && !$('activityReportLoad').hidden) $('activityReportLoad').focus(); } } }
++=======
++    } catch (error) { if (isCurrent(sequence)) $('activityReportStatus').textContent = error.name === 'AbortError' ? 'The report took too long to check. Please try again.' : error.message; }
++    finally { clearTimeout(timeout); if (sequence === generation) { controller = null; if (card.isConnected && $('activityReportLoad')) { $('activityReportLoad').disabled = false; card.setAttribute('aria-busy', 'false'); focusAfter(focusStart); } } }
++>>>>>>> theirs
+   }
+   $('activityReportLoad').addEventListener('click', load);
+   $('activityReportDays').addEventListener('change', reset);
+diff --git a/desk.html b/desk.html
+index a297a75d..abc5148e 100644
+--- a/desk.html
++++ b/desk.html
+@@ -17,7 +17,11 @@
+ 
+ <div class="desk-shell"><aside class="desk-rail" id="deskRail" hidden="" aria-label="Workspace navigation"><div class="desk-rail-brand" id="navbar"><a class="ui-brand" href="index.html" aria-label="Machines and Cloud home"><picture><source media="(max-width: 900px)" srcset="assets/logo-dark.png"><img src="assets/logo.png" alt="Machines &amp; Cloud" width="250" height="82"></picture></a></div><div class="desk-rail-business"><strong id="railBusiness">Your front desk</strong></div><nav class="tabs" aria-label="Main workspace navigation"><button type="button" data-t="today" id="tabToday" aria-controls="p-today" aria-current="false"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg><span>Home</span></button><button type="button" data-t="leads" data-nav-group="inbox" aria-controls="p-leads" aria-current="false"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4zM4 13h4l2 3h4l2-3h4"></path></svg><span>Inbox</span></button><button type="button" data-t="availability" aria-controls="p-availability" aria-current="false"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4M8 3v4M3 11h18M8 16h2"></path></svg><span>Schedule</span></button><button type="button" data-t="setup" data-nav-group="frontdesk" aria-controls="p-setup" aria-current="false"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 12 8 0M4 7h4v10H4zM16 7h4v10h-4zM2 10h2M20 10h2M2 14h2M20 14h2"></path></svg><span>Front desk</span></button></nav><div class="desk-rail-help"><button type="button" data-workspace-route="account" id="tabAccount" class="desk-account-button" aria-controls="p-account" aria-current="false"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21v-2a8 8 0 0 1 16 0v2"></path></svg><span>Account</span></button><button type="button" class="desk-guide-button" id="openGuide"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M9.5 8.5a2.7 2.7 0 1 1 4.5 2L12 12v2M12 17h.01"></path></svg><span>Quick tour</span></button><a class="desk-support-link" href="mailto:support@machinesandcloud.com">Contact support</a></div></aside><main class="dk" id="workspaceMain" tabindex="-1">
+   <div class="dk-head desk-topbar"><span class="desk-workspace-location">Customer workspace</span><div class="desk-topbar-business"><strong id="title">Your front desk</strong><span class="st" id="status">loading</span></div><button type="button" class="btn-pill btn-pill-dark btn-sm" id="deskSignOut" hidden="">Sign out</button></div>
+-  <div id="portalRecovery" class="card2" hidden=""><h2 id="recoveryTitle" tabindex="-1" aria-describedby="recoveryMessage">Open your workspace securely</h2><p id="recoveryMessage" role="status">Sign in with the email you used during setup. If our team set up your workspace, open the link from your welcome email instead.</p><a class="btn-pill btn-pill-blue" href="onboard.html?signin=1">Email me a sign-in link</a> <button type="button" class="btn-pill btn-pill-dark" id="retryLoad">Try again</button></div>
++<<<<<<< ours
++  <div id="portalRecovery" class="card2" hidden=""><h2>Open your workspace securely</h2><p id="recoveryMessage">Sign in with the email you used during setup. If our team set up your workspace, open the link from your welcome email instead.</p><a class="btn-pill btn-pill-blue" href="onboard.html?signin=1">Email me a sign-in link</a> <button type="button" class="btn-pill btn-pill-dark" id="retryLoad">Try again</button></div>
++=======
++  <div id="portalRecovery" class="card2" hidden=""><h2 id="recoveryTitle" tabindex="-1" aria-describedby="recoveryMessage">Open your workspace securely</h2><p id="recoveryMessage" role="status">Sign in with the email you used during setup.</p><a class="btn-pill btn-pill-blue" href="onboard.html?signin=1">Email me a sign-in link</a> <button type="button" class="btn-pill btn-pill-dark" id="retryLoad">Try again</button></div>
++>>>>>>> theirs
+   <div id="portalContent" hidden=""><header class="desk-page-heading"><div><h1 id="pageTitle" tabindex="-1">Home</h1><p id="pageDescription">Your customer requests and visits, in one place.</p></div></header>
+ <nav id="inboxNav" class="desk-section-nav" aria-label="Inbox sections" hidden>
+   <button type="button" data-workspace-route="leads" aria-controls="p-leads" aria-current="false">Requests</button>
+diff --git a/desk.js b/desk.js
+index 7230279e..f0a6014f 100644
+--- a/desk.js
++++ b/desk.js
+@@ -1554,7 +1554,11 @@
+       var response = await fetch(API_BASE + '/api/access', { method: 'POST', headers: ownerHeaders(), body: JSON.stringify({ action: 'sign_out' }) });
+       if (!response.ok) throw new Error('Sign out could not be confirmed. Please retry.');
+       websitePrivateClear();ownerSession = null; key = null; data = null; transcript = [];
+-      try { sessionStorage.removeItem('mc-owner-visit-pending-v1:'+slug); sessionStorage.removeItem('mc-onboarding-session-v1'); sessionStorage.removeItem(ownerKeyStorage); sessionStorage.removeItem(cfgExpiredKey); } catch (error) { /* Session is revoked on the server. */ }
++<<<<<<< ours
++      try { sessionStorage.removeItem('mc-owner-visit-pending-v1:'+slug); sessionStorage.removeItem('mc-onboarding-session-v1'); sessionStorage.removeItem(ownerKeyStorage); } catch (error) { /* Session is revoked on the server. */ }
++=======
++      try { sessionStorage.removeItem('mc-owner-visit-pending-v1:'+slug); sessionStorage.removeItem('mc-onboarding-session-v1'); sessionStorage.removeItem(cfgExpiredKey); } catch (error) { /* Session is revoked on the server. */ }
++>>>>>>> theirs
+       button.hidden = true; $('retryLoad').hidden = true;
+       history.replaceState(null, '', location.pathname);
+       try { localStorage.removeItem(RETURN_ROUTE_KEY); } catch (error) { /* Nothing to return to after a chosen sign-out. */ }

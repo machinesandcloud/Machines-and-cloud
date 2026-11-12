@@ -1,0 +1,68 @@
+{
+  "at": "2026-11-12T19:10:29.134Z",
+  "cwd": "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc",
+  "physicalNetwork": 1,
+  "otherFetches": 1,
+  "passed": 9,
+  "failed": 0,
+  "results": [
+    {
+      "name": "A1 concurrency: 25 parallel first sends from one network, cap 3: exactly 3 admitted; refusals write nothing",
+      "pass": true,
+      "info": {
+        "statuses": "200200200429429429429429429429429429429429429429429429429429429429429429429"
+      }
+    },
+    {
+      "name": "A3 a token holder refused at the cap: 429 turnNotProcessed, conversation unchanged; the same turn later succeeds once",
+      "pass": true
+    },
+    {
+      "name": "A4 legacy recoverTurn with the cap exhausted is the 409 recovery refusal, never a 429 \"not processed\"",
+      "pass": true,
+      "info": {
+        "tokenlessRecover": {
+          "status": 409,
+          "error": "conversation_reload_required",
+          "turnNotProcessed": true
+        }
+      }
+    },
+    {
+      "name": "A5 charge-skip attempts: test channel without key, wrong key, wrong admin key, legacy websiteCheck all refused or charged",
+      "pass": true
+    },
+    {
+      "name": "A7 spoofed x-nf-client-connection-ip never changes the bucket when the platform supplies context.ip",
+      "pass": true
+    },
+    {
+      "name": "A6 (production-risk note) with no client address at all, unrelated visitors share one \"unknown\" bucket",
+      "pass": true,
+      "info": "documented 15 A1 design: depends on Netlify always supplying context.ip"
+    },
+    {
+      "name": "A8 (accepted residual) a lost concurrent first claim on one contact costs one turn and answers 409 turnNotProcessed",
+      "pass": true,
+      "info": {
+        "firstWave": [
+          200,
+          409,
+          409
+        ],
+        "admittedAfter": 2
+      }
+    },
+    {
+      "name": "W1 vapi: configured secret + matching header accepted; wrong, short, missing header 403; unset secret 503",
+      "pass": true,
+      "info": {
+        "slug": "qa-adv-8"
+      }
+    },
+    {
+      "name": "W2 twilio voice/sms: a valid signature over URL+path is accepted; tampered/missing 403; unset token 503; admin key bypass",
+      "pass": true
+    }
+  ]
+}

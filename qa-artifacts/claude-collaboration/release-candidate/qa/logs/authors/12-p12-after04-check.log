@@ -1,0 +1,31 @@
+owner sms withheld Netlify Blobs has generated an internal error (500 status code)
+{
+ "check": "p12-after04",
+ "pass": 5,
+ "total": 5,
+ "blockedRequests": 0,
+ "recordedTwilioPosts": 1,
+ "recordedEmails": 6,
+ "results": [
+  {
+   "name": "no settle, ledger unreadable: text result is {channel:\"text\", ok:false, reason:\"sms_unconfirmed\"}; email still sent",
+   "pass": true
+  },
+  {
+   "name": "settle:true, ledger unreadable: 04 wrapper records {channel:\"text\", reason:\"send_error\"}; email still sent",
+   "pass": true
+  },
+  {
+   "name": "flagLead with ledger unreadable: lead saved, deliveryNote says email sent and the text did not go out",
+   "pass": true
+  },
+  {
+   "name": "flagLead to an opted-out owner: text refused (opted_out), note reports only the email",
+   "pass": true
+  },
+  {
+   "name": "flagLead, ledger readable, owner subscribed: note reports a text and an email",
+   "pass": true
+  }
+ ]
+}

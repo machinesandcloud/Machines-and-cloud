@@ -1,0 +1,110 @@
+[email:disabled] to=o1@example.test :: P12 HVAC: P12 HVAC front desk: your phone +12815551001 opted out of te
+P12 HVAC front desk: your phone +12815551001 opted out of texts. Alerts now go to your email only. Reply START to resume.
+[email:disabled] to=o2@example.test :: P12 HVAC: P12 HVAC front desk: +18325553002 opted out of texts. Nothin
+P12 HVAC front desk: +18325553002 opted out of texts. Nothing more will be sent to them.
+[email:disabled] to=o4@example.test :: P12 HVAC: New lead
+New lead
+[email:disabled] to=o13@example.test :: P12 HVAC: P12 HVAC front desk: +18325559100 opted out of texts. Nothin
+P12 HVAC front desk: +18325559100 opted out of texts. Nothing more will be sent to them.
+[email:disabled] to=o14@example.test :: P12 HVAC: New lead
+New lead
+[email:disabled] to=o18@example.test :: P12 HVAC: P12 HVAC front desk: BOOKED
+P12 HVAC front desk: BOOKED
+Customer: Dana (new)
+Phone: +12815551018
+Where: 1 Owner St
+Issue: Own AC
+Window: Mon, Nov 10, 8 to 12
+Ref 6df10a89da. Reply "otw 6df10a89da" when you are on the way.
+[email:disabled] to=o18@example.test :: P12 HVAC: P12 HVAC front desk: your phone +12815551018 opted out of te
+P12 HVAC front desk: your phone +12815551018 opted out of texts. Alerts now go to your email only. Reply START to resume.
+[email:disabled] to=o20@example.test :: P12 HVAC: P12 HVAC front desk: +12815551019 opted out of texts. Nothin
+P12 HVAC front desk: +12815551019 opted out of texts. Nothing more will be sent to them.
+[email:disabled] to=o19@example.test :: P12 HVAC: New lead
+New lead
+{
+ "check": "p12-sms-legacy",
+ "pass": 18,
+ "total": 19,
+ "blockedRequests": 0,
+ "recordedTwilioPosts": 6,
+ "results": [
+  {
+   "name": "owner phone texting STOP is recorded as an opt-out",
+   "pass": true
+  },
+  {
+   "name": "always-ring-through (VIP) number texting STOP is recorded as an opt-out",
+   "pass": true
+  },
+  {
+   "name": "opted-out owner texting START is resubscribed",
+   "pass": true
+  },
+  {
+   "name": "owner alerts (notifyOwner) are not texted to an opted-out owner; email still goes",
+   "pass": true
+  },
+  {
+   "name": "force:true welcome text is not sent to an opted-out number",
+   "pass": true
+  },
+  {
+   "name": "force:true test text is not sent to an opted-out number",
+   "pass": true
+  },
+  {
+   "name": "force:true number_assigned text is not sent to an opted-out number",
+   "pass": true
+  },
+  {
+   "name": "force:true digest text is not sent to an opted-out number",
+   "pass": true
+  },
+  {
+   "name": "force:true escalation text is not sent to an opted-out number",
+   "pass": true
+  },
+  {
+   "name": "STOP recorded on the shared platform sender blocks legacy sends through that sender",
+   "pass": true
+  },
+  {
+   "name": "owner commands still answer (help)",
+   "pass": true
+  },
+  {
+   "name": "owner free text containing \"don't text\" is not an opt-out",
+   "pass": true
+  },
+  {
+   "name": "customer STOP still recorded and confirmed once",
+   "pass": true
+  },
+  {
+   "name": "owner alert still texted to a subscribed owner",
+   "pass": true
+  },
+  {
+   "name": "legacy send to a non-suppressed number still goes through the platform sender",
+   "pass": false,
+   "error": "Expected values to be strictly equal:\n\nfalse !== true\n"
+  },
+  {
+   "name": "opted-out owner HELP gets no reply",
+   "pass": true
+  },
+  {
+   "name": "opted-out owner command runs but gets no reply",
+   "pass": true
+  },
+  {
+   "name": "owner bare \"cancel\" opts out and files no cancellation request, even for a visit booked on the owner's own phone",
+   "pass": true
+  },
+  {
+   "name": "D12-6: owner A texting STOP to shop B withholds shop A's owner SMS alerts on A's own approved number; email still goes",
+   "pass": true
+  }
+ ]
+}

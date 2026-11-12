@@ -1,0 +1,216 @@
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out not recorded Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out not recorded Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out not recorded Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out not recorded Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+{
+ "check": "qa12r3-probe (16 rev 3 adjusted)",
+ "fixed": true,
+ "meets": 14,
+ "total": 14,
+ "blockedRequests": 0,
+ "rows": [
+  {
+   "id": "C1 STOP keyword | reads+writes fail once (write retried?) ",
+   "meets": true,
+   "observed": {
+    "status": 200,
+    "confirmed": true,
+    "unrecorded": 0,
+    "laterSendOk": false,
+    "laterReason": "opted_out",
+    "postsToCustomer": 0
+   },
+   "error": null
+  },
+  {
+   "id": "C1 STOP keyword | store fully failing during the STOP, then recovers",
+   "meets": true,
+   "observed": {
+    "status": 200,
+    "confirmed": true,
+    "body": "Q12 HVAC: you're unsubscribed and will get no more texts from this number. Reply START to resume.",
+    "unrecorded": 1,
+    "laterSendOk": true,
+    "postsToCustomer": 1
+   },
+   "error": null
+  },
+  {
+   "id": "C2 phrase \"please stop texting me\" | reads+writes fail once (write retried?) ",
+   "meets": true,
+   "observed": {
+    "status": 200,
+    "confirmed": true,
+    "unrecorded": 0,
+    "laterSendOk": false,
+    "laterReason": "opted_out",
+    "postsToCustomer": 0
+   },
+   "error": null
+  },
+  {
+   "id": "C2 phrase \"please stop texting me\" | store fully failing during the STOP, then recovers",
+   "meets": true,
+   "observed": {
+    "status": 200,
+    "confirmed": false,
+    "body": "Q12 HVAC: we could not complete your request right now. Please reply STOP to stop all texts from this number.",
+    "unrecorded": 1,
+    "laterSendOk": true,
+    "postsToCustomer": 1
+   },
+   "error": null
+  },
+  {
+   "id": "C3 Spanish ALTO | reads+writes fail once (write retried?) ",
+   "meets": true,
+   "observed": {
+    "status": 200,
+    "confirmed": true,
+    "unrecorded": 0,
+    "laterSendOk": false,
+    "laterReason": "opted_out",
+    "postsToCustomer": 0
+   },
+   "error": null
+  },
+  {
+   "id": "C3 Spanish ALTO | store fully failing during the STOP, then recovers",
+   "meets": true,
+   "observed": {
+    "status": 200,
+    "confirmed": false,
+    "body": "Q12 HVAC: no pudimos completar su solicitud ahora. Responda STOP para no recibir más mensajes.",
+    "unrecorded": 1,
+    "laterSendOk": true,
+    "postsToCustomer": 1
+   },
+   "error": null
+  },
+  {
+   "id": "S1 customer replies \"yes\" (not opted out) while reads fail: treated as START?",
+   "meets": true,
+   "observed": {
+    "reply": "",
+    "subscribedAgainReply": false,
+    "optInEvents": 0
+   },
+   "error": null
+  },
+  {
+   "id": "S2 opted-out customer START while reads+writes fail: \"subscribed again\" but record kept (info: safe direction)",
+   "meets": true,
+   "observed": {
+    "reply": "Q12 HVAC: you're subscribed again. Reply STOP any time.",
+    "stillOptedOut": true
+   },
+   "error": null
+  },
+  {
+   "id": "H1 scheduled reminder_24h hit by ONE transient read fault: retried on the next run?",
+   "meets": true,
+   "observed": {
+    "heldEvents": 1,
+    "sentDuringFault": 0,
+    "sentAfterRecovery": 1,
+    "ownerTexted": 0,
+    "tasksLeftForBooking": 0
+   },
+   "error": null
+  },
+  {
+   "id": "H2 web booking with ONE transient read fault: confirmation held; AI told not to promise a text; later sent or owner told?",
+   "meets": true,
+   "observed": {
+    "full": false,
+    "customerPosts": 0,
+    "textsHeld": {
+     "at": "2026-11-11T16:10:02.125Z",
+     "reason": "sms_unconfirmed"
+    },
+    "consent": null,
+    "reminderTasks": [
+     "visit_check"
+    ],
+    "aiNote": "mention only what was sent. The customer's confirmation text was not sent, so no reminder texts will be sent and texting consent was not recorded. Do not promise a confirmation text or text reminders.",
+    "aiNotPromised": true,
+    "ownerToldTextNotSent": true,
+    "ownerTextPreview": "Q12 HVAC front desk: BOOKED\nCustomer: Ana (new)\nPhone: +18325557402\nWhere: 1 Main St\nIssue: AC out\nWindow: Sat, Nov 14, 8 to 12\nRef 5e727ad235. Reply \"otw 5e727",
+    "sentAfterRecovery": 0
+   },
+   "error": null
+  },
+  {
+   "id": "H3 inbound customer question during the outage: saved anywhere / owner told?",
+   "meets": true,
+   "observed": {
+    "reply": "",
+    "inboundHeldEvent": 1,
+    "savedInConversation": true,
+    "ownerAlerted": false,
+    "leads": 0,
+    "events": [
+     "sms_held",
+     "inbound_held"
+    ]
+   },
+   "error": null
+  },
+  {
+   "id": "H1b persistent fault over 5 scheduler runs: bounded (task dropped with an event, nothing sent)",
+   "meets": true,
+   "observed": {
+    "sent": 0,
+    "held": 4,
+    "dropped": 1,
+    "tasksLeft": 0
+   },
+   "error": null
+  },
+  {
+   "id": "K1 STOP (store healthy) with a pending reminder: task cancelled, owner told",
+   "meets": true,
+   "observed": {
+    "confirmed": true,
+    "tasksLeft": 0,
+    "ownerTold": true
+   },
+   "error": null
+  },
+  {
+   "id": "K2 STOP with the write failing: operator email attempted",
+   "meets": true,
+   "observed": {
+    "operatorEmail": true
+   },
+   "error": null
+  }
+ ]
+}

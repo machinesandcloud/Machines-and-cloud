@@ -1,0 +1,52 @@
+scheduler: 2 due [ [ 'escalate', 'attention_due' ], [ 'escalate', 'attention_due' ] ] digests 0 weeklies 0 released 0 with errors
+scheduler: 1 due [ [ 'escalate', 'attention_due' ] ] digests 0 weeklies 0 released 0 with errors
+scheduler: 2 due [ [ 'escalate', 'attention_due' ], [ 'escalate', 'attention_due' ] ] digests 0 weeklies 0 released 0 with errors
+scheduler: 1 due [ [ 'escalate', 'attention_due' ] ] digests 0 weeklies 0 released 0 with errors
+scheduler: 2 due [ [ 'escalate', 'attention_due' ], [ 'escalate', 'attention_due' ] ] digests 0 weeklies 0 released 0 with errors
+scheduler: 1 due [ [ 'escalate', 'attention_due' ] ] digests 0 weeklies 0 released 0 with errors
+scheduler: 1 due [ [ 'escalate', 'acked' ] ] digests 0 weeklies 0 released 0 with errors
+scheduler: 1 due [ [ 'escalate', 'attention_due' ] ] digests 0 weeklies 0 released 0 with errors
+scheduler: 1 due [ [ 'escalate', 'acked' ] ] digests 0 weeklies 0 released 0 with errors
+scheduler: 0 due [] digests 0 weeklies 0 released 0 with errors
+scheduler: 0 due [] digests 0 weeklies 0 released 0 with errors
+scheduler: 1 due [ [ 'escalate', 'attention_due' ] ] digests 0 weeklies 0 released 0 with errors
+scheduler: 0 due [] digests 0 weeklies 0 released 0 with errors
+scheduler: 0 due [] digests 0 weeklies 0 released 0 with errors
+scheduler: 1 due [ [ 'escalate', 'attention_due' ] ] digests 0 weeklies 0 released 0 with errors
+scheduler: 1 due [ [ 'escalate', 'attention_due' ] ] digests 0 weeklies 0 released 0 with errors
+scheduler: 0 due [] digests 0 weeklies 0 released 0 with errors
+scheduler: 0 due [] digests 0 weeklies 0 released 0 with errors
+scheduler: 0 due [] digests 0 weeklies 0 released 0 with errors
+scheduler: 1 due [ [ 'escalate', 'attention_due' ] ] digests 0 weeklies 0 released 0 with errors
+scheduler: 1 due [ [ 'escalate', 'acked' ] ] digests 0 weeklies 0 released 0 with errors
+scheduler: 1 due [ [ 'escalate', 'attention_due' ] ] digests 0 weeklies 0 released 0 with errors
+scheduler: 1 due [ [ 'escalate', 'attention_due' ] ] digests 0 weeklies 0 released 0 with errors
+scheduler: 1 due [ [ 'escalate', 'acked' ] ] digests 0 weeklies 0 released 0 with errors
+scheduler: 0 due [] digests 0 weeklies 0 released 0 with errors
+scheduler: 1 due [ [ 'escalate', 'attention_due' ] ] digests 0 weeklies 0 released 0 with errors
+scheduler: 2 due [ [ 'escalate', 'attention_due' ], [ 'escalate', 'attention_due' ] ] digests 0 weeklies 0 released 0 with errors
+scheduler: 1 due [ [ 'escalate', 'acked' ] ] digests 0 weeklies 0 released 0 with errors
+scheduler: 0 due [] digests 0 weeklies 0 released 0 with errors
+{
+ "passed": 17,
+ "total": 21,
+ "blocked": 0,
+ "fails": [
+  {
+   "name": "Q1 late emergency upgrade: reminder timing is truthful (D1)",
+   "error": "Cannot read properties of undefined (reading 'deadlineAt')"
+  },
+  {
+   "name": "Q2b late callback upgrade with unchanged revision (D1)",
+   "error": "one reminder after the real deadline\n\n0 !== 1\n"
+  },
+  {
+   "name": "Q7 emergency after an acknowledged callback re-alerts (D2)",
+   "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ 'wants_call'\n- 'emergency'\n"
+  },
+  {
+   "name": "Q11 earlier-epoch escalation task retires quietly after an emergency reopen",
+   "error": "Expected values to be strictly equal:\n\n0 !== 1\n"
+  }
+ ]
+}

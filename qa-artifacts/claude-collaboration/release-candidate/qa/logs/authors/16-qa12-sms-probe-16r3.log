@@ -1,0 +1,142 @@
+[email:disabled] to=o1@example.test :: QA HVAC: QA HVAC front desk: +18325551001 opted out of texts. Nothing
+QA HVAC front desk: +18325551001 opted out of texts. Nothing more will be sent to them.
+[email:disabled] to=o2@example.test :: QA HVAC: QA HVAC front desk: +18325551002 opted out of texts. Nothing
+QA HVAC front desk: +18325551002 opted out of texts. Nothing more will be sent to them.
+[email:disabled] to=o3@example.test :: QA HVAC: QA HVAC front desk: your phone +12815551003 opted out of tex
+QA HVAC front desk: your phone +12815551003 opted out of texts. Alerts now go to your email only. Reply START to resume.
+[email:disabled] to=o4@example.test :: QA HVAC: QA HVAC front desk: your phone +12815551004 opted out of tex
+QA HVAC front desk: your phone +12815551004 opted out of texts. Alerts now go to your email only. Reply START to resume.
+[email:disabled] to=o5@example.test :: QA HVAC: QA HVAC front desk: +18325551005 opted out of texts. Nothing
+QA HVAC front desk: +18325551005 opted out of texts. Nothing more will be sent to them.
+[email:disabled] to=o8@example.test :: QA HVAC: QA HVAC front desk: your phone +12815551008 opted out of tex
+QA HVAC front desk: your phone +12815551008 opted out of texts. Alerts now go to your email only. Reply START to resume.
+[email:disabled] to=o9@example.test :: QA HVAC: QA HVAC front desk: +18325551011 opted out of texts. Nothing
+QA HVAC front desk: +18325551011 opted out of texts. Nothing more will be sent to them.
+[email:disabled] to=o14@example.test :: QA HVAC: VIP text from +18325553014: Call me back about the unit
+VIP text from +18325553014: Call me back about the unit
+[email:disabled] to=o18@example.test :: QA HVAC: QA HVAC front desk: your phone +12815551018 opted out of tex
+QA HVAC front desk: your phone +12815551018 opted out of texts. Alerts now go to your email only. Reply START to resume.
+[email:disabled] to=o19@example.test :: QA HVAC: QA HVAC front desk: your phone +12815551019 opted out of tex
+QA HVAC front desk: your phone +12815551019 opted out of texts. Alerts now go to your email only. Reply START to resume.
+owner sms withheld Netlify Blobs has generated an internal error (500 status code)
+[email:disabled] to=o20@example.test :: QA HVAC: QA HVAC front desk: +18325551021 opted out of texts. Nothing
+QA HVAC front desk: +18325551021 opted out of texts. Nothing more will be sent to them.
+owner sms withheld Netlify Blobs has generated an internal error (500 status code)
+[email:disabled] to=o22@example.test :: QA HVAC: EMERGENCY lead
+EMERGENCY lead
+[email:disabled] to=o24@example.test :: QA HVAC: QA HVAC front desk: +12815551023 opted out of texts. Nothing
+QA HVAC front desk: +12815551023 opted out of texts. Nothing more will be sent to them.
+[email:disabled] to=o23@example.test :: QA HVAC: EMERGENCY lead
+EMERGENCY lead
+{
+ "check": "qa12-sms-probe",
+ "pass": 25,
+ "total": 25,
+ "blockedRequests": 0,
+ "twilioPosts": 8,
+ "results": [
+  {
+   "name": "C1 customer STOP: TwiML confirmation is returned (one-time confirmation still sent)",
+   "pass": true
+  },
+  {
+   "name": "C2 customer STOP with OptOutType (Twilio handled): app stays silent, opt-out recorded",
+   "pass": true
+  },
+  {
+   "name": "C3 owner STOP: TwiML confirmation returned, no SMS to owner, owner email still attempted",
+   "pass": true
+  },
+  {
+   "name": "C4 Spanish ALTO from owner: Spanish confirmation",
+   "pass": true
+  },
+  {
+   "name": "C5 opted-out customer START: resubscribed and confirmation returned",
+   "pass": true
+  },
+  {
+   "name": "C6 opted-out owner HELP is silent (Twilio: opted-out users do not receive HELP)",
+   "pass": true
+  },
+  {
+   "name": "C7 subscribed owner HELP still answered",
+   "pass": true
+  },
+  {
+   "name": "C8 repeat STOP from opted-out owner: silent, no second confirmation",
+   "pass": true
+  },
+  {
+   "name": "N1 STOP recorded -> every sendSMS type (force or not) is refused",
+   "pass": true
+  },
+  {
+   "name": "N2 notifySteve via platform number honours a platform STOP",
+   "pass": true
+  },
+  {
+   "name": "N3 (A5) shop on its OWN approved number is NOT blocked by a platform-sender STOP for an inline text (per-sender scope)",
+   "pass": true
+  },
+  {
+   "name": "N3b (A5, 16r3) own approved number, scheduled text, platform-sender STOP: blocked (QA-16 r2 N4)",
+   "pass": true
+  },
+  {
+   "name": "N4 platform START (suppressed:false) lets bridge sends resume",
+   "pass": true
+  },
+  {
+   "name": "N5 platform ledger read failure: bridge send fails closed (no Twilio POST)",
+   "pass": true
+  },
+  {
+   "name": "N6 VIP opted-out text: relayed to owner, no reply to VIP",
+   "pass": true
+  },
+  {
+   "name": "N7 opted-out owner command runs silently (ok/help produce no Message)",
+   "pass": true
+  },
+  {
+   "name": "F1 owner \"cancel ABC123\" is a command, not an opt-out",
+   "pass": true
+  },
+  {
+   "name": "F2 owner \"stop texting the customer\" free text is not an opt-out",
+   "pass": true
+  },
+  {
+   "name": "F3 owner bare \"cancel\" IS an opt-out (Twilio default keyword CANCEL)",
+   "pass": true
+  },
+  {
+   "name": "F4 owner opt-out does not file a customer cancellation request",
+   "pass": true
+  },
+  {
+   "name": "R1 customer STOP on a bridge-mode shop while the platform ledger is unreadable: STOP still recorded AND confirmation still returned",
+   "pass": true
+  },
+  {
+   "name": "R2 owner STOP with no owner email: opt-out recorded, confirmation returned",
+   "pass": true
+  },
+  {
+   "name": "R3 owner alert while the platform ledger is unreadable: SMS not sent (fail closed) but the email fallback is still attempted",
+   "pass": true
+  },
+  {
+   "name": "X1-observed",
+   "pass": true,
+   "observed": {
+    "ownerAlertTexted": false
+   }
+  },
+  {
+   "name": "X1 (scope observation) owner A texts STOP to unrelated shop B: shop A owner alerts on A's own approved number are now also withheld (global optouts store)",
+   "pass": true
+  }
+ ]
+}

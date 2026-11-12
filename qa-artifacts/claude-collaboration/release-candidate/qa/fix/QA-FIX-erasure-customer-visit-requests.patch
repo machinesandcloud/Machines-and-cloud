@@ -1,0 +1,25 @@
+diff --git a/netlify/functions/lib/data-erasure.mjs b/netlify/functions/lib/data-erasure.mjs
+index d5a49dc4..7bafa05c 100644
+--- a/netlify/functions/lib/data-erasure.mjs
++++ b/netlify/functions/lib/data-erasure.mjs
+@@ -47,6 +47,7 @@ export const ERASURE_REGISTRY = Object.freeze({
+   lead_connections: { scope: 'prefix', contact: false },
+   request_followthrough: { scope: 'prefix' }, request_followup_permissions: { scope: 'prefix' },
+   owner_visit_operations: { scope: 'prefix' }, owner_visit_locks: { scope: 'prefix' }, owner_tests: { scope: 'prefix' },
++  customer_visit_requests: { scope: 'prefix' }, // customer-visits.mjs: `${slug}/${tenant}/…`, holds the customer's phone and visit details
+   self_service_ai_proofs: { scope: 'exact' }, // keyed by the bare slug (self-service-ai.mjs PROOF_STORE)
+   website_installations: { scope: 'prefix', contact: false }, setup_assistance: { scope: 'prefix', contact: false },
+   service_intake: { scope: 'prefix', contact: false }, service_approval: { scope: 'prefix', contact: false },
+diff --git a/scripts/data-erasure-check.mjs b/scripts/data-erasure-check.mjs
+index 86c43564..fac1eedc 100644
+--- a/scripts/data-erasure-check.mjs
++++ b/scripts/data-erasure-check.mjs
+@@ -52,7 +52,7 @@ const storeNames = new Set();
+ for (const file of files) {
+   const text = readFileSync(file, 'utf8');
+   for (const m of text.matchAll(/(?<![.\w])(?:atomicUpdate|strictRead|put|get|del|remove|list|listJSON|boundedRecordKeys|rowsOf)\(\s*['"]([a-z][a-z0-9_]+)['"]/g)) storeNames.add(m[1]);
+-  for (const m of text.matchAll(/\b[A-Z_]*(?:STORE|QUEUE|INDEX|CALLS|CALLBACKS|OPERATIONS|LOCKS|KIND|REVIEWS|EVENTS|CURSOR|CLOCK|ERASURES)\s*=\s*['"]([a-z][a-z0-9_]+)['"]/g)) storeNames.add(m[1]);
++  for (const m of text.matchAll(/\b[A-Z_]*(?:STORE|QUEUE|INDEX|CALLS|CALLBACKS|OPERATIONS|LOCKS|KIND|REVIEWS|EVENTS|CURSOR|CLOCK|ERASURES|REQUESTS)\s*=\s*['"]([a-z][a-z0-9_]+)['"]/g)) storeNames.add(m[1]);
+ }
+ for (const n of ['workspace_rebuild', 'daily']) storeNames.delete(n);
+ await check('every store the source names is classified by ERASURE_REGISTRY, plus the conditional 09/15 stores', async () => {

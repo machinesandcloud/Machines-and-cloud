@@ -1,0 +1,219 @@
+owner sms withheld Netlify Blobs has generated an internal error (500 status code)
+owner sms withheld Netlify Blobs has generated an internal error (500 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out not recorded Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out not recorded Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out not recorded Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out not recorded Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out not recorded Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out not recorded Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+opt-out store unreadable Netlify Blobs has generated an internal error (400 status code)
+{
+ "check": "p12-sms-failclosed",
+ "pass": 35,
+ "total": 38,
+ "blockedRequests": 0,
+ "recordedTwilioPosts": 9,
+ "results": [
+  {
+   "name": "bridge send while the shared-number ledger is unreadable: no text is sent (fail closed)",
+   "pass": false,
+   "error": "Expected values to be strictly equal:\n\nfalse !== true\n"
+  },
+  {
+   "name": "owner alert while the ledger is unreadable: text withheld (sms_unconfirmed), email fallback still attempted",
+   "pass": true
+  },
+  {
+   "name": "customer STOP while the ledger is unreadable: opt-out recorded and the STOP confirmation still returned",
+   "pass": true
+  },
+  {
+   "name": "ledger readable again: owner alert texts normally",
+   "pass": true
+  },
+  {
+   "name": "r3: customer send on its own approved number while the legacy opt-out store is unreadable: held (sms_unconfirmed), not sent, sms_held logged",
+   "pass": true
+  },
+  {
+   "name": "r3: owner alert (no settle) while the legacy store is unreadable: text held, no throw, email still attempted",
+   "pass": true
+  },
+  {
+   "name": "r3: owner alert (settle) while the legacy store is unreadable: text held, no throw, email still attempted",
+   "pass": true
+  },
+  {
+   "name": "r3: customer STOP while legacy reads fail: confirmation returned, opt-out recorded, owner not texted",
+   "pass": true
+  },
+  {
+   "name": "r3: customer STOP while the legacy store fails to read and write: confirmation still returned, opt_out_unrecorded logged, nothing texted",
+   "pass": true
+  },
+  {
+   "name": "r3: Spanish STOP (ALTO) while legacy reads fail: Spanish confirmation returned",
+   "pass": true
+  },
+  {
+   "name": "r3: customer question while the legacy store is unreadable: no reply and no model run (treated as opted out)",
+   "pass": true
+  },
+  {
+   "name": "r3: START while the legacy store is unreadable: the opt-in confirmation is still returned",
+   "pass": true
+  },
+  {
+   "name": "r3: owner \"help\" while the legacy store is unreadable: no text reply (owner treated as opted out)",
+   "pass": true
+  },
+  {
+   "name": "r3: missed call while the legacy store is unreadable: 200 TwiML, no text-back sent (held); with 07, owner_alert_failed logged once and no \"texting you\" line",
+   "pass": true
+  },
+  {
+   "name": "r3: owner \"otw REF\" while the legacy store is unreadable: on-the-way text held, owner told it was not sent",
+   "pass": true
+  },
+  {
+   "name": "r3: Angi lead while the legacy store is unreadable: lead kept, text-back held (texted:false)",
+   "pass": true
+  },
+  {
+   "name": "r3: front-desk reply (sms-agent-background) while the legacy store is unreadable: reply held, not sent",
+   "pass": true
+  },
+  {
+   "name": "r3: scheduled review request while the legacy store is unreadable: held by the scheduler at send time (sms_held), not sent",
+   "pass": true
+  },
+  {
+   "name": "r3: legacy store readable again: the same customer send goes out and an opted-out number is still refused",
+   "pass": true
+  },
+  {
+   "name": "r4 C1: \"STOP\" with one transient read and write fault: the write is retried, stored, confirmed; a later send is refused",
+   "pass": true
+  },
+  {
+   "name": "r4 C2: \"please stop texting me\" with one transient read and write fault: the write is retried, stored, confirmed; a later send is refused",
+   "pass": true
+  },
+  {
+   "name": "r4 C3: \"ALTO\" with one transient read and write fault: the write is retried, stored, confirmed; a later send is refused",
+   "pass": true
+  },
+  {
+   "name": "r4 C2: \"please stop texting me\" while the store cannot be written: not confirmed (Twilio does not enforce it), customer asked to reply STOP, operator emailed",
+   "pass": true
+  },
+  {
+   "name": "r4 C3: \"ALTO\" while the store cannot be written: not confirmed (Twilio does not enforce it), customer asked to reply STOP, operator emailed",
+   "pass": true
+  },
+  {
+   "name": "r4 C4: \"STOP.\" while the store cannot be written: not confirmed (Twilio does not enforce it), customer asked to reply STOP, operator emailed",
+   "pass": true
+  },
+  {
+   "name": "r4 C1/K2: Twilio keyword STOP while the store cannot be written: confirmed (Twilio enforces it), operator emailed",
+   "pass": true
+  },
+  {
+   "name": "r4 Q1: recordOptOut reports the result (true stored, false after 3 failed writes)",
+   "pass": true
+  },
+  {
+   "name": "r4 S1: \"yes\" from a subscribed customer while reads fail: not an opt-in; kept as a held inbound",
+   "pass": true
+  },
+  {
+   "name": "r4 S1: \"Sí\" from a subscribed customer while reads fail: not an opt-in; kept as a held inbound",
+   "pass": true
+  },
+  {
+   "name": "r4 S1b: explicit START from an opted-out customer while reads fail is still confirmed (UNSTOP too)",
+   "pass": true
+  },
+  {
+   "name": "r4 H3: customer question while reads fail: no reply, no model; saved (held), inbound_held logged, owner emailed with the text",
+   "pass": true
+  },
+  {
+   "name": "r4 H1: scheduled reminder hit by one transient read fault: kept, then sent on the next run",
+   "pass": false,
+   "error": "Expected values to be strictly deep-equal:\n+ actual - expected\n\n  {\n+   after: 0,\n-   after: 1,\n    during: 0,\n+   held: 0,\n+   kept: 0,\n-   held: 1,\n-   kept: 1,\n    left: 0\n  }\n"
+  },
+  {
+   "name": "r4 H1b: persistent fault over 5 runs: bounded (4 holds, 1 task_dropped_held, nothing sent, no task left)",
+   "pass": false,
+   "error": "Expected values to be strictly deep-equal:\n+ actual - expected\n\n  {\n+   dropped: 0,\n+   held: 0,\n-   dropped: 1,\n-   held: 4,\n    left: 0,\n    sent: 0,\n+   tries: undefined\n-   tries: 4\n  }\n"
+  },
+  {
+   "name": "r4 H2: web booking whose confirmation is held by one read fault: owner alert says so and that no reminders are scheduled; AI note forbids promising texts",
+   "pass": true
+  },
+  {
+   "name": "r4 H2b: web booking with the store healthy: confirmation sent, owner alert has no unsent line",
+   "pass": true
+  },
+  {
+   "name": "r4 K1: STOP (store healthy) with a pending reminder: task cancelled, owner texted that the customer opted out",
+   "pass": true
+  },
+  {
+   "name": "r4 Q8/Q10: the read contract: any stored record blocks (a hand-entered one without `at`), and the number is normalised",
+   "pass": true
+  },
+  {
+   "name": "r4 Q9: held text while the events store also fails: still returns held (no throw), nothing sent",
+   "pass": true
+  }
+ ]
+}

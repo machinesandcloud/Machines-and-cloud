@@ -1,0 +1,176 @@
+{
+  "check": "post-visit-lifecycle",
+  "revision": 2,
+  "finding": "PRA-HOMEOWNER-08",
+  "at": "2026-11-12T19:14:07.662Z",
+  "module": "present",
+  "passed": 27,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "PV01 Schedule offers Mark job done: the visit closes as done with history; replaying the same action is idempotent",
+      "ok": true
+    },
+    {
+      "name": "PV02 Mark done stops the remaining 1-hour reminder and the owner nudge (nothing sent afterwards)",
+      "ok": true
+    },
+    {
+      "name": "PV03 Defaults: toggles off means no customer text after done; the owner-only nudge is on and sends once",
+      "ok": true
+    },
+    {
+      "name": "PV04 Review request needs the switch, a review link, the registered program and the customer's own YES REVIEWS",
+      "ok": true
+    },
+    {
+      "name": "PV05 Review request respects quiet hours at send time and is due inside sending hours",
+      "ok": true
+    },
+    {
+      "name": "PV06 Payment reminder: owner-triggered with an amount, day 3 and day 7, stops when marked paid, needs appointment permission",
+      "ok": true
+    },
+    {
+      "name": "PV07 Spanish customers get Spanish post-visit texts and RESEÑAS / SÍ RESEÑAS consent",
+      "ok": true
+    },
+    {
+      "name": "PV08 STOP (or ALTO) stops queued post-visit texts; START does not restore review permission",
+      "ok": true
+    },
+    {
+      "name": "PV09 Replays and duplicate queue calls never create or send a second text",
+      "ok": true
+    },
+    {
+      "name": "PV10 Switching a program off after queueing supersedes its unsent texts",
+      "ok": true
+    },
+    {
+      "name": "PV11 Selecting the post-visit program never invalidates an existing appointment registration",
+      "ok": true
+    },
+    {
+      "name": "PV12 Where the owner does not offer review requests, REVIEWS and YES REVIEWS grant nothing",
+      "ok": true
+    },
+    {
+      "name": "QP01 owner nudge: an owner edit that keeps date/window must not produce a second \"did this visit happen?\" email",
+      "ok": true
+    },
+    {
+      "name": "QP02 payment reminder body must stay within the registered sample: a saved payLink adds an unregistered \"Pay here\" link",
+      "ok": true
+    },
+    {
+      "name": "QP03 amount normalisation: leading zeros are not echoed to the customer",
+      "ok": true
+    },
+    {
+      "name": "QP04 undo: an owner who mis-taps No-show can restore the visit (or is asked to confirm first)",
+      "ok": true
+    },
+    {
+      "name": "QP05 a visit from months ago marked done today must not start a review request (stale outcome)",
+      "ok": true
+    },
+    {
+      "name": "QP06 held post-visit texts must not occupy the shared 500-entry delivery index for weeks when the program can never send",
+      "ok": true
+    },
+    {
+      "name": "QP07 registered program sample and description describe the texts actually sent, and the opt-in flow names REVIEWS",
+      "ok": true
+    },
+    {
+      "name": "QP08 settings replay with the same operationId but a different body is refused, not silently ignored",
+      "ok": true
+    },
+    {
+      "name": "QP09 the owner nudge is not sent the morning after when the owner already marked the visit done (control)",
+      "ok": true
+    },
+    {
+      "name": "QP10 one-hour reminder already claimed before Mark done (control: send-time recheck after claim)",
+      "ok": true
+    },
+    {
+      "name": "QP11 reopen: restores a mistaken No-show within 24h and its still-queued reminder; refused after a customer text was sent or after 24h",
+      "ok": true
+    },
+    {
+      "name": "R2-01 Mark done, Reopen, Mark done again: exactly one review request, bound to the second close",
+      "ok": true
+    },
+    {
+      "name": "R2-02 Default until OD-QA-1 is decided: review requests are unavailable, refused, absent from the program and never asked or sent",
+      "ok": true
+    },
+    {
+      "name": "R2-03 Consent needs the sent question: REVIEWS without a sent question, a failed question send, or a question sent while the offer is off grants nothing",
+      "ok": true
+    },
+    {
+      "name": "R2-04 A review proof older than the last STOP/START directive is not current (row written out of order or restored)",
+      "ok": true
+    }
+  ],
+  "notes": {
+    "QP01_jobs": 1,
+    "QP01_sent": 1,
+    "QP02_body": "Bayou Air: friendly reminder that the invoice for $180 is open. Reply here with any questions. Reply STOP to end texts.",
+    "QP03": {
+      "0180": "$180",
+      "$ 180": "$180",
+      "0.50": "$0.50",
+      "180.5": "refused:invalid_amount",
+      "1,000": "$1000",
+      "999999.99": "$999999.99",
+      "$0.00": "refused:invalid_amount",
+      "-5": "refused:invalid_amount",
+      "180\nPay at evil.test": "refused:invalid_amount"
+    },
+    "QP04": {
+      "reopen": "ok",
+      "undo": "invalid_request",
+      "mark_booked": "invalid_request",
+      "reschedule": "invalid_request"
+    },
+    "QP05": null,
+    "QP06_program": {
+      "registered": false,
+      "reason": "post_visit_program_not_selected"
+    },
+    "QP06_held": [],
+    "QP06_index": 0,
+    "QP07_flowMentionsReviews": true,
+    "QP07_desc": "m does not send on-the-way alerts, promotions, purchased-list outreach or unrelated marketing. After the owner marks a visit done, Bayou Air may send one review request for that visit to recipients who separately texted REVIEWS or RESEÑAS and replied YES REVIEWS or SÍ RESEÑAS, and, when the owner records an open amount, up to two payment reminders for that visit to recipients with ongoing appointment-text permission.",
+    "QP07_actualReview": "Thanks for choosing Bayou Air, Rosa. How did we do? A quick Google review helps a small shop a lot: https://g.page/r/synthetic/review. Reply here if anything was not right.",
+    "QP07_sampleReview": "Bayou Air: thanks for choosing us. How did we do? A quick review helps a small shop a lot: https://g.page/r/example/review. Reply here if anything was not right. Reply STOP to end texts.",
+    "QP08": {
+      "error": "submission_conflict"
+    },
+    "QP11_afterReopen": [
+      "reminder_1h",
+      "owner_booking",
+      "confirmation"
+    ],
+    "R2_01": [
+      [
+        "superseded",
+        false
+      ],
+      [
+        "accepted",
+        true
+      ]
+    ],
+    "R2_02_program": {
+      "description": "s, promotions, purchased-list outreach, review requests or unrelated marketing. After the owner marks a visit done and records an open amount, Bayou Air may send up to two payment reminders for that visit to recipients with ongoing appointment-text permission.",
+      "flowHasReviews": false,
+      "samples": 4
+    }
+  },
+  "physicalRequestsDenied": 0
+}

@@ -1,0 +1,11 @@
+PASS short-window limiter: 150 concurrent from one IP with daily cap lifted -> 60 answered (want exactly 60)
+PASS missing IP shares one limited bucket -> 60 of 65 answered (want 60)
+PASS twilioSignatureValid without token is false
+PASS non-string signature false, no throw
+PASS multibyte signature of equal char length (28 bytes) rejected, no throw
+PASS vapi multibyte secret accepted when equal
+PASS vapi same char length different bytes rejected
+PASS vapi header missing -> 403
+PASS vapi empty secret + empty header -> 503 (not accepted)
+Q5 all pass
+[q5] outbound fetch calls intercepted by stub (none left the process): 0

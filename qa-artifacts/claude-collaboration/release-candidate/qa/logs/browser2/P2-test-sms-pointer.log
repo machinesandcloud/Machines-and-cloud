@@ -1,0 +1,42 @@
+fatal: invalid object name 'dfb0ae78'.
+fatal: invalid object name 'dfb0ae78'.
+fatal: invalid object name 'dfb0ae78'.
+fatal: invalid object name 'dfb0ae78'.
+fatal: invalid object name 'dfb0ae78'.
+fatal: invalid object name 'dfb0ae78'.
+fatal: invalid object name 'dfb0ae78'.
+fatal: invalid object name 'dfb0ae78'.
+fatal: invalid object name 'dfb0ae78'.
+fatal: invalid object name 'dfb0ae78'.
+fatal: invalid object name 'dfb0ae78'.
+fatal: invalid object name 'dfb0ae78'.
+fatal: invalid object name 'dfb0ae78'.
+fatal: invalid object name 'dfb0ae78'.
+fatal: invalid object name 'dfb0ae78'.
+fatal: invalid object name 'dfb0ae78'.
+fatal: invalid object name 'dfb0ae78'.
+fatal: invalid object name 'dfb0ae78'.
+fatal: invalid object name 'dfb0ae78'.
+fatal: invalid object name 'dfb0ae78'.
+fatal: invalid object name 'dfb0ae78'.
+fatal: invalid object name 'dfb0ae78'.
+fatal: invalid object name 'dfb0ae78'.
+fatal: invalid object name 'dfb0ae78'.
+fatal: invalid object name 'dfb0ae78'.
+fatal: invalid object name 'dfb0ae78'.
+fatal: invalid object name 'dfb0ae78'.
+PASS 1440px legacy workspace: Front desk > Connections shows "Send me a test text" (and the rest of the legacy setup details)
+PASS 1440px legacy workspace (pointer click): one click sends exactly one test text to the owner and the page says it was accepted
+PASS 390px legacy workspace: Front desk > Connections shows "Send me a test text" (and the rest of the legacy setup details)
+PASS 390px legacy workspace (pointer click): one click sends exactly one test text to the owner and the page says it was accepted
+twilio send failed 400 Synthetic provider refusal
+PASS pointer: provider refuses the text: the owner is told no test text was sent (not "could not confirm… retry")
+[sms:disabled] to=+17135550198 from=- :: Fixture Blind Shop: test text from your front desk. Reply "help" any time to see the commands.
+PASS pointer: no texting sender configured: nothing reaches the provider and the owner is told no test text was sent
+PASS pointer: lost response after the server sent the text: no raw transport error, no false "accepted", and the owner learns it may already have been sent
+PASS pointer: double click sends one test text, not two (button is busy while the first request runs)
+PASS pointer: no owner cell on file: nothing is sent and the owner is told to add a cell number (not "could not confirm… retry")
+PASS self-service workspace: the button is hidden and disabled, and a direct test_sms POST sends nothing
+PASS observation only: an owner number that texted STOP still receives the test text (send.mjs force)
+PASS No physical transport, forbidden destinations or page errors; served bytes are the worktree bytes
+{"output":"scratchpad/claude-blind2-qarc-p2.json","passed":12,"failed":0,"total":12,"physicalNetwork":0,"pageErrors":0,"servedAllBase":false,"sourceStable":true,"failures":[]}

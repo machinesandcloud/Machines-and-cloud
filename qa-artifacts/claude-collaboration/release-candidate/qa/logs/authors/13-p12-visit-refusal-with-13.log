@@ -1,0 +1,44 @@
+{
+ "check": "p12-visit-refusal",
+ "pass": 9,
+ "total": 9,
+ "nonFixtureRequests": 0,
+ "results": [
+  {
+   "name": "transient Calendar refusal: same submission succeeds once Calendar is back and the retry delay has passed",
+   "pass": true
+  },
+  {
+   "name": "transient refusal exposes when the same submission may be retried",
+   "pass": true
+  },
+  {
+   "name": "definite refusal (Calendar conflict) stays final for its submission",
+   "pass": true
+  },
+  {
+   "name": "reopened transient refusal re-checks current rules; a changed configuration refuses without writing",
+   "pass": true
+  },
+  {
+   "name": "a different visit under the same submission id is still a conflict",
+   "pass": true
+  },
+  {
+   "name": "double-submitted Add visit whose sibling fenced the booking: refusal is final and says so (no retryAt); a new submission still works",
+   "pass": true
+  },
+  {
+   "name": "two concurrent retries of a reopened refusal never create two visits, and a later retry settles on one",
+   "pass": true
+  },
+  {
+   "name": "a stored transient refusal that later gained an abortError is final: no stale retryAt, never reopened",
+   "pass": true
+  },
+  {
+   "name": "a sibling still holding this submission's capacity token keeps the transient refusal final (no reopen, no retryAt)",
+   "pass": true
+  }
+ ]
+}

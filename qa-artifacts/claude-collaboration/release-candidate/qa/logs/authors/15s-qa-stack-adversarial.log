@@ -1,0 +1,27 @@
+PASS A1 concurrency: 25 parallel first sends from one network, cap 3: exactly 3 admitted; refusals write nothing
+PASS A3 a token holder refused at the cap: 429 turnNotProcessed, conversation unchanged; the same turn later succeeds once
+PASS A4 legacy recoverTurn with the cap exhausted is the 409 recovery refusal, never a 429 "not processed"
+PASS A5 charge-skip attempts: test channel without key, wrong key, wrong admin key, legacy websiteCheck all refused or charged
+PASS A7 spoofed x-nf-client-connection-ip never changes the bucket when the platform supplies context.ip
+PASS A6 (production-risk note) with no client address at all, unrelated visitors share one "unknown" bucket
+PASS A8 (accepted residual) a lost concurrent first claim on one contact costs one turn and answers 409 turnNotProcessed
+PASS W1 vapi: configured secret + matching header accepted; wrong, short, missing header 403; unset secret 503
+[sms:disabled] to=+17135559901 from=+17135554009 :: Hi, this is QA Air. Sorry we missed your call. What can we help with, and is it urgent? / Hola, le saluda QA Air. ¿En qué le podemos ayudar? Reply STOP to opt out. / Responda STOP o ALTO para no recibir mensajes.
+[sms:disabled] to=+17135550198 from=+17135554009 :: QA Air front desk: missed call from +17135559901. Texting is not set up yet, so no text-back was sent. Please call them back.
+[email:disabled] to=qa-adv-9@example.test :: QA Air: QA Air front desk: missed call from +17135559901. Texting is
+QA Air front desk: missed call from +17135559901. Texting is not set up yet, so no text-back was sent. Please call them back.
+could not start sms agent Error: qa: network denied
+    at deny (file:///private/tmp/mc-claude-proposals-index-20261110/qa-artifacts/claude-collaboration/proposals-index/stacked/qa/probes/qa-stack-adversarial.mjs:11:58)
+    at globalThis.fetch (file:///private/tmp/mc-claude-proposals-index-20261110/qa-artifacts/claude-collaboration/proposals-index/stacked/qa/probes/qa-stack-adversarial.mjs:13:97)
+    at default (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/sms.mjs:157:11)
+    at async file:///private/tmp/mc-claude-proposals-index-20261110/qa-artifacts/claude-collaboration/proposals-index/stacked/qa/probes/qa-stack-adversarial.mjs:129:15
+    at async check (file:///private/tmp/mc-claude-proposals-index-20261110/qa-artifacts/claude-collaboration/proposals-index/stacked/qa/probes/qa-stack-adversarial.mjs:22:56)
+    at async file:///private/tmp/mc-claude-proposals-index-20261110/qa-artifacts/claude-collaboration/proposals-index/stacked/qa/probes/qa-stack-adversarial.mjs:120:1
+[sms:disabled] to=+17135550198 from=+17135554009 :: VIP voicemail from +17135559901: https://api.twilio.example/r/RE1.mp3 (3 s)
+[email:disabled] to=qa-adv-9@example.test :: QA Air: VIP voicemail from +17135559901: https://api.twilio.example/
+VIP voicemail from +17135559901: https://api.twilio.example/r/RE1.mp3 (3 s)
+[sms:disabled] to=+17135550198 from=+17135554009 :: QA Air front desk: missed call from +17135559901. They were already sent a text-back in the last 24 hours, so no new one.
+[email:disabled] to=qa-adv-9@example.test :: QA Air: QA Air front desk: missed call from +17135559901. They were 
+QA Air front desk: missed call from +17135559901. They were already sent a text-back in the last 24 hours, so no new one.
+PASS W2 twilio voice/sms: a valid signature over URL+path is accepted; tampered/missing 403; unset token 503; admin key bypass
+qa-stack-adversarial: 9/9 passed; physical 1; fetches 1

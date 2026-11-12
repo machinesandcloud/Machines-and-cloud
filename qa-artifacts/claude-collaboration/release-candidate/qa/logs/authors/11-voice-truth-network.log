@@ -1,0 +1,170 @@
+PASS V1 legacy VIP firstMessage makes no tone/voicemail/callback promise and offers to take a message
+     {"firstMessage":"This is Bayou Air. Ray cannot pick up right now. I can take a message for Ray."}
+PASS V3 legacy voicePrompt and managed transient assistant carry the exact web/test no-narration rule and say every word is spoken
+     {"webHasRule":true,"legacy":true,"managed":true}
+PASS V3b prompt: Tier 1 same-day hand-offs say reason "lead"; the 24/7 after-hours Tier 1 says reason "emergency"; no reason-less notify_owner urgency hand-off remains
+     {"tier1":true,"table":true,"e247":true}
+PASS V2a book_visit throw after save: result names the saved reference, forbids a repeat, makes no callback promise; a re-delivery replays the identical result; a model retry on the same call saves no second booking
+     {"threw":false,"first":{"toolCallId":"tc-1","result":"Booked, reference 3a9713b737. It is saved, but Ray could not be alerted yet (the alert did not go out). Do not tell the customer that Ray was texted, emailed or told, and do not promise a callback time; say it is saved for Ray to review. The customer's confirmation text was not sent, so no reminder texts will be sent and texting consent was not recorded. Do not promise a confirmation text or text reminders."},"redelivered":{"toolCallId":"tc-1","result":"Booked, reference 3a9713b737. It is saved, but Ray could not be alerted yet (the alert did not go out). Do not tell the customer that Ray was texted, emailed or told, and do not promise a callback time; say it is saved for Ray to review. The customer's confirmation text was not sent, so no reminder texts will be sent and texting consent was not recorded. Do not promise a confirmation text or text reminders."},"retried":{"toolCallId":"tc-2","result":"A visit was already saved on this call, reference 3a9713b737. Do not book another. If the caller wants a different day or time for that visit, save the change with notify_owner, reason \"question\", naming reference 3a9713b737, and say the visit stays as booked until the shop confirms the change."},"bookingsSaved":1}
+PASS V2b notify_owner throw after save: result names the saved reference, says the owner could not be alerted (no provider accepted the alert), makes no callback promise; failure event records the outcome
+     {"result":{"toolCallId":"tc-3","result":"Request saved, reference b2f5c5e39c. It is saved, but Ray could not be alerted yet (the alert did not go out). Do not tell the customer that Ray was texted, emailed or told, and do not promise a callback time; say it is saved for Ray to review."},"leadsSaved":1,"failureEvents":[]}
+vapi tool book_visit Error: injected storage fault
+    at Map.set (file:///private/tmp/mc-claude-voice-review-20261110/qa-artifacts/claude-collaboration/voice-review/proposal-11/voice-truth-check.mjs:30:131)
+    at Map.set (file:///private/tmp/mc-claude-voice-review-20261110/qa-artifacts/claude-collaboration/voice-review/proposal-11/voice-truth-check.mjs:35:258)
+    at Object.setJSON (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/store.mjs:24:48)
+    at atomicUpdate (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/store.mjs:60:29)
+    at async addRecord (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/store.mjs:380:55)
+    at async bookVisit (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/desk.mjs:382:13)
+    at async default (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/vapi.mjs:158:53)
+    at async tool (file:///private/tmp/mc-claude-voice-review-20261110/qa-artifacts/claude-collaboration/voice-review/proposal-11/voice-truth-check.mjs:69:69)
+    at async file:///private/tmp/mc-claude-voice-review-20261110/qa-artifacts/claude-collaboration/voice-review/proposal-11/voice-truth-check.mjs:144:13
+PASS V2c pre-save throw: no earlier record is claimed as saved; result is uncertain and makes no callback promise
+     {"result":{"toolCallId":"n1","error":"This could not be confirmed. It may or may not be saved. Do not say it was booked, saved or sent, do not promise a callback, and do not repeat this action. Say the shop has a record of this call."},"earlierRef":"69ce0182fa"}
+vapi tool notify_owner Error: injected storage fault
+    at Map.set (file:///private/tmp/mc-claude-voice-review-20261110/qa-artifacts/claude-collaboration/voice-review/proposal-11/voice-truth-check.mjs:30:131)
+    at Map.set (file:///private/tmp/mc-claude-voice-review-20261110/qa-artifacts/claude-collaboration/voice-review/proposal-11/voice-truth-check.mjs:35:258)
+    at Object.setJSON (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/store.mjs:24:48)
+    at put (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/store.mjs:47:21)
+    at addRecord (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/store.mjs:381:14)
+    at async flagLead (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/desk.mjs:538:13)
+    at async default (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/vapi.mjs:159:55)
+    at async tool (file:///private/tmp/mc-claude-voice-review-20261110/qa-artifacts/claude-collaboration/voice-review/proposal-11/voice-truth-check.mjs:69:69)
+    at async file:///private/tmp/mc-claude-voice-review-20261110/qa-artifacts/claude-collaboration/voice-review/proposal-11/voice-truth-check.mjs:153:13
+PASS V2d pre-save throw on notify_owner: uncertain, no callback promise, no saved/sent claim
+     {"result":{"toolCallId":"q1","error":"This could not be confirmed. It may or may not be saved. Do not say it was booked, saved or sent, do not promise a callback, and do not repeat this action. Say the shop has a record of this call."}}
+vapi tool book_visit Error: injected storage fault
+    at Map.set (file:///private/tmp/mc-claude-voice-review-20261110/qa-artifacts/claude-collaboration/voice-review/proposal-11/voice-truth-check.mjs:30:131)
+    at Map.set (file:///private/tmp/mc-claude-voice-review-20261110/qa-artifacts/claude-collaboration/voice-review/proposal-11/voice-truth-check.mjs:35:258)
+    at Object.setJSON (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/store.mjs:24:48)
+    at put (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/store.mjs:47:21)
+    at logEvent (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/store.mjs:742:9)
+    at bookVisit (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/desk.mjs:421:9)
+    at async default (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/vapi.mjs:158:53)
+    at async tool (file:///private/tmp/mc-claude-voice-review-20261110/qa-artifacts/claude-collaboration/voice-review/proposal-11/voice-truth-check.mjs:69:69)
+    at async file:///private/tmp/mc-claude-voice-review-20261110/qa-artifacts/claude-collaboration/voice-review/proposal-11/voice-truth-check.mjs:163:13
+PASS V2e post-save throw: `result` field names the ref; 'was sent an alert' only when the provider accepted it
+     {"result":{"toolCallId":"g2","result":"The visit was saved, reference fa8767da3a, but its confirmation step failed. Do not call book_visit again for this caller on this call. Ray was sent an alert about it (accepted by the provider; delivery and reading are not confirmed)."},"threw":true}
+PASS V5a concurrent duplicate delivery of one tool call: one booking; the duplicate replays the ref or says it is still being handled
+     {"bookings":1,"r1":"Booked, reference 00a03a925e. Ray was sent a text and an email with the details (accepted ","r2":"This same request is still being handled on this call. Do not repeat it, and do not say it"}
+PASS V5d re-delivered notify_owner: identical result, one lead, the tool ran once (no lead_updated event)
+     {"r1":"Request saved, reference 1b7773bc55. Ray was sent a text and","r2":"Request saved, reference 1b7773bc55. Ray was sent a text and","ev":["lead"]}
+PASS V5b fresh pending claim: nothing booked and not reported booked; stale claim: reclaimed and booked
+     {"fresh":"This same request is still being handled on this call. Do not repeat it, and do not say it was booked, saved or sent.","stale":"Booked, reference 15e1da6ce5. Ray was sent a text and an ema","n1":0,"n2":1}
+PASS V5c full window then another window on the same tool call id: books once, in the open window
+     {"full":"Nothing was booked. That date/window is already full. Offer one of these availab","retry":"Booked, reference db1b681b5c. Ray was sent a text and an ema","windows":["12 to 5"]}
+PASS V6 admin delete removes the deleted shop's vapitool/vapicall keys and keeps another shop's
+     {"status":200,"before":["vapicall:voice-truth-14:call-v6:booking","vapitool:voice-truth-14:call-v6:tI1"],"left":[],"otherKept":2}
+PASS V6b delete removes shopx's vapitool/vapicall keys and keeps shopx0's
+     {"status":200,"aLeft":0,"bBefore":2,"bLeft":2}
+PASS V7 reschedule on the same call: steer names reason "question" and says the visit stays as booked; same-caller lead saved as question naming the ref; no lead_chase; original visit kept
+     {"r1":"Booked, reference ca537c584d. ","r2":"A visit was already saved on this call, reference ca537c584d. Do not book another. If the caller wants a different day or time for that visit, save the change with notify_owner, reason \"question\", naming reference ca537c584d, and say the visit stays as booked until the shop confirms the change.","r3":"Request saved, reference a78825f552. Ray was sent a text and","tasksAfterBooking":"reminder_1h,reminder_24h,visit_check","bookings":["2026-11-15"],"leads":[{"reason":"question","issue":"Same caller as visit ref ca537c584d booked on this call: Wants to move the visit to 2026-11-17 8 to 12"}],"tasks":["reminder_1h","reminder_24h","visit_check"]}
+PASS V8 other caller on the same call keeps reason lead and its three lead_chase texts; the booked caller's wants_call is not rewritten
+     {"result":"Request saved, reference 29eb5a9bb6. Ray was sent a text and","leads":["lead"],"chase":3,"bookedCallerLead":["wants_call"]}
+PASS V9 no call.id: a second, unrelated booking is not blocked
+     {"r2":"Booked, reference ee92f8c891. Ray was sent a text and an email with the details "}
+INFO V10a bookings after the first run, its re-delivery and one retry under a new tool call id: 1 (QA-11 r2 R6 counts: base 3, revision 2: 2)
+PASS V10a result writes fail after a saved booking: the first answer names the saved ref; the re-delivery is still being handled; a retry under a new tool call id books nothing, is an error, says it could not be confirmed and is replayed identically
+     {"first":"Booked, reference 456c49794e. Ray was se","re":"This same request is still being handled on this c","retry":{"toolCallId":"b","error":"A visit on this call may already be saved, but it could not be confirmed yet. Do not book another, do not say it was booked or saved, and do not promise a callback. Say the shop has a record of this call."},"bookings":1}
+PASS V10b stale pending slot with a visit saved since the claim: steered to the saved ref, no second booking, slot now names the ref
+     {"late":"A visit was already saved on this call, reference 456c49794e. Do not book anothe","bookings":1,"slot":{"id":"456c49794e","phone":"+17135554001"}}
+PASS V10c fresh pending slot: nothing booked, not reported booked; stale slot whose only booking predates the claim: reclaimed and booked
+     {"fresh":"A visit on this call may already be saved, but it could not ","stale":"Booked, reference e2b7e8ad36. Ray was se","bookings":2}
+PASS V10d two concurrent book_visit tool calls on one call: one booking, one Booked answer, the other is not reported booked
+     {"r1":"Booked, reference 480c445f2b. Ray was sent a text ","r2":"A visit on this call may already be saved, but it ","bookings":1}
+vapi booking slot Error: injected key write fault
+    at Map.set (file:///private/tmp/mc-claude-voice-review-20261110/qa-artifacts/claude-collaboration/voice-review/proposal-11/voice-truth-check.mjs:35:201)
+    at Object.setJSON (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/store.mjs:24:48)
+    at atomicUpdate (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/store.mjs:60:29)
+    at async default (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/vapi.mjs:122:18)
+    at async raw (file:///private/tmp/mc-claude-voice-review-20261110/qa-artifacts/claude-collaboration/voice-review/proposal-11/voice-truth-check.mjs:71:65)
+    at async file:///private/tmp/mc-claude-voice-review-20261110/qa-artifacts/claude-collaboration/voice-review/proposal-11/voice-truth-check.mjs:320:13
+PASS V10e booking-slot storage fault: HTTP 200, both tools answered, book_visit uncertain (error), nothing booked
+     {"status":200,"bk":{"toolCallId":"bk","error":"This could not be confirmed. It may or may not be saved. Do not say it was booked, saved or sent, do not promise a callback, and do not repeat this action. Say the shop has a record of this call."},"bookings":0}
+PASS V11 same-caller urgency "today" request after a booking: reason lead, needs_action, counted in the digest, issue not prefixed
+     {"reason":"lead","outcome":"needs_action","issue":"Water heater now leaking through the ceiling, needs someone today","digest":"Bayou Air, today: 1 booked (c0f099709e), 1 leads need action (dbef6e5521), 0 emergencies, 0 wants a call, 0 spam. Flagge"}
+PASS V12 same-caller urgency "emergency" lead after a booking keeps reason lead, needs_action and the digest count
+     {"reason":"lead","outcome":"needs_action","digest":"Bayou Air, today: 1 booked (bca0105fdd), 1 leads need action (0b36835f58), 1 emergencies, 0 wants a call, 0 spam. Flagge"}
+PASS V13 new-job lead from the booked caller: issue starts "Same caller as visit ref <ref>" and does not say it is about the visit
+     {"reason":"question","issue":"Same caller as visit ref 0a2aea8855 booked on this call: Rental property next door also needs a new thermostat quote"}
+vapi tool claim book_visit Error: injected storage fault
+    at Map.set (file:///private/tmp/mc-claude-voice-review-20261110/qa-artifacts/claude-collaboration/voice-review/proposal-11/voice-truth-check.mjs:30:131)
+    at Map.set (file:///private/tmp/mc-claude-voice-review-20261110/qa-artifacts/claude-collaboration/voice-review/proposal-11/voice-truth-check.mjs:35:258)
+    at Object.setJSON (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/store.mjs:24:48)
+    at atomicUpdate (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/store.mjs:60:29)
+    at async default (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/vapi.mjs:110:22)
+    at async raw (file:///private/tmp/mc-claude-voice-review-20261110/qa-artifacts/claude-collaboration/voice-review/proposal-11/voice-truth-check.mjs:71:65)
+    at async file:///private/tmp/mc-claude-voice-review-20261110/qa-artifacts/claude-collaboration/voice-review/proposal-11/voice-truth-check.mjs:359:13
+PASS V14 claim write fault: HTTP 200, every tool answered, book_visit is the uncertain error (not booked, no callback promise), nothing booked
+     {"status":200,"results":[{"id":"av","t":"{\"error\":\"invalid_days\",\"message\":\"Check from 1 to 14 consecutive dates.\"}"},{"id":"bk","t":"This could not be confirmed. It may or may not be saved. Do not say it was booke"}]}
+PASS V15 notify_owner with arguments "null": HTTP 200 and a per-tool result for every tool
+     {"status":200}
+PASS V16 claim at 115 s blocks; claim without `at` is reclaimed
+     {"a":"This same request is still being handled on this c","b":"Booked, reference 585b37ebf3. Ray was se"}
+PASS V17 rewritten notify_owner re-delivery is identical, one lead (question); Booked names the saved booking
+     {"r1":"Request saved, reference dbbe0d208a. Ray was sent a text and","leads":1}
+vapi tool notify_owner Error: injected storage fault
+    at Map.set (file:///private/tmp/mc-claude-voice-review-20261110/qa-artifacts/claude-collaboration/voice-review/proposal-11/voice-truth-check.mjs:30:131)
+    at Map.set (file:///private/tmp/mc-claude-voice-review-20261110/qa-artifacts/claude-collaboration/voice-review/proposal-11/voice-truth-check.mjs:35:258)
+    at Object.setJSON (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/store.mjs:24:48)
+    at put (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/store.mjs:47:21)
+    at addRecord (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/store.mjs:381:14)
+    at async flagLead (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/desk.mjs:538:13)
+    at async default (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/vapi.mjs:159:55)
+    at async tool (file:///private/tmp/mc-claude-voice-review-20261110/qa-artifacts/claude-collaboration/voice-review/proposal-11/voice-truth-check.mjs:69:69)
+    at async file:///private/tmp/mc-claude-voice-review-20261110/qa-artifacts/claude-collaboration/voice-review/proposal-11/voice-truth-check.mjs:392:13
+PASS V18 uncertain pre-save result is an error; its re-delivery is the identical error
+     {"a":{"toolCallId":"u","error":"This could not be confirmed. It may or may not be saved. Do not say it was booked, saved or sent, do not promise a callback, and do not repeat this action. Say the shop has a record of this call."},"b":{"toolCallId":"u","error":"This could not be confirmed. It may or may not be saved. Do not say it was booked, saved or sent, do not promise a callback, and do not repeat this action. Say the shop has a record of this call."}}
+vapi tool book_visit Error: injected storage fault
+    at Map.set (file:///private/tmp/mc-claude-voice-review-20261110/qa-artifacts/claude-collaboration/voice-review/proposal-11/voice-truth-check.mjs:30:131)
+    at Map.set (file:///private/tmp/mc-claude-voice-review-20261110/qa-artifacts/claude-collaboration/voice-review/proposal-11/voice-truth-check.mjs:35:258)
+    at Object.setJSON (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/store.mjs:24:48)
+    at put (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/store.mjs:47:21)
+    at logEvent (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/store.mjs:742:9)
+    at bookVisit (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/desk.mjs:421:9)
+    at async default (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/vapi.mjs:158:53)
+    at async tool (file:///private/tmp/mc-claude-voice-review-20261110/qa-artifacts/claude-collaboration/voice-review/proposal-11/voice-truth-check.mjs:69:69)
+    at async file:///private/tmp/mc-claude-voice-review-20261110/qa-artifacts/claude-collaboration/voice-review/proposal-11/voice-truth-check.mjs:400:13
+PASS V19 after a post-save booking throw, the booked caller's reschedule lead is saved as question
+     {"threw":true,"r":"The visit was saved, reference c2a30e8580, but its confirmat","reason":"question"}
+PASS V20 without any phone, a lead after a booking on the call is not rewritten
+     {"reason":"lead","issue":"V20 new job"}
+vapi tool book_visit Error: injected key read fault
+    at Map.get (file:///private/tmp/mc-claude-voice-review-20261110/qa-artifacts/claude-collaboration/voice-review/proposal-11/voice-truth-check.mjs:39:155)
+    at Object.getWithMetadata (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/store.mjs:20:52)
+    at atomicUpdate (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/store.mjs:56:29)
+    at reserveBookingWindow (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/store.mjs:606:10)
+    at async admitBookingWindow (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/desk.mjs:353:17)
+    at async bookVisit (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/desk.mjs:376:17)
+    at async default (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/vapi.mjs:158:53)
+    at async raw (file:///private/tmp/mc-claude-voice-review-20261110/qa-artifacts/claude-collaboration/voice-review/proposal-11/voice-truth-check.mjs:71:65)
+    at async toolRaw (file:///private/tmp/mc-claude-voice-review-20261110/qa-artifacts/claude-collaboration/voice-review/proposal-11/voice-truth-check.mjs:72:76)
+    at async file:///private/tmp/mc-claude-voice-review-20261110/qa-artifacts/claude-collaboration/voice-review/proposal-11/voice-truth-check.mjs:421:17
+PASS V21 pre-save fault: first answer uncertain, nothing booked; a retry within 120 s is an error that forbids another booking and any booked claim; after 120 s the call books once
+     {"first":"This could not be confirmed. It may or may not be saved. Do ","within":"A visit on this call may already be saved, but it could not be confirmed yet. Do not book ","late":"Booked, reference 8afdb535f0. Ray was se","bookings":1}
+PASS V22 6 concurrent book_visit calls: one booking and one Booked answer, on a fresh slot and on a stale-slot reclaim
+     {"fresh":1,"stale":1,"bookedAnswers":[1,1]}
+PASS V23 second person on the same call after a booking: steered, no second booking
+     {"second":"A visit was already saved on this call, reference 46cea985f0. Do not book anothe","bookings":1}
+PASS V24 adopted slot keeps the phone; a later same-caller lead names the adopted ref
+     {"ref":"ad6abd1b18","slot":{"id":"ad6abd1b18","phone":"+17135555401"},"late":"A visit was already saved on this call, reference ad6abd1b18","issue":"Same caller as visit ref ad6abd1b18 booked on this call: Gate code is "}
+vapi tool book_visit Error: injected key write fault
+    at Map.set (file:///private/tmp/mc-claude-voice-review-20261110/qa-artifacts/claude-collaboration/voice-review/proposal-11/voice-truth-check.mjs:35:201)
+    at Object.setJSON (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/store.mjs:24:48)
+    at atomicUpdate (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/store.mjs:60:29)
+    at async addToIndex (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/store.mjs:676:3)
+    at async bookVisit (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/lib/desk.mjs:397:5)
+    at async default (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/netlify/functions/vapi.mjs:158:53)
+    at async raw (file:///private/tmp/mc-claude-voice-review-20261110/qa-artifacts/claude-collaboration/voice-review/proposal-11/voice-truth-check.mjs:71:65)
+    at async toolRaw (file:///private/tmp/mc-claude-voice-review-20261110/qa-artifacts/claude-collaboration/voice-review/proposal-11/voice-truth-check.mjs:72:76)
+    at async file:///private/tmp/mc-claude-voice-review-20261110/qa-artifacts/claude-collaboration/voice-review/proposal-11/voice-truth-check.mjs:464:17
+PASS V25 phone-index write fault after a save: no second booking within or after 120 s; the late retry is steered to the saved ref and the slot names it
+     {"first":"This could not be confirmed. It may or may not be saved. Do ","within":"A visit on this call may already be saved, but it ","late":"A visit was already saved on this call, reference d97c34110c. Do not b","bookings":1}
+PASS V26 phone-less visit saved, result writes lost: a retry after 120 s is steered to it, no second booking
+     {"late":"A visit was already saved on this call, reference 9664e01c17. Do not b","bookings":1}
+PASS V27 stale slot is not resolved to a text-channel visit: the call books its own visit; no answer or lead cites the text ref
+     {"smsRef":"7a4db9a080","late":"Booked, reference cbdaf63a6b. Ray was sent a text and an ema","callBookings":1,"leadIssue":"Same caller as visit ref cbdaf63a6b booked on this call: Also wants a "}
+INFO G4 reachable availability failure (desk.mjs, unchanged)
+     {"r":{"toolCallId":"a1","error":"{\"error\":\"availability_unavailable\",\"message\":\"Availability could not be checked. Do not say there are no openings or promise a window. Offer an owner callback instead; emergency safety and handoff still take priority.\"}"},"viaVapiCatch":false}
+PASS V4 VIP voicemail: no unconditional callback promise; /recorded answers, records an open lead and logs whether the owner alert went out
+     {"twimlSay":"This is Bayou Air. Please leave a message for Ray after the tone.","status":200,"recorded":"<Response><Say voice=\"Polly.Joanna\">Thank you. Goodbye.</Say><Hangup/></Response>","leads":[{"id":"83c2bd80c3","status":"open","issue":"VIP voicemail (14 s): https://api.twilio.example/rec/RE1.mp3"}],"events":[{"from":"+17135550202","url":"https://api.twilio.example/rec/RE1","sid":"","seconds":14,"alerted":false,"leadId":"83c2bd80c3"}]}
+{"repo":"/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc","mode":"network","checks":40,"failed":[],"fetchDoubleCalls":133}

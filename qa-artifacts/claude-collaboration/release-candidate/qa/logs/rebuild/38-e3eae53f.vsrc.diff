@@ -1,0 +1,57 @@
+diff --git a/netlify/functions/lib/desk.mjs b/netlify/functions/lib/desk.mjs
+index 38c711b7..78f9b3b9 100644
+--- a/netlify/functions/lib/desk.mjs
++++ b/netlify/functions/lib/desk.mjs
+@@ -2,8 +2,13 @@
+ // records, owner alerts (job tickets), acknowledge-and-escalate, calendar, confirm and
+ // reschedule by reply, the follow-up timers that match the plan, the daily digest, line health.
+ import { addRecord, createRecordOnce, finishStableBookingWindow, saveRecord, getRecord, scheduleTask, cancelTasks, logEvent, listRecords, list, get, del, put, getConversation, saveConversation, addToIndex, recordsFor, id, bookingWindowTaken, reserveBookingWindow, finishBookingWindow, canonicalWindow, getAvailability, assertCurrentWorkspace, listWorkspaceRecords } from "./store.mjs";
+-import { AvailabilityInputError, appointmentWindowRange } from "./availability.mjs";
++<<<<<<< ours
++import { AvailabilityInputError } from "./availability.mjs";
+ import { notifyOwner, sendSMS, sendEmail, notifySteve, e164, optOutStatus, placeCall, STEVE_PHONE } from "./send.mjs";
++=======
++import { AvailabilityInputError, appointmentWindowRange } from "./availability.mjs";
++import { notifyOwner, sendSMS, sendEmail, notifySteve, e164, optedOut, placeCall, STEVE_PHONE } from "./send.mjs";
++>>>>>>> theirs
+ import { createEvent, updateEvent, visitDate, windowHours, houstonISO, normalizeDate, friendlyDate } from "./calendar.mjs";
+ import { PLANS, isBusinessHours, houstonNow, normalizeHours, NOBOOK_REASONS, opensLaterToday, tradeKey } from "./config.mjs";
+ import { getUsage, usageView } from "./usage.mjs";
+diff --git a/netlify/functions/lib/managed-delivery.mjs b/netlify/functions/lib/managed-delivery.mjs
+index 0829f704..2f35646a 100644
+--- a/netlify/functions/lib/managed-delivery.mjs
++++ b/netlify/functions/lib/managed-delivery.mjs
+@@ -179,10 +179,15 @@ export async function queueManagedRecord(c, record, kind = "bookings") {
+   if (scope) return; // This internal phase proves owner email only, not customer SMS.
+   if (kind !== "bookings" || !saved.phone || !["booked", "confirmed", "on_the_way", "cancelled"].includes(saved.status)) return;
+   const cancelled = saved.status === "cancelled";
++<<<<<<< ours
++  if (cancelled || !await confirmationAlreadySent(current, saved)) await queueManagedMessage(current, { eventId: `${eventId}:customer`, channel: "sms", purpose: cancelled ? "cancelled" : "confirmation", to: saved.phone,
++    body: cancelled ? `${current.business.name}: visit ${saved.id} has been cancelled.` : `${current.business.name}: visit ${saved.id} is saved for ${saved.date}, ${saved.window}. The shop confirms arrival details directly. Reply STOP to end texts.`, source, preserveSnapshot: true });
++=======
+   // Customer texts follow the booking's saved language (TEMPLATES_ES/STRINGS via str()).
+   const { str } = await import("./desk.mjs");
+-  if (cancelled || !await confirmationAlreadySent(current, saved)) await queueManagedMessage(current, { eventId: `${eventId}:customer`, channel: "sms", purpose: cancelled ? "cancelled" : "confirmation", to: saved.phone,
++  await queueManagedMessage(current, { eventId: `${eventId}:customer`, channel: "sms", purpose: cancelled ? "cancelled" : "confirmation", to: saved.phone,
+     body: str(cancelled ? "managed_cancelled" : "managed_confirmation", saved)(current, saved), source, preserveSnapshot: true });
++>>>>>>> theirs
+   if (!cancelled && saved.date && saved.window) {
+     const start = arrivalInstant(saved.date, saved.window);
+     for (const [purpose, hours] of [["reminder_24h", 24], ["reminder_1h", 1]]) {
+diff --git a/netlify/functions/lib/owner-visits.mjs b/netlify/functions/lib/owner-visits.mjs
+index ea9b67f7..9416ac76 100644
+--- a/netlify/functions/lib/owner-visits.mjs
++++ b/netlify/functions/lib/owner-visits.mjs
+@@ -297,7 +297,11 @@ async function changeOwnerVisitCore(client, session, originalBody) {
+         const capacity = await strictRead('index', capacityKey(client));
+         if (capacity?.mutations?.[body.visitId] !== operationId) throw new Error('Visit capacity ownership could not be confirmed');
+         if (creating ? !!saved : ownerVisitRevision(saved) !== body.expectedVisitRevision || !active(saved.status)) throw new OwnerVisitError('visit_changed', 'This visit changed. Refresh its details before trying again.');
+-        const source = saved || { id: body.visitId, slug: client.slug, createdAt: operation.mutationAt, customer_name: body.customer_name.trim(), phone: e164(body.phone), address: body.address.trim(), issue: body.issue.trim(), status: 'booked', outcome: 'booked', channel: 'owner', customerType: 'new', managedActionId: operationId, ...(body.requestId ? { sourceRequestId: body.requestId } : {}), ...(knownLanguage ? { language: knownLanguage } : {}), delivery: { mode: 'portal_only', ownerContactConfirmed: false, tenantIdentity: tenant } };
++<<<<<<< ours
++        const source = saved || { id: body.visitId, slug: client.slug, createdAt: operation.mutationAt, customer_name: body.customer_name.trim(), phone: e164(body.phone), address: body.address.trim(), issue: body.issue.trim(), status: 'booked', outcome: 'booked', channel: 'owner', customerType: 'new', managedActionId: operationId, ...(body.requestId ? { sourceRequestId: body.requestId } : {}), delivery: { mode: 'portal_only', ownerContactConfirmed: false, tenantIdentity: tenant } };
++=======
++        const source = saved || { id: body.visitId, slug: client.slug, createdAt: operation.mutationAt, customer_name: body.customer_name.trim(), phone: e164(body.phone), address: body.address.trim(), issue: body.issue.trim(), status: 'booked', outcome: 'booked', channel: 'owner', customerType: 'new', managedActionId: operationId, ...(knownLanguage ? { language: knownLanguage } : {}), delivery: { mode: 'portal_only', ownerContactConfirmed: false, tenantIdentity: tenant } };
++>>>>>>> theirs
+         const value = { ...source, ...(cancel ? { status: 'cancelled', cancelledAt: operation.mutationAt } : { date: claim.date, dateSaid: claim.date, window: claim.window, rescheduledAt: operation.mutationAt }), updatedAt: operation.mutationAt,
+           ownerVisitMutation: { id: operationId, action: body.action, at: operation.mutationAt }, ownerVisitHistory: [...(source.ownerVisitHistory || []), { action: body.action, at: operation.mutationAt, actor: actorLabel(session), ...(session.customer ? { customerReason: session.customer.reason || '' } : {}), previous: saved ? { date: saved.date, window: saved.window, status: saved.status } : null, next: { date: cancel ? source.date : claim.date, window: cancel ? source.window : claim.window, status: cancel ? 'cancelled' : source.status } }] };
+         return { value, result: value };

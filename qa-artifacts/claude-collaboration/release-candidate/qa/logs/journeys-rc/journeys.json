@@ -1,0 +1,935 @@
+{
+ "at": "2026-11-12T19:19:16.633Z",
+ "mode": "actual handlers via context.route, memory store, Anthropic protocol double, server network refused",
+ "checks": [
+  {
+   "journey": "J1-signup-390",
+   "name": "homepage renders headline and inquiry form",
+   "pass": true,
+   "detail": {
+    "title": "AI Website Chat for Home-Service Businesses | Machines & Cloud"
+   }
+  },
+  {
+   "journey": "J1-signup-390",
+   "name": "inquiry submits through /api/intake and hands off to onboarding",
+   "pass": true,
+   "detail": {
+    "url": "http://127.0.0.1:8961/onboard.html",
+    "prospects": 1
+   }
+  },
+  {
+   "journey": "J1-signup-390",
+   "name": "onboarding shows the email gate with the inquiry email carried over",
+   "pass": true,
+   "detail": {
+    "prefilled": true,
+    "value": "qa-rc-owner-390@example.test"
+   }
+  },
+  {
+   "journey": "J1-signup-390",
+   "name": "email link (fake mailbox) verifies and opens the questionnaire",
+   "pass": true,
+   "detail": {
+    "sentText": "Your test link is ready\n\nA local test link is ready for\n\nqa-rc-owner-390@example.test\n\nThis preview uses a local test inbox. No email was sent.\n\nResend in 30s\nUse a different email\n\nCan’t find it? Give it a minute, then check your spam folder.\n\nA link was saved in the local test inbox. No email was ",
+    "name": "Quinn Owner",
+    "business": "QA Signup Air 390"
+   }
+  },
+  {
+   "journey": "J1-signup-390",
+   "name": "questionnaire completes and creates one workspace",
+   "pass": true,
+   "detail": {
+    "clients": 1,
+    "doneText": "Your workspace is ready\n\nYour answers are saved. Your selected connections are next, with a clear step for anything that needs your permission.\n\nYour front desk starts with the details you’ve shared. Next, review its answers, try a customer question and follow your connection checklist.\n\nContinue my",
+    "step4Excerpt": "Your preferences\nHow should your chat say hello?\n\nLeave this blank to start with the standard greeting.\n\nWhat else should your front desk know?\n\nYour tone, how you describe the team, or anything that makes your shop different.\n\nWhich questions should your team handle?\n\nList the requests you want saved for your team to review.\n\nUrgent requests & safety\nReview the suggestions for your trade.\nAdditional boundaries\nAnything your front desk should avoid."
+   }
+  },
+  {
+   "journey": "J1-signup-390",
+   "name": "workspace link opens the desk with the business name, no owner key in URL",
+   "pass": true,
+   "detail": {
+    "url": "http://127.0.0.1:8961/desk.html?c=qa-signup-air-390-b0c4",
+    "mentionsLive": false,
+    "homeExcerpt": "Skip to workspace\nHome\nInbox\nSchedule\nFront desk\nAccount\nQuick tour\nQA Signup Air 390\nSetup in progress\nSign out\nConnections\n\nConnect and manage the services for your front desk.\n\nConnections\nBusiness details\nTest answers\nYour connections\n\nChoose a service. We’ll walk you through one step at a time.\n\nWebsite chat\nYour next step\nAvailable now\n→\nPhone answering\nNot selected\nSetup with our team\n→\nText messaging\nNot selected\nSetup with our team\n→\nGoogle Calendar\nNot selected\nSetup with our team\n→\nThumbtack\nNot selected\nAvailable now\n→\nAngi\nNot selected\nAvailable now\n→\nManage service choices\nWebsit"
+   }
+  },
+  {
+   "journey": "J1-signup-390",
+   "name": "Front desk / Connections page renders truthful channel states",
+   "pass": true,
+   "detail": {
+    "claimsConnected": false,
+    "phoneLive": false,
+    "excerpt": "Your connections\n\nChoose a service. We’ll walk you through one step at a time.\n\nWebsite chat\nYour next step\nAvailable now\n→\nPhone answering\nNot selected\nSetup with our team\n→\nText messaging\nNot selected\nSetup with our team\n→\nGoogle Calendar\nNot selected\nSetup with our team\n→\nThumbtack\nNot selected\nAvailable now\n→\nAngi\nNot selected\nAvailable now\n→\nManage service choices\nWebsite chat\n\nWebsite chat settings\nChange your website, get installation code or check setup"
+   }
+  },
+  {
+   "journey": "J2-website-chat-390",
+   "name": "owner sees the install snippet for the website",
+   "pass": true,
+   "detail": {
+    "hasEmbedSnippet": false,
+    "excerpt": "Your connections\n\nChoose a service. We’ll walk you through one step at a time.\n\nWebsite chat\nYour next step\nAvailable now\n→\nPhone answering\nNot selected\nSetup with our team\n→\nText messaging\nNot selected\nSetup with our team\n→\nGoogle Calendar\nNot selected\nSetup with our team\n→\nThumbtack\nNot selected\nAvailable now\n→\nAngi\nNot selected\nAvailable now\n→\nManage service choices\nWebsite chat\n\nWebsite chat settings\nChange your website, get installation code or check setup"
+   }
+  },
+  {
+   "journey": "J2-website-chat-390",
+   "name": "widget loads on the shop site and opens",
+   "pass": true
+  },
+  {
+   "journey": "J2-website-chat-390",
+   "name": "first visitor turn is answered and a conversation token is issued",
+   "pass": true,
+   "detail": {
+    "reply": "Happy to help. What is going on with your system?",
+    "tokenKept": true
+   }
+  },
+  {
+   "journey": "J2-website-chat-390",
+   "name": "second turn (token carried) books a visit through book_visit",
+   "pass": true,
+   "detail": {
+    "reply": "Thanks. That is saved for the shop, and they confirm arrival details directly.",
+    "booking": {
+     "id": "7ab953a912",
+     "date": "2026-11-16",
+     "window": "8 to 12",
+     "status": "booked"
+    },
+    "toolResult": "\"Visit saved in the shop portal. Ref 7ab953a912. This result confirms the saved visit; separate text, calendar or owner-contact delivery is not confirmed here. The shop must confirm arrival details di"
+   }
+  },
+  {
+   "journey": "J3-inbox-emergency-390",
+   "name": "emergency visitor message saves an urgent owner request",
+   "pass": true,
+   "detail": {
+    "reply": "Thanks. That is saved for the shop, and they confirm arrival details directly.",
+    "urgency": "emergency",
+    "reason": "emergency",
+    "ownerNotices": [
+     {
+      "purpose": "owner_visit_check",
+      "subject": null,
+      "state": "queued"
+     },
+     {
+      "purpose": "owner_lead",
+      "subject": "EMERGENCY: Strong gas smell near the furnace",
+      "state": "queued"
+     },
+     {
+      "purpose": "owner_booking",
+      "subject": "Visit request: 2026-11-16 8 to 12",
+      "state": "queued"
+     }
+    ]
+   }
+  },
+  {
+   "journey": "J3-inbox-emergency-390",
+   "name": "a normal callback request is also saved",
+   "pass": true,
+   "detail": {
+    "leads": 2
+   }
+  },
+  {
+   "journey": "J3-inbox-emergency-390",
+   "name": "Inbox lists the emergency first, labelled urgent, newest first",
+   "pass": true,
+   "detail": {
+    "emergencyFirst": true,
+    "urgentLabel": true,
+    "hasOpenDone": true,
+    "excerpt": "Requests 2\n\nOpen a request to review the job and record your next step.\n\nOpen 2\nDone 0\nGina Gasline\nEmergency\n+17135550111\nRef ccabd10bef\n\nStrong gas smell near the furnace\n\n5 Oak St, Katy\nNov 12, 2026, 1:19 PM CT\nContact not recorded\nView request\nAcknowledge\nRiley Request\n+17135550133\nRef 23dcfe9635\n\nAC needs a tune-up\n\n77 Pine St, Katy\n2026-11-16 8 to 12\nNov 12, 2026, 1:19 PM CT\nContact not recorded\nView request"
+   }
+  },
+  {
+   "journey": "J3-inbox-emergency-390",
+   "name": "Home shows the urgent request needing attention",
+   "pass": true,
+   "detail": {
+    "mentionsGina": true,
+    "excerpt": "2 customer requests need your attention\n\nReview the saved details and record what happens next.\n\nOpen customer requests\n\nSetup also needs attention: Get your website ready for customers.\n\nContinue website setup\nConnection progress\n0 of 1 selected services have verified delivery\nWebsite chat\n\nAdd chat to your website\n\n3 of 5 required steps complete · Next: You\n\nLatest saved evidence: Nov 12, 1:19 P"
+   }
+  },
+  {
+   "journey": "J4-visits-390",
+   "name": "Schedule lists the booked visit and its details open",
+   "pass": true,
+   "detail": {
+    "title": "Dana Visitor",
+    "details": "Ref 7ab953a912 · Visit requested · Nov 16, 2026 · 8 to 12 AC blows warm air · 9 Elm St, Katy Contact the customer to confirm the arrival window."
+   }
+  },
+  {
+   "journey": "J4-visits-390",
+   "name": "Edit details saves a corrected address, keeps date/window",
+   "pass": true,
+   "detail": {
+    "address": "11 Elm St, Katy",
+    "date": "2026-11-16",
+    "window": "8 to 12",
+    "message": "Visit details updated in your workspace. The visit time is unchanged. Calendar and customer notifications have separate delivery status. Calendar delivery is not confirmed. Customer notification delivery is not confirmed."
+   }
+  },
+  {
+   "journey": "J4-visits-390",
+   "name": "empty required detail is refused inline",
+   "pass": true,
+   "detail": {
+    "editButtonAfterSave": {
+     "visible": false,
+     "disabled": true
+    },
+    "invalid": "true",
+    "err": "Complete this customer detail."
+   }
+  },
+  {
+   "journey": "J4-visits-390",
+   "name": "Schedule a visit from the request pre-fills Add visit and saves a linked visit",
+   "pass": true,
+   "detail": {
+    "prefill": {
+     "name": "Riley Request",
+     "phone": "+17135550133",
+     "address": "77 Pine St, Katy",
+     "date": "2026-11-16"
+    },
+    "saved": true,
+    "sourceRequestId": true,
+    "message": "Visit added in your workspace. Calendar and customer notifications have separate delivery status. Calendar delivery is not confirmed. Customer notification delivery is not confirmed. Linked to the request, and its follow-up is marked complete."
+   }
+  },
+  {
+   "journey": "J5-connections-390",
+   "name": "Connections show website chat on, phone/text/Calendar not falsely active",
+   "pass": true,
+   "detail": {
+    "calendarClaimedConnected": false,
+    "phoneClaimedLive": false,
+    "channelAvailability": {
+     "version": 1,
+     "channels": [
+      {
+       "id": "web",
+       "label": "Website chat",
+       "state": "available",
+       "status": "Available now",
+       "note": "",
+       "detail": "Answer questions and gather job details from your website, with each request saved for your follow-up."
+      },
+      {
+       "id": "voice",
+       "label": "Phone answering",
+       "state": "team_setup",
+       "status": "Setup with our team",
+       "note": "We’ll set this up with you; it is not live yet.",
+       "detail": "Save your business number and call preferences. Calls are not answered yet."
+      },
+      {
+       "id": "sms",
+       "label": "Text messaging",
+       "state": "team_setup",
+       "status": "Setup with our team",
+       "note": "We’ll set this up with you; it is not live yet.",
+       "detail": "Save your texting preferences. No sender is registered and no texts are sent yet."
+      },
+      {
+       "id": "calendar",
+       "label": "Google Calendar",
+       "state": "team_setup",
+       "status": "Setup with our team",
+       "note": "We’ll set this up with you; it is not live yet.",
+       "detail": "Save the Google account you want to use. Visits stay in your workspace Schedule until Calendar sync is live."
+      },
+      {
+       "id": "thumbtack",
+       "label": "Thumbtack",
+       "state": "available",
+       "status": "Available now",
+       "note": "",
+       "detail": "Get Thumbtack lead notifications in your Inbox. Replies stay in Thumbtack for now."
+      },
+      {
+       "id": "angi",
+       "label": "Angi",
+       "state": "available",
+       "status": "Available now",
+       "note": "",
+       "detail": "Bring new Angi leads into your Inbox after Angi turns on delivery for your account. Replies stay in Angi."
+      }
+     ]
+    },
+    "excerpt": "Your connections\n\nChoose a service. We’ll walk you through one step at a time.\n\nWebsite chat\nYour next step\nAvailable now\n→\nPhone answering\nNot selected\nSetup with our team\n→\nText messaging\nNot selected\nSetup with our team\n→\nGoogle Calendar\nNot selected\nSetup with our team\n→\nThumbtack\nNot selected\nAvailable now\n→\nAngi\nNot selected\nAvailable now\n→\nManage service choices\nWebsite chat\n\nWebsite chat settings\nChange your website, get installation code or check setup"
+   }
+  },
+  {
+   "journey": "J5-connections-390",
+   "name": "service buttons listed",
+   "pass": true,
+   "detail": [
+    "Website chatYour next stepAvailable now→",
+    "Phone answeringNot selectedSetup with our team→",
+    "Text messagingNot selectedSetup with our team→",
+    "Google CalendarNot selectedSetup with our team→",
+    "ThumbtackNot selectedAvailable now→",
+    "AngiNot selectedAvailable now→"
+   ]
+  },
+  {
+   "journey": "J6-admin-390",
+   "name": "operator sign-in opens admin with health banner and issues",
+   "pass": true,
+   "detail": {
+    "mentionsHealth": true,
+    "excerpt": "Skip to operations\nOverview\nCustomers\nIssues\nActivity\nInquiries\nSystem\n!\nOperations\n/\nOverview\n\nOperator: qa-rc-operator@example.test\n\nRefresh\nSign out\nPlatform health needs attention\n\nNo operator email is recorded for this incident yet.\n\nscheduler: no run recorded\n\nLast scheduler run not recorded. Last healthy run not recorded.\n\nOpen System\nWhat needs your attention?\n\nStart with an issue, open the customer account and follow the next action through.\n\nCustomer issues\nView all issues\nNothing needs action\n\nNew setup or service issues will appear here, with a link to the customer account.\n\nView customers\nRecent activity\nView activity\nNo activity recorded yet\n\nCustomer setup and support actions will build a clear history here.\n\nNeed attention\n0\nSetup pending\n2\nLive accounts\n1\nAll customers\n2"
+   }
+  },
+  {
+   "journey": "J6-admin-390",
+   "name": "customer detail lists issues for the live shop",
+   "pass": true,
+   "detail": {
+    "excerpt": "Skip to operations\nOverview\nCustomers\nIssues\nActivity\nInquiries\nSystem\n!\nOperations\n/\nCustomers / QA Comfort Air web390\n\nOperator: qa-rc-operator@example.test\n\nRefresh\nSign out\nPlatform health needs attention\n\nNo operator email is recorded for this incident yet.\n\nscheduler: no run recorded\n\nLast scheduler run not recorded. Last healthy run not recorded.\n\nOpen System\n← All customers\nQA Comfort Air web390\n\nqa-rc-web390-1 · Created Nov 12, 1:19 PM CT\n\nlive\nOwner\nAlex Owner\nEmail\nqa-rc-web390-1@example.test\nPhone\n+17135550198\nPlan preference\nFollow-through\nConnections\nready for website\nWebsite chat\n\nCustomer chat is switched on in your workspace. Website installation and its check are shown sepa"
+   }
+  },
+  {
+   "journey": "J6-admin-390",
+   "name": "owner session cannot use the operator API; anonymous health is sanitized",
+   "pass": true,
+   "detail": {
+    "ownerStatus": 401,
+    "anonStatus": 401,
+    "healthStatus": 503,
+    "healthBody": "{\"ok\":false,\"lastRunAt\":null,\"minutesAgo\":null,\"failingBlocks\":[],\"failing\":[],\"failingComponents\":[]}"
+   }
+  },
+  {
+   "journey": "J7-account-390",
+   "name": "Pause workspace",
+   "pass": true,
+   "detail": {
+    "status": "paused",
+    "msg": "Workspace paused. Check carrier forwarding if calls should return to your phone."
+   }
+  },
+  {
+   "journey": "J7-account-390",
+   "name": "Resume workspace",
+   "pass": true,
+   "detail": {
+    "status": "live",
+    "msg": "Resuming workspace…"
+   }
+  },
+  {
+   "journey": "J7-account-390",
+   "name": "Stop service (cancel) with confirmation",
+   "pass": true,
+   "detail": {
+    "status": "cancelled",
+    "msg": "Service stopped. You can still download your saved records."
+   }
+  },
+  {
+   "journey": "J7-account-390",
+   "name": "Reopen your workspace",
+   "pass": true,
+   "detail": {
+    "status": "testing",
+    "msg": "Workspace reopened. Review your business details and run a private test before turning service back on."
+   }
+  },
+  {
+   "journey": "J1-signup-1440",
+   "name": "homepage renders headline and inquiry form",
+   "pass": true,
+   "detail": {
+    "title": "AI Website Chat for Home-Service Businesses | Machines & Cloud"
+   }
+  },
+  {
+   "journey": "J1-signup-1440",
+   "name": "inquiry submits through /api/intake and hands off to onboarding",
+   "pass": true,
+   "detail": {
+    "url": "http://127.0.0.1:8961/onboard.html",
+    "prospects": 2
+   }
+  },
+  {
+   "journey": "J1-signup-1440",
+   "name": "onboarding shows the email gate with the inquiry email carried over",
+   "pass": true,
+   "detail": {
+    "prefilled": true,
+    "value": "qa-rc-owner-1440@example.test"
+   }
+  },
+  {
+   "journey": "J1-signup-1440",
+   "name": "email link (fake mailbox) verifies and opens the questionnaire",
+   "pass": true,
+   "detail": {
+    "sentText": "Your test link is ready\n\nA local test link is ready for\n\nqa-rc-owner-1440@example.test\n\nThis preview uses a local test inbox. No email was sent.\n\nResend in 30s\nUse a different email\n\nCan’t find it? Give it a minute, then check your spam folder.\n\nA link was saved in the local test inbox. No email was",
+    "name": "Quinn Owner",
+    "business": "QA Signup Air 1440"
+   }
+  },
+  {
+   "journey": "J1-signup-1440",
+   "name": "questionnaire completes and creates one workspace",
+   "pass": true,
+   "detail": {
+    "clients": 2,
+    "doneText": "Your workspace is ready\n\nYour answers are saved. Your selected connections are next, with a clear step for anything that needs your permission.\n\nYour front desk starts with the details you’ve shared. Next, review its answers, try a customer question and follow your connection checklist.\n\nContinue my",
+    "step4Excerpt": "Your preferences\nHow should your chat say hello?\n\nLeave this blank to start with the standard greeting.\n\nWhat else should your front desk know?\n\nYour tone, how you describe the team, or anything that makes your shop different.\n\nWhich questions should your team handle?\n\nList the requests you want saved for your team to review.\n\nUrgent requests & safety\nReview the suggestions for your trade.\nAdditional boundaries\nAnything your front desk should avoid."
+   }
+  },
+  {
+   "journey": "J1-signup-1440",
+   "name": "workspace link opens the desk with the business name, no owner key in URL",
+   "pass": true,
+   "detail": {
+    "url": "http://127.0.0.1:8961/desk.html?c=qa-signup-air-1440-0782",
+    "mentionsLive": false,
+    "homeExcerpt": "Skip to workspace\nQA Signup Air 1440\nHome\nInbox\nSchedule\nFront desk\nAccount\nQuick tour\nContact support\nCustomer workspace\nQA Signup Air 1440\nSetup in progress\nSign out\nConnections\n\nConnect and manage the services for your front desk.\n\nConnections\nBusiness details\nTest answers\nYour connections\n\nChoose a service. We’ll walk you through one step at a time.\n\nWebsite chat\nYour next step\nAvailable now\n→\nPhone answering\nNot selected\nSetup with our team\n→\nText messaging\nNot selected\nSetup with our team\n→\nGoogle Calendar\nNot selected\nSetup with our team\n→\nThumbtack\nNot selected\nAvailable now\n→\nAngi\nNot"
+   }
+  },
+  {
+   "journey": "J1-signup-1440",
+   "name": "Front desk / Connections page renders truthful channel states",
+   "pass": true,
+   "detail": {
+    "claimsConnected": false,
+    "phoneLive": false,
+    "excerpt": "Your connections\n\nChoose a service. We’ll walk you through one step at a time.\n\nWebsite chat\nYour next step\nAvailable now\n→\nPhone answering\nNot selected\nSetup with our team\n→\nText messaging\nNot selected\nSetup with our team\n→\nGoogle Calendar\nNot selected\nSetup with our team\n→\nThumbtack\nNot selected\nAvailable now\n→\nAngi\nNot selected\nAvailable now\n→\nManage service choices\nWebsite chat\n\nWebsite chat settings\nChange your website, get installation code or check setup"
+   }
+  },
+  {
+   "journey": "J2-website-chat-1440",
+   "name": "owner sees the install snippet for the website",
+   "pass": true,
+   "detail": {
+    "hasEmbedSnippet": false,
+    "excerpt": "Your connections\n\nChoose a service. We’ll walk you through one step at a time.\n\nWebsite chat\nYour next step\nAvailable now\n→\nPhone answering\nNot selected\nSetup with our team\n→\nText messaging\nNot selected\nSetup with our team\n→\nGoogle Calendar\nNot selected\nSetup with our team\n→\nThumbtack\nNot selected\nAvailable now\n→\nAngi\nNot selected\nAvailable now\n→\nManage service choices\nWebsite chat\n\nWebsite chat settings\nChange your website, get installation code or check setup"
+   }
+  },
+  {
+   "journey": "J2-website-chat-1440",
+   "name": "widget loads on the shop site and opens",
+   "pass": true
+  },
+  {
+   "journey": "J2-website-chat-1440",
+   "name": "first visitor turn is answered and a conversation token is issued",
+   "pass": true,
+   "detail": {
+    "reply": "Happy to help. What is going on with your system?",
+    "tokenKept": true
+   }
+  },
+  {
+   "journey": "J2-website-chat-1440",
+   "name": "second turn (token carried) books a visit through book_visit",
+   "pass": true,
+   "detail": {
+    "reply": "Thanks. That is saved for the shop, and they confirm arrival details directly.",
+    "booking": {
+     "id": "f50fa6d75c",
+     "date": "2026-11-16",
+     "window": "8 to 12",
+     "status": "booked"
+    },
+    "toolResult": "\"Visit saved in the shop portal. Ref f50fa6d75c. This result confirms the saved visit; separate text, calendar or owner-contact delivery is not confirmed here. The shop must confirm arrival details di"
+   }
+  },
+  {
+   "journey": "J3-inbox-emergency-1440",
+   "name": "emergency visitor message saves an urgent owner request",
+   "pass": true,
+   "detail": {
+    "reply": "Thanks. That is saved for the shop, and they confirm arrival details directly.",
+    "urgency": "emergency",
+    "reason": "emergency",
+    "ownerNotices": [
+     {
+      "purpose": "owner_lead",
+      "subject": "EMERGENCY: Strong gas smell near the furnace",
+      "state": "queued"
+     },
+     {
+      "purpose": "owner_booking",
+      "subject": "Visit request: 2026-11-16 8 to 12",
+      "state": "queued"
+     },
+     {
+      "purpose": "owner_visit_check",
+      "subject": null,
+      "state": "queued"
+     }
+    ]
+   }
+  },
+  {
+   "journey": "J3-inbox-emergency-1440",
+   "name": "a normal callback request is also saved",
+   "pass": true,
+   "detail": {
+    "leads": 2
+   }
+  },
+  {
+   "journey": "J3-inbox-emergency-1440",
+   "name": "Inbox lists the emergency first, labelled urgent, newest first",
+   "pass": true,
+   "detail": {
+    "emergencyFirst": true,
+    "urgentLabel": true,
+    "hasOpenDone": true,
+    "excerpt": "Requests 2\n\nOpen a request to review the job and record your next step.\n\nOpen 2\nDone 0\nGina Gasline\nEmergency\n+17135550111\nRef 5ca1087d5c\n\nStrong gas smell near the furnace\n\n5 Oak St, Katy\nNov 12, 2026, 1:19 PM CT\nContact not recorded\nView request\nAcknowledge\nRiley Request\n+17135550133\nRef 15e5373c17\n\nAC needs a tune-up\n\n77 Pine St, Katy\n2026-11-16 8 to 12\nNov 12, 2026, 1:19 PM CT\nContact not recorded\nView request"
+   }
+  },
+  {
+   "journey": "J3-inbox-emergency-1440",
+   "name": "Home shows the urgent request needing attention",
+   "pass": true,
+   "detail": {
+    "mentionsGina": true,
+    "excerpt": "2 customer requests need your attention\n\nReview the saved details and record what happens next.\n\nOpen customer requests\n\nSetup also needs attention: Get your website ready for customers.\n\nContinue website setup\nConnection progress\n0 of 1 selected services have verified delivery\nWebsite chat\n\nAdd chat to your website\n\n3 of 5 required steps complete · Next: You\n\nLatest saved evidence: Nov 12, 1:19 P"
+   }
+  },
+  {
+   "journey": "J4-visits-1440",
+   "name": "Schedule lists the booked visit and its details open",
+   "pass": true,
+   "detail": {
+    "title": "Dana Visitor",
+    "details": "Ref f50fa6d75c · Visit requested · Nov 16, 2026 · 8 to 12 AC blows warm air · 9 Elm St, Katy Contact the customer to confirm the arrival window."
+   }
+  },
+  {
+   "journey": "J4-visits-1440",
+   "name": "Edit details saves a corrected address, keeps date/window",
+   "pass": true,
+   "detail": {
+    "address": "11 Elm St, Katy",
+    "date": "2026-11-16",
+    "window": "8 to 12",
+    "message": "Visit details updated in your workspace. The visit time is unchanged. Calendar and customer notifications have separate delivery status. Calendar delivery is not confirmed. Customer notification delivery is not confirmed."
+   }
+  },
+  {
+   "journey": "J4-visits-1440",
+   "name": "empty required detail is refused inline",
+   "pass": true,
+   "detail": {
+    "editButtonAfterSave": {
+     "visible": false,
+     "disabled": true
+    },
+    "invalid": "true",
+    "err": "Complete this customer detail."
+   }
+  },
+  {
+   "journey": "J4-visits-1440",
+   "name": "Schedule a visit from the request pre-fills Add visit and saves a linked visit",
+   "pass": true,
+   "detail": {
+    "prefill": {
+     "name": "Riley Request",
+     "phone": "+17135550133",
+     "address": "77 Pine St, Katy",
+     "date": "2026-11-16"
+    },
+    "saved": true,
+    "sourceRequestId": true,
+    "message": "Visit added in your workspace. Calendar and customer notifications have separate delivery status. Calendar delivery is not confirmed. Customer notification delivery is not confirmed. Linked to the request, and its follow-up is marked complete."
+   }
+  },
+  {
+   "journey": "J5-connections-1440",
+   "name": "Connections show website chat on, phone/text/Calendar not falsely active",
+   "pass": true,
+   "detail": {
+    "calendarClaimedConnected": false,
+    "phoneClaimedLive": false,
+    "channelAvailability": {
+     "version": 1,
+     "channels": [
+      {
+       "id": "web",
+       "label": "Website chat",
+       "state": "available",
+       "status": "Available now",
+       "note": "",
+       "detail": "Answer questions and gather job details from your website, with each request saved for your follow-up."
+      },
+      {
+       "id": "voice",
+       "label": "Phone answering",
+       "state": "team_setup",
+       "status": "Setup with our team",
+       "note": "We’ll set this up with you; it is not live yet.",
+       "detail": "Save your business number and call preferences. Calls are not answered yet."
+      },
+      {
+       "id": "sms",
+       "label": "Text messaging",
+       "state": "team_setup",
+       "status": "Setup with our team",
+       "note": "We’ll set this up with you; it is not live yet.",
+       "detail": "Save your texting preferences. No sender is registered and no texts are sent yet."
+      },
+      {
+       "id": "calendar",
+       "label": "Google Calendar",
+       "state": "team_setup",
+       "status": "Setup with our team",
+       "note": "We’ll set this up with you; it is not live yet.",
+       "detail": "Save the Google account you want to use. Visits stay in your workspace Schedule until Calendar sync is live."
+      },
+      {
+       "id": "thumbtack",
+       "label": "Thumbtack",
+       "state": "available",
+       "status": "Available now",
+       "note": "",
+       "detail": "Get Thumbtack lead notifications in your Inbox. Replies stay in Thumbtack for now."
+      },
+      {
+       "id": "angi",
+       "label": "Angi",
+       "state": "available",
+       "status": "Available now",
+       "note": "",
+       "detail": "Bring new Angi leads into your Inbox after Angi turns on delivery for your account. Replies stay in Angi."
+      }
+     ]
+    },
+    "excerpt": "Your connections\n\nChoose a service. We’ll walk you through one step at a time.\n\nWebsite chat\nYour next step\nAvailable now\n→\nPhone answering\nNot selected\nSetup with our team\n→\nText messaging\nNot selected\nSetup with our team\n→\nGoogle Calendar\nNot selected\nSetup with our team\n→\nThumbtack\nNot selected\nAvailable now\n→\nAngi\nNot selected\nAvailable now\n→\nManage service choices\nWebsite chat\n\nWebsite chat settings\nChange your website, get installation code or check setup"
+   }
+  },
+  {
+   "journey": "J5-connections-1440",
+   "name": "service buttons listed",
+   "pass": true,
+   "detail": [
+    "Website chatYour next stepAvailable now→",
+    "Phone answeringNot selectedSetup with our team→",
+    "Text messagingNot selectedSetup with our team→",
+    "Google CalendarNot selectedSetup with our team→",
+    "ThumbtackNot selectedAvailable now→",
+    "AngiNot selectedAvailable now→"
+   ]
+  },
+  {
+   "journey": "J6-admin-1440",
+   "name": "operator sign-in opens admin with health banner and issues",
+   "pass": true,
+   "detail": {
+    "mentionsHealth": true,
+    "excerpt": "Skip to operations\nPrivate operator access\n\nCustomer operations\n\nOverview\nCustomers\nIssues\nActivity\nInquiries\nSystem\n!\nM&C\nOperations console\nPrivate operator access\nOperations\n/\nOverview\n\nOperator: qa-rc-operator@example.test\n\nRefresh\nSign out\nPlatform health needs attention\n\nOperators were emailed Nov 12, 1:19 PM CT about this incident.\n\nscheduler: no run recorded\n\nLast scheduler run not recorded. Last healthy run not recorded.\n\nOpen System\nWhat needs your attention?\n\nStart with an issue, open the customer account and follow the next action through.\n\nCustomer issues\nView all issues\nNothing needs action\n\nNew setup or service issues will appear here, with a link to the customer account.\n\nView customers\nRecent activity\nView activity\nNo activity recorded yet\n\nCustomer setup and support actions will build a clear history here.\n\nNeed attention\n0\nSetup pending\n5\nLive accounts\n2\nAll customers\n"
+   }
+  },
+  {
+   "journey": "J6-admin-1440",
+   "name": "customer detail lists issues for the live shop",
+   "pass": true,
+   "detail": {
+    "excerpt": "Skip to operations\nPrivate operator access\n\nCustomer operations\n\nOverview\nCustomers\nIssues\nActivity\nInquiries\nSystem\n!\nM&C\nOperations console\nPrivate operator access\nOperations\n/\nCustomers / QA Comfort Air web1440\n\nOperator: qa-rc-operator@example.test\n\nRefresh\nSign out\nPlatform health needs attention\n\nOperators were emailed Nov 12, 1:19 PM CT about this incident.\n\nscheduler: no run recorded\n\nLast scheduler run not recorded. Last healthy run not recorded.\n\nOpen System\n← All customers\nQA Comfort Air web1440\n\nqa-rc-web1440-3 · Created Nov 12, 1:19 PM CT\n\nlive\nOwner\nAlex Owner\nEmail\nqa-rc-web1440-3@example.test\nPhone\n+17135550198\nPlan preference\nFollow-through\nConnections\nready for website\nWebs"
+   }
+  },
+  {
+   "journey": "J6-admin-1440",
+   "name": "owner session cannot use the operator API; anonymous health is sanitized",
+   "pass": true,
+   "detail": {
+    "ownerStatus": 401,
+    "anonStatus": 401,
+    "healthStatus": 503,
+    "healthBody": "{\"ok\":false,\"lastRunAt\":null,\"minutesAgo\":null,\"failingBlocks\":[],\"failing\":[],\"failingComponents\":[]}"
+   }
+  },
+  {
+   "journey": "J7-account-1440",
+   "name": "Pause workspace",
+   "pass": true,
+   "detail": {
+    "status": "paused",
+    "msg": "Workspace paused. Check carrier forwarding if calls should return to your phone."
+   }
+  },
+  {
+   "journey": "J7-account-1440",
+   "name": "Resume workspace",
+   "pass": true,
+   "detail": {
+    "status": "live",
+    "msg": "Resuming workspace…"
+   }
+  },
+  {
+   "journey": "J7-account-1440",
+   "name": "Stop service (cancel) with confirmation",
+   "pass": true,
+   "detail": {
+    "status": "cancelled",
+    "msg": "Service stopped. You can still download your saved records."
+   }
+  },
+  {
+   "journey": "J7-account-1440",
+   "name": "Reopen your workspace",
+   "pass": true,
+   "detail": {
+    "status": "testing",
+    "msg": "Workspace reopened. Review your business details and run a private test before turning service back on."
+   }
+  }
+ ],
+ "pageErrors": [],
+ "consoleErrors": [],
+ "blockedBrowser": [],
+ "blockedServer": [],
+ "unhandledApi": [],
+ "modelCalls": 14,
+ "overflow": [],
+ "shots": [
+  "J1-signup-390-01-home",
+  "J1-signup-390-02-inquiry",
+  "J1-signup-390-03-gate",
+  "J1-signup-390-03b-link-sent",
+  "J1-signup-390-04-step2",
+  "J1-signup-390-05-step4",
+  "J1-signup-390-06-done",
+  "J1-signup-390-07-desk-home",
+  "J1-signup-390-08-frontdesk",
+  "J2-website-chat-390-01-install",
+  "J2-website-chat-390-02-widget-open",
+  "J2-website-chat-390-03-booked",
+  "J3-inbox-emergency-390-01-visitor",
+  "J3-inbox-emergency-390-02-inbox",
+  "J3-inbox-emergency-390-03-home",
+  "J4-visits-390-00-schedule",
+  "J4-visits-390-01-visit",
+  "J4-visits-390-02-edit-form",
+  "J4-visits-390-03-edited",
+  "J4-visits-390-04-request",
+  "J4-visits-390-05-from-request",
+  "J4-visits-390-06-from-request-saved",
+  "J5-connections-390-01",
+  "J6-admin-390-01-admin",
+  "J6-admin-390-02-customer",
+  "J7-account-390-01-paused",
+  "J7-account-390-02-cancel-confirm",
+  "J7-account-390-03-stopped",
+  "J7-account-390-04-reopened",
+  "J1-signup-1440-01-home",
+  "J1-signup-1440-02-inquiry",
+  "J1-signup-1440-03-gate",
+  "J1-signup-1440-03b-link-sent",
+  "J1-signup-1440-04-step2",
+  "J1-signup-1440-05-step4",
+  "J1-signup-1440-06-done",
+  "J1-signup-1440-07-desk-home",
+  "J1-signup-1440-08-frontdesk",
+  "J2-website-chat-1440-01-install",
+  "J2-website-chat-1440-02-widget-open",
+  "J2-website-chat-1440-03-booked",
+  "J3-inbox-emergency-1440-01-visitor",
+  "J3-inbox-emergency-1440-02-inbox",
+  "J3-inbox-emergency-1440-03-home",
+  "J4-visits-1440-00-schedule",
+  "J4-visits-1440-01-visit",
+  "J4-visits-1440-02-edit-form",
+  "J4-visits-1440-03-edited",
+  "J4-visits-1440-04-request",
+  "J4-visits-1440-05-from-request",
+  "J4-visits-1440-06-from-request-saved",
+  "J5-connections-1440-01",
+  "J6-admin-1440-01-admin",
+  "J6-admin-1440-02-customer",
+  "J7-account-1440-01-paused",
+  "J7-account-1440-02-cancel-confirm",
+  "J7-account-1440-03-stopped",
+  "J7-account-1440-04-reopened"
+ ],
+ "api": [
+  {
+   "label": "J1-signup-390",
+   "method": "POST",
+   "path": "/api/intake",
+   "status": 202,
+   "body": "{\"ok\":true,\"handoff\":\"5674ce190af4513cc1be70ab7adefb05245f13e51f8b110c28f91eb45a1b5a99\",\"expiresAt\":\"2026-11-19T19:19:17.385Z\",\"next\":\"/onboard.html#intake=5674ce190af4513cc1be70ab7adefb05245f13e51f8b110c28f91eb45a1b5a99\"}"
+  },
+  {
+   "label": "J1-signup-390",
+   "method": "POST",
+   "path": "/api/access",
+   "status": 202,
+   "body": "{\"ok\":true,\"delivery\":\"test_outbox\",\"message\":\"A link was saved in the local test inbox. No email was sent.\"}"
+  },
+  {
+   "label": "J1-signup-390",
+   "method": "POST",
+   "path": "/api/access",
+   "status": 200,
+   "body": "{\"ok\":true,\"session\":\"046240445396fa5f4c13eb2e4c8a92a8e41c47f749d3a873b1c810debf606af7\",\"email\":\"qa-rc-owner-390@example.test\",\"expiresAt\":\"2026-11-13T19:19:17.754Z\"}"
+  },
+  {
+   "label": "J1-signup-390",
+   "method": "GET",
+   "path": "/api/access",
+   "status": 200,
+   "body": "{\"ok\":true,\"email\":\"qa-rc-owner-390@example.test\",\"expiresAt\":\"2026-11-13T19:19:17.754Z\",\"draft\":{\"step\":0,\"fields\":{\"name\":\"Quinn Owner\",\"business\":\"QA Signup Air 390\"},\"intakeApplied\":[\"3c8614c5331def790e03e6386facd97e4a700fe53f7becae5a5c"
+  },
+  {
+   "label": "J1-signup-390",
+   "method": "PUT",
+   "path": "/api/access",
+   "status": 200,
+   "body": "{\"ok\":true,\"draft\":{\"fields\":{\"primaryGoal\":\"\",\"setupVersion\":\"2\",\"name\":\"Quinn Owner\",\"phone\":\"7135550101\",\"website\":\"\",\"desiredChannels\":[\"web\"],\"plan\":\"growth\",\"business\":\"QA Signup Air 390\",\"trade\":\"\",\"services\":\"\",\"serviceArea\":\"\",\"cit"
+  },
+  {
+   "label": "J1-signup-390",
+   "method": "PUT",
+   "path": "/api/access",
+   "status": 200,
+   "body": "{\"ok\":true,\"draft\":{\"fields\":{\"primaryGoal\":\"\",\"setupVersion\":\"2\",\"name\":\"Quinn Owner\",\"phone\":\"7135550101\",\"website\":\"\",\"desiredChannels\":[\"web\"],\"plan\":\"growth\",\"business\":\"QA Signup Air 390\",\"trade\":\"\",\"services\":\"\",\"serviceArea\":\"\",\"cit"
+  },
+  {
+   "label": "J1-signup-390",
+   "method": "PUT",
+   "path": "/api/access",
+   "status": 200,
+   "body": "{\"ok\":true,\"draft\":{\"fields\":{\"primaryGoal\":\"\",\"setupVersion\":\"2\",\"name\":\"Quinn Owner\",\"phone\":\"7135550101\",\"website\":\"\",\"desiredChannels\":[\"web\"],\"plan\":\"growth\",\"business\":\"QA Signup Air 390\",\"trade\":\"HVAC\",\"services\":\"AC repair\",\"service"
+  },
+  {
+   "label": "J1-signup-390",
+   "method": "PUT",
+   "path": "/api/access",
+   "status": 200,
+   "body": "{\"ok\":true,\"draft\":{\"fields\":{\"primaryGoal\":\"\",\"setupVersion\":\"2\",\"name\":\"Quinn Owner\",\"phone\":\"7135550101\",\"website\":\"\",\"desiredChannels\":[\"web\"],\"plan\":\"growth\",\"business\":\"QA Signup Air 390\",\"trade\":\"HVAC\",\"services\":\"AC repair\",\"service"
+  },
+  {
+   "label": "J1-signup-390",
+   "method": "PUT",
+   "path": "/api/access",
+   "status": 200,
+   "body": "{\"ok\":true,\"draft\":{\"fields\":{\"primaryGoal\":\"\",\"setupVersion\":\"2\",\"name\":\"Quinn Owner\",\"phone\":\"7135550101\",\"website\":\"\",\"desiredChannels\":[\"web\"],\"plan\":\"growth\",\"business\":\"QA Signup Air 390\",\"trade\":\"HVAC\",\"services\":\"AC repair\",\"service"
+  },
+  {
+   "label": "J1-signup-390",
+   "method": "PUT",
+   "path": "/api/access",
+   "status": 200,
+   "body": "{\"ok\":true,\"draft\":{\"fields\":{\"primaryGoal\":\"\",\"setupVersion\":\"2\",\"name\":\"Quinn Owner\",\"phone\":\"7135550101\",\"website\":\"\",\"desiredChannels\":[\"web\"],\"plan\":\"growth\",\"business\":\"QA Signup Air 390\",\"trade\":\"HVAC\",\"services\":\"AC repair\",\"service"
+  },
+  {
+   "label": "J1-signup-390",
+   "method": "PUT",
+   "path": "/api/access",
+   "status": 200,
+   "body": "{\"ok\":true,\"draft\":{\"fields\":{\"primaryGoal\":\"\",\"setupVersion\":\"2\",\"name\":\"Quinn Owner\",\"phone\":\"7135550101\",\"website\":\"\",\"desiredChannels\":[\"web\"],\"plan\":\"growth\",\"business\":\"QA Signup Air 390\",\"trade\":\"HVAC\",\"services\":\"AC repair\",\"service"
+  },
+  {
+   "label": "J1-signup-1440",
+   "method": "POST",
+   "path": "/api/intake",
+   "status": 202,
+   "body": "{\"ok\":true,\"handoff\":\"574085af7dc91b86fffe28073097d73111b813da01914ea169037bb232b3741c\",\"expiresAt\":\"2026-11-19T19:19:28.442Z\",\"next\":\"/onboard.html#intake=574085af7dc91b86fffe28073097d73111b813da01914ea169037bb232b3741c\"}"
+  },
+  {
+   "label": "J1-signup-1440",
+   "method": "POST",
+   "path": "/api/access",
+   "status": 202,
+   "body": "{\"ok\":true,\"delivery\":\"test_outbox\",\"message\":\"A link was saved in the local test inbox. No email was sent.\"}"
+  },
+  {
+   "label": "J1-signup-1440",
+   "method": "POST",
+   "path": "/api/access",
+   "status": 200,
+   "body": "{\"ok\":true,\"session\":\"f6b77d9efd0f22d9abaa5eb4d2b224cf7f9e39c3574f1ca4832b80df97bdf7e9\",\"email\":\"qa-rc-owner-1440@example.test\",\"expiresAt\":\"2026-11-13T19:19:28.846Z\"}"
+  },
+  {
+   "label": "J1-signup-1440",
+   "method": "GET",
+   "path": "/api/access",
+   "status": 200,
+   "body": "{\"ok\":true,\"email\":\"qa-rc-owner-1440@example.test\",\"expiresAt\":\"2026-11-13T19:19:28.846Z\",\"draft\":{\"step\":0,\"fields\":{\"name\":\"Quinn Owner\",\"business\":\"QA Signup Air 1440\"},\"intakeApplied\":[\"ff11055988086d3a8b2b20a3eeacbbb365e01e4bf9e8abcdae"
+  },
+  {
+   "label": "J1-signup-1440",
+   "method": "PUT",
+   "path": "/api/access",
+   "status": 200,
+   "body": "{\"ok\":true,\"draft\":{\"fields\":{\"primaryGoal\":\"\",\"setupVersion\":\"2\",\"name\":\"Quinn Owner\",\"phone\":\"7135550101\",\"website\":\"\",\"desiredChannels\":[\"web\"],\"plan\":\"growth\",\"business\":\"QA Signup Air 1440\",\"trade\":\"\",\"services\":\"\",\"serviceArea\":\"\",\"ci"
+  },
+  {
+   "label": "J1-signup-1440",
+   "method": "PUT",
+   "path": "/api/access",
+   "status": 200,
+   "body": "{\"ok\":true,\"draft\":{\"fields\":{\"primaryGoal\":\"\",\"setupVersion\":\"2\",\"name\":\"Quinn Owner\",\"phone\":\"7135550101\",\"website\":\"\",\"desiredChannels\":[\"web\"],\"plan\":\"growth\",\"business\":\"QA Signup Air 1440\",\"trade\":\"\",\"services\":\"\",\"serviceArea\":\"\",\"ci"
+  },
+  {
+   "label": "J1-signup-1440",
+   "method": "PUT",
+   "path": "/api/access",
+   "status": 200,
+   "body": "{\"ok\":true,\"draft\":{\"fields\":{\"primaryGoal\":\"\",\"setupVersion\":\"2\",\"name\":\"Quinn Owner\",\"phone\":\"7135550101\",\"website\":\"\",\"desiredChannels\":[\"web\"],\"plan\":\"growth\",\"business\":\"QA Signup Air 1440\",\"trade\":\"HVAC\",\"services\":\"AC repair\",\"servic"
+  },
+  {
+   "label": "J1-signup-1440",
+   "method": "PUT",
+   "path": "/api/access",
+   "status": 200,
+   "body": "{\"ok\":true,\"draft\":{\"fields\":{\"primaryGoal\":\"\",\"setupVersion\":\"2\",\"name\":\"Quinn Owner\",\"phone\":\"7135550101\",\"website\":\"\",\"desiredChannels\":[\"web\"],\"plan\":\"growth\",\"business\":\"QA Signup Air 1440\",\"trade\":\"HVAC\",\"services\":\"AC repair\",\"servic"
+  },
+  {
+   "label": "J1-signup-1440",
+   "method": "PUT",
+   "path": "/api/access",
+   "status": 200,
+   "body": "{\"ok\":true,\"draft\":{\"fields\":{\"primaryGoal\":\"\",\"setupVersion\":\"2\",\"name\":\"Quinn Owner\",\"phone\":\"7135550101\",\"website\":\"\",\"desiredChannels\":[\"web\"],\"plan\":\"growth\",\"business\":\"QA Signup Air 1440\",\"trade\":\"HVAC\",\"services\":\"AC repair\",\"servic"
+  },
+  {
+   "label": "J1-signup-1440",
+   "method": "PUT",
+   "path": "/api/access",
+   "status": 200,
+   "body": "{\"ok\":true,\"draft\":{\"fields\":{\"primaryGoal\":\"\",\"setupVersion\":\"2\",\"name\":\"Quinn Owner\",\"phone\":\"7135550101\",\"website\":\"\",\"desiredChannels\":[\"web\"],\"plan\":\"growth\",\"business\":\"QA Signup Air 1440\",\"trade\":\"HVAC\",\"services\":\"AC repair\",\"servic"
+  },
+  {
+   "label": "J1-signup-1440",
+   "method": "PUT",
+   "path": "/api/access",
+   "status": 200,
+   "body": "{\"ok\":true,\"draft\":{\"fields\":{\"primaryGoal\":\"\",\"setupVersion\":\"2\",\"name\":\"Quinn Owner\",\"phone\":\"7135550101\",\"website\":\"\",\"desiredChannels\":[\"web\"],\"plan\":\"growth\",\"business\":\"QA Signup Air 1440\",\"trade\":\"HVAC\",\"services\":\"AC repair\",\"servic"
+  }
+ ],
+ "lastToolResult": "\"Request saved in the shop portal. Ref 15e5373c17. Separate phone, text or email delivery is not confirmed here; human response and timing are not confirmed.\\n\\nDelivery reminder: Your text in the preceding tool-use turn was not shown to the customer. Include all necessary customer-facing instructions in your final reply; required immediate safety guidance comes first, before the tool outcome or n",
+ "summary": {
+  "passed": 56,
+  "failed": 0,
+  "pageErrors": 0,
+  "consoleErrors": 0,
+  "overflow": 0,
+  "blockedServer": 0,
+  "unhandledApi": []
+ }
+}

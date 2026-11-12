@@ -1,0 +1,116 @@
+{
+  "summary": {
+    "check": "missed-call-promise-check",
+    "repo": "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc",
+    "checks": 16,
+    "failed": 2,
+    "providerCalls": 19,
+    "physicalNetwork": 0,
+    "result": "FAIL"
+  },
+  "results": [
+    {
+      "name": "new caller: text accepted, promise spoken and kept, owner told it was sent",
+      "pass": true,
+      "spoken": "Thanks for calling Promise HVAC. We are on a job right now. We are texting you this second so we can get you scheduled. Gracias por llamar. Le enviamos un mensaje de texto ahora mismo.",
+      "owner": "Promise HVAC front desk: missed call from +17135552201. Text-back sent; I will take it from here and text you the lead."
+    },
+    {
+      "name": "new caller, Spanish shop: both promises spoken and kept",
+      "pass": true,
+      "spoken": "Thanks for calling Promise HVAC. We are on a job right now. We are texting you this second so we can get you scheduled. Gracias por llamar. Le enviamos un mensaje de texto ahora mismo."
+    },
+    {
+      "name": "opted-out caller: no text, no promise, owner told they opted out",
+      "pass": true,
+      "spoken": "Thanks for calling Promise HVAC. We are on a job right now. Please call back, and we will get you scheduled. Gracias por llamar. Por favor vuelva a llamar.",
+      "owner": "Promise HVAC front desk: missed call from +17135552203. They opted out, so no text-back. Please call them back."
+    },
+    {
+      "name": "opted-out caller, Spanish shop: no promise in either language",
+      "pass": true,
+      "spoken": "Thanks for calling Promise HVAC. We are on a job right now. Please call back, and we will get you scheduled. Gracias por llamar. Por favor vuelva a llamar."
+    },
+    {
+      "name": "text-back switched off: no text, no promise",
+      "pass": true,
+      "spoken": "Thanks for calling Promise HVAC. We are on a job right now. Please call back, and we will get you scheduled. Gracias por llamar. Por favor vuelva a llamar.",
+      "owner": "Promise HVAC front desk: missed call from +17135552205. Text-back is off for this line, so no text-back. Please call them back."
+    },
+    {
+      "name": "caller texted in the last 24 hours: second call sends nothing and promises nothing",
+      "pass": true,
+      "spoken": "Thanks for calling Promise HVAC. We are on a job right now. Please reply to our earlier text or call back, and we will get you scheduled. Gracias por llamar. Por favor responda a nuestro mensaje anterior o vuelva a llamar.",
+      "owner": "Promise HVAC front desk: missed call from +17135552206. They were already sent a text-back in the last 24 hours, so no new one."
+    },
+    {
+      "name": "provider refuses the text: no promise, owner gets the real reason (not 'No texting sender yet')",
+      "pass": true,
+      "spoken": "Thanks for calling Promise HVAC. We are on a job right now. Please call back, and we will get you scheduled. Gracias por llamar. Por favor vuelva a llamar.",
+      "owner": "Promise HVAC front desk: missed call from +17135552207. The text-back could not be sent (Synthetic provider refusal). Please call them back."
+    },
+    {
+      "name": "network error on the text-back, English-only shop: spoken TwiML (xmllint), no promise or texting invite, owner told it could not be sent",
+      "pass": true,
+      "spoken": "Thanks for calling Promise HVAC. We are on a job right now. Please call back, and we will get you scheduled.",
+      "owner": "Promise HVAC front desk: missed call from +17135552209. The text-back could not be sent (network error). Please call them back.",
+      "xmllint": {
+        "status": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "name": "network error on the text-back, Spanish shop: spoken TwiML in both languages, no promise",
+      "pass": true,
+      "spoken": "Thanks for calling Promise HVAC. We are on a job right now. Please call back, and we will get you scheduled. Gracias por llamar. Por favor vuelva a llamar.",
+      "xmllint": {
+        "status": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "name": "network error on the owner alert: caller still gets the kept promise as TwiML (xmllint), failure logged",
+      "pass": true,
+      "spoken": "Thanks for calling Promise HVAC. We are on a job right now. We are texting you this second so we can get you scheduled. Gracias por llamar. Le enviamos un mensaje de texto ahora mismo.",
+      "xmllint": {
+        "status": 0,
+        "stderr": ""
+      },
+      "ownerAlertFailed": 1
+    },
+    {
+      "name": "no caller ID: no text, no promise, owner note does not mention a voicemail",
+      "pass": true,
+      "spoken": "Thanks for calling Promise HVAC. We are on a job right now. Please call back, and we will get you scheduled. Gracias por llamar. Por favor vuelva a llamar.",
+      "owner": "Promise HVAC front desk: missed call from unknown. No caller ID, so no text-back and no number to call back."
+    },
+    {
+      "name": "no physical transport and no non-Twilio destination",
+      "pass": true
+    },
+    {
+      "name": "every TwiML body in this run is well-formed (xmllint --noout)",
+      "pass": true,
+      "twimlBodies": 12
+    },
+    {
+      "name": "texting not configured (send only logged): no promise, owner told texting is not set up",
+      "pass": false,
+      "error": "Expected values to be strictly equal:",
+      "spoken": "webhook not configured",
+      "owner": "",
+      "providerCalls": []
+    },
+    {
+      "name": "no physical transport and no non-Twilio destination",
+      "pass": true
+    },
+    {
+      "name": "every TwiML body in this run is well-formed (xmllint --noout)",
+      "pass": false,
+      "error": "Expected values to be strictly deep-equal:",
+      "twimlBodies": 1,
+      "providerCalls": []
+    }
+  ]
+}

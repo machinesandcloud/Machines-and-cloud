@@ -1,0 +1,4192 @@
+{
+  "at": "2026-11-12T19:14:08.488Z",
+  "mode": "independent real handler/provider protocol/installed SDK fixtures; fake model only; synthetic common review proof; zero external network",
+  "before": {
+    "scripts/managed-sms-qa-check.mjs": "ff037707ade92da1472d6ad2c0c7f09af30dbd56f7a988cc37ed5ec62557d3f0",
+    "embed.js": "99585989e30ca6d619de66fae741b5e5d3779b484f308c3576768d46057df3f7",
+    "netlify/functions/chat.mjs": "48f9182899995d3226d8cda06ff1ba410c4ebac41ea7f4946186a0425b7435ec",
+    "netlify/functions/lib/appointment-texts.mjs": "fdbdc34866190dbac17107cd27c8a14a5705e7ea215e0d39d777b8b78303f62c",
+    "netlify/functions/lib/managed-actions.mjs": "db98d45691c829e2d2484be4f4ffddc414310ec2219ebaf998ab98ccaae80ab5",
+    "netlify/functions/lib/messaging-program.mjs": "ee014d14a5420d74ceb5f5eb6f7983567ae0c5046ba7134f0963f31c78b0a2f3",
+    "netlify/functions/policy.mjs": "f0bd6815b47f14da4af7f3c5d66a6b3e01bf7e591a712c3765302e1606f84ec2",
+    "netlify/functions/lib/managed-sms.mjs": "360ab93d1cd7f05353ad93149baf1a05426246a505328e2e08866aa108c7cb68",
+    "netlify/functions/managed-sms.mjs": "d8dba928f51821c9f4a03e5a85af85dc340e3a132a1a52ae096d90d26e585e80",
+    "netlify/functions/managed-sms-background.mjs": "cd6710a191030ea5a4b15d9d2c3a6eb92788f294f68f44c8f116e77861283460",
+    "netlify/functions/lib/managed-delivery.mjs": "e126605094468becb5202ae43dbf611c50712673c6faec8c8ab6b7013e3e4f27",
+    "netlify/functions/lib/managed-consent.mjs": "e276f08cba81fc9acd07d4b7424b41594daab1c0399dd2451fa7909a2052eb7a",
+    "netlify/functions/lib/managed-history.mjs": "c812b78fb6970b8fee9730e6f16efb160196c3760df72feb736a51e237f206dc",
+    "netlify/functions/client.mjs": "0dc9d38762f6219cf704fbfee153b72381e085cb1962a3bdd8c0daa8180b8730"
+  },
+  "checks": [
+    {
+      "name": "03 web: emergency/callback/price/out-of-area owner email, alert and escalation",
+      "pass": true
+    },
+    {
+      "name": "03 sms: emergency/callback/price/out-of-area owner email, alert and escalation",
+      "pass": true
+    },
+    {
+      "name": "03 voice: emergency/callback/price/out-of-area owner email, alert and escalation",
+      "pass": true
+    },
+    {
+      "name": "03 ack before the deadline stops escalation; Spanish emergency email is English with a language marker",
+      "pass": true
+    },
+    {
+      "name": "04 Spanish SMS booking: confirmation, 24h, 1h, reschedule, cancellation and AYUDA in Spanish; owner email English",
+      "pass": true
+    },
+    {
+      "name": "04 English booking texts are unchanged",
+      "pass": true
+    },
+    {
+      "name": "Q1 late emergency upgrade: reminder timing is truthful (D1)",
+      "pass": false,
+      "error": "Cannot read properties of undefined (reading 'deadlineAt')",
+      "stack": "TypeError: Cannot read properties of undefined (reading 'deadlineAt')\n    at file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/scripts/urgency-spanish-check.composed.mjs:346:97\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/scripts/urgency-spanish-check.composed.mjs:77:111)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/scripts/urgency-spanish-check.composed.mjs:339:1"
+    },
+    {
+      "name": "Q2 late callback upgrade sends a \"Callback requested\" owner email",
+      "pass": true
+    },
+    {
+      "name": "Q2b late callback upgrade with unchanged revision (D1)",
+      "pass": false,
+      "error": "one reminder after the real deadline\n\n0 !== 1\n",
+      "stack": "AssertionError [ERR_ASSERTION]: one reminder after the real deadline\n\n0 !== 1\n\n    at file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/scripts/urgency-spanish-check.composed.mjs:372:39\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/scripts/urgency-spanish-check.composed.mjs:77:111)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/scripts/urgency-spanish-check.composed.mjs:364:1"
+    },
+    {
+      "name": "Q3 repeated emergency merges stay idempotent and bounded",
+      "pass": true
+    },
+    {
+      "name": "Q4 customer booking acks the alert and supersedes a queued reminder",
+      "pass": true
+    },
+    {
+      "name": "Q5 hostile issue text through the real web path",
+      "pass": true
+    },
+    {
+      "name": "Q6 Spanish emergency reminders are English with language marker",
+      "pass": true
+    },
+    {
+      "name": "Q7 emergency after an acknowledged callback re-alerts (D2)",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ 'wants_call'\n- 'emergency'\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ 'wants_call'\n- 'emergency'\n\n    at file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/scripts/urgency-spanish-check.composed.mjs:424:10\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/scripts/urgency-spanish-check.composed.mjs:77:111)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/scripts/urgency-spanish-check.composed.mjs:415:1"
+    },
+    {
+      "name": "Q8 status check does not suppress the emergency alert",
+      "pass": true
+    },
+    {
+      "name": "Q9 setup-check emergency opens no alert",
+      "pass": true
+    },
+    {
+      "name": "Q10 stale callback reminder stays superseded after emergency reopen (D2)",
+      "pass": true
+    },
+    {
+      "name": "Q11 earlier-epoch escalation task retires quietly after an emergency reopen",
+      "pass": false,
+      "error": "Expected values to be strictly equal:\n\n0 !== 1\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n0 !== 1\n\n    at file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/scripts/urgency-spanish-check.composed.mjs:471:10\n    at async check (file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/scripts/urgency-spanish-check.composed.mjs:77:111)\n    at async file:///private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/qarc/rc/scripts/urgency-spanish-check.composed.mjs:457:1"
+    },
+    {
+      "name": "r2 Spanish window wording: noon and evening read naturally; managed texts stay GSM-7 and at most 2 segments",
+      "pass": true
+    },
+    {
+      "name": "r2 owner subject strips bidi override and isolate characters",
+      "pass": true
+    },
+    {
+      "name": "r2 owner-created visit uses the known customer language; unknown stays English",
+      "pass": true
+    }
+  ],
+  "conflicts": 0,
+  "blocked": [],
+  "dispatches": 65,
+  "providerSends": 23,
+  "emailSends": 52,
+  "assertions": [
+    {
+      "check": "03 web: emergency/callback/price/out-of-area owner email, alert and escalation",
+      "passed": 38,
+      "total": 38,
+      "results": [
+        {
+          "label": "web emergency: subject leads with urgency/reason",
+          "pass": true
+        },
+        {
+          "label": "web emergency: subject is at most 78 characters",
+          "pass": true
+        },
+        {
+          "label": "web emergency: body first line is the headline",
+          "pass": true
+        },
+        {
+          "label": "web emergency: urgent acknowledgment line only when urgent",
+          "pass": true
+        },
+        {
+          "label": "web emergency: alert opened",
+          "pass": true
+        },
+        {
+          "label": "web emergency: alert kind",
+          "pass": true
+        },
+        {
+          "label": "web emergency: alert waiting",
+          "pass": true
+        },
+        {
+          "label": "web emergency: escalation task scheduled",
+          "pass": true
+        },
+        {
+          "label": "web callback: subject leads with urgency/reason",
+          "pass": true
+        },
+        {
+          "label": "web callback: subject is at most 78 characters",
+          "pass": true
+        },
+        {
+          "label": "web callback: body first line is the headline",
+          "pass": true
+        },
+        {
+          "label": "web callback: urgent acknowledgment line only when urgent",
+          "pass": true
+        },
+        {
+          "label": "web callback: alert opened",
+          "pass": true
+        },
+        {
+          "label": "web callback: alert kind",
+          "pass": true
+        },
+        {
+          "label": "web callback: alert waiting",
+          "pass": true
+        },
+        {
+          "label": "web callback: escalation task scheduled",
+          "pass": true
+        },
+        {
+          "label": "web price: subject leads with urgency/reason",
+          "pass": true
+        },
+        {
+          "label": "web price: subject is at most 78 characters",
+          "pass": true
+        },
+        {
+          "label": "web price: body first line is the headline",
+          "pass": true
+        },
+        {
+          "label": "web price: urgent acknowledgment line only when urgent",
+          "pass": true
+        },
+        {
+          "label": "web price: no invented urgency",
+          "pass": true
+        },
+        {
+          "label": "web price: no alert for a routine request",
+          "pass": true
+        },
+        {
+          "label": "web area: subject leads with urgency/reason",
+          "pass": true
+        },
+        {
+          "label": "web area: subject is at most 78 characters",
+          "pass": true
+        },
+        {
+          "label": "web area: body first line is the headline",
+          "pass": true
+        },
+        {
+          "label": "web area: urgent acknowledgment line only when urgent",
+          "pass": true
+        },
+        {
+          "label": "web area: no invented urgency",
+          "pass": true
+        },
+        {
+          "label": "web area: no alert for a routine request",
+          "pass": true
+        },
+        {
+          "label": "web: emergency alert escalates (step 1)",
+          "pass": true
+        },
+        {
+          "label": "web: callback alert escalates (step 1)",
+          "pass": true
+        },
+        {
+          "label": "web: emergency reminder email sent",
+          "pass": true
+        },
+        {
+          "label": "web: callback reminder email sent",
+          "pass": true
+        },
+        {
+          "label": "web: no reminder for price/area",
+          "pass": true
+        },
+        {
+          "label": "web: emergency escalates again (step 2)",
+          "pass": true
+        },
+        {
+          "label": "web: callback escalates once",
+          "pass": true
+        },
+        {
+          "label": "web: exactly one step-2 reminder",
+          "pass": true
+        },
+        {
+          "label": "web: step-2 reminder is the emergency",
+          "pass": true
+        },
+        {
+          "label": "web: no escalation task left",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "check": "03 sms: emergency/callback/price/out-of-area owner email, alert and escalation",
+      "passed": 38,
+      "total": 38,
+      "results": [
+        {
+          "label": "sms emergency: subject leads with urgency/reason",
+          "pass": true
+        },
+        {
+          "label": "sms emergency: subject is at most 78 characters",
+          "pass": true
+        },
+        {
+          "label": "sms emergency: body first line is the headline",
+          "pass": true
+        },
+        {
+          "label": "sms emergency: urgent acknowledgment line only when urgent",
+          "pass": true
+        },
+        {
+          "label": "sms emergency: alert opened",
+          "pass": true
+        },
+        {
+          "label": "sms emergency: alert kind",
+          "pass": true
+        },
+        {
+          "label": "sms emergency: alert waiting",
+          "pass": true
+        },
+        {
+          "label": "sms emergency: escalation task scheduled",
+          "pass": true
+        },
+        {
+          "label": "sms callback: subject leads with urgency/reason",
+          "pass": true
+        },
+        {
+          "label": "sms callback: subject is at most 78 characters",
+          "pass": true
+        },
+        {
+          "label": "sms callback: body first line is the headline",
+          "pass": true
+        },
+        {
+          "label": "sms callback: urgent acknowledgment line only when urgent",
+          "pass": true
+        },
+        {
+          "label": "sms callback: alert opened",
+          "pass": true
+        },
+        {
+          "label": "sms callback: alert kind",
+          "pass": true
+        },
+        {
+          "label": "sms callback: alert waiting",
+          "pass": true
+        },
+        {
+          "label": "sms callback: escalation task scheduled",
+          "pass": true
+        },
+        {
+          "label": "sms price: subject leads with urgency/reason",
+          "pass": true
+        },
+        {
+          "label": "sms price: subject is at most 78 characters",
+          "pass": true
+        },
+        {
+          "label": "sms price: body first line is the headline",
+          "pass": true
+        },
+        {
+          "label": "sms price: urgent acknowledgment line only when urgent",
+          "pass": true
+        },
+        {
+          "label": "sms price: no invented urgency",
+          "pass": true
+        },
+        {
+          "label": "sms price: no alert for a routine request",
+          "pass": true
+        },
+        {
+          "label": "sms area: subject leads with urgency/reason",
+          "pass": true
+        },
+        {
+          "label": "sms area: subject is at most 78 characters",
+          "pass": true
+        },
+        {
+          "label": "sms area: body first line is the headline",
+          "pass": true
+        },
+        {
+          "label": "sms area: urgent acknowledgment line only when urgent",
+          "pass": true
+        },
+        {
+          "label": "sms area: no invented urgency",
+          "pass": true
+        },
+        {
+          "label": "sms area: no alert for a routine request",
+          "pass": true
+        },
+        {
+          "label": "sms: emergency alert escalates (step 1)",
+          "pass": true
+        },
+        {
+          "label": "sms: callback alert escalates (step 1)",
+          "pass": true
+        },
+        {
+          "label": "sms: emergency reminder email sent",
+          "pass": true
+        },
+        {
+          "label": "sms: callback reminder email sent",
+          "pass": true
+        },
+        {
+          "label": "sms: no reminder for price/area",
+          "pass": true
+        },
+        {
+          "label": "sms: emergency escalates again (step 2)",
+          "pass": true
+        },
+        {
+          "label": "sms: callback escalates once",
+          "pass": true
+        },
+        {
+          "label": "sms: exactly one step-2 reminder",
+          "pass": true
+        },
+        {
+          "label": "sms: step-2 reminder is the emergency",
+          "pass": true
+        },
+        {
+          "label": "sms: no escalation task left",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "check": "03 voice: emergency/callback/price/out-of-area owner email, alert and escalation",
+      "passed": 38,
+      "total": 38,
+      "results": [
+        {
+          "label": "voice emergency: subject leads with urgency/reason",
+          "pass": true
+        },
+        {
+          "label": "voice emergency: subject is at most 78 characters",
+          "pass": true
+        },
+        {
+          "label": "voice emergency: body first line is the headline",
+          "pass": true
+        },
+        {
+          "label": "voice emergency: urgent acknowledgment line only when urgent",
+          "pass": true
+        },
+        {
+          "label": "voice emergency: alert opened",
+          "pass": true
+        },
+        {
+          "label": "voice emergency: alert kind",
+          "pass": true
+        },
+        {
+          "label": "voice emergency: alert waiting",
+          "pass": true
+        },
+        {
+          "label": "voice emergency: escalation task scheduled",
+          "pass": true
+        },
+        {
+          "label": "voice callback: subject leads with urgency/reason",
+          "pass": true
+        },
+        {
+          "label": "voice callback: subject is at most 78 characters",
+          "pass": true
+        },
+        {
+          "label": "voice callback: body first line is the headline",
+          "pass": true
+        },
+        {
+          "label": "voice callback: urgent acknowledgment line only when urgent",
+          "pass": true
+        },
+        {
+          "label": "voice callback: alert opened",
+          "pass": true
+        },
+        {
+          "label": "voice callback: alert kind",
+          "pass": true
+        },
+        {
+          "label": "voice callback: alert waiting",
+          "pass": true
+        },
+        {
+          "label": "voice callback: escalation task scheduled",
+          "pass": true
+        },
+        {
+          "label": "voice price: subject leads with urgency/reason",
+          "pass": true
+        },
+        {
+          "label": "voice price: subject is at most 78 characters",
+          "pass": true
+        },
+        {
+          "label": "voice price: body first line is the headline",
+          "pass": true
+        },
+        {
+          "label": "voice price: urgent acknowledgment line only when urgent",
+          "pass": true
+        },
+        {
+          "label": "voice price: no invented urgency",
+          "pass": true
+        },
+        {
+          "label": "voice price: no alert for a routine request",
+          "pass": true
+        },
+        {
+          "label": "voice area: subject leads with urgency/reason",
+          "pass": true
+        },
+        {
+          "label": "voice area: subject is at most 78 characters",
+          "pass": true
+        },
+        {
+          "label": "voice area: body first line is the headline",
+          "pass": true
+        },
+        {
+          "label": "voice area: urgent acknowledgment line only when urgent",
+          "pass": true
+        },
+        {
+          "label": "voice area: no invented urgency",
+          "pass": true
+        },
+        {
+          "label": "voice area: no alert for a routine request",
+          "pass": true
+        },
+        {
+          "label": "voice: emergency alert escalates (step 1)",
+          "pass": true
+        },
+        {
+          "label": "voice: callback alert escalates (step 1)",
+          "pass": true
+        },
+        {
+          "label": "voice: emergency reminder email sent",
+          "pass": true
+        },
+        {
+          "label": "voice: callback reminder email sent",
+          "pass": true
+        },
+        {
+          "label": "voice: no reminder for price/area",
+          "pass": true
+        },
+        {
+          "label": "voice: emergency escalates again (step 2)",
+          "pass": true
+        },
+        {
+          "label": "voice: callback escalates once",
+          "pass": true
+        },
+        {
+          "label": "voice: exactly one step-2 reminder",
+          "pass": true
+        },
+        {
+          "label": "voice: step-2 reminder is the emergency",
+          "pass": true
+        },
+        {
+          "label": "voice: no escalation task left",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "check": "03 ack before the deadline stops escalation; Spanish emergency email is English with a language marker",
+      "passed": 8,
+      "total": 8,
+      "results": [
+        {
+          "label": "es emergency: owner subject marks Spanish",
+          "pass": true
+        },
+        {
+          "label": "es emergency: owner body has Language: Spanish",
+          "pass": true
+        },
+        {
+          "label": "ack closes one alert",
+          "pass": true
+        },
+        {
+          "label": "alert stays acked after the deadline",
+          "pass": true
+        },
+        {
+          "label": "no reminder after acknowledgment",
+          "pass": true
+        },
+        {
+          "label": "escalation queued a reminder before the late ack",
+          "pass": true
+        },
+        {
+          "label": "queued reminder is not sent after a late ack",
+          "pass": true
+        },
+        {
+          "label": "queued reminder ends superseded",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "check": "04 Spanish SMS booking: confirmation, 24h, 1h, reschedule, cancellation and AYUDA in Spanish; owner email English",
+      "passed": 38,
+      "total": 38,
+      "results": [
+        {
+          "label": "es confirmation sent",
+          "pass": true
+        },
+        {
+          "label": "es reminder_24h sent",
+          "pass": true
+        },
+        {
+          "label": "es reminder_1h sent",
+          "pass": true
+        },
+        {
+          "label": "es confirmation: Spanish wording",
+          "pass": true
+        },
+        {
+          "label": "es confirmation: no English template text",
+          "pass": true
+        },
+        {
+          "label": "es confirmation: GSM-7 encoding",
+          "pass": true
+        },
+        {
+          "label": "es confirmation: at most 2 segments",
+          "pass": true
+        },
+        {
+          "label": "es reminder_24h: Spanish wording",
+          "pass": true
+        },
+        {
+          "label": "es reminder_24h: no English template text",
+          "pass": true
+        },
+        {
+          "label": "es reminder_24h: GSM-7 encoding",
+          "pass": true
+        },
+        {
+          "label": "es reminder_24h: at most 2 segments",
+          "pass": true
+        },
+        {
+          "label": "es reminder_1h: Spanish wording",
+          "pass": true
+        },
+        {
+          "label": "es reminder_1h: no English template text",
+          "pass": true
+        },
+        {
+          "label": "es reminder_1h: GSM-7 encoding",
+          "pass": true
+        },
+        {
+          "label": "es reminder_1h: at most 2 segments",
+          "pass": true
+        },
+        {
+          "label": "es reschedule: Spanish wording",
+          "pass": true
+        },
+        {
+          "label": "es reschedule: no English template text",
+          "pass": true
+        },
+        {
+          "label": "es reschedule: GSM-7 encoding",
+          "pass": true
+        },
+        {
+          "label": "es reschedule: at most 2 segments",
+          "pass": true
+        },
+        {
+          "label": "es cancelled: Spanish wording",
+          "pass": true
+        },
+        {
+          "label": "es cancelled: no English template text",
+          "pass": true
+        },
+        {
+          "label": "es cancelled: GSM-7 encoding",
+          "pass": true
+        },
+        {
+          "label": "es cancelled: at most 2 segments",
+          "pass": true
+        },
+        {
+          "label": "es AYUDA reply: Spanish wording",
+          "pass": true
+        },
+        {
+          "label": "es AYUDA reply: no English template text",
+          "pass": true
+        },
+        {
+          "label": "es AYUDA reply: GSM-7 encoding",
+          "pass": true
+        },
+        {
+          "label": "es AYUDA reply: at most 2 segments",
+          "pass": true
+        },
+        {
+          "label": "HELP stays English",
+          "pass": true
+        },
+        {
+          "label": "es owner email sent",
+          "pass": true
+        },
+        {
+          "label": "es owner email: Language: Spanish line",
+          "pass": true
+        },
+        {
+          "label": "es owner email: (Spanish) in subject",
+          "pass": true
+        },
+        {
+          "label": "es owner email stays English",
+          "pass": true
+        },
+        {
+          "label": "es owner email: Language: Spanish line",
+          "pass": true
+        },
+        {
+          "label": "es owner email: (Spanish) in subject",
+          "pass": true
+        },
+        {
+          "label": "es owner email stays English",
+          "pass": true
+        },
+        {
+          "label": "es owner email: Language: Spanish line",
+          "pass": true
+        },
+        {
+          "label": "es owner email: (Spanish) in subject",
+          "pass": true
+        },
+        {
+          "label": "es owner email stays English",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "check": "04 English booking texts are unchanged",
+      "passed": 2,
+      "total": 2,
+      "results": [
+        {
+          "label": "English confirmation byte-identical",
+          "pass": true
+        },
+        {
+          "label": "English reminder byte-identical",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "check": "r2 Spanish window wording: noon and evening read naturally; managed texts stay GSM-7 and at most 2 segments",
+      "passed": 347,
+      "total": 347,
+      "results": [
+        {
+          "label": "managed window \"8 to 12\"",
+          "pass": true
+        },
+        {
+          "label": "managed window \"12 to 5\"",
+          "pass": true
+        },
+        {
+          "label": "managed window \"8 am to 12 pm\"",
+          "pass": true
+        },
+        {
+          "label": "managed window \"12 pm to 5 pm\"",
+          "pass": true
+        },
+        {
+          "label": "managed window \"1 pm to 5 pm\"",
+          "pass": true
+        },
+        {
+          "label": "managed window \"6 pm to 8 pm\"",
+          "pass": true
+        },
+        {
+          "label": "managed window \"5 pm to 9 pm\"",
+          "pass": true
+        },
+        {
+          "label": "managed window \"8:30 am to 10:30 am\"",
+          "pass": true
+        },
+        {
+          "label": "managed window \"8 a.m. to 12 p.m.\"",
+          "pass": true
+        },
+        {
+          "label": "managed window \"11 am to 1 pm\"",
+          "pass": true
+        },
+        {
+          "label": "managed window \"7 to 9\"",
+          "pass": true
+        },
+        {
+          "label": "legacy window \"8 am to 12 pm\"",
+          "pass": true
+        },
+        {
+          "label": "legacy window \"12 pm to 5 pm\"",
+          "pass": true
+        },
+        {
+          "label": "legacy window \"6 pm to 8 pm\"",
+          "pass": true
+        },
+        {
+          "label": "legacy window \"8 a.m. to 12 p.m.\"",
+          "pass": true
+        },
+        {
+          "label": "legacy window \"7 pm to 11 pm\"",
+          "pass": true
+        },
+        {
+          "label": "legacy window \"12 to 5\"",
+          "pass": true
+        },
+        {
+          "label": "n15 8 to 12 confirmation: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 8 to 12 confirmation: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 8 to 12 reschedule: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 8 to 12 reschedule: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 8 to 12 reminder_requested: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 8 to 12 reminder_requested: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 8 to 12 reminder_owner: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 8 to 12 reminder_owner: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 8 to 12 cancelled: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 8 to 12 cancelled: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 12 to 5 confirmation: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 12 to 5 confirmation: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 12 to 5 reschedule: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 12 to 5 reschedule: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 12 to 5 reminder_requested: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 12 to 5 reminder_requested: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 12 to 5 reminder_owner: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 12 to 5 reminder_owner: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 12 to 5 cancelled: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 12 to 5 cancelled: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 8 am to 12 pm confirmation: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 8 am to 12 pm confirmation: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 8 am to 12 pm reschedule: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 8 am to 12 pm reschedule: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 8 am to 12 pm reminder_requested: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 8 am to 12 pm reminder_requested: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 8 am to 12 pm reminder_owner: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 8 am to 12 pm reminder_owner: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 8 am to 12 pm cancelled: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 8 am to 12 pm cancelled: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 12 pm to 5 pm confirmation: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 12 pm to 5 pm confirmation: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 12 pm to 5 pm reschedule: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 12 pm to 5 pm reschedule: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 12 pm to 5 pm reminder_requested: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 12 pm to 5 pm reminder_requested: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 12 pm to 5 pm reminder_owner: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 12 pm to 5 pm reminder_owner: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 12 pm to 5 pm cancelled: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 12 pm to 5 pm cancelled: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 1 pm to 5 pm confirmation: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 1 pm to 5 pm confirmation: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 1 pm to 5 pm reschedule: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 1 pm to 5 pm reschedule: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 1 pm to 5 pm reminder_requested: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 1 pm to 5 pm reminder_requested: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 1 pm to 5 pm reminder_owner: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 1 pm to 5 pm reminder_owner: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 1 pm to 5 pm cancelled: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 1 pm to 5 pm cancelled: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 6 pm to 8 pm confirmation: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 6 pm to 8 pm confirmation: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 6 pm to 8 pm reschedule: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 6 pm to 8 pm reschedule: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 6 pm to 8 pm reminder_requested: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 6 pm to 8 pm reminder_requested: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 6 pm to 8 pm reminder_owner: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 6 pm to 8 pm reminder_owner: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 6 pm to 8 pm cancelled: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 6 pm to 8 pm cancelled: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 5 pm to 9 pm confirmation: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 5 pm to 9 pm confirmation: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 5 pm to 9 pm reschedule: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 5 pm to 9 pm reschedule: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 5 pm to 9 pm reminder_requested: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 5 pm to 9 pm reminder_requested: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 5 pm to 9 pm reminder_owner: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 5 pm to 9 pm reminder_owner: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 5 pm to 9 pm cancelled: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 5 pm to 9 pm cancelled: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 8:30 am to 10:30 am confirmation: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 8:30 am to 10:30 am confirmation: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 8:30 am to 10:30 am reschedule: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 8:30 am to 10:30 am reschedule: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 8:30 am to 10:30 am reminder_requested: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 8:30 am to 10:30 am reminder_requested: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 8:30 am to 10:30 am reminder_owner: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 8:30 am to 10:30 am reminder_owner: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 8:30 am to 10:30 am cancelled: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 8:30 am to 10:30 am cancelled: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 8 a.m. to 12 p.m. confirmation: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 8 a.m. to 12 p.m. confirmation: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 8 a.m. to 12 p.m. reschedule: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 8 a.m. to 12 p.m. reschedule: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 8 a.m. to 12 p.m. reminder_requested: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 8 a.m. to 12 p.m. reminder_requested: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 8 a.m. to 12 p.m. reminder_owner: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 8 a.m. to 12 p.m. reminder_owner: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 8 a.m. to 12 p.m. cancelled: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 8 a.m. to 12 p.m. cancelled: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 11 am to 1 pm confirmation: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 11 am to 1 pm confirmation: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 11 am to 1 pm reschedule: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 11 am to 1 pm reschedule: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 11 am to 1 pm reminder_requested: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 11 am to 1 pm reminder_requested: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 11 am to 1 pm reminder_owner: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 11 am to 1 pm reminder_owner: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 11 am to 1 pm cancelled: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 11 am to 1 pm cancelled: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 7 to 9 confirmation: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 7 to 9 confirmation: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 7 to 9 reschedule: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 7 to 9 reschedule: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 7 to 9 reminder_requested: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 7 to 9 reminder_requested: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 7 to 9 reminder_owner: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 7 to 9 reminder_owner: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n15 7 to 9 cancelled: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n15 7 to 9 cancelled: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 8 to 12 confirmation: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 8 to 12 confirmation: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 8 to 12 reschedule: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 8 to 12 reschedule: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 8 to 12 reminder_requested: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 8 to 12 reminder_requested: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 8 to 12 reminder_owner: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 8 to 12 reminder_owner: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 8 to 12 cancelled: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 8 to 12 cancelled: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 12 to 5 confirmation: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 12 to 5 confirmation: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 12 to 5 reschedule: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 12 to 5 reschedule: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 12 to 5 reminder_requested: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 12 to 5 reminder_requested: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 12 to 5 reminder_owner: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 12 to 5 reminder_owner: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 12 to 5 cancelled: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 12 to 5 cancelled: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 8 am to 12 pm confirmation: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 8 am to 12 pm confirmation: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 8 am to 12 pm reschedule: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 8 am to 12 pm reschedule: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 8 am to 12 pm reminder_requested: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 8 am to 12 pm reminder_requested: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 8 am to 12 pm reminder_owner: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 8 am to 12 pm reminder_owner: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 8 am to 12 pm cancelled: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 8 am to 12 pm cancelled: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 12 pm to 5 pm confirmation: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 12 pm to 5 pm confirmation: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 12 pm to 5 pm reschedule: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 12 pm to 5 pm reschedule: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 12 pm to 5 pm reminder_requested: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 12 pm to 5 pm reminder_requested: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 12 pm to 5 pm reminder_owner: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 12 pm to 5 pm reminder_owner: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 12 pm to 5 pm cancelled: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 12 pm to 5 pm cancelled: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 1 pm to 5 pm confirmation: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 1 pm to 5 pm confirmation: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 1 pm to 5 pm reschedule: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 1 pm to 5 pm reschedule: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 1 pm to 5 pm reminder_requested: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 1 pm to 5 pm reminder_requested: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 1 pm to 5 pm reminder_owner: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 1 pm to 5 pm reminder_owner: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 1 pm to 5 pm cancelled: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 1 pm to 5 pm cancelled: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 6 pm to 8 pm confirmation: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 6 pm to 8 pm confirmation: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 6 pm to 8 pm reschedule: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 6 pm to 8 pm reschedule: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 6 pm to 8 pm reminder_requested: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 6 pm to 8 pm reminder_requested: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 6 pm to 8 pm reminder_owner: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 6 pm to 8 pm reminder_owner: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 6 pm to 8 pm cancelled: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 6 pm to 8 pm cancelled: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 5 pm to 9 pm confirmation: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 5 pm to 9 pm confirmation: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 5 pm to 9 pm reschedule: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 5 pm to 9 pm reschedule: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 5 pm to 9 pm reminder_requested: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 5 pm to 9 pm reminder_requested: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 5 pm to 9 pm reminder_owner: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 5 pm to 9 pm reminder_owner: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 5 pm to 9 pm cancelled: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 5 pm to 9 pm cancelled: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 8:30 am to 10:30 am confirmation: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 8:30 am to 10:30 am confirmation: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 8:30 am to 10:30 am reschedule: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 8:30 am to 10:30 am reschedule: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 8:30 am to 10:30 am reminder_requested: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 8:30 am to 10:30 am reminder_requested: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 8:30 am to 10:30 am reminder_owner: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 8:30 am to 10:30 am reminder_owner: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 8:30 am to 10:30 am cancelled: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 8:30 am to 10:30 am cancelled: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 8 a.m. to 12 p.m. confirmation: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 8 a.m. to 12 p.m. confirmation: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 8 a.m. to 12 p.m. reschedule: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 8 a.m. to 12 p.m. reschedule: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 8 a.m. to 12 p.m. reminder_requested: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 8 a.m. to 12 p.m. reminder_requested: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 8 a.m. to 12 p.m. reminder_owner: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 8 a.m. to 12 p.m. reminder_owner: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 8 a.m. to 12 p.m. cancelled: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 8 a.m. to 12 p.m. cancelled: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 11 am to 1 pm confirmation: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 11 am to 1 pm confirmation: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 11 am to 1 pm reschedule: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 11 am to 1 pm reschedule: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 11 am to 1 pm reminder_requested: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 11 am to 1 pm reminder_requested: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 11 am to 1 pm reminder_owner: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 11 am to 1 pm reminder_owner: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 11 am to 1 pm cancelled: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 11 am to 1 pm cancelled: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 7 to 9 confirmation: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 7 to 9 confirmation: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 7 to 9 reschedule: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 7 to 9 reschedule: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 7 to 9 reminder_requested: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 7 to 9 reminder_requested: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 7 to 9 reminder_owner: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 7 to 9 reminder_owner: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n44 7 to 9 cancelled: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n44 7 to 9 cancelled: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 8 to 12 confirmation: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 8 to 12 confirmation: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 8 to 12 reschedule: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 8 to 12 reschedule: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 8 to 12 reminder_requested: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 8 to 12 reminder_requested: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 8 to 12 reminder_owner: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 8 to 12 reminder_owner: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 8 to 12 cancelled: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 8 to 12 cancelled: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 12 to 5 confirmation: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 12 to 5 confirmation: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 12 to 5 reschedule: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 12 to 5 reschedule: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 12 to 5 reminder_requested: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 12 to 5 reminder_requested: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 12 to 5 reminder_owner: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 12 to 5 reminder_owner: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 12 to 5 cancelled: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 12 to 5 cancelled: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 8 am to 12 pm confirmation: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 8 am to 12 pm confirmation: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 8 am to 12 pm reschedule: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 8 am to 12 pm reschedule: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 8 am to 12 pm reminder_requested: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 8 am to 12 pm reminder_requested: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 8 am to 12 pm reminder_owner: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 8 am to 12 pm reminder_owner: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 8 am to 12 pm cancelled: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 8 am to 12 pm cancelled: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 12 pm to 5 pm confirmation: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 12 pm to 5 pm confirmation: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 12 pm to 5 pm reschedule: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 12 pm to 5 pm reschedule: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 12 pm to 5 pm reminder_requested: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 12 pm to 5 pm reminder_requested: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 12 pm to 5 pm reminder_owner: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 12 pm to 5 pm reminder_owner: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 12 pm to 5 pm cancelled: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 12 pm to 5 pm cancelled: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 1 pm to 5 pm confirmation: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 1 pm to 5 pm confirmation: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 1 pm to 5 pm reschedule: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 1 pm to 5 pm reschedule: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 1 pm to 5 pm reminder_requested: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 1 pm to 5 pm reminder_requested: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 1 pm to 5 pm reminder_owner: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 1 pm to 5 pm reminder_owner: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 1 pm to 5 pm cancelled: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 1 pm to 5 pm cancelled: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 6 pm to 8 pm confirmation: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 6 pm to 8 pm confirmation: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 6 pm to 8 pm reschedule: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 6 pm to 8 pm reschedule: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 6 pm to 8 pm reminder_requested: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 6 pm to 8 pm reminder_requested: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 6 pm to 8 pm reminder_owner: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 6 pm to 8 pm reminder_owner: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 6 pm to 8 pm cancelled: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 6 pm to 8 pm cancelled: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 5 pm to 9 pm confirmation: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 5 pm to 9 pm confirmation: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 5 pm to 9 pm reschedule: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 5 pm to 9 pm reschedule: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 5 pm to 9 pm reminder_requested: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 5 pm to 9 pm reminder_requested: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 5 pm to 9 pm reminder_owner: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 5 pm to 9 pm reminder_owner: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 5 pm to 9 pm cancelled: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 5 pm to 9 pm cancelled: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 8:30 am to 10:30 am confirmation: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 8:30 am to 10:30 am confirmation: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 8:30 am to 10:30 am reschedule: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 8:30 am to 10:30 am reschedule: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 8:30 am to 10:30 am reminder_requested: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 8:30 am to 10:30 am reminder_requested: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 8:30 am to 10:30 am reminder_owner: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 8:30 am to 10:30 am reminder_owner: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 8:30 am to 10:30 am cancelled: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 8:30 am to 10:30 am cancelled: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 8 a.m. to 12 p.m. confirmation: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 8 a.m. to 12 p.m. confirmation: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 8 a.m. to 12 p.m. reschedule: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 8 a.m. to 12 p.m. reschedule: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 8 a.m. to 12 p.m. reminder_requested: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 8 a.m. to 12 p.m. reminder_requested: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 8 a.m. to 12 p.m. reminder_owner: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 8 a.m. to 12 p.m. reminder_owner: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 8 a.m. to 12 p.m. cancelled: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 8 a.m. to 12 p.m. cancelled: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 11 am to 1 pm confirmation: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 11 am to 1 pm confirmation: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 11 am to 1 pm reschedule: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 11 am to 1 pm reschedule: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 11 am to 1 pm reminder_requested: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 11 am to 1 pm reminder_requested: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 11 am to 1 pm reminder_owner: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 11 am to 1 pm reminder_owner: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 11 am to 1 pm cancelled: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 11 am to 1 pm cancelled: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 7 to 9 confirmation: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 7 to 9 confirmation: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 7 to 9 reschedule: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 7 to 9 reschedule: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 7 to 9 reminder_requested: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 7 to 9 reminder_requested: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 7 to 9 reminder_owner: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 7 to 9 reminder_owner: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        },
+        {
+          "label": "n60 7 to 9 cancelled: GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "n60 7 to 9 cancelled: no \"12 de la tarde\"/\"de la tarde\" at 8 pm",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "check": "r2 owner-created visit uses the known customer language; unknown stays English",
+      "passed": 7,
+      "total": 7,
+      "results": [
+        {
+          "label": "known Spanish customer: booking stores language es",
+          "pass": true
+        },
+        {
+          "label": "newest known language wins (es earlier, en latest)",
+          "pass": true
+        },
+        {
+          "label": "unknown customer: booking stores no language (English)",
+          "pass": true
+        },
+        {
+          "label": "owner-created Spanish confirmation says \"queda guardada\", not \"ahora es\"",
+          "pass": true
+        },
+        {
+          "label": "owner-created Spanish confirmation is GSM-7, <=2 segments",
+          "pass": true
+        },
+        {
+          "label": "unknown customer confirmation stays English byte-identical",
+          "pass": true
+        },
+        {
+          "label": "owner reschedule of that visit says \"ahora es\"",
+          "pass": true
+        }
+      ]
+    }
+  ],
+  "obs": [
+    {
+      "step": "03 web emergency owner email",
+      "at": "2026-10-22T18:00:00.000Z",
+      "subject": "EMERGENCY: Gas smell in the kitchen; family outside now",
+      "firstLines": [
+        "EMERGENCY: Gas smell in the kitchen; family outside now",
+        "Urgent: acknowledge it in your workspace. If it is still unacknowledged after 10 minutes, a reminder email follows.",
+        "Fixture Service: Customer request 2919e84466"
+      ]
+    },
+    {
+      "step": "03 web emergency alert",
+      "at": "2026-10-22T18:00:00.000Z",
+      "alert": {
+        "kind": "emergency",
+        "status": "waiting",
+        "deadlineAt": "2026-10-22T18:10:00.000Z"
+      },
+      "tasks": [
+        {
+          "dueAt": "2026-10-22T18:10:00.000Z",
+          "step": 1
+        }
+      ]
+    },
+    {
+      "step": "03 web callback owner email",
+      "at": "2026-10-22T18:00:00.000Z",
+      "subject": "Callback requested: by 3pm",
+      "firstLines": [
+        "Callback requested: by 3pm",
+        "Urgent: acknowledge it in your workspace. If it is still unacknowledged after 10 minutes, a reminder email follows.",
+        "Fixture Service: Customer request 0d50ff3edf"
+      ]
+    },
+    {
+      "step": "03 web callback alert",
+      "at": "2026-10-22T18:00:00.000Z",
+      "alert": {
+        "kind": "wants_call",
+        "status": "waiting",
+        "deadlineAt": "2026-10-22T18:10:00.000Z"
+      },
+      "tasks": [
+        {
+          "dueAt": "2026-10-22T18:10:00.000Z",
+          "step": 1
+        }
+      ]
+    },
+    {
+      "step": "03 web price owner email",
+      "at": "2026-10-22T18:00:00.000Z",
+      "subject": "Question (price): Wants price for water heater replacement",
+      "firstLines": [
+        "Question (price): Wants price for water heater replacement",
+        "Fixture Service: Customer request 9e98c54101",
+        "Lee Price +17135550143"
+      ]
+    },
+    {
+      "step": "03 web price alert",
+      "at": "2026-10-22T18:00:00.000Z",
+      "tasks": []
+    },
+    {
+      "step": "03 web area owner email",
+      "at": "2026-10-22T18:00:00.000Z",
+      "subject": "Outside service area: Leaking pipe, outside service area",
+      "firstLines": [
+        "Outside service area: Leaking pipe, outside service area",
+        "Fixture Service: Customer request 7c15a51b77",
+        "Gal Veston +17135550144"
+      ]
+    },
+    {
+      "step": "03 web area alert",
+      "at": "2026-10-22T18:00:00.000Z",
+      "tasks": []
+    },
+    {
+      "step": "03 web escalation step 1",
+      "at": "2026-10-22T18:11:00.000Z",
+      "reminders": [
+        "Reminder: Callback requested: by 3pm",
+        "Reminder: EMERGENCY: Gas smell in the kitchen; family outside now"
+      ],
+      "alerts": {
+        "callback": {
+          "step": 1,
+          "attentionDueAt": "2026-10-22T18:11:00.000Z",
+          "history": [
+            "Workspace attention due; owner reminder email queued; no external call, text or callback promise"
+          ]
+        },
+        "emergency": {
+          "step": 1,
+          "attentionDueAt": "2026-10-22T18:11:00.000Z",
+          "history": [
+            "Workspace attention due; owner reminder email queued; no external call, text or callback promise"
+          ]
+        }
+      }
+    },
+    {
+      "step": "03 web escalation step 2",
+      "at": "2026-10-22T18:22:00.000Z",
+      "reminders": [
+        "Reminder: EMERGENCY: Gas smell in the kitchen; family outside now"
+      ],
+      "alerts": {
+        "callback": {
+          "step": 1,
+          "status": "waiting"
+        },
+        "emergency": {
+          "step": 2,
+          "status": "waiting"
+        }
+      },
+      "remainingTasks": 0
+    },
+    {
+      "step": "03 sms emergency owner email",
+      "at": "2026-10-22T18:22:08.000Z",
+      "subject": "EMERGENCY: Gas smell in the kitchen; family outside now",
+      "firstLines": [
+        "EMERGENCY: Gas smell in the kitchen; family outside now",
+        "Urgent: acknowledge it in your workspace. If it is still unacknowledged after 10 minutes, a reminder email follows.",
+        "Fixture Service: Customer request a0e4ef28407350f4398e36bfc83cf8d7"
+      ]
+    },
+    {
+      "step": "03 sms emergency alert",
+      "at": "2026-10-22T18:22:08.000Z",
+      "alert": {
+        "kind": "emergency",
+        "status": "waiting",
+        "deadlineAt": "2026-10-22T18:32:02.000Z"
+      },
+      "tasks": [
+        {
+          "dueAt": "2026-10-22T18:32:02.000Z",
+          "step": 1
+        }
+      ]
+    },
+    {
+      "step": "03 sms callback owner email",
+      "at": "2026-10-22T18:22:08.000Z",
+      "subject": "Callback requested: by 3pm",
+      "firstLines": [
+        "Callback requested: by 3pm",
+        "Urgent: acknowledge it in your workspace. If it is still unacknowledged after 10 minutes, a reminder email follows.",
+        "Fixture Service: Customer request 3dcb16fd6a11b6f0bc5bddae4ed835cb"
+      ]
+    },
+    {
+      "step": "03 sms callback alert",
+      "at": "2026-10-22T18:22:08.000Z",
+      "alert": {
+        "kind": "wants_call",
+        "status": "waiting",
+        "deadlineAt": "2026-10-22T18:32:04.000Z"
+      },
+      "tasks": [
+        {
+          "dueAt": "2026-10-22T18:32:04.000Z",
+          "step": 1
+        }
+      ]
+    },
+    {
+      "step": "03 sms price owner email",
+      "at": "2026-10-22T18:22:08.000Z",
+      "subject": "Question (price): Wants price for water heater replacement",
+      "firstLines": [
+        "Question (price): Wants price for water heater replacement",
+        "Fixture Service: Customer request 70b1bf2294c32f38baf0b742eff6a8af",
+        "Lee Price +17135550143"
+      ]
+    },
+    {
+      "step": "03 sms price alert",
+      "at": "2026-10-22T18:22:08.000Z",
+      "tasks": []
+    },
+    {
+      "step": "03 sms area owner email",
+      "at": "2026-10-22T18:22:08.000Z",
+      "subject": "Outside service area: Leaking pipe, outside service area",
+      "firstLines": [
+        "Outside service area: Leaking pipe, outside service area",
+        "Fixture Service: Customer request e3e6745ce0bc28e9035c598871ecc3e5",
+        "Gal Veston +17135550144"
+      ]
+    },
+    {
+      "step": "03 sms area alert",
+      "at": "2026-10-22T18:22:08.000Z",
+      "tasks": []
+    },
+    {
+      "step": "03 sms escalation step 1",
+      "at": "2026-10-22T18:33:08.000Z",
+      "reminders": [
+        "Reminder: EMERGENCY: Gas smell in the kitchen; family outside now",
+        "Reminder: Callback requested: by 3pm"
+      ],
+      "alerts": {
+        "callback": {
+          "step": 1,
+          "attentionDueAt": "2026-10-22T18:33:08.000Z",
+          "history": [
+            "Workspace attention due; owner reminder email queued; no external call, text or callback promise"
+          ]
+        },
+        "emergency": {
+          "step": 1,
+          "attentionDueAt": "2026-10-22T18:33:08.000Z",
+          "history": [
+            "Workspace attention due; owner reminder email queued; no external call, text or callback promise"
+          ]
+        }
+      }
+    },
+    {
+      "step": "03 sms escalation step 2",
+      "at": "2026-10-22T18:44:08.000Z",
+      "reminders": [
+        "Reminder: EMERGENCY: Gas smell in the kitchen; family outside now"
+      ],
+      "alerts": {
+        "callback": {
+          "step": 1,
+          "status": "waiting"
+        },
+        "emergency": {
+          "step": 2,
+          "status": "waiting"
+        }
+      },
+      "remainingTasks": 0
+    },
+    {
+      "step": "03 voice emergency owner email",
+      "at": "2026-10-22T18:44:08.000Z",
+      "subject": "EMERGENCY: Gas smell in the kitchen; family outside now",
+      "firstLines": [
+        "EMERGENCY: Gas smell in the kitchen; family outside now",
+        "Urgent: acknowledge it in your workspace. If it is still unacknowledged after 10 minutes, a reminder email follows.",
+        "Fixture Service: Customer request 5eded71315de867ff03263c7d3917b91"
+      ]
+    },
+    {
+      "step": "03 voice emergency alert",
+      "at": "2026-10-22T18:44:08.000Z",
+      "alert": {
+        "kind": "emergency",
+        "status": "waiting",
+        "deadlineAt": "2026-10-22T18:54:08.000Z"
+      },
+      "tasks": [
+        {
+          "dueAt": "2026-10-22T18:54:08.000Z",
+          "step": 1
+        }
+      ]
+    },
+    {
+      "step": "03 voice callback owner email",
+      "at": "2026-10-22T18:44:08.000Z",
+      "subject": "Callback requested: by 3pm",
+      "firstLines": [
+        "Callback requested: by 3pm",
+        "Urgent: acknowledge it in your workspace. If it is still unacknowledged after 10 minutes, a reminder email follows.",
+        "Fixture Service: Customer request 84eae47946494251cd94756b619f31ae"
+      ]
+    },
+    {
+      "step": "03 voice callback alert",
+      "at": "2026-10-22T18:44:08.000Z",
+      "alert": {
+        "kind": "wants_call",
+        "status": "waiting",
+        "deadlineAt": "2026-10-22T18:54:08.000Z"
+      },
+      "tasks": [
+        {
+          "dueAt": "2026-10-22T18:54:08.000Z",
+          "step": 1
+        }
+      ]
+    },
+    {
+      "step": "03 voice price owner email",
+      "at": "2026-10-22T18:44:08.000Z",
+      "subject": "Question (price): Wants price for water heater replacement",
+      "firstLines": [
+        "Question (price): Wants price for water heater replacement",
+        "Fixture Service: Customer request abf165833b09aea0be9b430b75ac05e4",
+        "Lee Price +17135550143"
+      ]
+    },
+    {
+      "step": "03 voice price alert",
+      "at": "2026-10-22T18:44:08.000Z",
+      "tasks": []
+    },
+    {
+      "step": "03 voice area owner email",
+      "at": "2026-10-22T18:44:08.000Z",
+      "subject": "Outside service area: Leaking pipe, outside service area",
+      "firstLines": [
+        "Outside service area: Leaking pipe, outside service area",
+        "Fixture Service: Customer request 33be088a08b5415e1af4ddeedfcbd4aa",
+        "Gal Veston +17135550144"
+      ]
+    },
+    {
+      "step": "03 voice area alert",
+      "at": "2026-10-22T18:44:08.000Z",
+      "tasks": []
+    },
+    {
+      "step": "03 voice escalation step 1",
+      "at": "2026-10-22T18:55:08.000Z",
+      "reminders": [
+        "Reminder: Callback requested: by 3pm",
+        "Reminder: EMERGENCY: Gas smell in the kitchen; family outside now"
+      ],
+      "alerts": {
+        "emergency": {
+          "step": 1,
+          "attentionDueAt": "2026-10-22T18:55:08.000Z",
+          "history": [
+            "Workspace attention due; owner reminder email queued; no external call, text or callback promise"
+          ]
+        },
+        "callback": {
+          "step": 1,
+          "attentionDueAt": "2026-10-22T18:55:08.000Z",
+          "history": [
+            "Workspace attention due; owner reminder email queued; no external call, text or callback promise"
+          ]
+        }
+      }
+    },
+    {
+      "step": "03 voice escalation step 2",
+      "at": "2026-10-22T19:06:08.000Z",
+      "reminders": [
+        "Reminder: EMERGENCY: Gas smell in the kitchen; family outside now"
+      ],
+      "alerts": {
+        "emergency": {
+          "step": 2,
+          "status": "waiting"
+        },
+        "callback": {
+          "step": 1,
+          "status": "waiting"
+        }
+      },
+      "remainingTasks": 0
+    },
+    {
+      "step": "03 spanish emergency owner email",
+      "at": "2026-10-22T19:06:08.000Z",
+      "subject": "EMERGENCY: Gas smell in the kitchen (Spanish)",
+      "body": "EMERGENCY: Gas smell in the kitchen\nUrgent: acknowledge it in your workspace. If it is still unacknowledged after 10 minutes, a reminder email follows.\nFixture Service: Customer request bdf7551b1c706419a772de1aa5c99159\nJo Caller +17135550151\nGas smell in the kitchen\n1 Gas Ct, Houston\n \nLanguage: Spanish\nOpen your workspace to review and respond."
+    },
+    {
+      "step": "03 acked alert after deadline",
+      "at": "2026-10-22T19:17:08.000Z",
+      "status": "acked",
+      "alertStep": 0,
+      "reminders": 0
+    },
+    {
+      "step": "03 ack after reminder queued",
+      "at": "2026-10-22T19:28:08.000Z",
+      "queuedState": "queued",
+      "finalState": "superseded",
+      "reasonCode": "record_changed",
+      "lateAck": 1
+    },
+    {
+      "step": "04 spanish lifecycle",
+      "at": "2026-10-22T19:28:12.000Z",
+      "texts": [
+        {
+          "stage": "confirmation",
+          "body": "Fixture Service: su visita queda guardada para el 24 de octubre, de 12 p. m. a 5 p. m. El negocio le confirma la hora de llegada. Responda STOP o ALTO para terminar.",
+          "encoding": "GSM-7",
+          "units": 165,
+          "segments": 2
+        },
+        {
+          "stage": "reminder_24h",
+          "body": "Fixture Service: recordatorio de su visita solicitada para el 24 de octubre, de 12 p. m. a 5 p. m. El negocio le confirma la hora de llegada. Si algo cambia, responda a este mensaje. Responda STOP o ALTO para terminar.",
+          "encoding": "GSM-7",
+          "units": 218,
+          "segments": 2
+        },
+        {
+          "stage": "reminder_1h",
+          "body": "Fixture Service: recordatorio de su visita solicitada para el 24 de octubre, de 12 p. m. a 5 p. m. El negocio le confirma la hora de llegada. Si algo cambia, responda a este mensaje. Responda STOP o ALTO para terminar.",
+          "encoding": "GSM-7",
+          "units": 218,
+          "segments": 2
+        },
+        {
+          "stage": "reschedule",
+          "body": "Fixture Service: su visita ahora es el 26 de octubre, de 8 a. m. a 12 p. m. El negocio le confirma la hora de llegada. Responda STOP o ALTO para terminar.",
+          "encoding": "GSM-7",
+          "units": 154,
+          "segments": 1
+        },
+        {
+          "stage": "cancelled",
+          "body": "Fixture Service: su visita del 26 de octubre, de 8 a. m. a 12 p. m., fue cancelada.",
+          "encoding": "GSM-7",
+          "units": 83,
+          "segments": 1
+        },
+        {
+          "stage": "AYUDA reply",
+          "body": "Fixture Service: para ayuda, llame o escriba a sms-qa-urges-49@example.test. Responda STOP, ALTO o PARAR para terminar los mensajes.",
+          "encoding": "GSM-7",
+          "units": 132,
+          "segments": 1
+        }
+      ],
+      "helpReply": "Fixture Service: for help contact sms-qa-urges-49@example.test. Reply STOP, ALTO or PARAR to stop texts.",
+      "ownerSubjects": [
+        "Visit request: 2026-10-24 12 to 5 (Spanish)",
+        "Visit request: 2026-10-26 8 to 12 (Spanish)",
+        "Visit cancelled: Calentador de agua no calienta (Spanish)"
+      ],
+      "ownerFirstEmail": "Visit request: 2026-10-24 12 to 5\nFixture Service: Visit request 8a91f8b1a45b3a196bce0e1b6f14e952\nMaría López +17135550177\nCalentador de agua no calienta\n45 Elm St, Houston\n2026-10-24 12 to 5\nUrgency: this week\nLanguage: Spanish\nOpen your workspace to review and respond."
+    },
+    {
+      "step": "04 english control",
+      "at": "2026-10-22T19:28:16.000Z",
+      "confirmation": "Fixture Service: visit 784e183178be438294ceeef0affbf9ed is saved for 2026-10-24, 8 to 12. The shop confirms arrival details directly. Reply STOP to end texts.",
+      "reminder": "Fixture Service: reminder of your requested visit 784e183178be438294ceeef0affbf9ed on 2026-10-24, 8 to 12. The shop confirms arrival details directly. Reply here if anything changes. Reply STOP to end texts.",
+      "confirmationSegments": {
+        "encoding": "GSM-7",
+        "units": 158,
+        "segments": 1
+      },
+      "reminderSegments": {
+        "encoding": "GSM-7",
+        "units": 207,
+        "segments": 2
+      }
+    },
+    {
+      "step": "Q2",
+      "at": "2026-10-22T20:30:18.000Z",
+      "leads": 2,
+      "reason": "wants_call",
+      "emails": [
+        {
+          "subject": "Callback requested: by 3pm",
+          "first": "Callback requested: by 3pm"
+        }
+      ]
+    },
+    {
+      "step": "Q2b",
+      "at": "2026-10-22T20:56:18.000Z",
+      "reason": "lead",
+      "emails": [
+        {
+          "subject": "New request: Wants to talk to the owner about a quote",
+          "first": "New request: Wants to talk to the owner about a quote"
+        }
+      ]
+    },
+    {
+      "step": "Q3",
+      "at": "2026-10-22T21:44:48.000Z",
+      "leads": 1,
+      "alerts": 1,
+      "tasksLeft": 0,
+      "reminders": [
+        "Reminder: EMERGENCY: Gas smell 0",
+        "Reminder: EMERGENCY: Gas smell 0"
+      ]
+    },
+    {
+      "step": "Q4",
+      "at": "2026-10-22T22:06:48.000Z",
+      "queued": 1,
+      "states": [
+        "superseded"
+      ],
+      "alert": "acked",
+      "tasksLeft": 0
+    },
+    {
+      "step": "Q5",
+      "at": "2026-10-22T22:06:48.000Z",
+      "subject": "Question (price): EMERGENCY!!! Bcc: evil@example.com...",
+      "len": 55
+    },
+    {
+      "step": "Q6",
+      "at": "2026-10-22T22:28:50.000Z",
+      "subjects": [
+        "EMERGENCY: Smells like gas in kitchen (Spanish)",
+        "Reminder: EMERGENCY: Smells like gas in kitchen",
+        "Reminder: EMERGENCY: Smells like gas in kitchen"
+      ]
+    },
+    {
+      "step": "Q7",
+      "at": "2026-10-22T22:55:50.000Z",
+      "reopened": {
+        "kind": "wants_call",
+        "status": "acked"
+      },
+      "alerts": [
+        {
+          "kind": "wants_call",
+          "status": "acked",
+          "step": 0
+        }
+      ],
+      "reminders": []
+    },
+    {
+      "step": "Q8",
+      "at": "2026-10-22T23:08:50.000Z",
+      "leads": [
+        "emergency"
+      ],
+      "alerts": [
+        {
+          "kind": "emergency",
+          "status": "waiting",
+          "step": 1
+        }
+      ]
+    },
+    {
+      "step": "Q10",
+      "at": "2026-10-22T23:20:50.000Z",
+      "queued": true,
+      "staleState": "superseded"
+    },
+    {
+      "step": "Q11",
+      "at": "2026-10-22T23:39:50.000Z",
+      "betweenTasks": {
+        "ok": true,
+        "ms": 0,
+        "due": 1
+      },
+      "mid": {
+        "step": 0,
+        "status": "acked"
+      },
+      "midTasks": [],
+      "reminders": []
+    },
+    {
+      "step": "r2 spanish window matrix",
+      "at": "2026-10-22T23:39:50.000Z",
+      "managed": {
+        "8 to 12": "8 a. m. a 12 p. m.",
+        "12 to 5": "12 p. m. a 5 p. m.",
+        "8 am to 12 pm": "8 a. m. a 12 p. m.",
+        "12 pm to 5 pm": "12 p. m. a 5 p. m.",
+        "1 pm to 5 pm": "1 a 5 p. m.",
+        "6 pm to 8 pm": "6 a 8 p. m.",
+        "5 pm to 9 pm": "5 a 9 p. m.",
+        "8:30 am to 10:30 am": "8:30 a 10:30 a. m.",
+        "8 a.m. to 12 p.m.": "8 a. m. a 12 p. m.",
+        "11 am to 1 pm": "11 a. m. a 1 p. m.",
+        "7 to 9": "7 a 9 a. m."
+      },
+      "legacy": {
+        "8 am to 12 pm": "8 de la mañana a 12 del mediodía",
+        "12 pm to 5 pm": "12 del mediodía a 5 de la tarde",
+        "6 pm to 8 pm": "6 de la tarde a 8 de la noche",
+        "8 a.m. to 12 p.m.": "8 de la mañana a 12 del mediodía",
+        "7 pm to 11 pm": "7 de la noche a 11 de la noche",
+        "12 to 5": "12 a 5"
+      },
+      "worst": {
+        "name": "n60",
+        "window": "8 to 12",
+        "text": "reminder_requested",
+        "encoding": "GSM-7",
+        "units": 264,
+        "segments": 2
+      },
+      "rows": [
+        {
+          "name": "n15",
+          "window": "8 to 12",
+          "text": "confirmation",
+          "encoding": "GSM-7",
+          "units": 165,
+          "segments": 2
+        },
+        {
+          "name": "n15",
+          "window": "8 to 12",
+          "text": "reschedule",
+          "encoding": "GSM-7",
+          "units": 154,
+          "segments": 1
+        },
+        {
+          "name": "n15",
+          "window": "8 to 12",
+          "text": "reminder_requested",
+          "encoding": "GSM-7",
+          "units": 218,
+          "segments": 2
+        },
+        {
+          "name": "n15",
+          "window": "8 to 12",
+          "text": "reminder_owner",
+          "encoding": "GSM-7",
+          "units": 164,
+          "segments": 2
+        },
+        {
+          "name": "n15",
+          "window": "8 to 12",
+          "text": "cancelled",
+          "encoding": "GSM-7",
+          "units": 83,
+          "segments": 1
+        },
+        {
+          "name": "n15",
+          "window": "12 to 5",
+          "text": "confirmation",
+          "encoding": "GSM-7",
+          "units": 165,
+          "segments": 2
+        },
+        {
+          "name": "n15",
+          "window": "12 to 5",
+          "text": "reschedule",
+          "encoding": "GSM-7",
+          "units": 154,
+          "segments": 1
+        },
+        {
+          "name": "n15",
+          "window": "12 to 5",
+          "text": "reminder_requested",
+          "encoding": "GSM-7",
+          "units": 218,
+          "segments": 2
+        },
+        {
+          "name": "n15",
+          "window": "12 to 5",
+          "text": "reminder_owner",
+          "encoding": "GSM-7",
+          "units": 164,
+          "segments": 2
+        },
+        {
+          "name": "n15",
+          "window": "12 to 5",
+          "text": "cancelled",
+          "encoding": "GSM-7",
+          "units": 83,
+          "segments": 1
+        },
+        {
+          "name": "n15",
+          "window": "8 am to 12 pm",
+          "text": "confirmation",
+          "encoding": "GSM-7",
+          "units": 165,
+          "segments": 2
+        },
+        {
+          "name": "n15",
+          "window": "8 am to 12 pm",
+          "text": "reschedule",
+          "encoding": "GSM-7",
+          "units": 154,
+          "segments": 1
+        },
+        {
+          "name": "n15",
+          "window": "8 am to 12 pm",
+          "text": "reminder_requested",
+          "encoding": "GSM-7",
+          "units": 218,
+          "segments": 2
+        },
+        {
+          "name": "n15",
+          "window": "8 am to 12 pm",
+          "text": "reminder_owner",
+          "encoding": "GSM-7",
+          "units": 164,
+          "segments": 2
+        },
+        {
+          "name": "n15",
+          "window": "8 am to 12 pm",
+          "text": "cancelled",
+          "encoding": "GSM-7",
+          "units": 83,
+          "segments": 1
+        },
+        {
+          "name": "n15",
+          "window": "12 pm to 5 pm",
+          "text": "confirmation",
+          "encoding": "GSM-7",
+          "units": 165,
+          "segments": 2
+        },
+        {
+          "name": "n15",
+          "window": "12 pm to 5 pm",
+          "text": "reschedule",
+          "encoding": "GSM-7",
+          "units": 154,
+          "segments": 1
+        },
+        {
+          "name": "n15",
+          "window": "12 pm to 5 pm",
+          "text": "reminder_requested",
+          "encoding": "GSM-7",
+          "units": 218,
+          "segments": 2
+        },
+        {
+          "name": "n15",
+          "window": "12 pm to 5 pm",
+          "text": "reminder_owner",
+          "encoding": "GSM-7",
+          "units": 164,
+          "segments": 2
+        },
+        {
+          "name": "n15",
+          "window": "12 pm to 5 pm",
+          "text": "cancelled",
+          "encoding": "GSM-7",
+          "units": 83,
+          "segments": 1
+        },
+        {
+          "name": "n15",
+          "window": "1 pm to 5 pm",
+          "text": "confirmation",
+          "encoding": "GSM-7",
+          "units": 158,
+          "segments": 1
+        },
+        {
+          "name": "n15",
+          "window": "1 pm to 5 pm",
+          "text": "reschedule",
+          "encoding": "GSM-7",
+          "units": 147,
+          "segments": 1
+        },
+        {
+          "name": "n15",
+          "window": "1 pm to 5 pm",
+          "text": "reminder_requested",
+          "encoding": "GSM-7",
+          "units": 211,
+          "segments": 2
+        },
+        {
+          "name": "n15",
+          "window": "1 pm to 5 pm",
+          "text": "reminder_owner",
+          "encoding": "GSM-7",
+          "units": 157,
+          "segments": 1
+        },
+        {
+          "name": "n15",
+          "window": "1 pm to 5 pm",
+          "text": "cancelled",
+          "encoding": "GSM-7",
+          "units": 76,
+          "segments": 1
+        },
+        {
+          "name": "n15",
+          "window": "6 pm to 8 pm",
+          "text": "confirmation",
+          "encoding": "GSM-7",
+          "units": 158,
+          "segments": 1
+        },
+        {
+          "name": "n15",
+          "window": "6 pm to 8 pm",
+          "text": "reschedule",
+          "encoding": "GSM-7",
+          "units": 147,
+          "segments": 1
+        },
+        {
+          "name": "n15",
+          "window": "6 pm to 8 pm",
+          "text": "reminder_requested",
+          "encoding": "GSM-7",
+          "units": 211,
+          "segments": 2
+        },
+        {
+          "name": "n15",
+          "window": "6 pm to 8 pm",
+          "text": "reminder_owner",
+          "encoding": "GSM-7",
+          "units": 157,
+          "segments": 1
+        },
+        {
+          "name": "n15",
+          "window": "6 pm to 8 pm",
+          "text": "cancelled",
+          "encoding": "GSM-7",
+          "units": 76,
+          "segments": 1
+        },
+        {
+          "name": "n15",
+          "window": "5 pm to 9 pm",
+          "text": "confirmation",
+          "encoding": "GSM-7",
+          "units": 158,
+          "segments": 1
+        },
+        {
+          "name": "n15",
+          "window": "5 pm to 9 pm",
+          "text": "reschedule",
+          "encoding": "GSM-7",
+          "units": 147,
+          "segments": 1
+        },
+        {
+          "name": "n15",
+          "window": "5 pm to 9 pm",
+          "text": "reminder_requested",
+          "encoding": "GSM-7",
+          "units": 211,
+          "segments": 2
+        },
+        {
+          "name": "n15",
+          "window": "5 pm to 9 pm",
+          "text": "reminder_owner",
+          "encoding": "GSM-7",
+          "units": 157,
+          "segments": 1
+        },
+        {
+          "name": "n15",
+          "window": "5 pm to 9 pm",
+          "text": "cancelled",
+          "encoding": "GSM-7",
+          "units": 76,
+          "segments": 1
+        },
+        {
+          "name": "n15",
+          "window": "8:30 am to 10:30 am",
+          "text": "confirmation",
+          "encoding": "GSM-7",
+          "units": 165,
+          "segments": 2
+        },
+        {
+          "name": "n15",
+          "window": "8:30 am to 10:30 am",
+          "text": "reschedule",
+          "encoding": "GSM-7",
+          "units": 154,
+          "segments": 1
+        },
+        {
+          "name": "n15",
+          "window": "8:30 am to 10:30 am",
+          "text": "reminder_requested",
+          "encoding": "GSM-7",
+          "units": 218,
+          "segments": 2
+        },
+        {
+          "name": "n15",
+          "window": "8:30 am to 10:30 am",
+          "text": "reminder_owner",
+          "encoding": "GSM-7",
+          "units": 164,
+          "segments": 2
+        },
+        {
+          "name": "n15",
+          "window": "8:30 am to 10:30 am",
+          "text": "cancelled",
+          "encoding": "GSM-7",
+          "units": 83,
+          "segments": 1
+        },
+        {
+          "name": "n15",
+          "window": "8 a.m. to 12 p.m.",
+          "text": "confirmation",
+          "encoding": "GSM-7",
+          "units": 165,
+          "segments": 2
+        },
+        {
+          "name": "n15",
+          "window": "8 a.m. to 12 p.m.",
+          "text": "reschedule",
+          "encoding": "GSM-7",
+          "units": 154,
+          "segments": 1
+        },
+        {
+          "name": "n15",
+          "window": "8 a.m. to 12 p.m.",
+          "text": "reminder_requested",
+          "encoding": "GSM-7",
+          "units": 218,
+          "segments": 2
+        },
+        {
+          "name": "n15",
+          "window": "8 a.m. to 12 p.m.",
+          "text": "reminder_owner",
+          "encoding": "GSM-7",
+          "units": 164,
+          "segments": 2
+        },
+        {
+          "name": "n15",
+          "window": "8 a.m. to 12 p.m.",
+          "text": "cancelled",
+          "encoding": "GSM-7",
+          "units": 83,
+          "segments": 1
+        },
+        {
+          "name": "n15",
+          "window": "11 am to 1 pm",
+          "text": "confirmation",
+          "encoding": "GSM-7",
+          "units": 165,
+          "segments": 2
+        },
+        {
+          "name": "n15",
+          "window": "11 am to 1 pm",
+          "text": "reschedule",
+          "encoding": "GSM-7",
+          "units": 154,
+          "segments": 1
+        },
+        {
+          "name": "n15",
+          "window": "11 am to 1 pm",
+          "text": "reminder_requested",
+          "encoding": "GSM-7",
+          "units": 218,
+          "segments": 2
+        },
+        {
+          "name": "n15",
+          "window": "11 am to 1 pm",
+          "text": "reminder_owner",
+          "encoding": "GSM-7",
+          "units": 164,
+          "segments": 2
+        },
+        {
+          "name": "n15",
+          "window": "11 am to 1 pm",
+          "text": "cancelled",
+          "encoding": "GSM-7",
+          "units": 83,
+          "segments": 1
+        },
+        {
+          "name": "n15",
+          "window": "7 to 9",
+          "text": "confirmation",
+          "encoding": "GSM-7",
+          "units": 158,
+          "segments": 1
+        },
+        {
+          "name": "n15",
+          "window": "7 to 9",
+          "text": "reschedule",
+          "encoding": "GSM-7",
+          "units": 147,
+          "segments": 1
+        },
+        {
+          "name": "n15",
+          "window": "7 to 9",
+          "text": "reminder_requested",
+          "encoding": "GSM-7",
+          "units": 211,
+          "segments": 2
+        },
+        {
+          "name": "n15",
+          "window": "7 to 9",
+          "text": "reminder_owner",
+          "encoding": "GSM-7",
+          "units": 157,
+          "segments": 1
+        },
+        {
+          "name": "n15",
+          "window": "7 to 9",
+          "text": "cancelled",
+          "encoding": "GSM-7",
+          "units": 76,
+          "segments": 1
+        },
+        {
+          "name": "n44",
+          "window": "8 to 12",
+          "text": "confirmation",
+          "encoding": "GSM-7",
+          "units": 195,
+          "segments": 2
+        },
+        {
+          "name": "n44",
+          "window": "8 to 12",
+          "text": "reschedule",
+          "encoding": "GSM-7",
+          "units": 184,
+          "segments": 2
+        },
+        {
+          "name": "n44",
+          "window": "8 to 12",
+          "text": "reminder_requested",
+          "encoding": "GSM-7",
+          "units": 248,
+          "segments": 2
+        },
+        {
+          "name": "n44",
+          "window": "8 to 12",
+          "text": "reminder_owner",
+          "encoding": "GSM-7",
+          "units": 194,
+          "segments": 2
+        },
+        {
+          "name": "n44",
+          "window": "8 to 12",
+          "text": "cancelled",
+          "encoding": "GSM-7",
+          "units": 113,
+          "segments": 1
+        },
+        {
+          "name": "n44",
+          "window": "12 to 5",
+          "text": "confirmation",
+          "encoding": "GSM-7",
+          "units": 195,
+          "segments": 2
+        },
+        {
+          "name": "n44",
+          "window": "12 to 5",
+          "text": "reschedule",
+          "encoding": "GSM-7",
+          "units": 184,
+          "segments": 2
+        },
+        {
+          "name": "n44",
+          "window": "12 to 5",
+          "text": "reminder_requested",
+          "encoding": "GSM-7",
+          "units": 248,
+          "segments": 2
+        },
+        {
+          "name": "n44",
+          "window": "12 to 5",
+          "text": "reminder_owner",
+          "encoding": "GSM-7",
+          "units": 194,
+          "segments": 2
+        },
+        {
+          "name": "n44",
+          "window": "12 to 5",
+          "text": "cancelled",
+          "encoding": "GSM-7",
+          "units": 113,
+          "segments": 1
+        },
+        {
+          "name": "n44",
+          "window": "8 am to 12 pm",
+          "text": "confirmation",
+          "encoding": "GSM-7",
+          "units": 195,
+          "segments": 2
+        },
+        {
+          "name": "n44",
+          "window": "8 am to 12 pm",
+          "text": "reschedule",
+          "encoding": "GSM-7",
+          "units": 184,
+          "segments": 2
+        },
+        {
+          "name": "n44",
+          "window": "8 am to 12 pm",
+          "text": "reminder_requested",
+          "encoding": "GSM-7",
+          "units": 248,
+          "segments": 2
+        },
+        {
+          "name": "n44",
+          "window": "8 am to 12 pm",
+          "text": "reminder_owner",
+          "encoding": "GSM-7",
+          "units": 194,
+          "segments": 2
+        },
+        {
+          "name": "n44",
+          "window": "8 am to 12 pm",
+          "text": "cancelled",
+          "encoding": "GSM-7",
+          "units": 113,
+          "segments": 1
+        },
+        {
+          "name": "n44",
+          "window": "12 pm to 5 pm",
+          "text": "confirmation",
+          "encoding": "GSM-7",
+          "units": 195,
+          "segments": 2
+        },
+        {
+          "name": "n44",
+          "window": "12 pm to 5 pm",
+          "text": "reschedule",
+          "encoding": "GSM-7",
+          "units": 184,
+          "segments": 2
+        },
+        {
+          "name": "n44",
+          "window": "12 pm to 5 pm",
+          "text": "reminder_requested",
+          "encoding": "GSM-7",
+          "units": 248,
+          "segments": 2
+        },
+        {
+          "name": "n44",
+          "window": "12 pm to 5 pm",
+          "text": "reminder_owner",
+          "encoding": "GSM-7",
+          "units": 194,
+          "segments": 2
+        },
+        {
+          "name": "n44",
+          "window": "12 pm to 5 pm",
+          "text": "cancelled",
+          "encoding": "GSM-7",
+          "units": 113,
+          "segments": 1
+        },
+        {
+          "name": "n44",
+          "window": "1 pm to 5 pm",
+          "text": "confirmation",
+          "encoding": "GSM-7",
+          "units": 188,
+          "segments": 2
+        },
+        {
+          "name": "n44",
+          "window": "1 pm to 5 pm",
+          "text": "reschedule",
+          "encoding": "GSM-7",
+          "units": 177,
+          "segments": 2
+        },
+        {
+          "name": "n44",
+          "window": "1 pm to 5 pm",
+          "text": "reminder_requested",
+          "encoding": "GSM-7",
+          "units": 241,
+          "segments": 2
+        },
+        {
+          "name": "n44",
+          "window": "1 pm to 5 pm",
+          "text": "reminder_owner",
+          "encoding": "GSM-7",
+          "units": 187,
+          "segments": 2
+        },
+        {
+          "name": "n44",
+          "window": "1 pm to 5 pm",
+          "text": "cancelled",
+          "encoding": "GSM-7",
+          "units": 106,
+          "segments": 1
+        },
+        {
+          "name": "n44",
+          "window": "6 pm to 8 pm",
+          "text": "confirmation",
+          "encoding": "GSM-7",
+          "units": 188,
+          "segments": 2
+        },
+        {
+          "name": "n44",
+          "window": "6 pm to 8 pm",
+          "text": "reschedule",
+          "encoding": "GSM-7",
+          "units": 177,
+          "segments": 2
+        },
+        {
+          "name": "n44",
+          "window": "6 pm to 8 pm",
+          "text": "reminder_requested",
+          "encoding": "GSM-7",
+          "units": 241,
+          "segments": 2
+        },
+        {
+          "name": "n44",
+          "window": "6 pm to 8 pm",
+          "text": "reminder_owner",
+          "encoding": "GSM-7",
+          "units": 187,
+          "segments": 2
+        },
+        {
+          "name": "n44",
+          "window": "6 pm to 8 pm",
+          "text": "cancelled",
+          "encoding": "GSM-7",
+          "units": 106,
+          "segments": 1
+        },
+        {
+          "name": "n44",
+          "window": "5 pm to 9 pm",
+          "text": "confirmation",
+          "encoding": "GSM-7",
+          "units": 188,
+          "segments": 2
+        },
+        {
+          "name": "n44",
+          "window": "5 pm to 9 pm",
+          "text": "reschedule",
+          "encoding": "GSM-7",
+          "units": 177,
+          "segments": 2
+        },
+        {
+          "name": "n44",
+          "window": "5 pm to 9 pm",
+          "text": "reminder_requested",
+          "encoding": "GSM-7",
+          "units": 241,
+          "segments": 2
+        },
+        {
+          "name": "n44",
+          "window": "5 pm to 9 pm",
+          "text": "reminder_owner",
+          "encoding": "GSM-7",
+          "units": 187,
+          "segments": 2
+        },
+        {
+          "name": "n44",
+          "window": "5 pm to 9 pm",
+          "text": "cancelled",
+          "encoding": "GSM-7",
+          "units": 106,
+          "segments": 1
+        },
+        {
+          "name": "n44",
+          "window": "8:30 am to 10:30 am",
+          "text": "confirmation",
+          "encoding": "GSM-7",
+          "units": 195,
+          "segments": 2
+        },
+        {
+          "name": "n44",
+          "window": "8:30 am to 10:30 am",
+          "text": "reschedule",
+          "encoding": "GSM-7",
+          "units": 184,
+          "segments": 2
+        },
+        {
+          "name": "n44",
+          "window": "8:30 am to 10:30 am",
+          "text": "reminder_requested",
+          "encoding": "GSM-7",
+          "units": 248,
+          "segments": 2
+        },
+        {
+          "name": "n44",
+          "window": "8:30 am to 10:30 am",
+          "text": "reminder_owner",
+          "encoding": "GSM-7",
+          "units": 194,
+          "segments": 2
+        },
+        {
+          "name": "n44",
+          "window": "8:30 am to 10:30 am",
+          "text": "cancelled",
+          "encoding": "GSM-7",
+          "units": 113,
+          "segments": 1
+        },
+        {
+          "name": "n44",
+          "window": "8 a.m. to 12 p.m.",
+          "text": "confirmation",
+          "encoding": "GSM-7",
+          "units": 195,
+          "segments": 2
+        },
+        {
+          "name": "n44",
+          "window": "8 a.m. to 12 p.m.",
+          "text": "reschedule",
+          "encoding": "GSM-7",
+          "units": 184,
+          "segments": 2
+        },
+        {
+          "name": "n44",
+          "window": "8 a.m. to 12 p.m.",
+          "text": "reminder_requested",
+          "encoding": "GSM-7",
+          "units": 248,
+          "segments": 2
+        },
+        {
+          "name": "n44",
+          "window": "8 a.m. to 12 p.m.",
+          "text": "reminder_owner",
+          "encoding": "GSM-7",
+          "units": 194,
+          "segments": 2
+        },
+        {
+          "name": "n44",
+          "window": "8 a.m. to 12 p.m.",
+          "text": "cancelled",
+          "encoding": "GSM-7",
+          "units": 113,
+          "segments": 1
+        },
+        {
+          "name": "n44",
+          "window": "11 am to 1 pm",
+          "text": "confirmation",
+          "encoding": "GSM-7",
+          "units": 195,
+          "segments": 2
+        },
+        {
+          "name": "n44",
+          "window": "11 am to 1 pm",
+          "text": "reschedule",
+          "encoding": "GSM-7",
+          "units": 184,
+          "segments": 2
+        },
+        {
+          "name": "n44",
+          "window": "11 am to 1 pm",
+          "text": "reminder_requested",
+          "encoding": "GSM-7",
+          "units": 248,
+          "segments": 2
+        },
+        {
+          "name": "n44",
+          "window": "11 am to 1 pm",
+          "text": "reminder_owner",
+          "encoding": "GSM-7",
+          "units": 194,
+          "segments": 2
+        },
+        {
+          "name": "n44",
+          "window": "11 am to 1 pm",
+          "text": "cancelled",
+          "encoding": "GSM-7",
+          "units": 113,
+          "segments": 1
+        },
+        {
+          "name": "n44",
+          "window": "7 to 9",
+          "text": "confirmation",
+          "encoding": "GSM-7",
+          "units": 188,
+          "segments": 2
+        },
+        {
+          "name": "n44",
+          "window": "7 to 9",
+          "text": "reschedule",
+          "encoding": "GSM-7",
+          "units": 177,
+          "segments": 2
+        },
+        {
+          "name": "n44",
+          "window": "7 to 9",
+          "text": "reminder_requested",
+          "encoding": "GSM-7",
+          "units": 241,
+          "segments": 2
+        },
+        {
+          "name": "n44",
+          "window": "7 to 9",
+          "text": "reminder_owner",
+          "encoding": "GSM-7",
+          "units": 187,
+          "segments": 2
+        },
+        {
+          "name": "n44",
+          "window": "7 to 9",
+          "text": "cancelled",
+          "encoding": "GSM-7",
+          "units": 106,
+          "segments": 1
+        },
+        {
+          "name": "n60",
+          "window": "8 to 12",
+          "text": "confirmation",
+          "encoding": "GSM-7",
+          "units": 211,
+          "segments": 2
+        },
+        {
+          "name": "n60",
+          "window": "8 to 12",
+          "text": "reschedule",
+          "encoding": "GSM-7",
+          "units": 200,
+          "segments": 2
+        },
+        {
+          "name": "n60",
+          "window": "8 to 12",
+          "text": "reminder_requested",
+          "encoding": "GSM-7",
+          "units": 264,
+          "segments": 2
+        },
+        {
+          "name": "n60",
+          "window": "8 to 12",
+          "text": "reminder_owner",
+          "encoding": "GSM-7",
+          "units": 210,
+          "segments": 2
+        },
+        {
+          "name": "n60",
+          "window": "8 to 12",
+          "text": "cancelled",
+          "encoding": "GSM-7",
+          "units": 129,
+          "segments": 1
+        },
+        {
+          "name": "n60",
+          "window": "12 to 5",
+          "text": "confirmation",
+          "encoding": "GSM-7",
+          "units": 211,
+          "segments": 2
+        },
+        {
+          "name": "n60",
+          "window": "12 to 5",
+          "text": "reschedule",
+          "encoding": "GSM-7",
+          "units": 200,
+          "segments": 2
+        },
+        {
+          "name": "n60",
+          "window": "12 to 5",
+          "text": "reminder_requested",
+          "encoding": "GSM-7",
+          "units": 264,
+          "segments": 2
+        },
+        {
+          "name": "n60",
+          "window": "12 to 5",
+          "text": "reminder_owner",
+          "encoding": "GSM-7",
+          "units": 210,
+          "segments": 2
+        },
+        {
+          "name": "n60",
+          "window": "12 to 5",
+          "text": "cancelled",
+          "encoding": "GSM-7",
+          "units": 129,
+          "segments": 1
+        },
+        {
+          "name": "n60",
+          "window": "8 am to 12 pm",
+          "text": "confirmation",
+          "encoding": "GSM-7",
+          "units": 211,
+          "segments": 2
+        },
+        {
+          "name": "n60",
+          "window": "8 am to 12 pm",
+          "text": "reschedule",
+          "encoding": "GSM-7",
+          "units": 200,
+          "segments": 2
+        },
+        {
+          "name": "n60",
+          "window": "8 am to 12 pm",
+          "text": "reminder_requested",
+          "encoding": "GSM-7",
+          "units": 264,
+          "segments": 2
+        },
+        {
+          "name": "n60",
+          "window": "8 am to 12 pm",
+          "text": "reminder_owner",
+          "encoding": "GSM-7",
+          "units": 210,
+          "segments": 2
+        },
+        {
+          "name": "n60",
+          "window": "8 am to 12 pm",
+          "text": "cancelled",
+          "encoding": "GSM-7",
+          "units": 129,
+          "segments": 1
+        },
+        {
+          "name": "n60",
+          "window": "12 pm to 5 pm",
+          "text": "confirmation",
+          "encoding": "GSM-7",
+          "units": 211,
+          "segments": 2
+        },
+        {
+          "name": "n60",
+          "window": "12 pm to 5 pm",
+          "text": "reschedule",
+          "encoding": "GSM-7",
+          "units": 200,
+          "segments": 2
+        },
+        {
+          "name": "n60",
+          "window": "12 pm to 5 pm",
+          "text": "reminder_requested",
+          "encoding": "GSM-7",
+          "units": 264,
+          "segments": 2
+        },
+        {
+          "name": "n60",
+          "window": "12 pm to 5 pm",
+          "text": "reminder_owner",
+          "encoding": "GSM-7",
+          "units": 210,
+          "segments": 2
+        },
+        {
+          "name": "n60",
+          "window": "12 pm to 5 pm",
+          "text": "cancelled",
+          "encoding": "GSM-7",
+          "units": 129,
+          "segments": 1
+        },
+        {
+          "name": "n60",
+          "window": "1 pm to 5 pm",
+          "text": "confirmation",
+          "encoding": "GSM-7",
+          "units": 204,
+          "segments": 2
+        },
+        {
+          "name": "n60",
+          "window": "1 pm to 5 pm",
+          "text": "reschedule",
+          "encoding": "GSM-7",
+          "units": 193,
+          "segments": 2
+        },
+        {
+          "name": "n60",
+          "window": "1 pm to 5 pm",
+          "text": "reminder_requested",
+          "encoding": "GSM-7",
+          "units": 257,
+          "segments": 2
+        },
+        {
+          "name": "n60",
+          "window": "1 pm to 5 pm",
+          "text": "reminder_owner",
+          "encoding": "GSM-7",
+          "units": 203,
+          "segments": 2
+        },
+        {
+          "name": "n60",
+          "window": "1 pm to 5 pm",
+          "text": "cancelled",
+          "encoding": "GSM-7",
+          "units": 122,
+          "segments": 1
+        },
+        {
+          "name": "n60",
+          "window": "6 pm to 8 pm",
+          "text": "confirmation",
+          "encoding": "GSM-7",
+          "units": 204,
+          "segments": 2
+        },
+        {
+          "name": "n60",
+          "window": "6 pm to 8 pm",
+          "text": "reschedule",
+          "encoding": "GSM-7",
+          "units": 193,
+          "segments": 2
+        },
+        {
+          "name": "n60",
+          "window": "6 pm to 8 pm",
+          "text": "reminder_requested",
+          "encoding": "GSM-7",
+          "units": 257,
+          "segments": 2
+        },
+        {
+          "name": "n60",
+          "window": "6 pm to 8 pm",
+          "text": "reminder_owner",
+          "encoding": "GSM-7",
+          "units": 203,
+          "segments": 2
+        },
+        {
+          "name": "n60",
+          "window": "6 pm to 8 pm",
+          "text": "cancelled",
+          "encoding": "GSM-7",
+          "units": 122,
+          "segments": 1
+        },
+        {
+          "name": "n60",
+          "window": "5 pm to 9 pm",
+          "text": "confirmation",
+          "encoding": "GSM-7",
+          "units": 204,
+          "segments": 2
+        },
+        {
+          "name": "n60",
+          "window": "5 pm to 9 pm",
+          "text": "reschedule",
+          "encoding": "GSM-7",
+          "units": 193,
+          "segments": 2
+        },
+        {
+          "name": "n60",
+          "window": "5 pm to 9 pm",
+          "text": "reminder_requested",
+          "encoding": "GSM-7",
+          "units": 257,
+          "segments": 2
+        },
+        {
+          "name": "n60",
+          "window": "5 pm to 9 pm",
+          "text": "reminder_owner",
+          "encoding": "GSM-7",
+          "units": 203,
+          "segments": 2
+        },
+        {
+          "name": "n60",
+          "window": "5 pm to 9 pm",
+          "text": "cancelled",
+          "encoding": "GSM-7",
+          "units": 122,
+          "segments": 1
+        },
+        {
+          "name": "n60",
+          "window": "8:30 am to 10:30 am",
+          "text": "confirmation",
+          "encoding": "GSM-7",
+          "units": 211,
+          "segments": 2
+        },
+        {
+          "name": "n60",
+          "window": "8:30 am to 10:30 am",
+          "text": "reschedule",
+          "encoding": "GSM-7",
+          "units": 200,
+          "segments": 2
+        },
+        {
+          "name": "n60",
+          "window": "8:30 am to 10:30 am",
+          "text": "reminder_requested",
+          "encoding": "GSM-7",
+          "units": 264,
+          "segments": 2
+        },
+        {
+          "name": "n60",
+          "window": "8:30 am to 10:30 am",
+          "text": "reminder_owner",
+          "encoding": "GSM-7",
+          "units": 210,
+          "segments": 2
+        },
+        {
+          "name": "n60",
+          "window": "8:30 am to 10:30 am",
+          "text": "cancelled",
+          "encoding": "GSM-7",
+          "units": 129,
+          "segments": 1
+        },
+        {
+          "name": "n60",
+          "window": "8 a.m. to 12 p.m.",
+          "text": "confirmation",
+          "encoding": "GSM-7",
+          "units": 211,
+          "segments": 2
+        },
+        {
+          "name": "n60",
+          "window": "8 a.m. to 12 p.m.",
+          "text": "reschedule",
+          "encoding": "GSM-7",
+          "units": 200,
+          "segments": 2
+        },
+        {
+          "name": "n60",
+          "window": "8 a.m. to 12 p.m.",
+          "text": "reminder_requested",
+          "encoding": "GSM-7",
+          "units": 264,
+          "segments": 2
+        },
+        {
+          "name": "n60",
+          "window": "8 a.m. to 12 p.m.",
+          "text": "reminder_owner",
+          "encoding": "GSM-7",
+          "units": 210,
+          "segments": 2
+        },
+        {
+          "name": "n60",
+          "window": "8 a.m. to 12 p.m.",
+          "text": "cancelled",
+          "encoding": "GSM-7",
+          "units": 129,
+          "segments": 1
+        },
+        {
+          "name": "n60",
+          "window": "11 am to 1 pm",
+          "text": "confirmation",
+          "encoding": "GSM-7",
+          "units": 211,
+          "segments": 2
+        },
+        {
+          "name": "n60",
+          "window": "11 am to 1 pm",
+          "text": "reschedule",
+          "encoding": "GSM-7",
+          "units": 200,
+          "segments": 2
+        },
+        {
+          "name": "n60",
+          "window": "11 am to 1 pm",
+          "text": "reminder_requested",
+          "encoding": "GSM-7",
+          "units": 264,
+          "segments": 2
+        },
+        {
+          "name": "n60",
+          "window": "11 am to 1 pm",
+          "text": "reminder_owner",
+          "encoding": "GSM-7",
+          "units": 210,
+          "segments": 2
+        },
+        {
+          "name": "n60",
+          "window": "11 am to 1 pm",
+          "text": "cancelled",
+          "encoding": "GSM-7",
+          "units": 129,
+          "segments": 1
+        },
+        {
+          "name": "n60",
+          "window": "7 to 9",
+          "text": "confirmation",
+          "encoding": "GSM-7",
+          "units": 204,
+          "segments": 2
+        },
+        {
+          "name": "n60",
+          "window": "7 to 9",
+          "text": "reschedule",
+          "encoding": "GSM-7",
+          "units": 193,
+          "segments": 2
+        },
+        {
+          "name": "n60",
+          "window": "7 to 9",
+          "text": "reminder_requested",
+          "encoding": "GSM-7",
+          "units": 257,
+          "segments": 2
+        },
+        {
+          "name": "n60",
+          "window": "7 to 9",
+          "text": "reminder_owner",
+          "encoding": "GSM-7",
+          "units": 203,
+          "segments": 2
+        },
+        {
+          "name": "n60",
+          "window": "7 to 9",
+          "text": "cancelled",
+          "encoding": "GSM-7",
+          "units": 122,
+          "segments": 1
+        }
+      ]
+    },
+    {
+      "step": "r2 bidi subject",
+      "at": "2026-10-22T23:39:50.000Z",
+      "subject": "EMERGENCY: gas leak done x y"
+    },
+    {
+      "step": "r2 owner-created visit language",
+      "at": "2026-10-23T00:40:02.000Z",
+      "esLanguage": "es",
+      "enLanguage": null,
+      "esConfirmation": "Fixture Service: su visita queda guardada para el 24 de octubre, de 8 a. m. a 12 p. m. El negocio le confirma la hora de llegada. Responda STOP o ALTO para terminar.",
+      "enConfirmation": "Fixture Service: visit 2968ed56936c7ce082fc34bd55515e33 is saved for 2026-10-27, 8 to 12. The shop confirms arrival details directly. Reply STOP to end texts.",
+      "esAfterMove": [
+        "Fixture Service: su visita ahora es el 26 de octubre, de 12 p. m. a 5 p. m. El negocio le confirma la hora de llegada. Responda STOP o ALTO para terminar.",
+        "Fixture Service: su visita queda guardada para el 24 de octubre, de 8 a. m. a 12 p. m. El negocio le confirma la hora de llegada. Responda STOP o ALTO para terminar."
+      ],
+      "movedComplete": true,
+      "esSegments": {
+        "encoding": "GSM-7",
+        "units": 165,
+        "segments": 2
+      }
+    }
+  ],
+  "sentEmails": 52,
+  "passed": 17,
+  "total": 21
+}
