@@ -383,3 +383,24 @@ body.desk-app.guide-tour-open { overflow:hidden; }
 .desk-inbox-refresh { display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin:0 0 18px; }
 .desk-inbox-refresh[hidden] { display:none; }
 .desk-inbox-refresh p { margin:0;flex:1;min-width:180px;color:var(--ui-muted,#526176);font-size:13px;line-height:1.6; }
+
+/* 2026-11-11 Inbox triage: urgent badge, Open/Done filter, Home attention rows. Text labels carry the meaning; color only reinforces it. */
+.desk-urgency{display:inline-flex;align-items:center;gap:5px;margin:6px 0 0;padding:3px 8px;border-radius:4px;font-size:12px;font-weight:650;line-height:1.5;background:#fdecea;color:#8f1d14;border:1px solid #f2b8b1}
+.desk-urgency .ui-icon{width:14px;height:14px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.desk-urgency[data-urgency=today]{background:#fff4e0;color:#7a4300;border-color:#f1cf94}
+.desk-request-person .desk-urgency{display:flex;width:max-content}
+.desk-request-row[data-urgency=emergency]{box-shadow:inset 4px 0 0 #b42318;background:#fffafa}
+.desk-request-row[data-urgency=today]{box-shadow:inset 4px 0 0 #b26a00}
+.desk-request-filter{display:inline-flex;gap:4px;margin:16px 20px 4px;padding:4px;border:1px solid var(--ui-line);border-radius:8px;background:#fff}
+.desk-request-filter button{min-height:38px;padding:8px 14px;border:0;border-radius:6px;background:transparent;color:var(--ui-ink);font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.desk-request-filter button[aria-pressed=true]{background:#eef3fd;color:#1747b5;box-shadow:inset 0 0 0 1px #c9d7f6}
+.desk-request-filter button:focus-visible{outline:2px solid var(--ui-blue);outline-offset:2px}
+.desk-filter-count{display:inline-block;min-width:1.6em;margin-left:4px;padding:0 6px;border-radius:999px;background:#edf2f8;color:#3f5675;font-size:12px;text-align:center}
+.desk-filter-new{display:inline-block;margin-left:6px;padding:0 6px;border-radius:4px;background:#1747b5;color:#fff;font-size:11px;font-weight:700;line-height:1.6}.desk-filter-new[hidden]{display:none}
+.desk-app #needsYou>.desk-attention-row[data-urgency=emergency]{box-shadow:inset 4px 0 0 #b42318;padding-left:14px}
+.desk-app #needsYou>.desk-attention-row[data-urgency=today]{box-shadow:inset 4px 0 0 #b26a00;padding-left:14px}
+.desk-attention-head{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px}.desk-attention-head strong{font-size:14px;color:var(--ui-ink)}.desk-attention-head .desk-urgency{margin:0}
+.desk-attention-issue{margin:4px 0 2px;color:var(--ui-ink);font-size:13px;line-height:1.6}
+.desk-attention-meta{font-size:12px;color:var(--ui-muted)}
+.desk-app #todayEvents time,.desk-app #liveEvents time{font-variant-numeric:tabular-nums;color:var(--ui-muted);margin-right:4px}
+.desk-app #todayEvents .btn-pill{margin-left:6px;min-height:32px;padding:5px 10px;font-size:12px}

@@ -222,7 +222,7 @@ async function handle(req, context) {
     const serviceIntake=selfService?await serviceIntakeView(c,connections):null;
     const supportReports=selfService?supportReportViews(c):[],connectionAssistance=selfService?connectionAssistanceViews(c):{};
     const ownerResponse={
-      client: ownerView(c), ...(isSelfServiceClient(c) ? { connectionAssistance, setup: { ...serviceSetupView(c,connections,serviceOnboarding,websiteInstallation,leadConnections,serviceIntake), connectionPreparation: await connectionPreparationView(c) }, connections, leadConnections, serviceOnboarding, serviceIntake, operations: await listWorkspaceOperations(c), phoneActivation: await phoneActivationStatus(c), configurationRevision: configurationRevision(c), editRevision: workspaceEditRevision(c), supportReports, websiteInstallation, pendingVisitCreations: await pendingOwnerVisitCreations(c), aiAllowance, webAvailable: setupReadiness(c).channels.web.ready && setupReadiness(c).channels.web.active && aiAllowance.available } : {}), plan: PLANS[c.plan], usage: usageView(c, usage), bookings: ownerBookings.reverse(), leads: leads.reverse().map((l) => ({ ...l, alertWaiting: waiting.has(l.id), alertAttentionDue:attentionDue.has(l.id) })),
+      client: ownerView(c), ...(isSelfServiceClient(c) ? { connectionAssistance, setup: { ...serviceSetupView(c,connections,serviceOnboarding,websiteInstallation,leadConnections,serviceIntake), connectionPreparation: await connectionPreparationView(c) }, connections, leadConnections, serviceOnboarding, serviceIntake, operations: await listWorkspaceOperations(c), phoneActivation: await phoneActivationStatus(c), configurationRevision: configurationRevision(c), editRevision: workspaceEditRevision(c), supportReports, websiteInstallation, pendingVisitCreations: await pendingOwnerVisitCreations(c), aiAllowance, webAvailable: setupReadiness(c).channels.web.ready && setupReadiness(c).channels.web.active && aiAllowance.available } : {}), plan: PLANS[c.plan], usage: usageView(c, usage), bookings: newestFirst(ownerBookings), leads: newestFirst(leads).map((l) => ({ ...l, alertWaiting: waiting.has(l.id), alertAttentionDue:attentionDue.has(l.id) })),
       conversations: convs.sort((a,b)=>(b.updatedAt||'').localeCompare(a.updatedAt||'')).map(v=>{
         const supportReport=selfService?supportReports.find(row=>row.channel===v.channel&&row.contact===v.contact)||null:null;
         return {channel:v.channel,contact:v.contact,updatedAt:v.updatedAt,flag:supportReport?(supportReport.status==='resolved'?null:{at:supportReport.reportedAt,note:supportReport.note,by:'owner',supportReportId:supportReport.id}):v.flag||null,...(selfService?{supportReport}:{}),...(selfService&&v.channel==='web'?{reference:conversationReference(c,v.channel,v.contact),retainedMessages:v.history?.total??v.messages.length,historyComplete:v.history?.complete===true}:{}),messages:v.messages.slice(-12)};
@@ -571,6 +571,12 @@ function splitAddress(addr, defaultCity) {
 }
 
 // The portal's Today strip: this Houston day's calls, texts, bookings, and leads needing the owner.
+// Owner lists are newest first. Tenant-index listings already arrive newest first, while legacy
+// listings follow storage-key order, so a reverse cannot be right for both. This sort on createdAt
+// is the only ordering step. Ties order by record id, because a first index scan can list tied rows
+// in random storage-key order; the same data then always reads the same way. It does not mutate its input.
+const byId = (a, b) => { const x = String(a?.id || ''), y = String(b?.id || ''); return x < y ? -1 : x > y ? 1 : 0; };
+function newestFirst(rows) { return [...rows].sort((a, b) => String(b?.createdAt || '').localeCompare(String(a?.createdAt || '')) || byId(a, b)); }
 function todayStrip(c, bookings, leads, events) {
   const day = (iso) => (iso ? new Intl.DateTimeFormat("en-CA", { timeZone: "America/Chicago" }).format(new Date(iso)) : "");
   const today = day(new Date().toISOString());
