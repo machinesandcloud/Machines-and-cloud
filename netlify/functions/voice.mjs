@@ -3,7 +3,7 @@
 // them back within seconds (missed-call text-back). The owner gets a missed-call alert either way.
 // Paused or cancelled shops: the call rings the owner's cell (never the forwarded line) or hears a short message.
 // Numbers on the owner's always-ring-through list ring the cell, then record a voicemail that is texted to the owner.
-import { clientByNumber, getConversation, saveConversation, logEvent, saveClient, noteInbound } from "./lib/store.mjs";
+import { clientByNumber, getConversation, saveConversation, logEvent, saveClient, noteInbound, addRecord, addToIndex } from "./lib/store.mjs";
 import { sendSMS, notifyOwner, twilioSignatureValid, e164, optOutStatus } from "./lib/send.mjs";
 import { ACTIVE } from "./lib/config.mjs";
 import { cellIsForwardedLine } from "./lib/desk.mjs";
@@ -45,11 +45,19 @@ export default async (req) => {
   }
   const name = c.business?.name || "the office";
 
-  // A VIP voicemail just recorded: text the owner the link.
+  // A VIP voicemail just recorded: text the owner the link, and keep it as an open request in the portal
+  // so it is not only an event when the alert does not go out (voice review V4).
   if (path.endsWith("/recorded")) {
     const link = String(params.RecordingUrl || "");
-    await notifyOwner(c, `VIP voicemail from ${from || "unknown"}: ${link ? link + ".mp3" : "(no recording)"}${params.RecordingDuration ? ` (${params.RecordingDuration} s)` : ""}`, { type: "owner_note" });
-    await logEvent(c, "vip_voicemail", { from, url: link, sid: params.RecordingSid || "", seconds: Number(params.RecordingDuration) || null });
+    const seconds = Number(params.RecordingDuration) || null;
+    let alerted = false;
+    try { alerted = (await notifyOwner(c, `VIP voicemail from ${from || "unknown"}: ${link ? link + ".mp3" : "(no recording)"}${seconds ? ` (${seconds} s)` : ""}`, { type: "owner_note", settle: true })).some((r) => r?.ok); } catch (err) { console.error("vip voicemail alert", err); }
+    let leadId = "";
+    try {
+      const l = await addRecord("leads", c.slug, { customer_name: "", phone: from || "", address: "", issue: `VIP voicemail${seconds ? ` (${seconds} s)` : ""}${link ? ": " + link + ".mp3" : " (no recording)"}`.slice(0, 300), reason: "handoff", urgency: "today", wanted: "", language: "en", unsure: "", nobook_reason: "none", channel: "call", contact: from || "", status: "open", outcome: "needs_action", ownerAlerted: alerted });
+      leadId = l.id; if (from) await addToIndex("leads", c, from, l.id);
+    } catch (err) { console.error("vip voicemail lead", err); }
+    await logEvent(c, "vip_voicemail", { from, url: link, sid: params.RecordingSid || "", seconds, alerted, leadId });
     return xml(`<Say voice="Polly.Joanna">Thank you. Goodbye.</Say><Hangup/>`);
   }
 
@@ -58,7 +66,7 @@ export default async (req) => {
     const owner = esc(c.owner?.name || "the owner");
     const direct = !cellIsForwardedLine(c) && c.owner?.phone;
     const intro = direct ? `${owner} could not pick up.` : `This is ${esc(name)}.`;
-    const record = `<Say voice="Polly.Joanna">${intro} Please leave a message after the tone and ${owner} will call you back.</Say><Record maxLength="120" playBeep="true" action="${esc(sigUrl.replace(/\/api\/voice.*$/, "/api/voice/recorded"))}" method="POST"/><Say voice="Polly.Joanna">Thank you. Goodbye.</Say><Hangup/>`;
+    const record = `<Say voice="Polly.Joanna">${intro} Please leave a message for ${owner} after the tone.</Say><Record maxLength="120" playBeep="true" action="${esc(sigUrl.replace(/\/api\/voice.*$/, "/api/voice/recorded"))}" method="POST"/><Say voice="Polly.Joanna">Thank you. Goodbye.</Say><Hangup/>`;
     await logEvent(c, "vip_call", { from, rang: direct ? "cell" : "voicemail" });
     return xml(direct ? `<Dial timeout="25">${esc(c.owner.phone)}</Dial>${record}` : record);
   }
