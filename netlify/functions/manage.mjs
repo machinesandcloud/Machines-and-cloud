@@ -40,7 +40,11 @@ export default async (req, context) => {
         return reply(await revokeAccessSession(session));
       }
       const result = await supportAction(session, body);
-      await requireCurrentOperator(session);
+      try { await requireCurrentOperator(session); }
+      catch {
+        // The change is already committed. Report that receipt, without private customer data.
+        return reply({ ok: true, saved: true, refreshRequired: true, accessUnconfirmed: true, customer: null, message: 'Your change is saved. Your operator access could not be confirmed afterward, so the latest account details are not shown. Sign in again to review this account.' });
+      }
       return reply(result);
     }
     const session = await requireOperator(req);
