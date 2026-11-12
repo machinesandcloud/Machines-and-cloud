@@ -288,6 +288,15 @@ export async function eraseWorkspace({ slug, client = null, actor, reason, relea
   }
   const pending = refs.filter(ref => ref.state === 'pending');
   if (ctx.selfService && pending.length && providerCleanup !== 'retain_tombstone' && !tomb) throw new ErasureError('provider_cleanup_pending', 'Provider resources for this workspace are not confirmed released. Finish cleanup, or erase with providerCleanup "retain_tombstone" to keep their IDs in the erasure record.', 409, { providerCleanup: pending.map(ref => ({ provider: ref.provider, kind: ref.kind, id: ref.id, source: ref.source })) });
+  // C1 (QA-LIFE): claim the client row in a client CAS before the tombstone. A reopen racing this erase
+  // either committed first (this CAS sees it open and stops) or loses its own client CAS, retries and
+  // sees erasureStartedAt (workspace-lifecycle.mjs refuses reopen). A re-read alone leaves a window.
+  if (client) {
+    const claimed = await atomicUpdate('clients', ctx.slug, current => !current || workspaceTenant(current) !== ctx.tenant ? { result: true }
+      : requireClosed && !['cancelled', 'archived'].includes(current.status) ? { result: false }
+      : { value: { ...current, erasureStartedAt: current.erasureStartedAt || iso() }, result: true });
+    if (!claimed) throw new ErasureError('cancel_required', 'Cancel service before erasing this workspace. Its records are unchanged.');
+  }
   const attempt = { id: randomUUID(), at: iso(), actor: String(actor || '').slice(0, 254), reason: cleanReason };
   tomb = await atomicUpdate(ERASURES, tombKey, current => {
     const base = current || { version: 1, slug: ctx.slug, tenant: ctx.tenant, emailHash: ctx.emailHash, selfService: ctx.selfService, requestedAt: attempt.at, counts: {}, retained: {}, attempts: [] };
