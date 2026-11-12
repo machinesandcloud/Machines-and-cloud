@@ -6,6 +6,7 @@ import { runAgent, toApiMessages } from "./lib/agent.mjs";
 import { buildSystemPrompt, BOOK_VISIT, NOTIFY_OWNER, UPDATE_VISIT, ACTIVE } from "./lib/config.mjs";
 import { bookVisit, flagLead, ownerCommand, upcomingBookings, confirmVisit, rescheduleVisit, cancelRequest, noteReviewReply, noteConsentReply, when, dateEs, winEs } from "./lib/desk.mjs";
 import { sendSMS, twilioSignatureValid, e164, recordOptOut, clearOptOut, notifyOwner, optOutStatus } from "./lib/send.mjs";
+import { classifySMSKeyword } from "./lib/sms-keywords.mjs";
 
 export const config = { path: "/api/sms" };
 
@@ -14,7 +15,7 @@ const twiml = (msg) => new Response(`<?xml version="1.0" encoding="UTF-8"?><Resp
 const HELP = 'Each alert names the one reply it needs: "ok REF" (acknowledge), "called REF" (you reached them), "otw REF" (on the way), "done REF" (finished), "cancel REF". A bare "ok", "called", "otw", or "done" works when only one job fits. Also: "invoice REF amount" (payment reminders), "paid REF", "quote REF amount".';
 const STOP_RE = /^\s*(stop|stopall|unsubscribe|end|quit|cancel|revoke|opt\s*out|optout|alto|parar|cancelar|basta|detener)\b[\s.!]*$/i;
 const STOP_PHRASE = /\b(stop texting|stop messaging|do not text|don't text|no more texts|remove me|no me (escriban?|manden?|env[ií]en?|texteen?)( m[aá]s)?( mensajes)?|no m[aá]s mensajes|dejen? de (escribir|mandar|enviar)|no quiero m[aá]s mensajes)\b/i;
-const SPANISH_STOP = /\b(alto|parar|cancelar|basta|detener|no me (escriban?|manden?|env[ií]en?|texteen?)|no m[aá]s mensajes|dejen? de|no quiero m[aá]s)\b/i;
+const SPANISH_STOP = /\b(alto|parar|cancelar|baja|basta|detener|no me (escriban?|manden?|env[ií]en?|texteen?)|no m[aá]s mensajes|dejen? de|no quiero m[aá]s)\b/i;
 const START_RE = /^\s*(start|unstop|yes|empezar|iniciar|s[ií])\s*[.!]*\s*$/i;
 // Rev 4 (QA-12 r3): Twilio's default long-code opt-out keywords, matched exactly (whitespace only). Twilio confirms and
 // blocks these at the sender itself; phrases, ALTO/PARAR/BASTA and punctuated forms rely on our store alone.
@@ -48,7 +49,9 @@ export default async (req) => {
   // Opt-out and opt-in come before anything else (FCC: any reasonable means), including texts
   // from the owner's phone and from always-ring-through numbers. The owner's phone uses only the
   // whole-message keywords, so a command or free-text reply is never read as an opt-out.
-  if (STOP_RE.test(body) || !isOwner && STOP_PHRASE.test(body)) {
+  // The shared classifier (proposal 01) adds normalized keywords; the legacy phrases stay for customers.
+  const keyword = classifySMSKeyword(body);
+  if (STOP_RE.test(body) || keyword === "stop" || !isOwner && STOP_PHRASE.test(body)) {
     // Already out: one confirmation is all CTIA allows, so repeats are silent. An unreadable store (null) confirms again.
     if ((await optOutStatus(from)) === true) return twiml("");
     const stored = await recordOptOut(from, c.slug, body.slice(0, 80));
@@ -69,7 +72,7 @@ export default async (req) => {
     return twiml(`${name}: you're unsubscribed and will get no more texts from this number.${told} Reply START to resume.`);
   }
   const optState = await optOutStatus(from), isOptedOut = optState !== false, unknownState = optState === null;
-  if (isOptedOut && (unknownState ? START_KEYWORD.test(body) : START_RE.test(body))) { await clearOptOut(from); await logEvent(c, "opt_in", { from }); return twiml(/^\s*(empezar|iniciar|s[ií])/i.test(body) ? `${name}: volverá a recibir nuestros mensajes. Responda STOP o ALTO cuando quiera.` : `${name}: you're subscribed again. Reply STOP any time.`); }
+  if (isOptedOut && ((unknownState ? START_KEYWORD.test(body) : START_RE.test(body)) || keyword === "start")) { await clearOptOut(from); await logEvent(c, "opt_in", { from }); return twiml(/^\s*(empezar|iniciar|s[ií])/i.test(body) ? `${name}: volverá a recibir nuestros mensajes. Responda STOP o ALTO cuando quiera.` : `${name}: you're subscribed again. Reply STOP any time.`); }
 
   // Owner commands. An opted-out owner's command still runs, but no text is sent back.
   if (isOwner) {
