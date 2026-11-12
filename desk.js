@@ -1204,7 +1204,23 @@
   }
   function action(a, extra) { return apiRequest('POST', Object.assign({ action: a }, extra || {})); }
   function confirmAction(name, message) { return action(name).then(function () { toast(message); return load(); }).catch(function (error) { $('setupMessage').textContent = error.message; toast(error.message); }); }
-  $('testSms').addEventListener('click', function () { action('test_sms').then(function (r) { $('smsText').textContent = r.ok ? 'Test text request accepted. Check your phone for delivery.' : 'No test text was sent.'; }).catch(function (error) { $('smsText').textContent = error.message; }); });
+  // Test text: a definite answer from the server (a 2xx/4xx JSON reply with ok:false or an error code) means nothing was
+  // sent, so say so with its reason. Anything else (lost response, timeout, 5xx, unreadable body) is unknown: the text may
+  // already be on its way. The button stays disabled while the request runs so one press sends at most one text.
+  var testSmsReasons = { no_owner_phone: 'Add your contact cell in your business details first.', disabled: 'Texting is not set up for this workspace yet.', channel_not_active: 'This workspace does not send texts.', missing: 'Add your contact cell in your business details first.', opted_out: 'Your cell number has opted out of texts from this front desk.' };
+  function testSmsOutcome(error) {
+    if (error.status === 401 || error.status === 403) return error.message;
+    if (typeof error.status === 'number' && error.status < 500 && error.code !== undefined || error.status === 200) { var reason = testSmsReasons[error.code] || (typeof error.code === 'string' && error.code && !/^[a-z0-9_]+$/.test(error.code) ? 'The texting provider refused it: ' + error.code.slice(0, 200).replace(/\.?$/, '.') : ''); return 'No test text was sent.' + (reason ? ' ' + reason : ''); }
+    return 'We couldn’t confirm whether the test text was sent; check your phone before trying again.';
+  }
+  $('testSms').addEventListener('click', function () {
+    var button = $('testSms'), status = $('smsText'), label = button.textContent; if (button.disabled || button.dataset.busy) return;
+    button.dataset.busy = 'true'; button.disabled = true; button.setAttribute('aria-busy', 'true'); button.textContent = 'Sending test text…'; status.setAttribute('role', 'status'); status.textContent = '';
+    action('test_sms').then(function () { status.textContent = 'Test text request accepted. Check your phone for delivery.'; }).catch(function (error) { status.textContent = testSmsOutcome(error); }).finally(function () {
+      delete button.dataset.busy; button.removeAttribute('aria-busy'); button.textContent = label; button.disabled = false;
+      if (button.isConnected && (!document.activeElement || document.activeElement === document.body)) button.focus({ preventScroll: true });
+    });
+  });
 
   $('cfg').elements['phone.forwarding'].addEventListener('change', function (ev) { document.getElementById('transferGroup').style.display = data?.client?.onboarding?.version === 1 || ev.target.value === 'all' ? 'block' : 'none'; });
   var cfgBaseline = null, cfgBusy = false, cfgConflict = null, cfgFence = 0, cfgClosed = false, cfgEventValues = new WeakMap();
