@@ -118,7 +118,7 @@ export async function queueManagedRecord(c, record, kind = "bookings") {
   if (scope) return; // This internal phase proves owner email only, not customer SMS.
   if (kind !== "bookings" || !saved.phone || !["booked", "confirmed", "on_the_way", "cancelled"].includes(saved.status)) return;
   const cancelled = saved.status === "cancelled";
-  await queueManagedMessage(current, { eventId: `${eventId}:customer`, channel: "sms", purpose: cancelled ? "cancelled" : "confirmation", to: saved.phone,
+  if (cancelled || !await confirmationAlreadySent(current, saved)) await queueManagedMessage(current, { eventId: `${eventId}:customer`, channel: "sms", purpose: cancelled ? "cancelled" : "confirmation", to: saved.phone,
     body: cancelled ? `${current.business.name}: visit ${saved.id} has been cancelled.` : `${current.business.name}: visit ${saved.id} is saved for ${saved.date}, ${saved.window}. The shop confirms arrival details directly. Reply STOP to end texts.`, source, preserveSnapshot: true });
   if (!cancelled && saved.date && saved.window) {
     const start = arrivalInstant(saved.date, saved.window);
@@ -127,6 +127,21 @@ export async function queueManagedRecord(c, record, kind = "bookings") {
       if (due > Date.now()) await queueManagedMessage(current, { eventId: `${eventId}:${purpose}`, channel: "sms", purpose, to: saved.phone, body: `${current.business.name}: reminder of ${requestedVisit ? "your requested visit" : "visit"} ${saved.id} on ${saved.date}, ${saved.window}.${requestedVisit ? " The shop confirms arrival details directly." : ""} Reply here if anything changes. Reply STOP to end texts.`, source, dueAt: new Date(due).toISOString(), preserveSnapshot: true });
     }
   }
+}
+// A details-only owner edit (name, address, issue, or back to an earlier number) keeps the date,
+// window and status, so the confirmation text would be identical. Skip it when an earlier revision
+// in the same run of edits already sent (or is sending) a confirmation to this same number. A failed or
+// never-started confirmation is superseded by the revision change, so a new one is queued.
+async function confirmationAlreadySent(c, saved) {
+  const history = Array.isArray(saved.ownerVisitHistory) ? saved.ownerVisitHistory : [];
+  if (saved.ownerVisitMutation?.action !== "edit_visit") return false;
+  let record = saved;
+  for (let i = history.length - 1, steps = 0; i >= 0 && history[i]?.action === "edit_visit" && steps < 50; i--, steps++) {
+    record = { ...record, ...(history[i].previous || {}) };
+    const job = await strictRead(STORE, messageId(c, "sms", `bookings:${saved.id}:${revision(record)}:customer`));
+    if (job && job.purpose === "confirmation" && job.to === saved.phone && (job.providerId && job.state !== "failed" || ["sending", "accepted", "delivered", "uncertain"].includes(job.state))) return true;
+  }
+  return false;
 }
 async function inspectSource(job, c) {
   if(job.followup){const {inspectRequestFollowup}=await import("./request-followup.mjs");if(!await inspectRequestFollowup(c,job))return false;}

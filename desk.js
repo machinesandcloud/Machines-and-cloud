@@ -82,7 +82,7 @@
       return result;
     } finally { clearTimeout(timeout); }
   }
-  var visitPending = null, visitSelected = null, visitBusy = false, visitOpener = null, visitCalendarReturn = null;
+  var visitPending = null, visitSelected = null, visitBusy = false, visitOpener = null, visitCalendarReturn = null, visitEditing = false, visitPrefill = null;
   var scheduleRows = [], scheduleRange = null, scheduleController = null, scheduleSequence = 0;
   function scheduleEmit(name, detail) { document.dispatchEvent(new CustomEvent(name, { detail: detail })); }
   function scheduleReset() { scheduleSequence++; if(scheduleController)scheduleController.abort(); scheduleController=null; scheduleRows=[];scheduleRange=null; }
@@ -108,7 +108,7 @@
     finally {clearTimeout(timeout);if(current())scheduleController=null;}
   }
   document.addEventListener('mc:schedule-range',function(event){readSchedule(event.detail);});
-  document.addEventListener('mc:schedule-open-visit',function(event){if(!leaving&&data)openVisit(event.detail?.id||null,event.detail?.date);});
+  document.addEventListener('mc:schedule-open-visit',function(event){if(!leaving&&data)openVisit(event.detail?.id||null,event.detail?.date,event.detail?.prefill||null);});
   document.addEventListener('mc:schedule-block-time',function(event){
     if(leaving||!data||availabilityBusy)return;var detail=event.detail||{},date=$('availabilityDate');
     if(!/^\d{4}-\d{2}-\d{2}$/.test(detail.date||''))return;
@@ -124,14 +124,17 @@
   function customerVisitRequest(visit) { return !!(data && data.client && data.client.onboarding && data.client.onboarding.version === 1 && visit && visit.status === 'booked' && ['web','sms','call','voice'].indexOf(visit.channel) >= 0); }
   function visitStatusLabel(visit) { return customerVisitRequest(visit) ? 'Visit requested' : visit && visit.status || ''; }
   function visitDetailsText(visit) { return 'Ref '+visit.id+' · '+visitStatusLabel(visit)+' · '+visitDateLabel(visit.date)+' · '+visit.window+'\n'+(visit.issue || '')+' · '+(visit.address || 'Address not saved')+(customerVisitRequest(visit)?'\nContact the customer to confirm the arrival window.':''); }
-  function visitFieldsDisabled(disabled) { ['visitName','visitPhone','visitAddress','visitIssue','visitDate','visitWindow','visitCancelConfirm','saveVisit','cancelVisit'].forEach(function(id){$(id).disabled=disabled;}); }
-  function visitErrorsClear() { ['visitName','visitPhone','visitAddress','visitIssue','visitDate','visitWindow'].forEach(function(id){$(id).removeAttribute('aria-invalid');}); ['visitNameError','visitPhoneError','visitAddressError','visitIssueError','visitDateError','visitWindowError'].forEach(function(id){$(id).textContent='';}); }
-  function visitFieldError(field,message) { var id=({date:'visitDate',window:'visitWindow',customer_name:'visitName',phone:'visitPhone',address:'visitAddress',issue:'visitIssue'})[field] || 'visitWindow'; $(id).setAttribute('aria-invalid','true'); $(id+'Error').textContent=message; $(id).focus(); }
+  var VISIT_EDIT_FIELDS=[['visitEditName','customer_name'],['visitEditPhone','phone'],['visitEditAddress','address'],['visitEditIssue','issue']];
+  function visitFieldsDisabled(disabled) { ['visitName','visitPhone','visitAddress','visitIssue','visitDate','visitWindow','visitCancelConfirm','saveVisit','cancelVisit','visitCompleteRequest','visitEditName','visitEditPhone','visitEditAddress','visitEditIssue','saveVisitDetails','discardVisitDetails','editVisitDetails'].forEach(function(id){$(id).disabled=disabled;}); }
+  function visitErrorsClear() { ['visitName','visitPhone','visitAddress','visitIssue','visitDate','visitWindow','visitEditName','visitEditPhone','visitEditAddress','visitEditIssue'].forEach(function(id){$(id).removeAttribute('aria-invalid');$(id+'Error').textContent='';}); }
+  function visitFieldError(field,message) { var id=(visitEditing?{customer_name:'visitEditName',phone:'visitEditPhone',address:'visitEditAddress',issue:'visitEditIssue'}:{date:'visitDate',window:'visitWindow',customer_name:'visitName',phone:'visitPhone',address:'visitAddress',issue:'visitIssue'})[field] || (visitEditing?'visitEditName':'visitWindow'); $(id).setAttribute('aria-invalid','true'); $(id+'Error').textContent=message; $(id).focus(); }
+  // A value copied from a request can exceed a visit field; maxlength does not apply to copied text.
+  function visitTooLong(pairs){var long=pairs.filter(function(pair){var node=$(pair[0]);return node.maxLength>0&&node.value.trim().length>node.maxLength;});long.slice().reverse().forEach(function(pair){var node=$(pair[0]);visitFieldError(pair[1],'Shorten this to '+node.maxLength+' characters or fewer (now '+node.value.trim().length+').');});return long.length>0;}
   var visitStorageKey='mc-owner-visit-pending-v1:'+slug;
   var visitSessionTag=crypto.subtle.digest('SHA-256',new TextEncoder().encode(ownerSession || key || '')).then(function(bytes){return Array.from(new Uint8Array(bytes)).map(function(value){return value.toString(16).padStart(2,'0');}).join('');});
   async function storedVisitInput(){try{var row=JSON.parse(sessionStorage.getItem(visitStorageKey));return row && row.sessionTag===await visitSessionTag ? row.input:null;}catch(error){return null;}}
   async function storeVisitInput(input){var generation=portalGeneration;try{var sessionTag=await visitSessionTag;if(leaving || generation!==portalGeneration)return false;if(!input){sessionStorage.removeItem(visitStorageKey);return true;}sessionStorage.setItem(visitStorageKey,JSON.stringify({sessionTag:sessionTag,input:input}));return true;}catch(error){return false;}}
-  async function openVisit(id, selectedDate) {
+  async function openVisit(id, selectedDate, prefill) {
     if(visitBusy||!data||$('visitDialog').open)return;
     var row=scheduleRows.find(function(item){return item.id===id;})||(data.bookings || []).find(function(item){return item.id===id;});
     if(!id){var creation=(data.pendingVisitCreations || [])[0];row={ownerVisit:{id:null,canChange:true},pendingVisitChange:creation || null};}
@@ -141,19 +144,36 @@
     var generation=portalGeneration, stored=await storedVisitInput(); if(leaving || generation!==portalGeneration)return;
     visitOpener=document.activeElement; visitSelected=Object.assign({},row.ownerVisit,{canChange:row.ownerVisit.canChange&&mutable}); visitPending=row.pendingVisitChange ? row.pendingVisitChange.input : stored && (stored.visitId===id || !id && stored.action==='create_visit') ? stored:null; visitBusy=false; $('closeVisit').disabled=false; visitErrorsClear();
     var creating=!id || !!(visitPending && visitPending.action==='create_visit');
+    // A request prefill applies only to a fresh Add visit; a retained unconfirmed creation always wins.
+    visitPrefill=creating && !visitPending && prefill && typeof prefill==='object' ? prefill : creating && visitPending && visitPending.requestId ? {requestId:visitPending.requestId,customer_name:visitPending.customer_name} : null;
+    visitEditing=!creating && !!(visitPending && visitPending.action==='edit_visit');
     $('newVisitFields').hidden=!creating; $('saveVisit').textContent=creating?'Save visit':'Save new time'; $('cancelVisit').parentElement.hidden=creating;
-    var values=creating && visitPending || {}; [['visitName','customer_name'],['visitPhone','phone'],['visitAddress','address'],['visitIssue','issue']].forEach(function(pair){$(pair[0]).value=values[pair[1]] || '';});
+    var values=creating && (visitPending || visitPrefill) || {}; [['visitName','customer_name'],['visitPhone','phone'],['visitAddress','address'],['visitIssue','issue']].forEach(function(pair){$(pair[0]).value=values[pair[1]] || '';});
+    $('visitFromRequest').hidden=!visitPrefill; $('visitCompleteRequest').checked=!visitPending || visitPending.completeRequest!==false;
+    var wanted=visitPrefill && visitPrefill.wanted ? String(visitPrefill.wanted) : ''; $('visitRequestWanted').hidden=!wanted; $('visitRequestWanted').textContent=wanted?'Customer asked for: '+wanted:''; if(visitPrefill && visitPrefill.language)$('visitRequestWanted').lang=visitPrefill.language; else $('visitRequestWanted').removeAttribute('lang');
+    var editValues=visitEditing ? visitPending : visitSelected; VISIT_EDIT_FIELDS.forEach(function(pair){$(pair[0]).value=!creating && editValues[pair[1]] || '';});
+    $('visitEditForm').hidden=!visitEditing; $('editVisitDetails').hidden=creating || visitEditing || !!visitPending || !visitSelected.canChange; $('editVisitDetails').setAttribute('aria-expanded',visitEditing?'true':'false');
     $('visitTitle').textContent=creating?'Add a customer visit':visitSelected.customer_name || 'Customer visit';
     $('visitDetails').textContent=creating?'Save the agreed visit details. Availability is checked before the visit is created.':visitDetailsText(Object.assign({},row,visitSelected));
-    var pending=visitPending, date=pending && pending.date || visitSelected.date || (!id&&/^\d{4}-\d{2}-\d{2}$/.test(selectedDate||'')?selectedDate:''), windowValue=pending && pending.window || visitSelected.window;
+    var pending=visitPending, date=pending && pending.date || visitSelected.date || (!id&&/^\d{4}-\d{2}-\d{2}$/.test(selectedDate||'')?selectedDate:''), windowValue=pending && pending.window || visitSelected.window || visitPrefill && visitPrefill.window;
     visitCalendarReturn=visitOpener?.closest('#scheduleCalendar')?{calendar:true,id:id||null,date:date||null}:null;
     $('visitDate').value=date || ''; var windows=(data.client.windows || []).slice(); if(windowValue && windows.indexOf(windowValue)<0)windows.push(windowValue);
     $('visitWindow').innerHTML=windows.map(function(window){return '<option value="'+esc(window)+'">'+esc(window)+'</option>';}).join(''); $('visitWindow').value=windowValue;
-    $('visitCancelConfirm').checked=!!(pending && pending.action==='cancel_visit'); $('visitChangeForm').hidden=!visitSelected.canChange && !pending;
+    $('visitCancelConfirm').checked=!!(pending && pending.action==='cancel_visit'); $('visitChangeForm').hidden=visitEditing || !visitSelected.canChange && !pending;
     visitFieldsDisabled(!!pending); $('retryVisit').hidden=!pending; $('visitMessage').textContent=pending?'A saved change still needs confirmation. Retry it using the same details.':visitSelected.canChange?(creating?"We’ll check availability when you save.":'Choose a listed arrival window. Full or blocked windows keep the original visit unchanged.'):'This visit is retained for your records.';
-    $('visitDialog').showModal();document.dispatchEvent(new CustomEvent('mc:visit-open',{detail:{visitId:creating?null:visitSelected.id,visitRevision:creating?null:visitSelected.revision,configurationRevision:data.configurationRevision,pending:!!pending,canChange:visitSelected.canChange}})); $('closeVisit').focus();
+    $('visitDialog').showModal();document.dispatchEvent(new CustomEvent('mc:visit-open',{detail:{visitId:creating?null:visitSelected.id,visitRevision:creating?null:visitSelected.revision,configurationRevision:data.configurationRevision,pending:!!pending || visitEditing,canChange:visitSelected.canChange,preferredWindow:visitPrefill && visitPrefill.window || null}})); $('closeVisit').focus();
   }
-  function closeVisit() { if(visitBusy)return; $('visitDialog').close(); if(visitOpener && visitOpener.isConnected)visitOpener.focus(); }
+  // A save re-renders lists, so the opener may be replaced. Return to the same record's
+  // current control, then to the page heading, instead of dropping focus to the document.
+  // With inbox triage a request completed by this visit moves to Done: show the list that now holds it, then focus its row.
+  function visitReturnTarget() { var o=visitOpener; if(o && !o.isConnected && o.dataset){ if(o.dataset.visit)o=document.querySelector('.visit-open[data-visit="'+CSS.escape(o.dataset.visit)+'"]'); else if(o.dataset.requestOpen){showRequestFor(o.dataset.requestOpen);o=document.querySelector('[data-request-open="'+CSS.escape(o.dataset.requestOpen)+'"]');} else o=null; } return o && o.isConnected && !o.disabled && o.getClientRects().length ? o : $('pageTitle'); }
+  function closeVisit() { if(visitBusy)return; $('visitDialog').close(); var target=visitReturnTarget(); if(target)target.focus(); }
+  function visitEditMode(on){ if(visitBusy)return; visitEditing=on; visitErrorsClear(); $('visitEditForm').hidden=!on; $('visitChangeForm').hidden=on || !visitSelected.canChange; $('editVisitDetails').hidden=on; $('editVisitDetails').setAttribute('aria-expanded',on?'true':'false');
+    if(on){VISIT_EDIT_FIELDS.forEach(function(pair){$(pair[0]).value=visitSelected[pair[1]] || '';}); $('visitMessage').textContent=''; document.dispatchEvent(new CustomEvent('mc:visit-busy',{detail:{busy:false,pending:true}})); $('visitEditName').focus();}
+    else {document.dispatchEvent(new CustomEvent('mc:visit-busy',{detail:{busy:false,pending:false}})); $('editVisitDetails').focus();} }
+  $('editVisitDetails').addEventListener('click',function(){if(visitSelected && visitSelected.canChange && !visitPending)visitEditMode(true);});
+  $('discardVisitDetails').addEventListener('click',function(){if(!visitPending)visitEditMode(false);});
+  $('visitEditForm').addEventListener('submit',function(event){event.preventDefault();saveVisitChange('edit_visit');});
   $('closeVisit').addEventListener('click',closeVisit);
   $('visitDialog').addEventListener('close',function(){var target=visitCalendarReturn;visitCalendarReturn=null;if(target&&!leaving)scheduleEmit('mc:schedule-visit-closed',target);});
   $('visitDialog').addEventListener('cancel',function(event){if(visitBusy)event.preventDefault();});
@@ -168,6 +188,16 @@
       var missing=[['visitName','customer_name'],['visitPhone','phone'],['visitAddress','address'],['visitIssue','issue']].filter(function(field){return !$(field[0]).value.trim();});
       if(missing.length){missing.forEach(function(field){$(field[0]).setAttribute('aria-invalid','true');$(field[0]+'Error').textContent='Complete this customer detail.';});$('visitMessage').textContent=missing.length===1?'Complete the highlighted customer detail.':'Complete the '+missing.length+' highlighted customer details.';$(missing[0][0]).focus();return;}
     }
+    if(!visitPending && actionName==='edit_visit'){
+      var missing=VISIT_EDIT_FIELDS.filter(function(pair){return !$(pair[0]).value.trim();});
+      // Mark every missing required detail, then focus the first one.
+      if(missing.length){missing.slice().reverse().forEach(function(pair){visitFieldError(pair[1],'Complete this customer detail.');});return;}
+      if(visitTooLong(VISIT_EDIT_FIELDS))return;
+      var editInput={action:'edit_visit',expectedRevision:data.configurationRevision,submissionId:visitSubmissionId(),visitId:visitSelected.id,expectedVisitRevision:visitSelected.revision};
+      VISIT_EDIT_FIELDS.forEach(function(pair){editInput[pair[1]]=$(pair[0]).value.trim();});
+      if(VISIT_EDIT_FIELDS.every(function(pair){return pair[1]==='phone' ? String(visitSelected.phone||'').replace(/\D/g,'').slice(-10)===editInput.phone.replace(/\D/g,'').slice(-10) : String(visitSelected[pair[1]]||'')===editInput[pair[1]];})){$('visitMessage').textContent='Change at least one detail before saving, or choose Keep current details.';$('visitMessage').focus();return;}
+      visitPending=editInput;
+    }
     if(!visitPending){
       if(actionName==='create_visit' || actionName==='reschedule_visit') {
         if(!$('visitDate').value || !$('visitDate').checkValidity()){visitFieldError('date','Choose a real visit date.');return;}
@@ -175,10 +205,11 @@
       } else if(!$('visitCancelConfirm').checked){$('visitMessage').textContent='Confirm that you want to cancel this visit first.'; $('visitCancelConfirm').focus();return;}
       visitPending={action:actionName,expectedRevision:data.configurationRevision,submissionId:visitSubmissionId()};
       if(actionName!=='create_visit'){visitPending.visitId=visitSelected.id;visitPending.expectedVisitRevision=visitSelected.revision;}
-      else {for(var field of [['visitName','customer_name'],['visitPhone','phone'],['visitAddress','address'],['visitIssue','issue']]){if(!$(field[0]).value.trim()){visitPending=null;visitFieldError(field[1],'Complete this customer detail.');return;}visitPending[field[1]]=$(field[0]).value.trim();}}
+      else {if(visitTooLong([['visitName','customer_name'],['visitPhone','phone'],['visitAddress','address'],['visitIssue','issue']])){visitPending=null;return;}for(var field of [['visitName','customer_name'],['visitPhone','phone'],['visitAddress','address'],['visitIssue','issue']]){if(!$(field[0]).value.trim()){visitPending=null;visitFieldError(field[1],'Complete this customer detail.');return;}visitPending[field[1]]=$(field[0]).value.trim();}}
       if(actionName==='create_visit' || actionName==='reschedule_visit'){visitPending.date=$('visitDate').value;visitPending.window=$('visitWindow').value;}
+      if(actionName==='create_visit' && visitPrefill && visitPrefill.requestId){visitPending.requestId=visitPrefill.requestId;visitPending.completeRequest=$('visitCompleteRequest').checked;}
     }
-    visitBusy=true;document.dispatchEvent(new CustomEvent('mc:visit-busy',{detail:{busy:true,pending:!!visitPending}})); visitFieldsDisabled(true); $('retryVisit').hidden=true; $('closeVisit').disabled=true; $('visitMessage').textContent='Confirming your saved change…';
+    visitBusy=true;document.dispatchEvent(new CustomEvent('mc:visit-busy',{detail:{busy:true,pending:!!visitPending}})); $('visitMessage').textContent='Confirming your saved change…'; if($('visitDialog').contains(document.activeElement))$('visitMessage').focus(); visitFieldsDisabled(true); $('retryVisit').hidden=true; $('closeVisit').disabled=true;
     try {
       var retained=await storeVisitInput(visitPending); if(leaving || generation!==portalGeneration)return;
       if(!retained)$('visitMessage').textContent='Keep this page open while the change is confirmed. Browser recovery storage is unavailable.';
@@ -186,16 +217,18 @@
       var source=scheduleRows.find(function(row){return row.id===result.visit.id;})||(data.bookings||[]).find(function(row){return row.id===result.visit.id;})||{};
       $('visitTitle').textContent=result.visit.customer_name||'Customer visit';
       $('visitDetails').textContent=visitDetailsText(Object.assign({},source,result.visit));
-      $('visitMessage').textContent=result.message+(result.calendar?' Calendar: '+result.calendar.detail:' Calendar delivery is not confirmed.')+' Customer notification delivery is not confirmed.';
-      if(result.complete){visitPending=null;await storeVisitInput(null);if(leaving || generation!==portalGeneration)return; $('visitChangeForm').hidden=true; $('retryVisit').hidden=true;}else{$('retryVisit').hidden=false; $('visitMessage').textContent+=' Retry the saved change to finish preparing its delivery.';}
+      $('visitMessage').textContent=result.message+(result.calendar?' Calendar: '+result.calendar.detail:' Calendar delivery is not confirmed.')+' Customer notification delivery is not confirmed.'+visitDetailsNote(result)+visitRequestNote(result);
+      if(result.complete){visitPending=null;await storeVisitInput(null);if(leaving || generation!==portalGeneration)return; $('visitChangeForm').hidden=true; $('visitEditForm').hidden=true; $('visitFromRequest').hidden=true; $('retryVisit').hidden=true; visitEditing=false; visitPrefill=null;}else{$('retryVisit').hidden=false; $('visitMessage').textContent+=' Retry the saved change to finish preparing its delivery.';}
       $('visitMessage').focus(); await load();
     } catch(error) {
       if(leaving || generation!==portalGeneration)return;
       $('visitMessage').textContent=error.message;
-      if(error.status && error.status<500){visitPending=null;await storeVisitInput(null);if(leaving || generation!==portalGeneration)return;visitFieldsDisabled(false);if(error.field==='window'||error.field==='date'||['configuration_changed','visit_changed','visit_not_found'].includes(error.code))document.dispatchEvent(new CustomEvent('mc:visit-availability-invalid',{detail:{reason:error.code}}));if(error.field)visitFieldError(error.field,error.message);else $('visitMessage').focus();}
+      if(error.status && error.status<500){visitPending=null;await storeVisitInput(null);if(leaving || generation!==portalGeneration)return;visitFieldsDisabled(false);if(visitEditing){$('editVisitDetails').disabled=false;if(error.code==='visit_changed')load();}if(error.field==='window'||error.field==='date'||['configuration_changed','visit_changed','visit_not_found'].includes(error.code))document.dispatchEvent(new CustomEvent('mc:visit-availability-invalid',{detail:{reason:error.code}}));if(error.field)visitFieldError(error.field,error.message);else $('visitMessage').focus();}
       else {$('retryVisit').hidden=false; $('visitMessage').textContent+=' Retry saved change safely; the original submission will be reused.';}
     } finally {if(!leaving && generation===portalGeneration){visitBusy=false;document.dispatchEvent(new CustomEvent('mc:visit-busy',{detail:{busy:false,pending:!!visitPending}})); $('closeVisit').disabled=false;}}
   }
+  function visitDetailsNote(result){var d=result.details;if(!d||!d.phoneChanged)return '';return ({agreed:' The new callback number has its own permission for appointment texts, so reminders go there.',stopped:' The new callback number opted out of texts, so no appointment texts will go to it.',not_recorded:' The new callback number has not agreed to appointment texts, so no reminders will be texted to it. Permission from the previous number was not carried over.'})[d.textPermission]||'';}
+  function visitRequestNote(result){var r=result.request;if(!r)return '';if(r.completed)return ' Linked to the request, and its follow-up is marked complete.';return ' Linked to the request.'+(({already_completed:' Its follow-up was already complete.',review_required:' The request changed since your last review, so its follow-up was left open. Review it in Inbox.',request_changed:' Another action was saved on the request, so its follow-up was left open. Review it in Inbox.',not_requested:' Its follow-up is still open.'})[r.reason]||' Its follow-up could not be confirmed as complete. Check the request in Inbox.');}
   $('newVisit').addEventListener('click',function(){openVisit(null);});
   $('visitChangeForm').addEventListener('submit',function(event){event.preventDefault();saveVisitChange('reschedule_visit');});
   $('cancelVisit').addEventListener('click',function(){saveVisitChange('cancel_visit');});

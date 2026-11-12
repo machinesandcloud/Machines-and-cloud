@@ -342,7 +342,7 @@ async function handle(req, context) {
       try { return json(await startWebsiteCheck(c, session, b), 200, { 'Cache-Control': 'no-store' }); }
       catch (error) { if (error instanceof WebsiteInstallationError) return json({ error: error.code, message: error.message, ...(error.field ? { field: error.field } : {}) }, error.status, { 'Cache-Control': 'no-store' }); throw error; }
     }
-    if (["create_visit", "reschedule_visit", "cancel_visit", "visit_availability"].includes(b?.action)) {
+    if (["create_visit", "reschedule_visit", "cancel_visit", "edit_visit", "visit_availability"].includes(b?.action)) {
       if (!selfService || !accessOriginAllowed(origin)) return json({ error: "forbidden" }, 403, { "Cache-Control": "no-store" });
       try { return json(await (b.action==='visit_availability'?previewOwnerVisitAvailability(c,session,b):changeOwnerVisit(c, session, b)), 200, { "Cache-Control": "no-store", "Netlify-CDN-Cache-Control":"no-store" }); }
       catch (error) {

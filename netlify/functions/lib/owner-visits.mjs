@@ -10,11 +10,14 @@ import { deliveryTenant } from './managed-consent.mjs';
 import { requestedDate, listedWindow, isElapsedWindow, canonicalWindow, assertAppointmentWindow, AvailabilityInputError } from './availability.mjs';
 import { queueCalendarBooking } from './calendar-delivery.mjs';
 import { queueManagedRecord } from './managed-delivery.mjs';
+import { managedSMSConsent } from './managed-consent.mjs';
+import { requestSource, readRequestFollowthrough, updateRequestFollowthrough, RequestFollowthroughError } from './request-followthrough.mjs';
 const hash = value => createHash('sha256').update(value).digest('hex');
 const canonical = value => Array.isArray(value) ? value.map(canonical) : value && typeof value === 'object' ? Object.fromEntries(Object.keys(value).sort().map(key => [key, canonical(value[key])])) : value;
 const stamp = () => new Date().toISOString();
 const active = status => ['booked', 'confirmed', 'on_the_way'].includes(status);
 const OPERATIONS = 'owner_visit_operations', LOCKS = 'owner_visit_locks';
+const DETAIL_FIELDS = ['customer_name', 'phone', 'address', 'issue'];
 export class OwnerVisitError extends Error {
   constructor(code, message, status = 409, field = null, retryAt = null) { super(message); this.code = code; this.status = status; this.field = field; this.retryAt = retryAt; }
 }
@@ -28,7 +31,7 @@ const storedRefusal = (op, final = false) => new OwnerVisitError(op.error.code, 
 const reopenable = op => transientRefusal(op) && Date.parse(op.retryAt) <= Date.now();
 export const ownerVisitRevision = booking => hash(JSON.stringify(canonical(booking)));
 export function ownerVisitView(booking) {
-  return { id: booking.id, customer_name: booking.customer_name, phone: booking.phone, issue: booking.issue, address: booking.address, date: booking.date, window: booking.window, status: booking.status, revision: ownerVisitRevision(booking), canChange: active(booking.status) };
+  return { id: booking.id, customer_name: booking.customer_name, phone: booking.phone, issue: booking.issue, address: booking.address, date: booking.date, window: booking.window, status: booking.status, revision: ownerVisitRevision(booking), canChange: active(booking.status), sourceRequestId: booking.sourceRequestId || null, detailsEditedAt: booking.detailsEditedAt || null };
 }
 // A customer actor is a provider-verified phone on a managed channel. Its caller has
 // already matched the visit's saved number; the expected visit revision binds that match.
@@ -69,9 +72,21 @@ export async function previewOwnerVisitAvailability(client,session,body){
   return {ok:true,availability:{timezone:found.timezone,from:found.from,days:found.days,openings:found.openings,configurationRevision:body.expectedRevision,visitId:visit?.id||null,visitRevision:visit?body.expectedVisitRevision:null,checkedAt,expiresAt,source:found.calendar?'workspace_and_google':'workspace',message:'Available when checked. We check again when you save; choosing a time does not reserve it.'}};
 }
 function shape(body) {
-  const allowed = ['action', 'visitId', 'expectedRevision', 'expectedVisitRevision', 'submissionId', ...(['create_visit','reschedule_visit'].includes(body.action) ? ['date', 'window'] : []), ...(body.action === 'create_visit' ? ['customer_name','phone','address','issue'] : [])];
-  if (!['create_visit', 'reschedule_visit', 'cancel_visit'].includes(body.action) || JSON.stringify(body).length > 1800 || Object.keys(body).some(key => !allowed.includes(key)) || !/^[a-zA-Z0-9_-]{1,80}$/.test(body.visitId || '') || !/^[a-f0-9]{64}$/.test(body.expectedRevision || '') || body.action !== 'create_visit' && !/^[a-f0-9]{64}$/.test(body.expectedVisitRevision || '') || !/^[a-f0-9]{32,64}$/i.test(body.submissionId || '')) throw new OwnerVisitError('invalid_request', 'Refresh the visit and try again.', 400);
+  const allowed = ['action', 'visitId', 'expectedRevision', 'expectedVisitRevision', 'submissionId', ...(['create_visit','reschedule_visit'].includes(body.action) ? ['date', 'window'] : []), ...(['create_visit','edit_visit'].includes(body.action) ? DETAIL_FIELDS : []), ...(body.action === 'create_visit' ? ['requestId','completeRequest'] : [])];
+  if (!['create_visit', 'reschedule_visit', 'cancel_visit', 'edit_visit'].includes(body.action) || JSON.stringify(body).length > 1800 || Object.keys(body).some(key => !allowed.includes(key)) || !/^[a-zA-Z0-9_-]{1,80}$/.test(body.visitId || '') || !/^[a-f0-9]{64}$/.test(body.expectedRevision || '') || body.action !== 'create_visit' && !/^[a-f0-9]{64}$/.test(body.expectedVisitRevision || '') || !/^[a-f0-9]{32,64}$/i.test(body.submissionId || '') || body.requestId !== undefined && !/^[a-zA-Z0-9_-]{1,80}$/.test(body.requestId) || body.completeRequest !== undefined && (typeof body.completeRequest !== 'boolean' || body.requestId === undefined)) throw new OwnerVisitError('invalid_request', 'Refresh the visit and try again.', 400);
 }
+// Customer details are validated identically for a new visit and a details edit.
+function validateDetails(body) {
+  for (const [field, limit] of [['customer_name',120],['address',300],['issue',500]]) {
+    const label = field === 'customer_name' ? 'name' : field;
+    if (typeof body[field] !== 'string' || !body[field].trim()) throw new OwnerVisitError('invalid_visit', `Add the customer's ${label}.`, 400, field);
+    // A request copied into Add visit can be longer than a visit allows; say so instead of "Add".
+    if (body[field].length > limit) throw new OwnerVisitError('invalid_visit', `Shorten the customer's ${label} to ${limit} characters or fewer.`, 400, field);
+  }
+  if (typeof body.phone !== 'string' || !/^[+()\d\s.-]+$/.test(body.phone) || !/^\+1[2-9]\d{2}[2-9]\d{6}$/.test(e164(body.phone) || '')) throw new OwnerVisitError('invalid_visit', 'Enter a valid customer callback number.', 400, 'phone');
+}
+const detailValues = body => ({ customer_name: body.customer_name.trim(), phone: e164(body.phone), address: body.address.trim(), issue: body.issue.trim() });
+const changedDetails = (saved, next) => DETAIL_FIELDS.filter(field => String(saved?.[field] ?? '') !== next[field]);
 function owns(booking, client) { return booking?.slug === client.slug && booking.delivery?.tenantIdentity === deliveryTenant(client) && belongsToWorkspace(client, booking); }
 async function releaseLock(key, operationId) {
   await atomicUpdate(LOCKS, key, row => row?.operationId === operationId ? { value: { ...row, operationId: null, completedAt: stamp() } } : {});
@@ -94,7 +109,8 @@ async function finishAbort(client, operation, booking, key, lockKey) {
   return new OwnerVisitError(failure.code, failure.message, failure.status, failure.field);
 }
 function result(operation, booking) {
-  return { ok: true, localSaved: true, complete: operation.state === 'complete', visit: ownerVisitView(booking), calendar: operation.calendar || null, notifications: operation.notifications || 'pending', message: `Visit ${operation.input.action === 'create_visit' ? 'added' : operation.input.action === 'cancel_visit' ? 'cancelled' : 'rescheduled'} in your workspace. Calendar and customer notifications have separate delivery status.` };
+  const action = operation.input.action;
+  return { ok: true, localSaved: true, complete: operation.state === 'complete', visit: ownerVisitView(booking), calendar: operation.calendar || null, notifications: operation.notifications || 'pending', message: action === 'edit_visit' ? 'Visit details updated in your workspace. The visit time is unchanged. Calendar and customer notifications have separate delivery status.' : `Visit ${action === 'create_visit' ? 'added' : action === 'cancel_visit' ? 'cancelled' : 'rescheduled'} in your workspace. Calendar and customer notifications have separate delivery status.` };
 }
 export async function pendingOwnerVisitCreations(client) {
   const prefix = `${client.slug}/${deliveryTenant(client)}/`, keys = await list(OPERATIONS, prefix);
@@ -118,14 +134,74 @@ export async function pendingOwnerVisitChange(client, visitId) {
   return { state: operation.state, input: operation.input };
 }
 export const ownerVisitId = (client, submissionId) => hash(`${deliveryTenant(client)}:${submissionId.toLowerCase()}`).slice(0,32);
+// Text permission belongs to one number. A changed callback number is reported with its own
+// saved permission; nothing is copied from the previous number.
+async function textPermission(client, phone) {
+  const row = await managedSMSConsent(client, phone);
+  return !row ? 'not_recorded' : row.suppressed ? 'stopped' : row.transactional ? 'agreed' : 'not_recorded';
+}
+// A visit booked from a request records the existing request-close action once. The
+// deterministic action id makes a replayed visit response return the same receipt.
+async function closeLinkedRequest(client, session, body, visit) {
+  const operationId = hash(`request-close:${deliveryTenant(client)}:${body.submissionId.toLowerCase()}`).slice(0, 32);
+  try {
+    const { request } = await readRequestFollowthrough(client, session, body.requestId, operationId);
+    if (request.receipt?.id === operationId) return { requestId: body.requestId, completed: true, operationId };
+    if (request.state.completedAt) return { requestId: body.requestId, completed: false, reason: 'already_completed' };
+    if (request.reviewRequired) return { requestId: body.requestId, completed: false, reason: 'review_required' };
+    if (!request.canChange) return { requestId: body.requestId, completed: false, reason: 'read_only' };
+    await updateRequestFollowthrough(client, session, { action: 'request_followthrough', requestId: body.requestId, sourceRevision: request.sourceRevision, expectedRevision: request.revision, operationId, type: 'complete', resolution: 'resolved', note: `Visit booked for ${visit.date} · ${visit.window} (ref ${visit.id}).` });
+    return { requestId: body.requestId, completed: true, operationId };
+  } catch (error) {
+    if (error.status === 401 || error.status === 403) throw error;
+    return { requestId: body.requestId, completed: false, reason: error instanceof RequestFollowthroughError && error.status < 500 ? (error.code === 'request_changed' ? 'request_changed' : error.code) : 'unconfirmed' };
+  }
+}
 export async function changeOwnerVisit(client, session, originalBody) {
+  const outcome = await changeOwnerVisitCore(client, session, originalBody), body = originalBody;
+  if (body.action === 'edit_visit' && outcome?.visit) {
+    const operationId = hash(`${deliveryTenant(client)}:${String(body.submissionId).toLowerCase()}`);
+    const history = (await strictRead('bookings', `${client.slug}/${outcome.visit.id}`))?.ownerVisitHistory?.find(entry => entry.id === operationId);
+    const changed = history?.changed || [];
+    return { ...outcome, details: { changed, phoneChanged: changed.includes('phone'), textPermission: await textPermission(client, outcome.visit.phone) } };
+  }
+  if (body.action === 'create_visit' && body.requestId && outcome?.localSaved) return { ...outcome, request: body.completeRequest ? await closeLinkedRequest(client, session, body, outcome.visit) : { requestId: body.requestId, completed: false, reason: 'not_requested' } };
+  return outcome;
+}
+const CHANGED_ELSEWHERE = 'This visit changed in another tab or by your front desk. Your edits are kept here; close and reopen the visit to see the latest details.';
+// A details edit reuses the operation, lock, source snapshot and conditional booking write of
+// every owner change. It keeps the date, window and capacity reservation, so it claims nothing.
+async function writeVisitDetails(client, session, body, { booking, operation, key, lockKey, operationId }) {
+  let current = await authority(client, session, body.expectedRevision);
+  if (!owns(booking, current) || ownerVisitRevision(booking) !== body.expectedVisitRevision || !active(booking.status)) throw new OwnerVisitError('visit_changed', CHANGED_ELSEWHERE);
+  operation = await operationChange(key, row => row.source ? row : { ...row, source: booking, mutationAt: stamp() });
+  if (operation.state === 'rejected') { await releaseLock(lockKey, operationId); throw new OwnerVisitError(operation.error.code, operation.error.message, operation.error.status, operation.error.field); }
+  if (operation.state === 'complete') return { booking: await strictRead('bookings', `${client.slug}/${body.visitId}`), operation, current };
+  const saved = await atomicUpdate('bookings', `${client.slug}/${body.visitId}`, async row => {
+    current = await authority(client, session, body.expectedRevision, { checkRevision: false });
+    if (!owns(row, current)) throw new OwnerVisitError('visit_not_found', 'This visit is no longer available.', 404);
+    if (row.ownerVisitMutation?.id === operationId) return { result: row };
+    current = await authority(client, session, body.expectedRevision);
+    const latest = await strictRead(OPERATIONS, key);
+    if (latest?.state === 'rejected') throw new OwnerVisitError(latest.error.code, latest.error.message, latest.error.status, latest.error.field);
+    if (latest?.state === 'complete') throw new Error('A concurrent retry already completed this visit');
+    if (ownerVisitRevision(row) !== body.expectedVisitRevision || !active(row.status)) throw new OwnerVisitError('visit_changed', CHANGED_ELSEWHERE);
+    const next = detailValues(body), changed = changedDetails(row, next);
+    if (!changed.length) throw new OwnerVisitError('no_change', 'Change at least one detail before saving.', 400);
+    const pick = record => Object.fromEntries(changed.map(field => [field, record[field] ?? null]));
+    const value = { ...row, ...next, detailsEditedAt: operation.mutationAt, updatedAt: operation.mutationAt, ownerVisitMutation: { id: operationId, action: body.action, at: operation.mutationAt },
+      ownerVisitHistory: [...(row.ownerVisitHistory || []), { id: operationId, action: body.action, at: operation.mutationAt, actor: session.email, changed, previous: pick(row), next: pick(next) }] };
+    return { value, result: value };
+  });
+  return { booking: saved, operation, current };
+}
+async function changeOwnerVisitCore(client, session, originalBody) {
   const body = originalBody?.action === 'create_visit' ? { ...originalBody, visitId: ownerVisitId(client, String(originalBody.submissionId || '')) } : originalBody;
   shape(body);
-  const creating = body.action === 'create_visit';
-  if (creating) {
-    for (const [field, limit] of [['customer_name',120],['address',300],['issue',500]]) if (typeof body[field] !== 'string' || !body[field].trim() || body[field].length > limit) throw new OwnerVisitError('invalid_visit', `Add the customer's ${field === 'customer_name' ? 'name' : field}.`, 400, field);
-    if (typeof body.phone !== 'string' || !/^[+()\d\s.-]+$/.test(body.phone) || !/^\+1[2-9]\d{2}[2-9]\d{6}$/.test(e164(body.phone) || '')) throw new OwnerVisitError('invalid_visit', 'Enter a valid customer callback number.', 400, 'phone');
-  }
+  const creating = body.action === 'create_visit', editing = body.action === 'edit_visit';
+  if (creating || editing) validateDetails(body);
+  // Customer actors (managed SMS/call) may only move or cancel; a details edit is the owner's alone.
+  if (editing && session?.customer) throw new OwnerVisitError('forbidden', 'Only the shop can edit visit details.', 403);
   const tenant = deliveryTenant(client), operationId = hash(`${tenant}:${body.submissionId.toLowerCase()}`), key = `${client.slug}/${tenant}/${operationId}`, lockKey = `${client.slug}/${tenant}/${body.visitId}`;
   const input = { ...body, submissionId: body.submissionId.toLowerCase() }, digest = hash(JSON.stringify(canonical(input)));
   let operation = await strictRead(OPERATIONS, key);
@@ -150,6 +226,16 @@ export async function changeOwnerVisit(client, session, originalBody) {
       if (!existing || existing.date !== body.date || canonicalWindow(existing.window) !== canonicalWindow(body.window)) {
         try { assertAppointmentWindow(current, body.date, body.window); } catch (error) { if (!(error instanceof AvailabilityInputError)) throw error; throw new OwnerVisitError(error.code, error.message, 409, 'window'); }
       }
+    }
+    if (editing) {
+      const existing = await strictRead('bookings', `${client.slug}/${body.visitId}`);
+      if (!owns(existing, current) || !active(existing.status)) throw new OwnerVisitError('visit_not_found', 'This visit can no longer be edited. Refresh it first.', 404);
+      if (ownerVisitRevision(existing) !== body.expectedVisitRevision) throw new OwnerVisitError('visit_changed', CHANGED_ELSEWHERE);
+      if (!changedDetails(existing, detailValues(body)).length) throw new OwnerVisitError('no_change', 'Change at least one detail before saving.', 400);
+    }
+    if (creating && body.requestId) {
+      const lead = await requestSource(current, body.requestId).catch(() => null);
+      if (!lead || lead.websiteSetupCheck || lead.simulation) throw new OwnerVisitError('request_not_found', 'This request is no longer available. Add the visit without linking it.', 404);
     }
     operation = await atomicUpdate(OPERATIONS, key, row => {
       if (row && row.digest !== digest) throw new OwnerVisitError('submission_conflict', 'This submission was already used for a different change.');
@@ -178,6 +264,7 @@ export async function changeOwnerVisit(client, session, originalBody) {
     let booking = await strictRead('bookings', `${client.slug}/${body.visitId}`);
     if (!creating && !owns(booking, current) || creating && booking && !owns(booking, current)) throw new OwnerVisitError('visit_not_found', 'This visit is no longer available.', 404);
     if (booking?.ownerVisitAbortFence === operationId && booking.ownerVisitMutation?.id !== operationId) throw await finishAbort(current, operation, booking, key, lockKey);
+    if (editing && booking?.ownerVisitMutation?.id !== operationId) ({ booking, operation, current } = await writeVisitDetails(client, session, body, { booking, operation, key, lockKey, operationId }));
     if (booking?.ownerVisitMutation?.id !== operationId) {
       current = await authority(client, session, body.expectedRevision);
       if (creating ? !!booking : ownerVisitRevision(booking) !== body.expectedVisitRevision || !active(booking.status)) throw new OwnerVisitError('visit_changed', 'This visit changed. Refresh its details before trying again.');
@@ -200,7 +287,7 @@ export async function changeOwnerVisit(client, session, originalBody) {
         const capacity = await strictRead('index', capacityKey(client));
         if (capacity?.mutations?.[body.visitId] !== operationId) throw new Error('Visit capacity ownership could not be confirmed');
         if (creating ? !!saved : ownerVisitRevision(saved) !== body.expectedVisitRevision || !active(saved.status)) throw new OwnerVisitError('visit_changed', 'This visit changed. Refresh its details before trying again.');
-        const source = saved || { id: body.visitId, slug: client.slug, createdAt: operation.mutationAt, customer_name: body.customer_name.trim(), phone: e164(body.phone), address: body.address.trim(), issue: body.issue.trim(), status: 'booked', outcome: 'booked', channel: 'owner', customerType: 'new', managedActionId: operationId, delivery: { mode: 'portal_only', ownerContactConfirmed: false, tenantIdentity: tenant } };
+        const source = saved || { id: body.visitId, slug: client.slug, createdAt: operation.mutationAt, customer_name: body.customer_name.trim(), phone: e164(body.phone), address: body.address.trim(), issue: body.issue.trim(), status: 'booked', outcome: 'booked', channel: 'owner', customerType: 'new', managedActionId: operationId, ...(body.requestId ? { sourceRequestId: body.requestId } : {}), delivery: { mode: 'portal_only', ownerContactConfirmed: false, tenantIdentity: tenant } };
         const value = { ...source, ...(cancel ? { status: 'cancelled', cancelledAt: operation.mutationAt } : { date: claim.date, dateSaid: claim.date, window: claim.window, rescheduledAt: operation.mutationAt }), updatedAt: operation.mutationAt,
           ownerVisitMutation: { id: operationId, action: body.action, at: operation.mutationAt }, ownerVisitHistory: [...(source.ownerVisitHistory || []), { action: body.action, at: operation.mutationAt, actor: actorLabel(session), ...(session.customer ? { customerReason: session.customer.reason || '' } : {}), previous: saved ? { date: saved.date, window: saved.window, status: saved.status } : null, next: { date: cancel ? source.date : claim.date, window: cancel ? source.window : claim.window, status: cancel ? 'cancelled' : source.status } }] };
         return { value, result: value };
@@ -208,8 +295,9 @@ export async function changeOwnerVisit(client, session, originalBody) {
     }
     // A thrown write may already have committed. Only this exact marker can recover it.
     if (!owns(booking, current) || booking.ownerVisitMutation?.id !== operationId) throw new Error('Visit outcome is uncertain');
-    const capacity = await strictRead('index', capacityKey(client)), token = capacity?.mutations?.[booking.id];
-    if (token === operationId) {
+    const capacity = editing ? null : await strictRead('index', capacityKey(client)), token = capacity?.mutations?.[booking.id];
+    if (editing) { /* No capacity was claimed; the reservation for date/window is unchanged. */ }
+    else if (token === operationId) {
       const claim = capacity.stableClaims?.[booking.id];
       if (!claim || claim.token !== operationId) throw new Error('Visit capacity recovery is unavailable');
       if (body.action === 'cancel_visit') await finishBookingWindow(client, booking.id, { ...claim, release: true });
