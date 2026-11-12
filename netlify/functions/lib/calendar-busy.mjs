@@ -12,7 +12,11 @@ import { addDays, canonicalWindow, isoDateValid } from './availability.mjs';
 export const CALENDAR_BUSY_FIELDS='timeZone,nextPageToken,items(id,status,transparency,start,end,extendedProperties/private,attendees(self,responseStatus),recurrence)';
 const STORE='calendar_busy', ZONE='America/Chicago', TTL=60000, FRESH=5000, MAX_PAGES=4;
 const hash=v=>createHash('sha256').update(v).digest('hex');
-const fail=()=>{throw new CalendarError('calendar_busy_unavailable','Calendar availability could not be confirmed. Offer an owner callback; do not promise an arrival window.',503);};
+// superseded (the losing read's generation): a newer concurrent read of the same range owns the cache; this result is not authoritative.
+const fail=(superseded,observed)=>{throw Object.assign(new CalendarError('calendar_busy_unavailable','Calendar availability could not be confirmed. Offer an owner callback; do not promise an arrival window.',503),Number.isSafeInteger(superseded)?{superseded:true,readGeneration:superseded,...(Array.isArray(observed)?{observed}:{})}:{});};
+// Generation order is request order, not Google answer order: a newer generation's GET can answer before ours.
+// Adopt a newer row only if it still contains every busy interval our own completed read observed.
+const covers=(row,seen)=>seen.every(e=>row.intervals.some(r=>r.id===e.id&&r.start===e.start&&r.end===e.end&&r.owner===e.owner));
 export function calendarWallInstant(date,minutes=0,zone=ZONE) {
   if(!isoDateValid(date)||!Number.isInteger(minutes)||minutes<0||minutes>1440)fail();
   if(minutes===1440)return calendarWallInstant(addDays(date,1),0,zone);
@@ -63,7 +67,8 @@ async function calendarRequired(c) {
   const selected=current.onboarding?.desiredChannels?.includes('calendar'),owned=retained?.tenantIdentity===workspaceTenant(c);
   return selected||(owned&&!['not_connected','disconnected'].includes(retained.status));
 }
-export async function calendarBusyProjection(c,date,days,{fresh=false,accessToken,deadline=Date.now()+15000}={}) {
+const usable=(row,from,to,scope,age)=>row&&row.version===1&&row.from===from&&row.to===to&&row.tenant===scope.tenant&&row.connectionId===scope.connectionId&&row.policyDigest===scope.policyDigest&&Number.isFinite(row.checkedAt)&&row.checkedAt<=Date.now()&&Date.now()-row.checkedAt<age&&Array.isArray(row.intervals)&&row.intervals.length<=1000&&row.intervals.every(e=>typeof e.id==='string'&&e.id&&Number.isFinite(e.start)&&Number.isFinite(e.end)&&e.end>e.start&&(e.owner===null||/^[a-f0-9]{64}$/.test(e.owner)));
+export async function calendarBusyProjection(c,date,days,{fresh=false,accessToken,deadline=Date.now()+15000,adoptAfter,adoptUntil,adoptSeen=[]}={}) {
   if(!supportedWorkspace(c))return null; // Preserve legacy/manual scheduling.
   if(!await calendarRequired(c))return null;
   const connection=await getCalendarConnection(c.slug),policy=calendarExecutionPolicy();
@@ -73,8 +78,15 @@ export async function calendarBusyProjection(c,date,days,{fresh=false,accessToke
   const scope={tenant:workspaceTenant(c),configurationRevision:configurationRevision(c),connectionId:connection.connectionId,targetId:connection.targetId,grantEpoch:connection.grantEpoch,policyDigest:policy.digest},from=calendarWallInstant(date),to=calendarWallInstant(addDays(date,days));
   const key=c.slug+'/'+hash(JSON.stringify([scope,date,days]));
   await authority(c,scope);
+  // Adopt, never request: wait (until adoptUntil) for the completed newer read of this exact scope and day that
+  // superseded read adoptAfter, and return it only while fresh. No generation bump and no Google request.
+  // Polls are counted from real 25 ms sleeps (at most 200, 5 s), so a stopped clock cannot hold the request open.
+  if(adoptAfter!==undefined){
+    if(!Number.isSafeInteger(adoptAfter)||adoptAfter<1||!Number.isFinite(adoptUntil)||!Array.isArray(adoptSeen))fail();
+    for(let polls=Math.min(200,Math.max(1,Math.ceil((adoptUntil-Date.now())/25)));;){const row=await strictRead(STORE,key);if(usable(row,from,to,scope,FRESH)&&Number.isSafeInteger(row.readGeneration)&&row.readGeneration>adoptAfter&&covers(row,adoptSeen)){await authority(c,scope);if(!usable(row,from,to,scope,FRESH))fail();return {...row,scope};}if(--polls<=0||Date.now()>=adoptUntil)fail(adoptAfter);await new Promise(resolve=>setTimeout(resolve,25));}
+  }
   const cached=await strictRead(STORE,key);
-  if(!fresh&&cached&&cached.version===1&&cached.from===from&&cached.to===to&&cached.tenant===scope.tenant&&cached.connectionId===scope.connectionId&&cached.policyDigest===scope.policyDigest&&Number.isFinite(cached.checkedAt)&&cached.checkedAt<=Date.now()&&Date.now()-cached.checkedAt<TTL&&Array.isArray(cached.intervals)&&cached.intervals.length<=1000&&cached.intervals.every(e=>typeof e.id==='string'&&e.id&&Number.isFinite(e.start)&&Number.isFinite(e.end)&&e.end>e.start&&(e.owner===null||/^[a-f0-9]{64}$/.test(e.owner))))return {...cached,scope};
+  if(!fresh&&usable(cached,from,to,scope,TTL))return {...cached,scope};
   const generation=await atomicUpdate(STORE,key,previous=>{if(previous?.requestGeneration!==undefined&&(!Number.isSafeInteger(previous.requestGeneration)||previous.requestGeneration<1))fail();const n=(previous?.requestGeneration||0)+1;return {value:{...previous,requestGeneration:n},result:n};});
   const token=accessToken||await googleAccessToken(c.slug,connection.connectionId,{deadline}),intervals=[];
   let pageToken=null,zone=null;const seen=new Set();
@@ -85,7 +97,7 @@ export async function calendarBusyProjection(c,date,days,{fresh=false,accessToke
     if(!response.ok||!Array.isArray(data.items)||data.items.length>250||typeof data.timeZone!=='string'||!data.timeZone||zone&&zone!==data.timeZone)fail();
     zone=data.timeZone;calendarWallInstant(date,0,zone); // Validate IANA timezone even for an empty result.
     for(const item of data.items){const e=normalizedEvent(item,zone);if(e&&e.end>from&&e.start<to){if(seen.has(e.id))fail();seen.add(e.id);intervals.push(e);}}
-    if(!data.nextPageToken){await authority(c,scope);const value={version:1,tenant:scope.tenant,connectionId:scope.connectionId,policyDigest:scope.policyDigest,from,to,checkedAt:Date.now(),intervals,requestGeneration:generation};await atomicUpdate(STORE,key,previous=>{if(previous?.requestGeneration!==generation)fail();return {value};});return {...value,scope};}
+    if(!data.nextPageToken){await authority(c,scope);const value={version:1,tenant:scope.tenant,connectionId:scope.connectionId,policyDigest:scope.policyDigest,from,to,checkedAt:Date.now(),intervals,requestGeneration:generation,readGeneration:generation};await atomicUpdate(STORE,key,previous=>{if(previous?.requestGeneration!==generation)fail(generation,intervals);return {value};});return {...value,scope};}
     if(typeof data.nextPageToken!=='string'||data.nextPageToken.length>2048||data.nextPageToken===pageToken)fail();pageToken=data.nextPageToken;
   }
   fail(); // Incomplete pagination must never become an empty calendar.

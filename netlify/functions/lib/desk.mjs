@@ -294,6 +294,24 @@ async function savedRecordEvidence(ctx, kind, record) {
   if (typeof ctx.onSavedRecord !== 'function') return;
   try { await ctx.onSavedRecord(kind, record); } catch { console.error('website_installation_evidence_unavailable', kind); }
 }
+// A Calendar read that lost to a concurrent read of the same day (concurrentRead) is not a
+// refusal: reserveBookingWindow returned before its capacity CAS, so nothing was claimed. Admit
+// again through the same CAS, capacity and Calendar gates: first by adopting the newer read that
+// superseded this one (same scope and day, fresh, no new Calendar request; waits about one more
+// read), else with a new fresh read; bounded, after which the conservative calendar_unavailable
+// answer stands.
+// A re-read is started only within this elapsed budget, so a call/SMS turn adds at most about one
+// extra Calendar read beyond it (voice tool calls time out at 15 s; each read has its own deadline).
+const ADMIT_REREAD_BUDGET_MS = 3000, ADOPT_GRACE_MS = 150;
+async function admitBookingWindow(...args) {
+  const started = Date.now();
+  for (let attempt = 0; ; attempt++) {
+    let claim = await reserveBookingWindow(...args);
+    if (claim.full && claim.concurrentRead && Number.isSafeInteger(claim.readGeneration)) claim = await reserveBookingWindow(...args.slice(0, 5), { ...args[5], adoptAfter: claim.readGeneration, adoptSeen: claim.observed, adoptUntil: Math.min(started + ADMIT_REREAD_BUDGET_MS, Date.now() + claim.readMs + ADOPT_GRACE_MS) });
+    if (!claim.full || !claim.concurrentRead || attempt >= 3 || Date.now() - started >= ADMIT_REREAD_BUDGET_MS) return claim;
+    await new Promise((resolve) => setTimeout(resolve, 20 * (attempt + 1) + Math.floor(Math.random() * 40)));
+  }
+}
 export async function bookVisit(c, input, ctx = {}) {
   await assertCurrentWorkspace(c);
   const portalOnly = isSelfServiceClient(c);
@@ -311,7 +329,7 @@ export async function bookVisit(c, input, ctx = {}) {
       return previous;
     }
   }
-  const taken = await reserveBookingWindow(c, bookingId, input.date, input.window, undefined, stable ? { mutationId: ctx.managedActionId } : {});
+  const taken = await admitBookingWindow(c, bookingId, input.date, input.window, undefined, stable ? { mutationId: ctx.managedActionId } : {});
   if (taken.full) {
     if (taken.reason === "full") await logEvent(c, "window_full", { date: taken.availability?.from || normalizeDate(esc(input.date)), window: esc(input.window), capacity: taken.capacity });
     return { full: true, reason: taken.reason, message: taken.availability ? fullMessage(c, esc(input.date), esc(input.window), taken.availability, taken.reason) : taken.message || fullMessage(c, esc(input.date), esc(input.window)) };
@@ -675,7 +693,7 @@ export async function rescheduleVisit(c, b, date, window) {
   const nd = date === undefined ? b.date : date;
   const nw = window === undefined ? b.window : window;
   const from = ["booked", "confirmed", "on_the_way"].includes(b.status) && b.date && b.window ? b : undefined;
-  const claim = await reserveBookingWindow(c, b.id, nd, nw, from);
+  const claim = await admitBookingWindow(c, b.id, nd, nw, from);
   if (claim.full) return { full: true, reason: claim.reason, message: claim.availability ? fullMessage(c, nd, nw, claim.availability, claim.reason) : claim.message || fullMessage(c, nd, nw) };
   const old = when(b);
   const moved = { ...b, date: claim.date, window: claim.window, status: "booked", confirmedAt: null };

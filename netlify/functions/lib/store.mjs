@@ -453,7 +453,14 @@ async function initialCapacity(target) {
   let bookings;
   if (supportedWorkspace(client)) {
     const found = await listWorkspaceRecords(client, 'bookings', RECORD_INDEX_LIMIT);
-    if (found.listing.incomplete) throw new Error('Booking history needs review before availability can be confirmed');
+    if (found.listing.incomplete) {
+      // A concurrent first claim can commit this capacity row, then its booking locator, while this CAS
+      // callback still holds the absent row it read. That committed row is authoritative: hand it back so the
+      // caller's create-only write fails and the CAS retries on it. Only a still-absent row needs review.
+      const committed = await atomicUpdate('index', capacityKey(client), row => ({ result: row }));
+      if (committed) return validateCapacity(client, committed);
+      throw new Error('Booking history needs review before availability can be confirmed');
+    }
     bookings = found.records;
     const old = await atomicUpdate('index', `capacity:${slug}`, row => ({ result: row }));
     const byId = new Map(bookings.map(booking => [booking.id, booking]));
@@ -565,7 +572,7 @@ export async function bookingWindowTaken(c, date, window) {
     return { ...(!current ? { value: state } : {}), result: { full: blocked || count >= capacity, count, capacity, ...(blocked ? { blocked: true } : {}) } };
   });
 }
-export async function reserveBookingWindow(c, bookingId, date, window, from, { requireExisting = false, mutationId = null } = {}) {
+export async function reserveBookingWindow(c, bookingId, date, window, from, { requireExisting = false, mutationId = null, adoptAfter, adoptUntil, adoptSeen } = {}) {
   c = await currentAppointmentWorkspace(c);
   if (mutationId !== null && !/^[a-f0-9]{64}$/.test(mutationId)) throw new Error("Invalid booking mutation identity");
   // Replay the exact already-admitted immutable claim before revalidating a new schedule.
@@ -592,8 +599,9 @@ export async function reserveBookingWindow(c, bookingId, date, window, from, { r
   let calendar=null,calendarTools;
   if(!requireExisting) {
     calendarTools=await import('./calendar-busy.mjs');
-    try{calendar=await calendarTools.calendarBusyProjection(c,targetDate,1,{fresh:true});}
-    catch(error){if(!String(error.code||'').startsWith('calendar_'))throw error;return {full:true,reason:'calendar_unavailable',message:'Nothing was booked. Calendar availability could not be confirmed. Offer an owner callback instead of promising a window.'};}
+    const readStarted=Date.now(); // adoptAfter: use the newer concurrent read that superseded that generation, without a new read.
+    try{calendar=await calendarTools.calendarBusyProjection(c,targetDate,1,adoptAfter===undefined?{fresh:true}:{fresh:true,adoptAfter,adoptUntil,adoptSeen});}
+    catch(error){if(!String(error.code||'').startsWith('calendar_'))throw error;return {full:true,reason:'calendar_unavailable',message:'Nothing was booked. Calendar availability could not be confirmed. Offer an owner callback instead of promising a window.',...(error.superseded?{concurrentRead:true,readGeneration:error.readGeneration,readMs:Date.now()-readStarted,observed:error.observed}:{})};}
   }
   return atomicUpdate("index", capacityKey(c), async (current) => {
     const state = validateCapacity(c, current) || await initialCapacity(c);

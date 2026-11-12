@@ -158,6 +158,10 @@ export async function changeOwnerVisit(client, session, originalBody) {
     const value = { operationId, tenantIdentity: tenant, visitId: body.visitId };
     return { value, result: value };
   });
+  // Set when this attempt's Calendar read lost to a concurrent read of the same day. That is
+  // not a refusal of the submission: this attempt claimed nothing, so it must neither record a
+  // rejection nor fence an identical attempt that may be saving the same visit.
+  let concurrentRead = false;
   try {
     let booking = await strictRead('bookings', `${client.slug}/${body.visitId}`);
     if (!creating && !owns(booking, current) || creating && booking && !owns(booking, current)) throw new OwnerVisitError('visit_not_found', 'This visit is no longer available.', 404);
@@ -170,6 +174,7 @@ export async function changeOwnerVisit(client, session, originalBody) {
       if (operation.state === 'complete') { await releaseLock(lockKey,operationId); const latest=await strictRead('bookings',`${client.slug}/${body.visitId}`); if(!owns(latest,current))throw new OwnerVisitError('visit_not_found','This visit is no longer available.',404);return {...result(operation,latest),superseded:latest.ownerVisitMutation?.id!==operationId}; }
       const cancel = body.action === 'cancel_visit';
       const claim = await reserveBookingWindow(current, body.visitId, cancel ? booking.date : body.date, cancel ? booking.window : body.window, creating ? undefined : { date: operation.source.date, window: operation.source.window }, { requireExisting: cancel, mutationId: operationId });
+      concurrentRead = !!(claim.full && claim.concurrentRead);
       if (claim.full) throw new OwnerVisitError(claim.reason || 'window_full', claim.message || (claim.reason === 'blocked' ? 'That arrival window is blocked. Your original visit is unchanged.' : 'That arrival window is unavailable. Your original visit is unchanged.'), claim.reason==='calendar_unavailable'?503:409, 'window');
       await indexWorkspaceRecord('bookings', { id: body.visitId, slug: current.slug, delivery: { tenantIdentity: tenant } });
       booking = await atomicUpdate('bookings', `${client.slug}/${body.visitId}`, async saved => {
@@ -226,7 +231,7 @@ export async function changeOwnerVisit(client, session, originalBody) {
     // persistence retains the immutable operation and claim for the same retry.
     if (error instanceof OwnerVisitError) {
       const saved = await strictRead('bookings', `${client.slug}/${body.visitId}`), capacity = await strictRead('index', capacityKey(client));
-      if (saved?.ownerVisitMutation?.id !== operationId && capacity?.mutations?.[body.visitId] === operationId && (creating ? !saved : ownerVisitRevision(saved) === body.expectedVisitRevision)) {
+      if (!concurrentRead && saved?.ownerVisitMutation?.id !== operationId && capacity?.mutations?.[body.visitId] === operationId && (creating ? !saved : ownerVisitRevision(saved) === body.expectedVisitRevision)) {
         // Fence any delayed conditional booking write before restoring the source slot.
         // An unacknowledged write can arrive late; simply releasing capacity is unsafe.
         operation = await operationChange(key, row => ({ ...row, abortError: { code:error.code, message:error.message, status:error.status, field:error.field } }));
@@ -238,7 +243,7 @@ export async function changeOwnerVisit(client, session, originalBody) {
         throw await finishAbort(current, operation, fenced, key, lockKey);
       }
       const after = await strictRead('index', capacityKey(client));
-      if (saved?.ownerVisitMutation?.id !== operationId && after?.mutations?.[body.visitId] !== operationId) {
+      if (!concurrentRead && saved?.ownerVisitMutation?.id !== operationId && after?.mutations?.[body.visitId] !== operationId) {
         const rejectedAt = stamp(), retryAt = error.status >= 500 ? new Date(Date.parse(rejectedAt) + OWNER_VISIT_TRANSIENT_RETRY_MS).toISOString() : null;
         const rejected = await operationChange(key, row => ({ ...row, state: 'rejected', rejectedAt, retryAt, error: { code: error.code, message: error.message, status: error.status, field: error.field } }));
         await releaseLock(lockKey, operationId); throw rejected?.state === 'rejected' ? storedRefusal(rejected) : error;
