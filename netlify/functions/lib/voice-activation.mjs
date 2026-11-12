@@ -31,6 +31,8 @@ function productionPolicy() {
     return { policy, enabled: process.env.VOICE_ACTIVATION_ENABLED === "true" && process.env.VOICE_ACTIVATION_APPROVED_VERSION === policy.version && (process.env.SERVICE_WORKER_KEY || "").length >= 32 && !!process.env.VAPI_API_KEY && /^AC[a-f0-9]{32}$/i.test(process.env.TWILIO_ACCOUNT_SID || "") && !!process.env.TWILIO_AUTH_TOKEN && (process.env.VAPI_WEBHOOK_SECRET || "").length >= 32 && fallback.protocol === "https:" && fallback.hostname === "handler.twilio.com" && /^\/twiml\/EH[a-f0-9]{32}$/i.test(fallback.pathname) && !fallback.search && !fallback.hash && !fallback.username && !fallback.password && !fallback.port };
   } catch { return { policy: null, enabled: false }; }
 }
+// Public availability reads only this gate; it never creates an assistant or route.
+export function voiceActivationAvailable() { return productionPolicy().enabled === true; }
 function siteUrl() {
   const raw = process.env.URL || "https://machinesandcloud.com", url = new URL(raw);
   const fixture = process.env.NODE_ENV === "test" && process.env.MC_FAKE_MODEL === "1" && ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname);

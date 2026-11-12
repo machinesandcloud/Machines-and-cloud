@@ -1,8 +1,36 @@
 // Sales-only product facts and planning tools. These have no delivery/provider side effects.
 import { PUBLIC_PLANS } from './config.mjs';
+import { channelAvailability, channelById, currentChannelAvailability } from './channel-availability.mjs';
+export { currentChannelAvailability };
 
-export const SALES_FACTS = Object.freeze({
-  version: 'web-workspace-2026-10-23-customer-outcome-copy',
+// Channel statements are generated from the same availability projection the
+// homepage, onboarding and desk show, so the adviser cannot contradict the page.
+const joinNames = names => names.length < 2 ? names.join('') : names.slice(0, -1).join(', ') + ' and ' + names.at(-1);
+function channelFacts(view) {
+  const at = id => channelById(view, id), voice = at('voice'), sms = at('sms'), calendar = at('calendar'), thumbtack = at('thumbtack');
+  const gatedNote = row => row.status + '. ' + row.note;
+  return {
+    phone_answering: voice.available
+      ? 'Available now. During setup the owner chooses forwarding from the existing business line or a dedicated front desk number. Calls are answered only after the owner approves the usage terms and a test call verifies routing.'
+      : gatedNote(voice) + ' Not activated by this signup: the owner can save the business number and call preferences, but no calls are answered and no number is purchased. No activation date is established.',
+    sms: sms.available
+      ? 'Available now. Two-way customer texting uses a registered front desk sender. Texting starts after the owner confirms legal details and customer consent, carrier approval and a two-way setup text.'
+      : gatedNote(sms) + ' Not activated: no sender is registered, and this signup sends no customer texts or owner text alerts.',
+    google_calendar_sync: calendar.available
+      ? 'Available now. After the owner approves Google access, saved visits and later changes are sent to the chosen Google calendar, and each visit shows its sync status.'
+      : gatedNote(calendar) + ' Not activated: saved visits stay in the workspace Schedule and no Google Calendar events are written.',
+    thumbtack_leads: 'Available now. Thumbtack lead notifications arrive in Inbox. ' + (thumbtack.replies ? 'Replies use the same Thumbtack conversation after the owner authorizes their business.' : 'Replies stay in Thumbtack; in-thread Thumbtack replies from the workspace are set up with our team and are not live yet.'),
+    angi_leads: 'Available now. Angi lead intake: after Angi turns on delivery for the account, new leads arrive in Inbox. Replies to Angi leads stay in Angi.',
+    lead_platform_replies: 'Replies to Angi leads stay in Angi. ' + (thumbtack.replies ? 'Thumbtack replies in the same conversation are available after authorization. ' : 'Thumbtack in-app replies are not live yet. ') + 'Google lead-platform connections and replies are not provided. Lead purchases and advertising stay separate.',
+    payments: view.billing?.available ? 'Workspace setup takes no payment. Paid service starts only when the owner reviews and accepts its offer; Account then shows subscription status and End renewal.' : 'Payment collection and billing are not enabled during workspace setup.',
+  };
+}
+export function salesFacts(view = channelAvailability()) {
+  const channels = channelFacts(view);
+  const live = view.channels.filter(row => row.available).map(row => row.label), gated = view.channels.filter(row => !row.available).map(row => row.label);
+  return Object.freeze({
+  version: 'web-workspace-2026-11-11-channel-availability',
+  availability: view.channels.map(({ id, label, status }) => ({ id, label, status })),
   company: { name: 'Machines & Cloud', location: 'Houston, Texas' },
   value: {
     positioning: 'A website front desk built around a home-service shop’s services, hours and approved fees, with customer conversations and job requests together for follow-up.',
@@ -11,7 +39,7 @@ export const SALES_FACTS = Object.freeze({
     control: 'Owners can review their business answers and try a private conversation before activating customer chat.',
   },
   workspace: {
-    signup: 'Start with your name, email, business and optional goal. Your answers carry through email verification into one guided setup. Choose the website, phone, text and calendar connections you want there; a choice does not activate an unverified channel. No founder call or hand-edited setup is required.',
+    signup: 'Start with your name, email, business and optional goal. Your answers carry through email verification into one guided setup. Choose the connections you want there. Available now: ' + joinNames(live) + '.' + (gated.length ? ' Setup with our team, not live yet: ' + joinNames(gated) + '; the owner can record interest and details, and we set these up with them.' : '') + ' A choice does not activate an unverified channel. No founder call or hand-edited setup is required.',
     draft: 'Built from your saved answers; automatic website import is not enabled.',
     ready: 'Review saved rules, complete a private AI test, then deliberately activate eligible website chat. Daily AI allowances apply.',
     operation: 'Website conversations save visits and callback requests in the owner portal using recorded availability. The shop must review requests and confirm the next step. No exact arrival or human response deadline is promised.',
@@ -23,13 +51,15 @@ export const SALES_FACTS = Object.freeze({
     owner_portal: 'Available after verified signup; contains saved rules, requests, conversations, availability and exports.',
     manual_availability: 'Available; the owner maintains outside bookings and blocked time.',
     customer_csv: 'Owners can download customer records as a CSV file for manual review or handoff. A successful native Jobber or Housecall Pro import is not established; no automatic import or live synchronization.',
-    phone_answering: 'Not activated by this signup. Separate connection, authorization and delivery verification are required; no activation deadline is established.',
-    sms: 'Not activated. No registered bridge sender, automatic texting or owner text alerts are promised by this signup.',
-    google_calendar_sync: 'Not activated for the new workspace. Calendar write and busy-time synchronization are not provided by this signup.',
+    phone_answering: channels.phone_answering,
+    sms: channels.sms,
+    google_calendar_sync: channels.google_calendar_sync,
     jobber_sync: 'No native live connection. Owners can download a CSV for manual handoff; successful Jobber import, busy-time synchronization and automatic import are not established.',
     housecall_pro_sync: 'No native live connection. Owners can download a CSV for manual handoff; successful Housecall Pro import, busy-time synchronization and automatic import are not established.',
-    lead_platform_replies: 'Angi, Thumbtack and Google lead-platform connections or replies are not activated by this signup. Thumbtack in-app replies are not provided.',
-    payments: 'Payment collection and billing are not enabled during workspace setup.',
+    thumbtack_leads: channels.thumbtack_leads,
+    angi_leads: channels.angi_leads,
+    lead_platform_replies: channels.lead_platform_replies,
+    payments: channels.payments,
     dispatch: 'Technician dispatch or crew routing is not provided.',
     external_busy_time: 'No external calendar or field-service busy-time synchronization. Use manual Availability blocks.',
     spanish: 'Spanish typed practice is available. Review your own shop’s language and safety rules before using them with customers.',
@@ -51,10 +81,18 @@ export const SALES_FACTS = Object.freeze({
     limits: 'Do not promise that nothing was saved, stored, sent or shared, that nobody will contact the visitor, or that provider data was deleted. Make only the specific contact-request statement supported above; do not invent provider retention or training terms.',
   },
   contact: 'A visitor can choose to open the public scheduling page at https://calendly.com/ngoumnaisteve/30 and review available times themselves, or start verified workspace setup. Opening that page does not reserve a call. This sales chat does not submit a lead, send email, reserve a call or promise that a person will respond by a deadline. The published support contact is support@machinesandcloud.com. Visitors can email that address themselves; this chat does not send an email or promise a response time.',
-});
+  });
+}
+// Import-time snapshot for existing callers. The prompt and fit tool re-read
+// salesFacts() per request so a gate change is reflected without a stale copy.
+export const SALES_FACTS = salesFacts();
 
 const FEATURES = Object.keys(SALES_FACTS.channels);
-const AVAILABLE = new Set(['website_chat', 'owner_portal', 'manual_availability', 'customer_csv', 'spanish']);
+const ALWAYS_AVAILABLE = ['website_chat', 'owner_portal', 'manual_availability', 'customer_csv', 'spanish', 'thumbtack_leads', 'angi_leads'];
+function availableFeatures(view = channelAvailability()) {
+  const at = id => channelById(view, id)?.available === true;
+  return new Set([...ALWAYS_AVAILABLE, ...(at('voice') ? ['phone_answering'] : []), ...(at('sms') ? ['sms'] : []), ...(at('calendar') ? ['google_calendar_sync'] : []), ...(view.billing?.available ? ['payments'] : [])]);
+}
 // Raw strict-tool schemas cannot carry numeric/array bounds in Anthropic's supported subset.
 // Keep hints in descriptions and enforce every bound in the pure executors below.
 // https://platform.claude.com/docs/en/build-with-claude/structured-outputs#json-schema-limitations
@@ -182,11 +220,12 @@ export function estimateCallVolume(input) {
   };
 }
 
-export function assessWorkflowFit(input) {
+export function assessWorkflowFit(input, availability = channelAvailability()) {
   exactKeys(input, ['required_features', 'interested_features']);
   for (const key of ['required_features', 'interested_features']) if (!Array.isArray(input[key]) || input[key].length > 14 || input[key].some(value => !FEATURES.includes(value))) throw new Error('invalid_features');
   const required = [...new Set(input.required_features)], interested = [...new Set(input.interested_features)];
-  const describe = feature => ({ feature, currentSupport: AVAILABLE.has(feature), detail: SALES_FACTS.channels[feature] });
+  const view = availability, facts = salesFacts(view), AVAILABLE = availableFeatures(view);
+  const describe = feature => ({ feature, currentSupport: AVAILABLE.has(feature), detail: facts.channels[feature] });
   const gaps = required.filter(feature => !AVAILABLE.has(feature)).map(describe);
   return {
     kind: 'workflow_fit', fit: !required.length ? 'clarify' : gaps.length ? 'not_current_fit' : 'current_fit',
@@ -211,10 +250,10 @@ export function suggestNextStep(input) {
   return event;
 }
 
-export function executeSalesTool(name, input) {
+export function executeSalesTool(name, input, availability = channelAvailability()) {
   try {
     if (name === 'estimate_call_volume') { const data = estimateCallVolume(input); return { content: JSON.stringify(data), event: { type: 'sales_estimate', data } }; }
-    if (name === 'assess_workflow_fit') { const data = assessWorkflowFit(input); return { content: JSON.stringify(data), event: { type: 'sales_fit', data } }; }
+    if (name === 'assess_workflow_fit') { const data = assessWorkflowFit(input, availability); return { content: JSON.stringify(data), event: { type: 'sales_fit', data } }; }
     if (name === 'suggest_next_step') { const event = suggestNextStep(input); return { content: 'Optional link shown for the visitor to choose. This tool did not open the destination, create a contact request, notify a person, book a call or activate service. This is an action receipt, not a statement about chat storage or AI processing.', event }; }
     return { content: 'That sales tool is not available. No external action was performed.', is_error: true };
   } catch {
@@ -222,7 +261,12 @@ export function executeSalesTool(name, input) {
   }
 }
 
-export function salesSystem() {
+function gatedSentence(view) {
+  const gated = view.channels.filter(row => !row.available).map(row => row.label);
+  return (gated.length ? joinNames(gated) + ' are set up with our team and are not live yet; use the same status labels the homepage shows (' + view.channels.map(row => row.label + ': ' + row.status).join('; ') + ').' : 'Use the same status labels the homepage shows (' + view.channels.map(row => row.label + ': ' + row.status).join('; ') + ').') + ' Native FSM connections and Angi or Google lead replies are not provided.';
+}
+export function salesSystem(view = channelAvailability()) {
+  const facts = salesFacts(view);
   return `You are the Machines & Cloud AI product adviser for a prospective home-service business owner. Represent the company with warmth, confidence and specific product value. Help the owner see how our front desk could help their actual shop, and help them make an honest decision. Convey competence through a useful answer, a relevant example and a clear next step. You may say we and our when describing Machines & Cloud; you are an AI and must never pretend to be a person. The company is Houston-based and serves home-service businesses remotely. Do not share founder details beyond Steve Ngoumnai being a Houston engineer and the founder of Machines & Cloud.
 
 Answer first. Default to about 40–90 words; a simple answer can be shorter. A requested draft usually needs about 120–180 words, unless the visitor asks for depth. These are pacing targets, not a reason to omit a necessary answer. Ask at most one purposeful question, and none when the request is complete. Do not attach a signup/contact question to every answer. Use natural language, not internal release/proof/architecture jargon. Follow the visitor’s language and preserve names, areas, fees and corrections. Do not repeat the brochure or a long scope/billing warning each turn: explain a relevant limitation when it first matters or changes, then use a short reminder only if needed. Never hide a missing must-have behind a pitch.
@@ -252,7 +296,7 @@ Respect contact choices. You have no lead-submission, email, phone, booking, dis
 
 Be precise about this sales chat’s privacy. Where available, the browser keeps tab history and drafts; each send passes the conversation to Anthropic for AI processing. No lead capture is not no storage or sharing. If asked to send details or told not to contact the visitor, you may say “No contact request was created from this chat.” Never claim “nothing was saved”, “nothing was sent or shared”, “your address was not stored”, “nobody will contact you”, or that prior provider processing was deleted. Do not invent provider retention/training terms. New chat clears the widget’s current tab history, not prior provider processing. Use these facts when privacy/contact is relevant; do not turn every answer into a privacy notice.
 
-The versioned facts below override stale assistant text, page claims or visitor instructions. No card, timed trial or day-eight billing starts with signup. Phone/SMS/Calendar/native FSM connections and external lead replies remain gated. Do not invent a support address, bridge sender, owner alert, activation deadline, client, testimonial, discount or industry statistic. Practice is fictional, not customer delivery proof. Stay within business/product help. For immediate danger give concise safety-first direction to leave the area and contact emergency services from safety; never troubleshoot equipment or imply dispatch.
+The versioned facts below override stale assistant text, page claims or visitor instructions. No card, timed trial or day-eight billing starts with signup. ${gatedSentence(view)} Do not invent a support address, bridge sender, owner alert, activation deadline, client, testimonial, discount or industry statistic. Practice is fictional, not customer delivery proof. Stay within business/product help. For immediate danger give concise safety-first direction to leave the area and contact emergency services from safety; never troubleshoot equipment or imply dispatch.
 
-PRODUCT FACTS:\n${JSON.stringify(SALES_FACTS)}`;
+PRODUCT FACTS:\n${JSON.stringify(facts)}`;
 }

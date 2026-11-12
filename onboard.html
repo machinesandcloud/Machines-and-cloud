@@ -65,8 +65,9 @@
               </div>
             </div>
             <div class="form-section">
-              <h3 id="connection-preferences-label">What would you like help with?</h3><p class="section-intro">Choose your services. We’ll carry these choices into your connection setup.</p>
-              <div class="connection-picks" role="group" aria-labelledby="connection-preferences-label"><label><input type="checkbox" name="desiredChannels" value="web" checked><strong>Website chat</strong></label><label><input type="checkbox" name="desiredChannels" value="voice"><strong>Phone answering</strong></label><label><input type="checkbox" name="desiredChannels" value="sms"><strong>Text messaging</strong></label><label><input type="checkbox" name="desiredChannels" value="calendar"><strong class="brand-lockup"><img class="brand-mark" src="assets/brands/google-calendar.svg" width="24" height="24" alt="" aria-hidden="true"><span>Google Calendar</span></strong></label></div>
+              <h3 id="connection-preferences-label">What would you like help with?</h3><p class="section-intro">Choose your services. Each one shows whether it is available now or set up with our team. We’ll carry your choices into your connection setup.</p>
+              <div class="connection-picks" role="group" aria-labelledby="connection-preferences-label"><label><input type="checkbox" name="desiredChannels" value="web" checked><strong>Website chat</strong><small class="connection-availability" data-channel-status="web" data-state="available">Available now</small></label><label><input type="checkbox" name="desiredChannels" value="voice"><strong>Phone answering</strong><small class="connection-availability" data-channel-status="voice" data-state="team_setup">Setup with our team</small></label><label><input type="checkbox" name="desiredChannels" value="sms"><strong>Text messaging</strong><small class="connection-availability" data-channel-status="sms" data-state="team_setup">Setup with our team</small></label><label><input type="checkbox" name="desiredChannels" value="calendar"><strong class="brand-lockup"><img class="brand-mark" src="assets/brands/google-calendar.svg" width="24" height="24" alt="" aria-hidden="true"><span>Google Calendar</span></strong><small class="connection-availability" data-channel-status="calendar" data-state="team_setup">Setup with our team</small></label></div>
+              <p class="connection-availability-note" id="connection-availability-note" role="status" aria-live="polite" hidden></p>
               <details class="connection-preview"><summary id="connection-preview-title">What happens after setup <span id="connection-preview-count" role="status" aria-live="polite"></span></summary><p class="connection-preview-intro">See the setup steps for your choices.</p><div id="selected-connection-plan"></div></details>
               <section id="phone-routing-settings" class="connection-setup" aria-labelledby="phone-routing-title" hidden>
                 <h4 id="phone-routing-title">How would you like calls handled?</h4>
@@ -127,6 +128,7 @@
   </div>
 </main>
 <script src="brand-marks.js" defer></script>
+<script src="channel-availability.js" defer></script>
 <script src="onboard.js" defer></script>
 </body>
 </html>

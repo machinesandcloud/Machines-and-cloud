@@ -130,7 +130,7 @@ async function checkAuthRecovery() {
           check(mode + ' ordinary verified return restores the authoritative draft at ' + width, await p.locator('#phone').inputValue() === saved.phone && await p.locator('#business').inputValue() === saved.business);
         }
       }
-      check(mode + ' sends no sign-in email or provider request at ' + width, !calls.some(c => c.action === 'request_link') && calls.every(c => ['/api/access', '/api/onboard'].includes(c.path)));
+      check(mode + ' sends no sign-in email or provider request at ' + width, !calls.some(c => c.action === 'request_link') && calls.every(c => ['/api/access', '/api/onboard'].includes(c.path) || c.path === '/api/channel-availability' && c.method === 'GET'));
     } catch (error) { check(mode + ' completes focused auth journey at ' + width, false, error.message); }
     finally { await auth.close(); }
   }

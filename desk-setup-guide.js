@@ -106,15 +106,25 @@
     var intake=data.serviceIntake&&data.serviceIntake[id];
     return !!intake&&!!window.MCServiceIntake&&intake.canSave!==false&&!['cancelled','archived','paused'].includes(data.client.status)&&(['voice','sms'].includes(id)?!intake.complete||id==='voice'&&intake.canApply:id==='web'?!intake.preferences?.builder||!intake.preferences?.installationBy||intake.canApply:!intake.preferences?.accountEmail);
   }
+  // Public availability comes from the server's channel-availability projection (the
+  // same one the homepage, onboarding and sales desk use). Without it, assume the
+  // conservative state: a gated service is set up with our team and is not live.
+  function availabilityFor(id) {
+    var rows=data&&data.channelAvailability&&Array.isArray(data.channelAvailability.channels)?data.channelAvailability.channels:[],found=rows.find(function(item){return item&&item.id===id;});
+    if(found&&['available','team_setup'].includes(found.state)&&typeof found.status==='string')return found;
+    return ['web','thumbtack','angi'].includes(id)?{id:id,state:'available',status:'Available now',note:''}:{id:id,state:'team_setup',status:'Setup with our team',note:'We’ll set this up with you; it is not live yet.'};
+  }
+  function availabilityBadge(id) { var a=availabilityFor(id);return '<span class="connector-availability" data-availability="'+esc(a.state)+'">'+esc(a.status)+'</span>'; }
   function platformHold(row) {
     if(!row||!['web','voice','sms','calendar'].includes(row.id)||row.verification?.working||['cancelled','archived','paused'].includes(data.client.status)||['closed','cancelled','cancellation_pending','cancel_pending','cleanup_pending','cleanup_uncertain'].includes(row.status))return null;
     if(row.id==='web'){var website=data.websiteInstallation;return website?.configurationRevision===data.configurationRevision&&website?.originAllowed===true&&website?.observation?.state==='found'&&website?.customerChat?.state==='unavailable'?{saved:true,summary:'Your website installation is confirmed. Customer chat is not active because the AI service is unavailable.'}:null;}
     var service=data.connections?.[row.id==='sms'?'messaging':row.id],requested=row.setupProgress?.requestSaved===true||row.activation?.requestSaved===true;
-    if(row.id==='calendar'&&service?.connected&&data.connections?.calendarDelivery?.enabled===false)return {saved:true,summary:'Your Google permission is saved. Calendar syncing is not enabled for this workspace. Your saved visits are kept.'};
+    if(row.id==='calendar'&&service?.connected&&data.connections?.calendarDelivery?.enabled===false)return {saved:true,summary:'Your Google permission is saved. Calendar syncing is not live yet; we’ll set it up with you. Your saved visits are kept.'};
     if(requested||service?.operation||row.id==='calendar'&&(service?.connected||service?.reconnectRequired))return null;
     if(row.id==='calendar'?service?.available!==false:row.activation?.blockedBy!=='machines_and_cloud')return null;
     var intake=data.serviceIntake?.[row.id],saved=row.id==='calendar'?!!intake?.preferences?.accountEmail:intake?.complete===true;
-    return {saved:saved,summary:row.id==='calendar'?'Google Calendar is not enabled for this workspace. Your account has not been connected.':labels[row.id]+' is not enabled for this workspace, so '+(row.id==='sms'?'registration':'setup')+' has not started.'+(saved?' Your '+(row.id==='voice'?'call-routing preferences':'business details')+' are saved.':'')};
+    var note=availabilityFor(row.id).note||'We’ll set this up with you; it is not live yet.';
+    return {saved:saved,summary:labels[row.id]+' is set up with our team. '+note+(row.id==='calendar'?' Your account has not been connected.':' '+(row.id==='sms'?'Registration':'Setup')+' has not started.'+(saved?' Your '+(row.id==='voice'?'call-routing preferences':'business details')+' are saved.':''))};
   }
   function assistanceReport(id) { return data?.connectionAssistance?.[id] || null; }
   function assistanceState(id) { return assistance[id] || (assistance[id]={pending:false,uncertain:false,checked:false,notice:'',attempt:null}); }
@@ -199,7 +209,7 @@
     if(row.status==='not_selected'||!row.requested&&!row.retained)return 'Not selected';
     var usage=usageHold(row);if(usage)return usage.state==='unconfirmed'?'Usage needs checking':usage.unit==='voiceMinutes'?'Connected; call allowance reached':usage.unit==='smsSegments'?'Connected; text allowance reached':'Connected; AI reply allowance reached';
     if(row.verification?.working===true)return 'Delivery verified';
-    if(platformHold(row))return 'Setup needs our help';
+    if(platformHold(row))return 'Setup with our team';
     if(needsServiceInformation(row.id))return 'Your details needed';
     if(paymentHold(row))return 'Payment needs confirmation';
     if(row.activation?.blockedBy==='machines_and_cloud')return 'Needs our attention';
@@ -407,14 +417,14 @@
   function pageShell(row,step,index,total,body,footer) {
     var label=row.label||labels[row.id];
     return '<section class="connector-page setup-guide-current direct-connection-task" data-connector="'+row.id+'" data-connector-step="'+esc(pageScreen)+'" aria-labelledby="setupGuideStageTitle">'+
-      '<div class="connector-page-top"><button type="button" id="connectorAllServices" class="connection-guide-link">← All connections</button><span class="brand-lockup">'+brandMark(row.id)+'<span>'+esc(label)+'</span></span></div>'+
+      '<div class="connector-page-top"><button type="button" id="connectorAllServices" class="connection-guide-link">← All connections</button><span class="brand-lockup">'+brandMark(row.id)+'<span>'+esc(label)+'</span></span>'+availabilityBadge(row.id)+'</div>'+
       pageProgressHtml(row)+
       '<div class="connector-page-body">'+body+'</div>'+ (footer?'<footer class="connector-page-footer">'+footer+'</footer>':'')+'</section>';
   }
   function renderOverview(items) {
     selected=null;pageScreen='overview';host.dataset.connectorView='overview';var preferences=$('connectionPreferencesDetails');if(preferences)preferences.hidden=false;var retainedControls=!!(data.connections?.voice?.operation||data.connections?.messaging?.operation||data.connections?.calendar?.connected||data.connections?.calendar?.reconnectRequired||data.serviceOnboarding?.operation),management=$('connectionServiceDetails');if(management){management.hidden=!retainedControls;if(management.querySelector('summary'))management.querySelector('summary').textContent='Connection settings';}
     var websiteManagement=$('websiteSetupDetails'),websiteRow=items.find(function(row){return row.id==='web';});if(websiteManagement){websiteManagement.hidden=!websiteRow||!websiteRow.requested&&!websiteRow.retained;if(!websiteManagement.dataset.connectorManagement){websiteManagement.dataset.connectorManagement='true';websiteManagement.open=false;var caption=websiteManagement.querySelector('summary span');if(caption)caption.innerHTML='Website chat settings<small>Change your website, get installation code or check setup</small>';}}
-    host.innerHTML='<div class="setup-guide-heading"><h3 id="setupGuideTitle" tabindex="-1">Your connections</h3><p class="muted">Choose a service. We’ll walk you through one step at a time.</p></div><nav class="connector-service-list" aria-label="Choose a connection">'+items.map(function(row){return '<button type="button" data-guide-service="'+row.id+'" class="connector-service-choice"><span class="brand-lockup">'+brandMark(row.id)+'<span>'+esc(labels[row.id])+'</span></span><span class="connector-choice-status">'+esc(serviceStatus(row))+'</span><span aria-hidden="true">→</span></button>';}).join('')+'</nav>';
+    host.innerHTML='<div class="setup-guide-heading"><h3 id="setupGuideTitle" tabindex="-1">Your connections</h3><p class="muted">Choose a service. We’ll walk you through one step at a time.</p></div><nav class="connector-service-list" aria-label="Choose a connection">'+items.map(function(row){return '<button type="button" data-guide-service="'+row.id+'" class="connector-service-choice"><span class="brand-lockup">'+brandMark(row.id)+'<span>'+esc(labels[row.id])+'</span></span><span class="connector-choice-status">'+esc(serviceStatus(row))+'</span>'+(availabilityFor(row.id).status===serviceStatus(row)?'':availabilityBadge(row.id))+'<span aria-hidden="true">→</span></button>';}).join('')+'</nav>';
   }
   function keepFocus(id){if(!id)return;var node=$(id);if(node&&host.contains(node)&&!node.disabled&&document.activeElement!==node)node.focus({preventScroll:true});}
   function render() {

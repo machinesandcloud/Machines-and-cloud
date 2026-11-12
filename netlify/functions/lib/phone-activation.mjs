@@ -442,6 +442,8 @@ function productionPolicy() {
     return { enabled, offer,offerCurrent:Date.parse(offer.expiresAt)>Date.now() };
   } catch { return { enabled: false, offer: null,offerCurrent:false }; }
 }
+// Public availability reads only this gate; it never quotes or reserves a number.
+export function phoneAcquisitionAvailable() { const p = productionPolicy(); return p.enabled === true && p.offerCurrent === true; }
 function productionEngine(deadlineAt = null) {
   const policy = productionPolicy();
   if (!policy.offer) throw new PhoneActivationError("phone_setup_unavailable", "Phone setup is not available yet. No number was purchased.");

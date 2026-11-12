@@ -168,9 +168,9 @@ async function waitText(page, selector, re) { await page.waitForFunction(([s, sr
 
 // Exact honest provider-gating copy from desk-setup-guide.js platformHold()/reviewMarkup()/holdActions() at HEAD.
 const HOLD = {
-  voice: { heading: 'Prepare Phone answering', text: 'Phone answering is not enabled for this workspace, so setup has not started.' },
-  sms: { heading: 'Prepare Text messaging', text: 'Text messaging is not enabled for this workspace, so registration has not started.' },
-  calendar: { heading: 'Prepare Google Calendar', text: 'Google Calendar is not enabled for this workspace. Your account has not been connected.' }
+  voice: { heading: 'Prepare Phone answering', text: 'Phone answering is set up with our team. We’ll set this up with you; it is not live yet. Setup has not started.' },
+  sms: { heading: 'Prepare Text messaging', text: 'Text messaging is set up with our team. We’ll set this up with you; it is not live yet. Registration has not started.' },
+  calendar: { heading: 'Prepare Google Calendar', text: 'Google Calendar is set up with our team. We’ll set this up with you; it is not live yet. Your account has not been connected.' }
 };
 const REVIEW_INTRO = 'Send our team your saved connection details and the current setup status. No need to explain them again. This requests a review; it does not activate a service or approve a charge.';
 const REVIEW_SAVED = 'Your connection review is saved for our team. This request does not start provisioning or activate the service.';
@@ -182,7 +182,7 @@ const INTAKE_LOST = 'The response was interrupted. Your details may be saved. Ch
 const CLAIM_STATUSES = ['Delivery verified', 'Google access saved', 'Connected; call allowance reached', 'Connected; text allowance reached', 'Connected; AI reply allowance reached'];
 const CLAIM_TEXT = /(?<!not been |not |n’t )\bconnected\b|\bis live\b|\bgo live\b|\bdelivered\b|\bverified\b|\bactivated\b|is connected|Connection verified/i;
 const INTRO = { web: { heading: 'Connect Website chat', primary: 'Continue setup' }, thumbtack: { heading: 'Connect Thumbtack', primary: 'Start setup' }, angi: { heading: 'Connect Angi', primary: 'Start setup' } };
-const EXPECTED_LIST = { web: 'Your details needed', voice: 'Setup needs our help', sms: 'Setup needs our help', calendar: 'Setup needs our help', thumbtack: 'Not selected', angi: 'Not selected' };
+const EXPECTED_LIST = { web: 'Your details needed', voice: 'Setup with our team', sms: 'Setup with our team', calendar: 'Setup with our team', thumbtack: 'Not selected', angi: 'Not selected' };
 const EXPECTED_LIST_WEB_ONLY = { web: 'Your details needed', voice: 'Not selected', sms: 'Not selected', calendar: 'Not selected', thumbtack: 'Not selected', angi: 'Not selected' };
 
 async function assertList(page, expected, where) {
@@ -230,7 +230,7 @@ for (const [width, height] of WIDTHS) {
       if (HOLD[id]) {
         assert.equal(st.heading, HOLD[id].heading);
         assert.equal(await page.locator('#connectorPlatformHold').textContent(), HOLD[id].text);
-        assert.equal(listed, 'Setup needs our help');
+        assert.equal(listed, 'Setup with our team');
         assert.deepEqual(await primaryButtons(page), ['Request connection review'], 'One clear next action');
       } else {
         assert.equal(st.heading, INTRO[id].heading);

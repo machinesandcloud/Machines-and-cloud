@@ -12,7 +12,7 @@ import { reserveAIRequest, selfServiceAIModelFetch, reserveAIProofMutation, PUBL
 import { getAccessSession, accessOriginAllowed } from "./lib/access.mjs";
 import { strictRead, normalizeAccountEmail } from "./lib/accounts.mjs";
 import { isSelfServiceClient, setupReadiness } from "./lib/setup.mjs";
-import { salesSystem, SALES_TOOLS, sanitizeSalesMessages, executeSalesTool } from "./lib/sales-desk.mjs";
+import { salesSystem, SALES_TOOLS, sanitizeSalesMessages, executeSalesTool, currentChannelAvailability } from "./lib/sales-desk.mjs";
 import { getSalesAllowance, reserveSalesTurn } from "./lib/sales-budget.mjs";
 import { reservePublicChatTurn } from "./lib/public-chat-budget.mjs";
 import { networkBucket } from "./lib/network-bucket.mjs";
@@ -328,7 +328,8 @@ export default async (req, context) => {
     try { budget = await reserveSalesTurn(ip); }
     catch { return json({ error: "sales_allowance_unavailable", message: "Chat is temporarily unavailable. Your question has not been sent to anyone; please try again later." }, 503, cors(origin)); }
     if (!budget.allowed) return json({ error: "sales_daily_limit", message: "Today's AI chat allowance is used up. You can still explore the examples, create a workspace or contact us directly.", resetAt: budget.allowance.resetAt }, 429, cors(origin));
-    const run = onText => runAgent({ system: salesSystem(), tools: SALES_TOOLS, messages, onText, execTool: executeSalesTool, dropToolPreamble: true, adaptiveThinking: true, effort: "medium", maxTokens: 3072, maxIterations: 3, requireComplete: true, includeUsage: true, maxRetries: 0, safetyLine: false, exhaustedReply: "I couldn’t finish that reliably. Your question hasn’t been sent to anyone; you can try again or contact us directly." });
+    const availability = await currentChannelAvailability();
+    const run = onText => runAgent({ system: salesSystem(availability), tools: SALES_TOOLS, messages, onText, execTool: (name, input) => executeSalesTool(name, input, availability), dropToolPreamble: true, adaptiveThinking: true, effort: "medium", maxTokens: 3072, maxIterations: 3, requireComplete: true, includeUsage: true, maxRetries: 0, safetyLine: false, exhaustedReply: "I couldn’t finish that reliably. Your question hasn’t been sent to anyone; you can try again or contact us directly." });
     if (wantStream) return ndjsonResponse(run, cors(origin));
     try { return json(await run(), 200, cors(origin)); } catch (err) { const e = classifyError(err); return json({ error: e.error }, e.status, cors(origin)); }
   }

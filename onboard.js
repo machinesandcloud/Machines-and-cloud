@@ -204,12 +204,33 @@
     sms: {label:'Text messaging',summary:'Plan your customer texting setup',automation:'Your connection checklist covers business registration, customer consent and carrier review.',owner:'Confirm your legal business details and opt-in process, review the costs and complete the setup text test.',ready:'Your workspace tracks approval and the two-way text check before texting is activated.'},
     calendar: {label:'Google Calendar',summary:'Save your calendar preference',automation:'Your connection checklist covers Google authorization and syncing saved visits.',owner:'Choose your Google account and review the requested calendar permissions.',ready:'Your workspace shows the connection status and the visit-sync check needed before use.',note:'Keep your workspace availability up to date, including jobs booked elsewhere.'}
   };
+  // Availability comes from channel-availability.js (server gates); the HTML badge
+  // state is the conservative fallback when that request has not completed.
+  var teamSetupPreview = {
+    voice: {save:'Your business number, phone provider and when you want calls answered.'},
+    sms: {save:'Your texting preference. Registered business details are collected when texting is set up.'},
+    calendar: {save:'Your Google Calendar preference. Google access is not requested now.'}
+  };
+  function channelState(id) {
+    var live=window.MCChannelAvailability&&window.MCChannelAvailability[id];if(live)return live;
+    var badge=form.querySelector('[data-channel-status="'+id+'"]'),available=!!badge&&badge.getAttribute('data-state')==='available';
+    return {state:available?'available':'team_setup',status:badge?badge.textContent:'Setup with our team',note:available?'':'We’ll set this up with you; it is not live yet.'};
+  }
+  function teamSetup(id) { return channelState(id).state!=='available'; }
+  function updateAvailabilityCopy() {
+    var gated=['voice','sms','calendar'].filter(teamSetup),note=document.getElementById('connection-availability-note');
+    if(note){var names=gated.map(function(id){return connectionDescriptions[id].label;});note.hidden=!names.length;note.textContent=names.length?(names.length>1?names.slice(0,-1).join(', ')+' and '+names[names.length-1]:names[0])+': choose '+(names.length>1?'them':'it')+' now to record your interest. '+channelState(gated[0]).note:'';}
+    var hint=document.getElementById('business-number-hint');
+    if(hint){if(!hint.dataset.defaultHint)hint.dataset.defaultHint=hint.textContent;hint.textContent=hint.dataset.defaultHint+(teamSetup('voice')?' Saved for your phone setup with our team. Nothing is forwarded or purchased now.':'');}
+  }
   function updateConnectionPreview(changed) {
     var plan=document.getElementById('selected-connection-plan'),selected=Array.from(form.querySelectorAll('input[name="desiredChannels"]:checked')).map(function(field){return field.value;}),open=plan.querySelector('details[open]')?.dataset.channel;
     document.getElementById('connection-preview-count').textContent=selected.length+' option'+(selected.length===1?'':'s')+' selected';
     if(changed?.checked)open=changed.value;
     if(!selected.includes(open))open=selected[0];
-    plan.innerHTML=selected.length?selected.map(function(id){var row=connectionDescriptions[id];return '<details class="connection-preview-card" data-channel="'+id+'"'+(id===open?' open':'')+'><summary><strong class="brand-lockup">'+(id==='calendar'?'<img class="brand-mark" src="assets/brands/google-calendar.svg" width="24" height="24" alt="" aria-hidden="true">':'')+row.label+'</strong><span>'+row.summary+'</span></summary><dl><div><dt>Your connection</dt><dd>'+row.automation+'</dd></div><div><dt>Your part</dt><dd>'+row.owner+'</dd></div><div><dt>Before activation</dt><dd>'+row.ready+'</dd></div></dl>'+(row.note?'<p class="connection-preview-note">'+row.note+'</p>':'')+'</details>';}).join(''):'<p class="connection-preview-empty">Choose what you’d like help with to see the next steps.</p>';
+    plan.innerHTML=selected.length?selected.map(function(id){var row=connectionDescriptions[id],gated=id!=='web'&&teamSetup(id),availability=channelState(id),head='<details class="connection-preview-card" data-channel="'+id+'" data-availability="'+(gated?'team_setup':'available')+'"'+(id===open?' open':'')+'><summary><strong class="brand-lockup">'+(id==='calendar'?'<img class="brand-mark" src="assets/brands/google-calendar.svg" width="24" height="24" alt="" aria-hidden="true">':'')+row.label+'</strong><span>'+(gated?escapeText(availability.status):row.summary)+'</span></summary>';
+      if(gated)return head+'<dl><div><dt>Availability</dt><dd>'+escapeText(availability.status+'. '+availability.note)+'</dd></div><div><dt>What we save now</dt><dd>'+teamSetupPreview[id].save+'</dd></div><div><dt>What happens next</dt><dd>In your workspace, Connections lets you request setup with our team. Nothing is purchased, registered or connected during setup.</dd></div></dl></details>';
+      return head+'<dl><div><dt>Your connection</dt><dd>'+row.automation+'</dd></div><div><dt>Your part</dt><dd>'+row.owner+'</dd></div><div><dt>Before activation</dt><dd>'+row.ready+'</dd></div></dl>'+(row.note?'<p class="connection-preview-note">'+row.note+'</p>':'')+'</details>';}).join(''):'<p class="connection-preview-empty">Choose what you’d like help with to see the next steps.</p>';
   }
   function updatePhoneSetup() {
     var section = document.getElementById('phone-routing-settings'), existing = document.getElementById('existing-phone-fields'), mode = form.elements.phoneSetupMode;
@@ -225,7 +246,9 @@
     });
   }
   form.addEventListener('change', function(event){updatePhoneSetup();if(event.target.name==='desiredChannels')updateConnectionPreview(event.target);});
-  updatePhoneSetup(); updateConnectionPreview();
+  function escapeText(value){return String(value==null?'':value).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  document.addEventListener('mc:channel-availability',function(){updateAvailabilityCopy();updateConnectionPreview();});
+  updatePhoneSetup(); updateAvailabilityCopy(); updateConnectionPreview();
   function collect() {
     document.getElementById('hoursTable').value = JSON.stringify(hoursTable());
     document.getElementById('appointmentHoursTable').value = appointmentSeeded ? JSON.stringify(readAppointmentTable()) : '';
