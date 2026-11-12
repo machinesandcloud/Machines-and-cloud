@@ -45,6 +45,14 @@ function clientOriginAllowed(c, origin) {
 function cors(origin) {
   return origin ? { "Access-Control-Allow-Origin": origin, "Access-Control-Allow-Headers": "Content-Type, Authorization", "Access-Control-Allow-Methods": "GET, POST, OPTIONS", Vary: "Origin" } : {};
 }
+// Definite admission refusals. Every caller returns before any conversation, turn, allowance or
+// model work, so a first send was certainly not processed. A recoverTurn probe is different: its
+// refusal says nothing about the original turn, which may already be saved, so it stays unknown.
+// CORS headers let a cross-origin widget read the reason instead of seeing a network failure.
+const CHAT_UNAVAILABLE = "Website chat is unavailable right now. Please use the shop’s contact details on this website.";
+function refused(origin, body, error, message = CHAT_UNAVAILABLE) {
+  return json({ error, message, turnNotProcessed: body?.recoverTurn !== true }, 403, cors(origin));
+}
 
 // 60 messages per IP per 10 minutes for legacy tenants and fictional practice only. Keys carry the bucket, so old ones are simply
 // never read again. The owner's test line (valid key) and the admin key are exempt.
@@ -62,7 +70,7 @@ export default async (req, context) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: cors(origin) });
   const ip = context?.ip || req.headers.get("x-nf-client-connection-ip") || "";
   if (req.method === "GET" && new URL(req.url).searchParams.get("mode") === "sales") {
-    if (!siteOrigin(origin)) return json({ error: "forbidden" }, 403);
+    if (!siteOrigin(origin)) return refused(origin, null, "forbidden", "Chat is unavailable on this page."); // GET carries no turn
     try {
       const allowance = await getSalesAllowance(ip);
       return json({ available: allowance.available && (!!process.env.ANTHROPIC_API_KEY || process.env.MC_FAKE_MODEL === "1"), resetAt: allowance.resetAt }, 200, cors(origin));
@@ -86,10 +94,10 @@ export default async (req, context) => {
     try {
       requestedClient = await strictRead("clients", body.client.slice(0, 40));
       if (isSelfServiceClient(requestedClient) && req.headers.has("authorization")) {
-        if (origin && !accessOriginAllowed(origin)) return json({ error: "forbidden" }, 403, cors(origin));
+        if (origin && !accessOriginAllowed(origin)) return refused(origin, body, "forbidden", "Workspace chat can only be opened from your Machines & Cloud workspace.");
         session = await getAccessSession(req);
         if (!session) return json({ error: "verification_required" }, 401, cors(origin));
-        if (normalizeAccountEmail(session.email) !== normalizeAccountEmail(requestedClient.owner?.email)) return json({ error: "forbidden" }, 403, cors(origin));
+        if (normalizeAccountEmail(session.email) !== normalizeAccountEmail(requestedClient.owner?.email)) return refused(origin, body, "forbidden", "This sign-in does not have access to this workspace's chat.");
       }
       ownerExempt = isSelfServiceClient(requestedClient) ? !!session : !!requestedClient && body.key === requestedClient.ownerKey;
     } catch { return json({ error: "client_unavailable" }, 503, cors(origin)); }
@@ -103,15 +111,16 @@ export default async (req, context) => {
     const isOwner = isSelfServiceClient(c) ? !!session : typeof body.key === "string" && body.key === c.ownerKey;
     if (isSelfServiceClient(c) && !isOwner && (body.channel === "test" || (typeof body.key === "string" && body.key))) return json({ error: "verification_required" }, 401, cors(origin));
     const channel = isOwner && body.channel === "test" ? "test" : "web";
-    if (body.channel === "test" && !isOwner) return json({ error: "forbidden" }, 403);
+    if (body.channel === "test" && !isOwner) return refused(origin, body, "forbidden", "The test line is only available to the workspace owner.");
     // Verified owner authority opens rehearsal, never bypasses customer activation.
     if (isSelfServiceClient(c) && channel === "web") {
       const web = setupReadiness(c).channels.web;
-      if (!web.ready || !web.active) return json({ error: c.status === "paused" ? "paused" : "not_live" }, 403);
+      if (!web.ready || !web.active) return refused(origin, body, c.status === "paused" ? "paused" : "not_live");
     }
     if (!isOwner) {
-      if (!clientOriginAllowed(c, origin)) return json({ error: "forbidden" }, 403);
-      if (!["testing", "live"].includes(c.status)) return json({ error: c.status === "paused" ? "paused" : "not_live" }, 403);
+      // The page is not one of this shop's sites, so do not point at "contact details on this website".
+      if (!clientOriginAllowed(c, origin)) return refused(origin, body, "forbidden", "Website chat is not available on this page. Please contact the shop directly.");
+      if (!["testing", "live"].includes(c.status)) return refused(origin, body, c.status === "paused" ? "paused" : "not_live");
     }
     const contact = String(body.contact || "anon").slice(0, 60).replace(/[^a-zA-Z0-9_-]/g, "");
     const incoming = sanitizeMessages(body?.messages);
