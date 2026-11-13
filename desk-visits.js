@@ -31,13 +31,15 @@
   async function find(){
     if(!context||context.pending||saving||checking||!dialog.open)return;var token=session();if(!token)return;
     var date=$('visitDate').value||today();$('visitDate').value=date;if(!$('visitDate').checkValidity()){note('Choose a real date first.',true);$('visitDate').focus();return;}
-    clear();var run=sequence;checking=true;controller=new AbortController();controls();note('Checking available times…');
+    var keepFocus=document.activeElement===$('visitFindTimes');clear();var run=sequence;checking=true;controller=new AbortController();controls();note('Checking available times…');
     var body={action:'visit_availability',expectedRevision:context.configurationRevision,date:date,days:7};if(context.visitId){body.visitId=context.visitId;body.expectedVisitRevision=context.visitRevision;}
     var timeout=setTimeout(function(){controller?.abort();},20000);
     try{var response=await fetch(base+'/api/client?c='+encodeURIComponent(slug),{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify(body),signal:controller.signal});var result=await response.json();if(!current(run,token))return;if(response.status===401||response.status===403){document.dispatchEvent(new CustomEvent('mc:session-expired'));return;}if(!response.ok||!result.availability)throw Object.assign(new Error(result.message||'Available times could not be confirmed. Try again; no visit has changed.'),{code:result.error});
       var found=result.availability;if(found.configurationRevision!==context.configurationRevision||found.visitId!==context.visitId||found.visitRevision!==context.visitRevision||found.timezone!=='America/Chicago'||!Array.isArray(found.openings)||found.openings.length>7||!Number.isFinite(Date.parse(found.expiresAt))||Date.parse(found.expiresAt)<=Date.now())throw new Error('The schedule changed. Check available times again.');snapshot=found;draw();
     }catch(error){if(current(run,token)){snapshot=null;emptyWindows();var needsCalendar=error.code==='calendar_busy_unavailable'&&data?.connections?.calendar?.connected===false;note(needsCalendar?'Google Calendar is selected, but its connection needs attention before we can check free times. Review Calendar setup, then return to this visit. Your details are kept.':error.name==='AbortError'?'The availability check took too long. Try again; no visit has changed.':error.message,true);$('visitReviewCalendar').hidden=!needsCalendar;}}
-    finally{clearTimeout(timeout);if(run===sequence){checking=false;controller=null;controls();}}
+    finally{clearTimeout(timeout);if(run===sequence){checking=false;controller=null;controls();
+      // Disabling the button during the check blurs it; put focus back inside the dialog (PRA-A11Y-03).
+      var active=document.activeElement;if(keepFocus&&dialog.open&&(!active||active===document.body||!dialog.contains(active))){var back=$('visitFindTimes');if(back.disabled||back.hidden||!back.getClientRects().length)back=$('visitAvailabilityStatus');back.focus();}}}
   }
   $('visitFindTimes').addEventListener('click',find);
   $('visitReviewCalendar').addEventListener('click',function(){if(!context||checking||saving||context.pending)return;visitDraft={context:Object.assign({},context),token:session()};returnPanel.hidden=false;dialog.addEventListener('close',function(){document.dispatchEvent(new CustomEvent('mc:service-guide',{detail:{service:'calendar'}}));},{once:true});dialog.close();});
