@@ -260,3 +260,17 @@ body[data-connector-flow=step] #leadSourceDialog[data-connector-stage=management
 .connector-availability[data-availability="available"]{background:#eaf7ef;color:#1d5a37;border-color:#bfe3cc}
 .connector-page-top .connector-availability{margin-left:auto}
 @media(max-width:600px){.connector-service-choice{gap:12px}.connector-service-choice .connector-availability{font-size:11px;padding:2px 8px}.connector-page-top{flex-wrap:wrap}.connector-page-top .connector-availability{order:3;margin-left:0}}
+
+/* PRA-POLISH-15 (2026-11-13, open-cards r4): Connections list. Every mark sits in the same 32px neutral tile,
+   and on phones each row is mark + name on line 1, status + badge on line 2, so service names never wrap. */
+.desk-app .connector-service-choice img.brand-mark,.desk-app .connector-service-choice .service-mark,.desk-app .connector-service-choice img.brand-mark--wide,.desk-app .connector-service-choice .brand-mark-pair{box-sizing:border-box;width:32px!important;height:32px!important;flex:none;padding:6px;border-radius:8px;background:#f1f4f9;object-fit:contain;color:var(--ui-ink)}
+.desk-app .connector-service-choice .brand-mark-pair img.brand-mark{width:10px!important;height:10px!important;padding:0;background:transparent}
+@media(max-width:640px){
+.desk-app .connector-service-choice{display:grid;grid-template-columns:32px auto minmax(0,1fr) 16px;grid-template-areas:"mark name name arrow" "mark status badge arrow";column-gap:12px;row-gap:4px;align-items:center;min-height:72px}
+.desk-app .connector-service-choice>.brand-lockup{display:contents}
+.desk-app .connector-service-choice>.brand-lockup>:first-child{grid-area:mark}
+.desk-app .connector-service-choice>.brand-lockup>span:last-child{grid-area:name;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:15px;font-weight:600}
+.desk-app .connector-service-choice>.connector-choice-status{grid-area:status;max-width:none;text-align:left;white-space:nowrap}
+.desk-app .connector-service-choice>.connector-availability{grid-area:badge;justify-self:start;white-space:nowrap}
+.desk-app .connector-service-choice>span[aria-hidden=true]:last-child{grid-area:arrow}
+}

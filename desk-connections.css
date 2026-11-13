@@ -31,3 +31,11 @@
 }
 
 .connection-status-options{border-top:1px solid #dce4f1;margin-top:24px;padding-top:10px}.connection-status-options>summary{font-weight:700;cursor:pointer;min-height:48px;display:flex;align-items:center}.connection-status-options>summary small{display:block;font-weight:400;color:#627590;font-size:12px;margin-top:5px}.connection-status-options .connection-guide{padding-top:18px}
+
+/* PRA-POLISH-12 (2026-11-13, open-cards r4): the loading and signed-out desk screens keep the product brand.
+   Only the rail's logo is shown, as a top bar matching the signed-in header at each width; the workspace
+   navigation stays hidden until the workspace loads. Programmatic-focus outlines are left to the a11y owner. */
+body.desk-app[data-workspace-state=loading] #deskRail[hidden],body.desk-app[data-workspace-state=recovery] #deskRail[hidden]{display:flex!important;position:relative;inset:auto;width:100%;min-height:68px;flex-direction:row;align-items:center;padding:14px 32px;overflow:visible}
+body.desk-app[data-workspace-state=loading] #deskRail[hidden]>:not(.desk-rail-brand),body.desk-app[data-workspace-state=recovery] #deskRail[hidden]>:not(.desk-rail-brand){display:none!important}
+body.desk-app[data-workspace-state=loading] #deskRail[hidden] .desk-rail-brand,body.desk-app[data-workspace-state=recovery] #deskRail[hidden] .desk-rail-brand{padding:0;border:0}
+@media(max-width:900px){body.desk-app[data-workspace-state=loading] #deskRail[hidden],body.desk-app[data-workspace-state=recovery] #deskRail[hidden]{padding:10px 16px}}

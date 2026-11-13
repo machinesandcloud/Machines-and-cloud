@@ -1043,12 +1043,12 @@
         return '<div class="setup-step"><div><strong>' + esc(channel.label) + ' · ' + esc(states[state] || 'Not connected yet') + '</strong><p>' + esc(detail) + '</p>' + (channel.requested && next ? '<p><b>Next:</b> ' + esc(next) + '</p>' : '') + '</div></div>';
       }).join('');
     }
-    $('status').textContent = client.status === 'cancelled' ? 'Service cancelled' : client.status === 'paused' ? 'Front desk paused' : limited ? 'Daily AI allowance reached' : operational ? 'Website chat active' : 'Setup in progress';
+    $('status').textContent = client.status === 'cancelled' ? 'Service cancelled' : client.status === 'paused' ? 'Front desk paused' : limited ? (allowance.web.platformLimited ? 'Shared AI limit reached' : 'Daily AI allowance reached') : operational ? 'Website chat active' : 'Setup in progress';
     $('status').className = 'st' + (operational ? ' live' : '');
     renderHomeNext(d);
     $('setupSteps').replaceChildren();$('setupSteps').hidden=true;
     reviewState(d);
-    $('aiAllowance').textContent = allowance ? 'AI replies left today: ' + allowance.private.remaining + ' practice · ' + allowance.web.remaining + ' customer chat. Practice never uses customer chat replies. Both reset at midnight Houston time.' + (allowance.reconciliation ? ' ' + allowance.reconciliation : '') : '';
+    $('aiAllowance').textContent = allowance ? 'AI replies left today: ' + allowance.private.remaining + ' practice · ' + allowance.web.remaining + ' customer chat. Practice never uses customer chat replies. Both reset at midnight Houston time.' + (allowance.web.platformLimited || allowance.private.platformLimited ? ' Today’s shared platform limit is used, not your own allowance; our team has been shown this.' : '') + (allowance.reconciliation ? ' ' + allowance.reconciliation : '') : '';
     if (limited) { var activate = $('golive') || $('resume'); if (activate) activate.disabled = true; }
     $('checklist').innerHTML = setup.steps.map(function (step) { return '<div class="check"><span class="dot ' + (step.status === 'done' ? 'ok' : 'wait') + '"></span><div><strong>' + esc(step.label) + '</strong><p class="muted">' + esc(step.detail) + '</p></div></div>'; }).join('');
     $('numberText').textContent = 'No phone number has been purchased or connected for this workspace.';
@@ -1256,7 +1256,7 @@
   function renderAccount(d) {
     var c = d.client, selfService = c.onboarding?.version === 1, closed = ['cancelled','archived'].includes(c.status), paused = c.status === 'paused';
     $('accountBusiness').textContent = c.business.name || 'Not saved'; $('accountOwner').textContent = c.owner.name || 'Not saved';
-    $('accountEmail').textContent = c.owner.email || 'Not available'; $('accountPhone').textContent = c.owner.phone || 'Not saved';
+    $('accountEmail').textContent = c.owner.email || 'Not available'; $('accountPhone').textContent = c.owner.phone ? ownerPhone(c.owner.phone) : 'Not saved';
     $('accountEditContact').hidden = closed; $('accountReporting').hidden = selfService || closed; $('workspaceMaintenance').hidden = !selfService || closed;
     var webActive = !!d.webAvailable && !!d.setup?.channels?.web?.ready && !!d.setup?.channels?.web?.active;
     var rows = d.setup?.connectionJourney?.channels || [], active = rows.filter(function (row) { return row.id === 'web' ? webActive : row.active; });

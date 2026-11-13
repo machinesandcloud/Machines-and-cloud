@@ -9,13 +9,13 @@ import { createHash, randomBytes } from 'node:crypto';
 import { networkBucket } from './network-bucket.mjs';
 export const AI_BUDGET_KIND = 'self_service_ai';
 export const AI_BUDGET_KEY = 'daily';
-const PRIVATE_LIMIT = 20, WEB_LIMIT = 50;
+const PRIVATE_LIMIT = 20, WEB_LIMIT = 50, GLOBAL_MAX = 500;
 const zone = 'America/Chicago';
 const integer = n => Number.isInteger(n) && n >= 0;
 function globalLimit() {
   const raw = process.env.MC_SELF_SERVICE_AI_GLOBAL_DAILY_LIMIT;
   if (raw === undefined || raw === '') return 50;
-  if (!/^\d+$/.test(raw) || Number(raw) > 500) throw new Error('Invalid self-service AI limit');
+  if (!/^\d+$/.test(raw) || Number(raw) > GLOBAL_MAX) throw new Error('Invalid self-service AI limit');
   return Number(raw); // Zero is the operator kill switch; invalid configuration fails closed.
 }
 // Owner practice has its own share carved out of the global daily limit (PRA-DESK-11), so practice never lowers
@@ -103,8 +103,27 @@ function allowance(state, slug, key, global) {
   let privateUsed = 0, webUsed = 0;
   for (const row of Object.values(state.tenants)) { privateUsed += row.private; webUsed += row.web; }
   const practice = practiceLimit(global), practicePool = Math.max(0, practice - privateUsed), customerPool = Math.max(0, global - practice - webUsed);
-  const privateRemaining = Math.min(Math.max(0, PRIVATE_LIMIT - own.private - legacy.private), practicePool), webRemaining = Math.min(Math.max(0, WEB_LIMIT - own.web - legacy.web), customerPool);
-  return { private: { limit: PRIVATE_LIMIT, used: own.private, remaining: privateRemaining }, web: { limit: WEB_LIMIT, used: own.web, remaining: webRemaining }, available: webRemaining > 0, resetAt: resetAt(state.day), timezone: zone, ...((legacy.private || legacy.web) ? { reconciliation: 'A prior unverified allowance reservation is retained until the daily reset. Remaining availability already includes this safety hold.' } : {}) };
+  const privateOwn = Math.max(0, PRIVATE_LIMIT - own.private - legacy.private), webOwn = Math.max(0, WEB_LIMIT - own.web - legacy.web);
+  const privateRemaining = Math.min(privateOwn, practicePool), webRemaining = Math.min(webOwn, customerPool);
+  // PRA-OPS-06: say when the shared platform pool, not this shop's own daily allowance, is what closed a kind of turn.
+  // A pool configured to 0 (practice env 0 or invalid, or global 0) is switched off, not used up: never platformLimited.
+  const platform = (ownLeft, remaining, poolLimit) => ownLeft > 0 && remaining === 0 && poolLimit > 0 ? { platformLimited: true } : {};
+  return { private: { limit: PRIVATE_LIMIT, used: own.private, remaining: privateRemaining, ...platform(privateOwn, privateRemaining, practice) }, web: { limit: WEB_LIMIT, used: own.web, remaining: webRemaining, ...platform(webOwn, webRemaining, global - practice) }, available: webRemaining > 0, resetAt: resetAt(state.day), timezone: zone, ...((legacy.private || legacy.web) ? { reconciliation: 'A prior unverified allowance reservation is retained until the daily reset. Remaining availability already includes this safety hold.' } : {}) };
+}
+// PRA-OPS-06: platform-wide usage for the operator System view. Read-only (never writes the daily record).
+// `warning` is set from 80% of either shared pool so the operator can raise MC_SELF_SERVICE_AI_GLOBAL_DAILY_LIMIT in time.
+export const AI_CAPACITY_WARNING_RATIO = 0.8;
+export async function getAIPlatformUsage() {
+  return atomicUpdate(AI_BUDGET_KIND, AI_BUDGET_KEY, previous => {
+    const day = houstonToday(), state = currentDay(previous, day), global = globalLimit(), practice = practiceLimit(global), customer = global - practice;
+    let practiceUsed = 0, customerUsed = 0, shops = 0;
+    for (const row of Object.values(state.tenants)) { practiceUsed += row.private; customerUsed += row.web; if (row.private || row.web) shops++; }
+    const publicUsed = Object.values(state.publicIps || {}).reduce((n, v) => n + v, 0);
+    const level = (used, limit) => limit === 0 ? 'off' : used >= limit ? 'exhausted' : used >= Math.ceil(limit * AI_CAPACITY_WARNING_RATIO) ? 'warning' : 'ok';
+    const pools = { practice: { limit: practice, used: Math.min(practiceUsed, practice), level: level(practiceUsed, practice) }, customer: { limit: customer, used: Math.min(customerUsed, customer), level: level(customerUsed, customer) } };
+    const rank = { off: 0, ok: 1, warning: 2, exhausted: 3 }, worst = [pools.practice.level, pools.customer.level].sort((a, b) => rank[b] - rank[a])[0];
+    return { result: { day: state.day, resetAt: resetAt(state.day), timezone: zone, global, maxGlobal: GLOBAL_MAX, shopsUsing: shops, publicUsed, perShop: { practice: PRIVATE_LIMIT, customer: WEB_LIMIT }, ...pools, level: global === 0 ? 'off' : worst } };
+  });
 }
 export async function getAIAllowance(client) {
   const slug = tenantSlug(client), key = `${slug}:${workspaceTenant(client)}`;

@@ -1,0 +1,197 @@
+diff --git a/admin.css b/admin.css
+index 1261bc6..08257d0 100644
+--- a/admin.css
++++ b/admin.css
+@@ -343,3 +343,5 @@ dialog{padding:24px}
+ .issue-members{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0;padding:0;list-style:none}
+ .waiting-note{padding-top:12px;border-top:1px solid var(--ui-line)}
+ @media(max-width:800px){.health-banner{flex-direction:column}.issue-filters .field{min-width:0;width:100%}}
++/* PRA-OPS-06 (2026-11-13): shared AI capacity warning in Overview and System. */
++.notice.warning{border-color:#e2c27a;background:#fff8e6;color:#6d4c00}
+diff --git a/admin.js b/admin.js
+index d010e0b..3da8dd2 100644
+--- a/admin.js
++++ b/admin.js
+@@ -34,6 +34,7 @@
+     generation++; abortRequests(); data = null; selected = null; selectedRecord = null; detailVersion++; action = null; busy = false; loading = null; setSession(null);
+     if ($('actionDialog').open) $('actionDialog').close();
+     ['summary', 'overviewIssues', 'overviewActivity', 'customers', 'customerDetail', 'issues', 'activity', 'prospects', 'platformSMS', 'system'].forEach(function (id) { $(id).replaceChildren(); });
++    var staleAiWarn = document.getElementById('aiCapacityWarning'); if (staleAiWarn) staleAiWarn.remove();
+     $('scopeNotice').hidden = true; $('scopeNotice').textContent = ''; $('healthBanner').hidden = true; $('healthBanner').replaceChildren(); $('healthBanner').mcHtml = null; $('systemNavBadge').hidden = true; $('issueCount').textContent = ''; $('issueNavCount').hidden = true; $('issueNavCount').textContent = ''; $('currentLocation').textContent = 'Overview';
+     $('operator').textContent = ''; $('lastUpdated').textContent = ''; $('prospectsStatus').textContent = ''; $('platformSMSStatus').textContent = ''; $('customerSearch').value = ''; $('customerStatus').value = 'all';
+     ['actionNote', 'actionResolution', 'actionReason', 'ruleServices', 'ruleServiceArea', 'ruleNotServed', 'ruleSummary'].forEach(function (id) { $(id).value = ''; }); ['actionStatus', 'actionTitle', 'actionDescription', 'actionSupportReference', 'appStatus', 'customerCount', 'toast'].forEach(function (id) { $(id).textContent = ''; }); $('toast').hidden = true; clearTimeout(toastTimer);
+@@ -324,13 +325,32 @@
+     var rows = Array.isArray(states) ? states : Object.entries(states).map(function (entry) { var value = entry[1]; return typeof value === 'object' && value ? Object.assign({ id: entry[0] }, value) : { id: entry[0], status: typeof value === 'boolean' ? value ? 'configured' : 'unavailable' : /unavailable|disabled/i.test(String(value)) ? 'unavailable' : 'configured', detail: typeof value === 'string' ? value : '' }; });
+     $('system').innerHTML = '<section class="panel"><h2>Scheduler</h2><p class="muted">This is the last saved result, not a continuous uptime check.</p><dl class="facts"><div><dt>Last recorded run</dt><dd>' + esc(date(scheduler.at)) + '</dd></div><div><dt>Result</dt><dd>' + (scheduler.readable === false ? badge('unknown') + ' The saved health record could not be read.' : scheduler.at ? badge(scheduler.healthy === true ? 'healthy' : 'needs_attention') : 'No run recorded') + '</dd></div></dl>' + serviceFailureSummary(scheduler.blocks) + (scheduler.detail ? '<p class="muted" style="margin-top:16px">' + esc(scheduler.detail) + '</p>' : '') + (array(scheduler.blocks).length ? '<h3 style="margin-top:22px">Last recorded work scan</h3><p class="muted">These are the last recorded counts. A scan processes a limited batch; pending work and unresolved failures can remain after it.</p><div class="table-scroll" tabindex="0" role="region" aria-label="Scheduler block results; scroll to see all columns"><table class="data-table" style="min-width:980px"><thead><tr><th scope="col">Work</th><th scope="col">Result</th><th scope="col">Queued</th><th scope="col">Pending</th><th scope="col">Failed in scan</th><th scope="col">Uncertain</th><th scope="col">Unresolved</th><th scope="col">Release pending</th><th scope="col">Open failures</th></tr></thead><tbody>' + array(scheduler.blocks).map(function (block) { var count = function (value) { return Number.isInteger(value) && value >= 0 ? value : '—'; }; var explanations = { phone_scope_partial: 'More saved work remains outside this scan.', phone_recovery_stale: 'Phone setup worker has not reported recently.', product_gate_closed: 'Phone execution is disabled; saved work is retained.' }; return '<tr><td>' + esc(blockLabel(block.name)) + blockAdvice(block) + (explanations[block.reasonCode] ? '<small>' + esc(explanations[block.reasonCode]) + '</small>' : '') + (block.ok !== true && block.error ? '<small>Error: ' + esc(block.error) + '</small>' : '') + (Number.isInteger(block.inspected) && block.inspected >= 0 ? '<small>Checked ' + block.inspected + ' saved requests in this scan.</small>' : '') + '</td><td>' + badge(block.ok === true && !(block.openFailures > 0) && !(block.unresolved > 0) ? 'succeeded' : 'needs_attention') + '</td><td>' + count(block.queued) + '</td><td>' + count(block.pending) + '</td><td>' + count(block.failed) + '</td><td>' + count(block.uncertain) + '</td><td>' + count(block.unresolved) + '</td><td>' + count(block.cleanupPending) + '</td><td>' + count(block.openFailures) + '</td></tr>'; }).join('') + '</tbody></table></div>' : '<p class="muted" style="margin-top:16px">No work scan details were recorded.</p>') + '</section><section class="panel"><h2>Platform connections</h2><p class="muted">Platform configuration does not mean a customer connection has been activated or delivery verified.</p><div class="channel-grid">' + rows.map(function (provider) { return '<div class="channel-card">' + badge(provider.status || provider.state || 'unavailable') + '<h3>' + esc(provider.label || label(provider.id)) + '</h3><p>' + esc(provider.detail || 'Check the customer account for actual connection and delivery status.') + '</p></div>'; }).join('') + '</div></section>';
+     var schedulerFacts = $('system').querySelector('.facts'); if (schedulerFacts && scheduler.at && Number.isFinite(scheduler.minutesAgo) && scheduler.minutesAgo > 25) schedulerFacts.insertAdjacentHTML('afterend', '<p class="notice error" data-scheduler-stale>Scheduler has not run for ' + Math.round(scheduler.minutesAgo) + ' minutes. Check the scheduled function in Netlify, then refresh.</p>');
+-    $('system').insertAdjacentHTML('beforeend', legacyKeyAuditPanel(system.legacyKeyAudit));
++    $('system').insertAdjacentHTML('beforeend', aiCapacityPanel(system.aiCapacity) + legacyKeyAuditPanel(system.legacyKeyAudit));
++  }
++  // PRA-OPS-06: shared daily AI pools across every self-service shop, with a warning from 80% of either pool.
++  function aiCapacityAdvice(cap) {
++    if (!cap || cap.unavailable) return '';
++    if (cap.level === 'off') return 'AI replies are switched off platform-wide (MC_SELF_SERVICE_AI_GLOBAL_DAILY_LIMIT is 0).';
++    var full = ['customer', 'practice'].filter(function (k) { return cap[k] && cap[k].level === 'exhausted'; }), near = ['customer', 'practice'].filter(function (k) { return cap[k] && cap[k].level === 'warning'; });
++    var name = function (k) { return k === 'customer' ? 'customer replies (chat, phone, text)' : 'owner practice'; };
++    var atMax = Number(cap.global) >= Number(cap.maxGlobal || 500), raise = atMax ? ' MC_SELF_SERVICE_AI_GLOBAL_DAILY_LIMIT is already at its ' + Number(cap.maxGlobal || 500) + ' maximum; more daily capacity is an owner/PO decision.' : null;
++    if (full.length) return 'The shared platform limit for ' + full.map(name).join(' and ') + ' is used for today. Every shop is refused until midnight Houston time, even shops with their own allowance left.' + (raise || ' Raise MC_SELF_SERVICE_AI_GLOBAL_DAILY_LIMIT (up to ' + Number(cap.maxGlobal || 500) + ') to reopen it.');
++    if (near.length) return 'The shared platform limit for ' + near.map(name).join(' and ') + ' is at 80% or more for today.' + (raise || ' Raise MC_SELF_SERVICE_AI_GLOBAL_DAILY_LIMIT (up to ' + Number(cap.maxGlobal || 500) + ') before shops are refused.');
++    return '';
++  }
++  function aiCapacityPanel(cap) {
++    if (!cap) return '';
++    if (cap.unavailable) return '<section class="panel" id="aiCapacity"><h2>AI replies today</h2><p class="notice error">The shared AI usage record could not be read.</p></section>';
++    var pool = function (k, label) { var p = cap[k] || {}; return '<div><dt>' + label + '</dt><dd>' + esc(String(Number(p.used) || 0)) + ' of ' + esc(String(Number(p.limit) || 0)) + ' used</dd></div>'; };
++    var advice = aiCapacityAdvice(cap);
++    return '<section class="panel" id="aiCapacity"><h2>AI replies today</h2><p class="muted">One shared daily limit covers every self-service shop: ' + esc(String(Number(cap.global) || 0)) + ' replies, split into ' + esc(String(Number(cap.customer && cap.customer.limit) || 0)) + ' customer and ' + esc(String(Number(cap.practice && cap.practice.limit) || 0)) + ' owner practice. Each shop also has its own ' + esc(String(cap.perShop && cap.perShop.customer || 0)) + ' customer and ' + esc(String(cap.perShop && cap.perShop.practice || 0)) + ' practice replies. Resets at midnight Houston time.</p><dl class="facts">' + pool('customer', 'Customer replies: chat, phone, text (all shops)') + pool('practice', 'Owner practice (all shops)') + '<div><dt>Shops with AI use today</dt><dd>' + esc(String(Number(cap.shopsUsing) || 0)) + '</dd></div></dl>' + (advice ? '<p class="notice ' + (cap.level === 'warning' ? 'warning' : 'error') + '" data-ai-capacity="' + esc(cap.level) + '">' + esc(advice) + '</p>' : '') + '</section>';
+   }
+   function render() {
+     var summary = data.summary || {}, issues = issueRows(), events = activities();
+     $('currentLocation').textContent = view.charAt(0).toUpperCase() + view.slice(1);
+     var scope = data.nextCursor || (Number.isFinite(data.total) && data.total > array(data.customers).length) ? ' (loaded)' : '';
+     if (summary.scope === 'loaded' || summary.scope === 'Current page') summary = { customers: array(data.customers).length, active: array(data.customers).filter(function (c) { return c.status === 'live'; }).length, needsAttention: array(data.customers).filter(function (c) { return array(c.issues).some(actionable); }).length, setupPending: array(data.customers).filter(function (c) { return c.selfService && !['cancelled', 'archived'].includes(c.status) && array(c.connections).some(function (connection) { return connection.requested && !['active','connected'].includes(connection.status); }); }).length };
++    var aiWarn = document.getElementById('aiCapacityWarning'), aiAdvice = aiCapacityAdvice(data.system && data.system.aiCapacity); if (aiWarn) aiWarn.remove(); if (aiAdvice) $('scopeNotice').insertAdjacentHTML('beforebegin', '<p class="notice ' + (data.system.aiCapacity.level === 'warning' ? 'warning' : 'error') + '" id="aiCapacityWarning" role="status">' + esc(aiAdvice) + ' <button class="btn small quiet" type="button" data-go="system">View System</button></p>');
+     $('scopeNotice').hidden = !scope; $('scopeNotice').textContent = 'Overview, search, issues and activity cover the ' + array(data.customers).length + ' customers loaded so far. Load more in Customers to include the next accounts.';
+     $('operator').textContent = 'Operator: ' + (data.operator && data.operator.email || 'operator');
+     $('summary').innerHTML = [{ value: summary.needsAttention, label: 'Need attention' + scope, attention: true, go: 'issues' }, { value: summary.setupPending, label: 'Setup pending' + scope, go: 'customers', filter: 'setup_pending' }, { value: summary.active, label: 'Live accounts' + scope, go: 'customers', filter: 'live' }, { value: summary.customers, label: 'All customers' + scope, go: 'customers', filter: 'all' }].map(function (stat) { return '<button type="button" class="stat' + (stat.attention ? ' attention' : '') + '" data-go="' + stat.go + '"' + (stat.filter ? ' data-filter="' + stat.filter + '"' : '') + '><span>' + esc(stat.label) + '</span><svg class="stat-arrow ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg><b>' + (Number.isFinite(stat.value) ? stat.value : '—') + '</b></button>'; }).join('');
+diff --git a/desk-connections.css b/desk-connections.css
+index cc5dce3..219e190 100644
+--- a/desk-connections.css
++++ b/desk-connections.css
+@@ -31,3 +31,11 @@
+ }
+ 
+ .connection-status-options{border-top:1px solid #dce4f1;margin-top:24px;padding-top:10px}.connection-status-options>summary{font-weight:700;cursor:pointer;min-height:48px;display:flex;align-items:center}.connection-status-options>summary small{display:block;font-weight:400;color:#627590;font-size:12px;margin-top:5px}.connection-status-options .connection-guide{padding-top:18px}
++
++/* PRA-POLISH-12 (2026-11-13, open-cards r4): the loading and signed-out desk screens keep the product brand.
++   Only the rail's logo is shown, as a top bar matching the signed-in header at each width; the workspace
++   navigation stays hidden until the workspace loads. Programmatic-focus outlines are left to the a11y owner. */
++body.desk-app[data-workspace-state=loading] #deskRail[hidden],body.desk-app[data-workspace-state=recovery] #deskRail[hidden]{display:flex!important;position:relative;inset:auto;width:100%;min-height:68px;flex-direction:row;align-items:center;padding:14px 32px;overflow:visible}
++body.desk-app[data-workspace-state=loading] #deskRail[hidden]>:not(.desk-rail-brand),body.desk-app[data-workspace-state=recovery] #deskRail[hidden]>:not(.desk-rail-brand){display:none!important}
++body.desk-app[data-workspace-state=loading] #deskRail[hidden] .desk-rail-brand,body.desk-app[data-workspace-state=recovery] #deskRail[hidden] .desk-rail-brand{padding:0;border:0}
++@media(max-width:900px){body.desk-app[data-workspace-state=loading] #deskRail[hidden],body.desk-app[data-workspace-state=recovery] #deskRail[hidden]{padding:10px 16px}}
+diff --git a/desk-setup-guide.css b/desk-setup-guide.css
+index 5f4a4c2..4b45eb3 100644
+--- a/desk-setup-guide.css
++++ b/desk-setup-guide.css
+@@ -260,3 +260,17 @@ body[data-connector-flow=step] #leadSourceDialog[data-connector-stage=management
+ .connector-availability[data-availability="available"]{background:#eaf7ef;color:#1d5a37;border-color:#bfe3cc}
+ .connector-page-top .connector-availability{margin-left:auto}
+ @media(max-width:600px){.connector-service-choice{gap:12px}.connector-service-choice .connector-availability{font-size:11px;padding:2px 8px}.connector-page-top{flex-wrap:wrap}.connector-page-top .connector-availability{order:3;margin-left:0}}
++
++/* PRA-POLISH-15 (2026-11-13, open-cards r4): Connections list. Every mark sits in the same 32px neutral tile,
++   and on phones each row is mark + name on line 1, status + badge on line 2, so service names never wrap. */
++.desk-app .connector-service-choice img.brand-mark,.desk-app .connector-service-choice .service-mark,.desk-app .connector-service-choice img.brand-mark--wide,.desk-app .connector-service-choice .brand-mark-pair{box-sizing:border-box;width:32px!important;height:32px!important;flex:none;padding:6px;border-radius:8px;background:#f1f4f9;object-fit:contain;color:var(--ui-ink)}
++.desk-app .connector-service-choice .brand-mark-pair img.brand-mark{width:10px!important;height:10px!important;padding:0;background:transparent}
++@media(max-width:640px){
++.desk-app .connector-service-choice{display:grid;grid-template-columns:32px auto minmax(0,1fr) 16px;grid-template-areas:"mark name name arrow" "mark status badge arrow";column-gap:12px;row-gap:4px;align-items:center;min-height:72px}
++.desk-app .connector-service-choice>.brand-lockup{display:contents}
++.desk-app .connector-service-choice>.brand-lockup>:first-child{grid-area:mark}
++.desk-app .connector-service-choice>.brand-lockup>span:last-child{grid-area:name;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:15px;font-weight:600}
++.desk-app .connector-service-choice>.connector-choice-status{grid-area:status;max-width:none;text-align:left;white-space:nowrap}
++.desk-app .connector-service-choice>.connector-availability{grid-area:badge;justify-self:start;white-space:nowrap}
++.desk-app .connector-service-choice>span[aria-hidden=true]:last-child{grid-area:arrow}
++}
+diff --git a/desk.js b/desk.js
+index 1404f87..2e01b9f 100644
+--- a/desk.js
++++ b/desk.js
+@@ -1043,12 +1043,12 @@
+         return '<div class="setup-step"><div><strong>' + esc(channel.label) + ' · ' + esc(states[state] || 'Not connected yet') + '</strong><p>' + esc(detail) + '</p>' + (channel.requested && next ? '<p><b>Next:</b> ' + esc(next) + '</p>' : '') + '</div></div>';
+       }).join('');
+     }
+-    $('status').textContent = client.status === 'cancelled' ? 'Service cancelled' : client.status === 'paused' ? 'Front desk paused' : limited ? 'Daily AI allowance reached' : operational ? 'Website chat active' : 'Setup in progress';
++    $('status').textContent = client.status === 'cancelled' ? 'Service cancelled' : client.status === 'paused' ? 'Front desk paused' : limited ? (allowance.web.platformLimited ? 'Shared AI limit reached' : 'Daily AI allowance reached') : operational ? 'Website chat active' : 'Setup in progress';
+     $('status').className = 'st' + (operational ? ' live' : '');
+     renderHomeNext(d);
+     $('setupSteps').replaceChildren();$('setupSteps').hidden=true;
+     reviewState(d);
+-    $('aiAllowance').textContent = allowance ? 'AI replies left today: ' + allowance.private.remaining + ' practice · ' + allowance.web.remaining + ' customer chat. Practice never uses customer chat replies. Both reset at midnight Houston time.' + (allowance.reconciliation ? ' ' + allowance.reconciliation : '') : '';
++    $('aiAllowance').textContent = allowance ? 'AI replies left today: ' + allowance.private.remaining + ' practice · ' + allowance.web.remaining + ' customer chat. Practice never uses customer chat replies. Both reset at midnight Houston time.' + (allowance.web.platformLimited || allowance.private.platformLimited ? ' Today’s shared platform limit is used, not your own allowance; our team has been shown this.' : '') + (allowance.reconciliation ? ' ' + allowance.reconciliation : '') : '';
+     if (limited) { var activate = $('golive') || $('resume'); if (activate) activate.disabled = true; }
+     $('checklist').innerHTML = setup.steps.map(function (step) { return '<div class="check"><span class="dot ' + (step.status === 'done' ? 'ok' : 'wait') + '"></span><div><strong>' + esc(step.label) + '</strong><p class="muted">' + esc(step.detail) + '</p></div></div>'; }).join('');
+     $('numberText').textContent = 'No phone number has been purchased or connected for this workspace.';
+@@ -1256,7 +1256,7 @@
+   function renderAccount(d) {
+     var c = d.client, selfService = c.onboarding?.version === 1, closed = ['cancelled','archived'].includes(c.status), paused = c.status === 'paused';
+     $('accountBusiness').textContent = c.business.name || 'Not saved'; $('accountOwner').textContent = c.owner.name || 'Not saved';
+-    $('accountEmail').textContent = c.owner.email || 'Not available'; $('accountPhone').textContent = c.owner.phone || 'Not saved';
++    $('accountEmail').textContent = c.owner.email || 'Not available'; $('accountPhone').textContent = c.owner.phone ? ownerPhone(c.owner.phone) : 'Not saved';
+     $('accountEditContact').hidden = closed; $('accountReporting').hidden = selfService || closed; $('workspaceMaintenance').hidden = !selfService || closed;
+     var webActive = !!d.webAvailable && !!d.setup?.channels?.web?.ready && !!d.setup?.channels?.web?.active;
+     var rows = d.setup?.connectionJourney?.channels || [], active = rows.filter(function (row) { return row.id === 'web' ? webActive : row.active; });
+diff --git a/netlify/functions/lib/operator.mjs b/netlify/functions/lib/operator.mjs
+index 25e0c29..7b098f3 100644
+--- a/netlify/functions/lib/operator.mjs
++++ b/netlify/functions/lib/operator.mjs
+@@ -83,7 +83,7 @@ export async function customerView(c, detail = false) {
+   if (c.build?.status === 'failed') issues.push({ id: 'draft', severity: 'high', title: 'Desk draft needs repair', detail: 'Saved customer answers are retained. Queue a workspace rebuild.' });
+   for (const op of operations.filter(row => ['failed', 'uncertain'].includes(row.state))) issues.push({ id: op.id, severity: 'high', title: 'Background work needs attention', detail: op.detail || 'Review the operation before retrying.' });
+   if (phoneActivation?.operation && ['uncertain','cleanup_uncertain','needs_review'].includes(phoneActivation.operation.state)) issues.push({ id: phoneActivation.operation.id, severity: 'high', title: 'Phone setup needs attention', detail: phoneActivation.detail });
+-  if (selfService && !aiAllowance.available && c.channels?.web?.active) issues.push({ id: 'allowance', severity: 'medium', title: 'Daily AI allowance reached', detail: 'Customer AI replies are unavailable until the allowance resets.' });
++  if (selfService && !aiAllowance.available && c.channels?.web?.active) issues.push({ id: 'allowance', severity: 'medium', title: aiAllowance.web?.platformLimited ? 'Platform AI limit reached' : 'Daily AI allowance reached', detail: aiAllowance.web?.platformLimited ? 'Customer AI replies are unavailable because the shared platform daily limit is used, not this shop’s own allowance. Raise MC_SELF_SERVICE_AI_GLOBAL_DAILY_LIMIT or wait for the midnight Houston reset; see System.' : 'Customer AI replies are unavailable until the allowance resets.' });
+   if (selfService && c.status === 'live' && !setup.channels.web.ready) issues.push({ id: 'readiness', severity: 'high', title: 'Website chat is blocked', detail: 'Current saved rules have not passed all activation checks.' });
+   if (services) {
+     for (const [id,channel] of [['voice',services.voice],['sms',services.messaging]]) if (channel.operation && ['uncertain','needs_review','needs_action','cleanup_uncertain','blocked'].includes(channel.state)) issues.push({id:channel.operation.id,severity:'high',title: id==='voice'?'Phone service needs attention':'Texting setup needs attention',detail:channel.operation.detail || channel.detail});
+diff --git a/netlify/functions/lib/self-service-ai.mjs b/netlify/functions/lib/self-service-ai.mjs
+index 9eb8ff0..07fd1a1 100644
+--- a/netlify/functions/lib/self-service-ai.mjs
++++ b/netlify/functions/lib/self-service-ai.mjs
+@@ -9,13 +9,13 @@ import { createHash, randomBytes } from 'node:crypto';
+ import { networkBucket } from './network-bucket.mjs';
+ export const AI_BUDGET_KIND = 'self_service_ai';
+ export const AI_BUDGET_KEY = 'daily';
+-const PRIVATE_LIMIT = 20, WEB_LIMIT = 50;
++const PRIVATE_LIMIT = 20, WEB_LIMIT = 50, GLOBAL_MAX = 500;
+ const zone = 'America/Chicago';
+ const integer = n => Number.isInteger(n) && n >= 0;
+ function globalLimit() {
+   const raw = process.env.MC_SELF_SERVICE_AI_GLOBAL_DAILY_LIMIT;
+   if (raw === undefined || raw === '') return 50;
+-  if (!/^\d+$/.test(raw) || Number(raw) > 500) throw new Error('Invalid self-service AI limit');
++  if (!/^\d+$/.test(raw) || Number(raw) > GLOBAL_MAX) throw new Error('Invalid self-service AI limit');
+   return Number(raw); // Zero is the operator kill switch; invalid configuration fails closed.
+ }
+ // Owner practice has its own share carved out of the global daily limit (PRA-DESK-11), so practice never lowers
+@@ -103,8 +103,27 @@ function allowance(state, slug, key, global) {
+   let privateUsed = 0, webUsed = 0;
+   for (const row of Object.values(state.tenants)) { privateUsed += row.private; webUsed += row.web; }
+   const practice = practiceLimit(global), practicePool = Math.max(0, practice - privateUsed), customerPool = Math.max(0, global - practice - webUsed);
+-  const privateRemaining = Math.min(Math.max(0, PRIVATE_LIMIT - own.private - legacy.private), practicePool), webRemaining = Math.min(Math.max(0, WEB_LIMIT - own.web - legacy.web), customerPool);
+-  return { private: { limit: PRIVATE_LIMIT, used: own.private, remaining: privateRemaining }, web: { limit: WEB_LIMIT, used: own.web, remaining: webRemaining }, available: webRemaining > 0, resetAt: resetAt(state.day), timezone: zone, ...((legacy.private || legacy.web) ? { reconciliation: 'A prior unverified allowance reservation is retained until the daily reset. Remaining availability already includes this safety hold.' } : {}) };
++  const privateOwn = Math.max(0, PRIVATE_LIMIT - own.private - legacy.private), webOwn = Math.max(0, WEB_LIMIT - own.web - legacy.web);
++  const privateRemaining = Math.min(privateOwn, practicePool), webRemaining = Math.min(webOwn, customerPool);
++  // PRA-OPS-06: say when the shared platform pool, not this shop's own daily allowance, is what closed a kind of turn.
++  // A pool configured to 0 (practice env 0 or invalid, or global 0) is switched off, not used up: never platformLimited.
++  const platform = (ownLeft, remaining, poolLimit) => ownLeft > 0 && remaining === 0 && poolLimit > 0 ? { platformLimited: true } : {};
++  return { private: { limit: PRIVATE_LIMIT, used: own.private, remaining: privateRemaining, ...platform(privateOwn, privateRemaining, practice) }, web: { limit: WEB_LIMIT, used: own.web, remaining: webRemaining, ...platform(webOwn, webRemaining, global - practice) }, available: webRemaining > 0, resetAt: resetAt(state.day), timezone: zone, ...((legacy.private || legacy.web) ? { reconciliation: 'A prior unverified allowance reservation is retained until the daily reset. Remaining availability already includes this safety hold.' } : {}) };
++}
++// PRA-OPS-06: platform-wide usage for the operator System view. Read-only (never writes the daily record).
++// `warning` is set from 80% of either shared pool so the operator can raise MC_SELF_SERVICE_AI_GLOBAL_DAILY_LIMIT in time.
++export const AI_CAPACITY_WARNING_RATIO = 0.8;
++export async function getAIPlatformUsage() {
++  return atomicUpdate(AI_BUDGET_KIND, AI_BUDGET_KEY, previous => {
++    const day = houstonToday(), state = currentDay(previous, day), global = globalLimit(), practice = practiceLimit(global), customer = global - practice;
++    let practiceUsed = 0, customerUsed = 0, shops = 0;
++    for (const row of Object.values(state.tenants)) { practiceUsed += row.private; customerUsed += row.web; if (row.private || row.web) shops++; }
++    const publicUsed = Object.values(state.publicIps || {}).reduce((n, v) => n + v, 0);
++    const level = (used, limit) => limit === 0 ? 'off' : used >= limit ? 'exhausted' : used >= Math.ceil(limit * AI_CAPACITY_WARNING_RATIO) ? 'warning' : 'ok';
++    const pools = { practice: { limit: practice, used: Math.min(practiceUsed, practice), level: level(practiceUsed, practice) }, customer: { limit: customer, used: Math.min(customerUsed, customer), level: level(customerUsed, customer) } };
++    const rank = { off: 0, ok: 1, warning: 2, exhausted: 3 }, worst = [pools.practice.level, pools.customer.level].sort((a, b) => rank[b] - rank[a])[0];
++    return { result: { day: state.day, resetAt: resetAt(state.day), timezone: zone, global, maxGlobal: GLOBAL_MAX, shopsUsing: shops, publicUsed, perShop: { practice: PRIVATE_LIMIT, customer: WEB_LIMIT }, ...pools, level: global === 0 ? 'off' : worst } };
++  });
+ }
+ export async function getAIAllowance(client) {
+   const slug = tenantSlug(client), key = `${slug}:${workspaceTenant(client)}`;
+diff --git a/netlify/functions/manage.mjs b/netlify/functions/manage.mjs
+index 14da19b..dbbefb1 100644
+--- a/netlify/functions/manage.mjs
++++ b/netlify/functions/manage.mjs
+@@ -82,6 +82,7 @@ export default async (req, context) => {
+     let optOutReview = null; try { optOutReview = await (await import('./lib/optout-requests.mjs')).optOutReviewView(); } catch { /* shown as unavailable */ }
+     const result = { ok: true, operator: { email: session.email, expiresAt: session.expiresAt }, ...page, inquiries: await prospectAudience('all'), providerCleanupPending: await pendingProviderCleanup(), platformSMS: await platformSMSView(), optOutReview, system: { health, scheduler: { readable: health.state !== 'unknown', at: scheduler?.at || null, healthy, minutesAgo: age, blocks: blocks.map(([name, saved]) => { const row=saved && typeof saved === 'object' ? saved : {}; return ({ name, ok: row.ok === true, queued: row.queued, failed: row.failed, uncertain: row.uncertain, openFailures: row.openFailures, pending: row.pending, unresolved: row.unresolved, cleanupPending: row.cleanupPending, inspected: row.inspected, ...(row.ok !== true && row.error ? { error: String(row.error).slice(0, 300) } : {}), reasonCode: name === 'serviceDeliveryRecovery' ? serviceHealthFailureFacts(row)[0]?.reasonCode || (row.ok === true ? null : 'service_delivery_unresolved') : row.reasonCode, ...(name === 'serviceDeliveryRecovery' ? { failingComponents: serviceHealthFailureFacts(row) } : {}) }); }) }, providerStates: operatorProviderStates() } };
+     try { result.system.legacyKeyAudit = await adminKeyAuditView(); } catch { result.system.legacyKeyAudit = { unavailable: true }; }
++    try { result.system.aiCapacity = await (await import('./lib/self-service-ai.mjs')).getAIPlatformUsage(); } catch { result.system.aiCapacity = { unavailable: true }; }
+     await requireCurrentOperator(session);
+     return reply(result);
+   } catch (error) {
