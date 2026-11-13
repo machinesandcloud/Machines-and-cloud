@@ -3,27 +3,29 @@
 **Nothing here is pushed, deployed or merged. No provider was called.** Every run was offline:
 - `env -i` with `MC_MEMORY_STORE=1`, `MC_FAKE_MODEL=1` and `MC_LOCAL_NO_KEYS=1`, no `.env`;
 - release 3's `sandbox-exec` deny-remote profile (`harness/deny-net.sb`, loopback only);
-- throwaway `git archive` copies under the session scratchpad (`r4/r4-gate`, `r4/r4-gate-fc`, `r4/r4-gate-sms`, then `r4/r4-gate-a11y`), `node_modules` symlinked to `scratchpad/p10/nm`. Each copy was deleted after its run.
+- throwaway `git archive` copies under the session scratchpad (`r4/r4-gate`, `r4/r4-gate-fc`, `r4/r4-gate-sms`, `r4/r4-gate-a11y`, then `r4/r4-gate-oc`), `node_modules` symlinked to `scratchpad/p10/nm`. Each copy was deleted after its run.
 
 `route.fetch` was never used.
 
 - **Worktree / branch:** `/tmp/mc-claude-release4-candidate-20261113`, `work/claude-release4-candidate-20261113`.
 - **Base:** production release 3, `c470c7a7`. Release 4 is a fast-forward from production.
-- **Product head tested:** `e1e34e00` (all five pieces). Earlier runs: `6aa33436` (P3 and SEO), `d35c2de6` (plus FC-01..06 and QA's fixes), `eb973e37` (plus managed SMS).
+- **Product head tested:** `51fb3085` (six pieces plus the operator wording follow-up). Earlier runs: `e1e34e00` (plus a11y), `6aa33436` (P3 and SEO), `d35c2de6` (plus FC-01..06 and QA's fixes), `eb973e37` (plus managed SMS).
 
 ## 1. Result
 
 | Run | Result |
 |---|---|
-| **Deploy gate at `e1e34e00`**, each `node scripts/…` step in a fresh process | **72/72 exit 0** (`receipts/gate-a11y/SUMMARY.tsv`) |
-| Same build line verbatim as one `&&` chain at `e1e34e00` | `GATE_EXIT=0` (`receipts/gate-a11y/gate-chain-tail.log`) |
+| **Deploy gate at `51fb3085`**, each `node scripts/…` step in a fresh process | **72/72 exit 0** (`receipts/gate-oc/SUMMARY.tsv`) |
+| Same build line verbatim as one `&&` chain at `51fb3085` | `GATE_EXIT=0` (`receipts/gate-oc/gate-chain-tail.log`) |
+| Open-cards browser checks at `51fb3085`, system Chrome, offline (`receipts/oc/SUMMARY.tsv`) | open-cards-r4 **33/33** (with the two new follow-up assertions); QA `qa-probe-r2` **5/5**; connector-pages-ui **55/55**; operator-session-ui-qa **30/30**. Mutants for the follow-up, both killed (32/33): operator.mjs reverted to `549aaf33`, and the at-max branch forced off. |
+| Gate at `e1e34e00`, each step | **72/72 exit 0** (`receipts/gate-a11y/SUMMARY.tsv`), chain `GATE_EXIT=0` |
 | Browser checks at `e1e34e00`, system Chrome (`channel:"chrome"`), offline (`receipts/a11y/SUMMARY.tsv`) | a11y-r3-fix **30/30**; desk-daily-work **12/12**; request-followthrough-ui **12/12**; P3 ui **45/45**, desk-ui **12/12**; fc01 **6/6**, fc02 **4/4**, fc03 **4/4**, fc04 **4/4**, fc05 **4/4**, fc06 **8/8**; QA adversarial **22/22**. P3's launch line was switched to `channel:'chrome'` in the copy only, as QA did, because the default headless shell is not used. The first desk-daily-work and request-followthrough runs exited before starting because their `--output` must be a `scratchpad/` path; rerun with that, both pass. |
 | Gate at `eb973e37`, each step in a fresh process | **72/72 exit 0** (`receipts/gate-sms/SUMMARY.tsv`). Release 3's 70 plus `p3-cards-check` and `managed-reply-recovery-check` (20/20). |
 | Chain at `eb973e37` | `GATE_EXIT=0` (`receipts/gate-sms/gate-chain-tail.log`) |
 | Gate at `d35c2de6`, each `node scripts/…` step of the `netlify.toml` build line in a fresh process | **71/71 exit 0** (`receipts/gate-fc/SUMMARY.tsv`), the full gate after QA's D1-D3 fixes, which QA had not rerun. |
 | Chain at `d35c2de6` | `GATE_EXIT=0` (`receipts/gate-fc/gate-chain-tail.log`) |
 | Earlier gate at `6aa33436` (P3 + SEO only) | 71/71, `GATE_EXIT=0` (`receipts/gate/`) |
-| `python3 -I scripts/sitecheck.py .` at `e1e34e00` | 182 pages, 0 broken references, 0 sitemap, redirect or canonical issues |
+| `python3 -I scripts/sitecheck.py .` at `51fb3085` | 182 pages, 0 broken references, 0 sitemap, redirect or canonical issues |
 | FC author checks at `d35c2de6` (`receipts/fc/`) | fc01 **6/6**, fc02 **4/4**, fc03 **4/4**, fc04 **4/4**, fc05 **4/4**, fc06 **8/8** |
 | QA adversarial check at `d35c2de6`, 390 and 1440 (`receipts/fc/`) | **22/22** (16/22 before QA's fixes, per QA-REVIEW.md) |
 | P3 rev 2 checks, rerun at `d35c2de6` because FC changes `desk.js` (`receipts/fc/p3-*`) | unit **11/11**, ui **45/45**, desk-ui **12/12**; also 11/45/12 at `6aa33436` (`receipts/p3/`), the counts QA accepted in `p3-cards/qa/QA-REVIEW-R2.md` |
@@ -46,11 +48,14 @@ Every browser report shows physicalNetwork=0, forbidden=0, pageErrors=0.
 | 7 | `eb973e37` | **Managed-SMS failure gaps (rev 3)**: `lib/managed-delivery.mjs`, `lib/managed-history.mjs`, `lib/managed-sms.mjs`, new gate step `scripts/managed-reply-recovery-check.mjs` (before `build-site`, 72 steps; CLAUDE.md gate copy synced). Patch and `QA-REVIEW-R3.md` copied to `qa-artifacts/claude-collaboration/managed-sms-gaps/` | `/tmp/mc-claude-managed-sms-gaps-20261113/.../patches/managed-sms-gaps-r3-d35c2de6.patch` (sha256 `0e52b856…e8da`), accepted in `qa/QA-REVIEW-R3.md`, applied unchanged |
 | 8 | `ca727383` | Notes and receipts updated for managed SMS | |
 | 9 | `e1e34e00` | **Accessibility PRA-A11Y-01..07 rev 2** (client only): `design-system.css`, `desk-calendar.css`, `desk-visits.js`, `desk.css`, `desk.html`, `desk.js`, `onboard.css`, `product-ui.css`. Adds the author's browser check, PROPOSALS.md and QA-REVIEW.md under `qa-artifacts/claude-collaboration/a11y-r3-fix/` | `/tmp/mc-claude-a11y-r3-fix-20261113/.../a11y-r3-fix-r2-on-d35c2de6.patch` (sha256 `13588a48…4e9b`), accepted in `qa/QA-REVIEW.md` with F1 required; rev 2 adds F1 and F2. Applied unchanged on `ca727383` |
-| 10 | (this commit) | Notes and receipts updated for a11y | |
+| 10 | `5cb4233e` | Notes and receipts updated for a11y | |
+| 11 | `549aaf33` | **Open cards R4 rev 2** (OPS-06, ONB-11, POLISH-12 brand part, POLISH-15): `admin.css`, `admin.js`, `desk-connections.css`, `desk-setup-guide.css`, `desk.js`, `lib/operator.mjs`, `lib/self-service-ai.mjs`, `manage.mjs`. Adds the author's check, QA's `qa-probe-r2.mjs`, PROPOSALS and COVERAGE under `qa-artifacts/claude-collaboration/open-cards-r4/` | `/tmp/mc-claude-open-cards-r4-20261113/.../patches/open-cards-r4-rev2-on-5cb4233e.patch` (sha256 `c5880adb…dfdd9e55`), accepted in `qa/QA-REVIEW-R2.md`, applied unchanged |
+| 12 | `51fb3085` | **QA R2 residual fixed**: at the 500 maximum, the per-shop "Platform AI limit reached" issue (`operator.mjs`) says the limit is already at its 500 maximum and more capacity is an owner/PO decision, instead of advising a raise; below it, "Raise … (up to 500) or wait". `self-service-ai.mjs` exports `AI_GLOBAL_MAX` and `aiGlobalLimitAtMax()`. Two assertions added to `open-cards-r4-check.mjs` | this candidate |
+| 13 | (this commit) | Notes and receipts updated for open cards | |
 
 **Gate decision.** `p3-unit-check` is pure Node (memory store, fake model, fetch blocked, about 1 s), so it belongs in the gate. `p3-ui-check` and `p3-desk-ui-check` need a Playwright module and a Chromium binary passed by flag, which the Netlify build does not have; they stay in `qa-artifacts` as release evidence and were run here by hand.
 
-The same applies to FC: all six author checks and QA's adversarial check launch Chromium through `fc-lib.mjs` with `--playwright` and `--out`, so none is a gate step; they were run by hand on the gate copy (the adversarial check is copied beside `fc-lib.mjs` to run). The FC patches add no pure-Node check. The managed-SMS patch adds its own pure-Node step, `managed-reply-recovery-check`, so the gate is 72. The a11y check is a browser check, so the gate stays at 72.
+The same applies to FC: all six author checks and QA's adversarial check launch Chromium through `fc-lib.mjs` with `--playwright` and `--out`, so none is a gate step; they were run by hand on the gate copy (the adversarial check is copied beside `fc-lib.mjs` to run). The FC patches add no pure-Node check. The managed-SMS patch adds its own pure-Node step, `managed-reply-recovery-check`, so the gate is 72. The a11y and open-cards checks are browser checks (open-cards imports `fc-lib.mjs` and launches Chrome), so the gate stays at 72.
 
 ## 3. What changes for customers
 
@@ -68,6 +73,10 @@ The same applies to FC: all six author checks and QA's adversarial check launch 
 - **Home progress (FC-03):** services held for our team show "Setup with our team", no owner task, and are not counted as owner work.
 - **Practice checks (FC-04):** a reply that does not count names the real reason and says when an earlier check still counts.
 - **Review requests (FC-05):** says our team will email, no promised response time, and gives support@machinesandcloud.com.
+- **Operators (OPS-06):** the admin Overview and System panel show the shared platform AI capacity for today (owner practice and customer reply pools, ok / warning at 80% / exhausted), with a red notice when exhausted. Advice says to raise the limit only below the 500 maximum; at the maximum it says more capacity is an owner/PO decision, on the per-shop issue too (follow-up). An owner is flagged "Shared AI limit reached" only when the shared pool, not the shop's own allowance, binds.
+- **Account contact cell (ONB-11):** shown formatted, e.g. "(713) 555-0198"; the stored value is unchanged.
+- **Desk loading/recovery header (POLISH-12, brand part):** the rail shows only the logo as a top bar, navy with the white logo on desktop and white with the dark logo at 900px and below.
+- **Connections list marks (POLISH-15):** one 32px neutral tile for every mark; at 640px and below, mark + name on one line and status + badge on the next. Onboarding card icons are not done.
 - **Accessibility (desk and onboarding):** Escape from a visit dialog returns focus to where it was opened (calendar item, or View request); each hours input has a day name and the grids are labelled groups; a server error for one day marks only that day, and a whole-grid error marks every day (F1); filter changes are announced; stronger focus rings and input borders (onboarding aside ring 15.0:1, input borders 3.37:1). The request filter is remembered per workspace and only when the owner clicks it (F2).
 - **Customer texts that fail (managed SMS):** an undelivered or unconfirmed AI reply is recorded and gives the owner one request per customer per Houston day (reopened if already resolved), with no extra customer texts. A late delivered receipt corrects the status. If the reply carrying the automated-assistant intro was undelivered, the next delivered reply carries it.
 - **SEO pages (PRA-LIVE-01):** gradient hero stat descenders (g, y) are no longer clipped.
@@ -86,7 +95,7 @@ The same applies to FC: all six author checks and QA's adversarial check launch 
 
 ## 5. Coming later (room left)
 
-- **Copy-clarity** and **visual-polish**: coming next. Each will be its own commit, then the full gate and the desk browser checks rerun on a fresh `r4-*` copy.
+- **Visual polish** and **copy clarity**: after polish QA. Each will be its own commit, then the full gate and the desk browser checks rerun on a fresh `r4-*` copy.
 
 ## 6. Harness and receipts
 
@@ -95,5 +104,6 @@ The same applies to FC: all six author checks and QA's adversarial check launch 
 - `receipts/p3/`: unit, ui and desk-ui logs and JSON at `6aa33436`.
 - `receipts/gate-fc/`: `SUMMARY.tsv` (71 steps) and chain tail at `d35c2de6`.
 - `receipts/gate-sms/`: `SUMMARY.tsv` (72 steps), `managed-reply-recovery-check.log` and chain tail at `eb973e37`.
+- `receipts/gate-oc/` and `receipts/oc/`: gate (72 steps), chain tail, open-cards, QA probe, connector-pages, operator-session and mutant logs/JSON at `51fb3085`.
 - `receipts/gate-a11y/` and `receipts/a11y/`: gate (72 steps), chain tail and all browser check logs/JSON at `e1e34e00`.
 - `receipts/fc/`: FC author checks, QA adversarial check and the P3 rerun at `d35c2de6`, logs and JSON (screenshots not kept, to save disk).

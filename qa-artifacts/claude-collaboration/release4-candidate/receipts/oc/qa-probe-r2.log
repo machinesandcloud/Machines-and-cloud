@@ -1,0 +1,9 @@
+PASS F2: pill says Shared AI limit reached when the pool binds
+PASS F2: pill keeps Daily AI allowance reached when the shop limit binds (global 500)
+PROBE overview-500 "The shared platform limit for customer replies (chat, phone, text) is used for today. Every shop is refused until midnight Houston time, even shops with their own allowance left. MC_SELF_SERVICE_AI_GLOBAL_DAILY_LIMIT is already at its 500 maximum; more daily capacity is an owner/PO decision. View System"
+PROBE panel-500 "AI replies today\n\nOne shared daily limit covers every self-service shop: 500 replies, split into 400 customer and 100 owner practice. Each shop also has its own 50 customer and 20 practice replies. Resets at midnight Houston time.\n\nCustomer replies: chat, phone, text (all shops)\n400 of 400 used\nOwner practice (all shops)\n0 of 100 used\nShops with AI use today\n8\n\nThe shared platform limit for customer replies (chat, phone, text) is used for today. Every shop is refused until midnight Houston time, even shops with their own allowance left. MC_SELF_SERVICE_AI_GLOBAL_DAILY_LIMIT is already at its 500 maximum; more daily capacity is an owner/PO decision."
+PASS F3/F5: at global 500 exhausted: at-max wording, no "Raise", Overview notice is error
+PROBE overview-50 "The shared platform limit for customer replies (chat, phone, text) is at 80% or more for today. Raise MC_SELF_SERVICE_AI_GLOBAL_DAILY_LIMIT (up to 500) before shops are refused. View System"
+PASS F3/F4/F5: at default 50 warning: "Raise ... (up to 500)", label names chat/phone/text, notice is warning
+PASS F1 admin: practice env 0 at global 500 shows no capacity notice
+RESULT PASS qa-probe-r2 r4: 5/5 checks, physicalNetwork=0, forbidden=0, pageErrors=0

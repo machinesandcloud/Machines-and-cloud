@@ -1,0 +1,148 @@
+{
+ "label": "mutant-never-at-max",
+ "at": "2026-11-13T15:49:03.069Z",
+ "root": "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/r4/r4-gate-oc",
+ "checks": [
+  {
+   "name": "OPS-06: shop with its own allowance left but the shared customer pool used is marked platformLimited",
+   "pass": true
+  },
+  {
+   "name": "OPS-06: a shop that used its own allowance is not marked platformLimited",
+   "pass": true
+  },
+  {
+   "name": "OPS-06: platform usage reports ok / warning at 80% / exhausted, and never writes the daily record",
+   "pass": true
+  },
+  {
+   "name": "OPS-06: operator issue names the platform limit, and a shop-only limit keeps the shop wording",
+   "pass": false,
+   "error": "The input was expected to not match the regular expression /Raise/. Input: |  | 'Customer AI replies are unavailable because the shared platform daily limit is used, not this shop’s own allowance. Raise MC_SELF_SERVICE_AI_GLOBAL_DAILY_LIMIT (up to 500) or wait for the midnight Houston reset; see System.'"
+  },
+  {
+   "name": "QA 500: practice 100, customer 400, warning from 320, exhausted at 400 refuses the shop and marks it platformLimited",
+   "pass": true
+  },
+  {
+   "name": "QA 100: practice floor 40, customer 60",
+   "pass": true
+  },
+  {
+   "name": "QA practice pool full: private platformLimited, web not, chat still available",
+   "pass": true
+  },
+  {
+   "name": "QA global 0: no platformLimited, overall level off",
+   "pass": true
+  },
+  {
+   "name": "QA own allowance partly used, pool full: platformLimited",
+   "pass": true
+  },
+  {
+   "name": "QA own allowance and pool both used: own limit binds, not platformLimited",
+   "pass": true
+  },
+  {
+   "name": "QA invalid global env: platform usage throws (manage shows unavailable)",
+   "pass": true
+  },
+  {
+   "name": "F1: practice env 0 with global 500 is practice off, not platform used up and not platform-wide off",
+   "pass": true
+  },
+  {
+   "name": "F1: practice env bogus with global 500 is practice off, not platform used up and not platform-wide off",
+   "pass": true
+  },
+  {
+   "name": "QA owner /api/client payload exposes no other shop or pool counts",
+   "pass": true
+  },
+  {
+   "name": "ONB-11: Account shows the contact cell in US format, stored value unchanged",
+   "pass": true
+  },
+  {
+   "name": "OPS-06: owner AI allowance line says the shared platform limit is used, not their own",
+   "pass": true
+  },
+  {
+   "name": "F2: header pill matches the platform note (\"Shared AI limit reached\")",
+   "pass": true
+  },
+  {
+   "name": "QA ONB-11: +447911123456 is shown verbatim",
+   "pass": true
+  },
+  {
+   "name": "QA ONB-11: 5550198 is shown verbatim",
+   "pass": true
+  },
+  {
+   "name": "QA ONB-11: +1713555019 is shown verbatim",
+   "pass": true
+  },
+  {
+   "name": "F2: a shop at its own limit keeps the pill \"Daily AI allowance reached\" and gets no platform note",
+   "pass": true
+  },
+  {
+   "name": "OPS-06: with capacity left the owner line has no platform note",
+   "pass": true
+  },
+  {
+   "name": "POLISH-15: at 390 Connections names stay on one line, marks share a 32px tile, status/badge sit on line 2",
+   "pass": true
+  },
+  {
+   "name": "POLISH-15: at 1440 marks share the 32px tile and rows keep one line",
+   "pass": true
+  },
+  {
+   "name": "POLISH-12: loading desk shows the brand logo and no workspace navigation at 390",
+   "pass": true
+  },
+  {
+   "name": "POLISH-12: signed-out recovery desk shows the brand logo and no workspace navigation at 390",
+   "pass": true
+  },
+  {
+   "name": "POLISH-12: loading desk shows the brand logo and no workspace navigation at 1440",
+   "pass": true
+  },
+  {
+   "name": "POLISH-12: signed-out recovery desk shows the brand logo and no workspace navigation at 1440",
+   "pass": true
+  },
+  {
+   "name": "POLISH-12: once loaded, the full rail and navigation return (no regression)",
+   "pass": true
+  },
+  {
+   "name": "OPS-06: admin Overview warns when the shared customer pool is used and links to System, which shows usage",
+   "pass": true
+  },
+  {
+   "name": "OPS-06: admin warns before the limit (80%) and is quiet below it",
+   "pass": true
+  },
+  {
+   "name": "F3: at the 500 maximum admin says the limit is at its maximum and does not advise raising it",
+   "pass": true
+  },
+  {
+   "name": "F1: admin with practice configured off at 500 does not say AI is switched off platform-wide",
+   "pass": true
+  }
+ ],
+ "screenshots": [
+  "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/r4/out-ui-oc/mutant2/mutant-never-at-max-connections-390.png"
+ ],
+ "requests": 25,
+ "forbidden": [],
+ "pageErrors": [],
+ "physicalNetwork": 0,
+ "ok": false
+}

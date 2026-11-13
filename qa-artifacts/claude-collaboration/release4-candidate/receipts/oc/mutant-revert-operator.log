@@ -1,0 +1,34 @@
+PASS OPS-06: shop with its own allowance left but the shared customer pool used is marked platformLimited
+PASS OPS-06: a shop that used its own allowance is not marked platformLimited
+PASS OPS-06: platform usage reports ok / warning at 80% / exhausted, and never writes the daily record
+FAIL OPS-06: operator issue names the platform limit, and a shop-only limit keeps the shop wording: The input did not match the regular expression /Raise MC_SELF_SERVICE_AI_GLOBAL_DAILY_LIMIT \(up to 500\)/. Input:
+PASS QA 500: practice 100, customer 400, warning from 320, exhausted at 400 refuses the shop and marks it platformLimited
+PASS QA 100: practice floor 40, customer 60
+PASS QA practice pool full: private platformLimited, web not, chat still available
+PASS QA global 0: no platformLimited, overall level off
+PASS QA own allowance partly used, pool full: platformLimited
+PASS QA own allowance and pool both used: own limit binds, not platformLimited
+PASS QA invalid global env: platform usage throws (manage shows unavailable)
+PASS F1: practice env 0 with global 500 is practice off, not platform used up and not platform-wide off
+PASS F1: practice env bogus with global 500 is practice off, not platform used up and not platform-wide off
+PASS QA owner /api/client payload exposes no other shop or pool counts
+PASS ONB-11: Account shows the contact cell in US format, stored value unchanged
+PASS OPS-06: owner AI allowance line says the shared platform limit is used, not their own
+PASS F2: header pill matches the platform note ("Shared AI limit reached")
+PASS QA ONB-11: +447911123456 is shown verbatim
+PASS QA ONB-11: 5550198 is shown verbatim
+PASS QA ONB-11: +1713555019 is shown verbatim
+PASS F2: a shop at its own limit keeps the pill "Daily AI allowance reached" and gets no platform note
+PASS OPS-06: with capacity left the owner line has no platform note
+PASS POLISH-15: at 390 Connections names stay on one line, marks share a 32px tile, status/badge sit on line 2
+PASS POLISH-15: at 1440 marks share the 32px tile and rows keep one line
+PASS POLISH-12: loading desk shows the brand logo and no workspace navigation at 390
+PASS POLISH-12: signed-out recovery desk shows the brand logo and no workspace navigation at 390
+PASS POLISH-12: loading desk shows the brand logo and no workspace navigation at 1440
+PASS POLISH-12: signed-out recovery desk shows the brand logo and no workspace navigation at 1440
+PASS POLISH-12: once loaded, the full rail and navigation return (no regression)
+PASS OPS-06: admin Overview warns when the shared customer pool is used and links to System, which shows usage
+PASS OPS-06: admin warns before the limit (80%) and is quiet below it
+PASS F3: at the 500 maximum admin says the limit is at its maximum and does not advise raising it
+PASS F1: admin with practice configured off at 500 does not say AI is switched off platform-wide
+RESULT FAIL open-cards-r4 mutant-revert-operator: 32/33 checks, physicalNetwork=0, forbidden=0, pageErrors=0
