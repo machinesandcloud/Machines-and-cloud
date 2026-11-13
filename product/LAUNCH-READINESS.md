@@ -1,4 +1,41 @@
-# Production readiness · October 24, 2026
+# Production readiness · November 12, 2026
+
+## Current production (November 12, 2026)
+
+This section supersedes every production, release, gate-count and AI-limit statement below. Dated sections below keep their original evidence and are historical.
+
+- **Production:** release 2, `0f30643ecce135b3bc3518486e374676cc45cca6`, READY Netlify deploy `6af6a46a3237136494ad1c93`, published 2026-11-13T05:50:06Z (11:50 p.m. Houston, November 12). It was one non-force fast-forward push from release 1 with one automatic build. Release 1 was `43ee2f2c9dd5565e3332b0d048f1bd0f6e1767a4`, deploy `6af6668ce2918166ec6eb180`, ready 7:26 p.m. Houston, pushed from the earlier published `a54c5874`. Both releases ran under the owner's grouped-release approval of 2026-11-12, and each received an independent QA GO. Receipts: [release 1](../qa-artifacts/claude-collaboration/release-candidate/PUBLICATION-RECEIPT-20261112.md) and [notes](../qa-artifacts/claude-collaboration/release-candidate/RELEASE-NOTES.md); [release 2](../qa-artifacts/claude-collaboration/release2-candidate/PUBLICATION-RECEIPT-20261112.md), [notes](../qa-artifacts/claude-collaboration/release2-candidate/RELEASE-NOTES.md) and [QA](../qa-artifacts/claude-collaboration/release2-candidate/qa/RELEASE-QA.md). Each publication used 6 read-only GETs, all 200, with health `ok:true` and no failing blocks. Apart from setting `MC_SELF_SERVICE_AI_GLOBAL_DAILY_LIMIT=500` before release 1, no provider write, message, call, purchase or setting change was made.
+- **Release 1, for customers:**
+  - Texts: STOP and opt-out keywords are normalized; a STOP to any shop blocks all shops; legacy opt-out fails closed; the managed outbox honours legacy and platform STOP, with a Spanish confirmation. The SMS trim never drops safety text.
+  - Truthful replies: no timed callback promise; the missed-call text-back is promised only when it was sent; tool results about notifications are truthful; truncated or refused model turns are withheld; voice truthfulness fixes; no duplicate voice action after "could not be confirmed".
+  - Website chat: a server-issued chat token, plus public-endpoint abuse and cost limits.
+  - Visits: concurrent identical bookings are deduplicated. Customers can move or cancel through the owner's rule (`rules.visitChanges`, default `confirm_cancels`), and CANCEL tells the owner. Owners can edit a visit, schedule one from a request, and mark done or no-show. The owner visit check, payment reminder, urgent owner notices, Spanish appointment texts, scheduled-text fixes and Calendar delivery fixes are included, as is the P0 fix for an unconnected Calendar. Post-visit review requests are held: leave `POST_VISIT_REVIEW_REQUESTS_ENABLED` unset.
+  - Desk: the inbox is newest first, with urgent items pinned, Open/Done and Houston times. Owner notes are confidential, the owner key is out of the address bar, the legacy Connections page is no longer blank, and Test SMS copy and activation after the daily AI limit are fixed. It also has WCAG 2.2 AA fixes and a CSV formula guard.
+  - One gate-derived channel status (`/api/channel-availability`, `channel-availability.js`) on the homepage and onboarding.
+  - Operations: registry-driven erasure with a retention sweep; shared pause/resume/cancel/reopen; operator issue severity and grouping, a health banner and deduplicated alerts. Public `/api/health` is sanitized.
+- **Release 2, for customers:**
+  - Owner sign-in is shared across tabs. Its `Sec-Fetch-Site` check fails open safely.
+  - Fixes for onboarding (PRA-ONB-03..08), connectors (PRA-CONN-03..13) and the desk: hours text is preserved, a typed hours line no longer erases the grid, Customers search has limits, and the Customers view no longer throws on session expiry.
+  - Operations: audited `ADMIN_KEY` use on the SMS, voice, twilio-alert and chat routes; lean pagination; a stale-scheduler notice; deferred operator email.
+  - Website: prices are visible without JavaScript. Owner decision B11: 108 enterprise-consulting pages carry `noindex, follow`, stay as files, and are out of the sitemap (174 to 66 URLs), feeds and footer. The allowance line reads "Includes up to 50 AI replies a day."
+  - Spanish string review, and a demo fix for 320px clipping.
+  - Legal prerequisites rev 2 and the legal pages were applied and then reverted. They are deferred to release 3.
+- **AI limits** (`netlify/functions/lib/self-service-ai.mjs`):
+  - Per shop, per Houston day: 20 private practice turns and 50 website AI replies (`WEB_LIMIT`; the homepage says "up to 50 AI replies a day").
+  - Production sets `MC_SELF_SERVICE_AI_GLOBAL_DAILY_LIMIT=500`; keep it there. The code default is 50 when it is unset. It accepts 0..500, 0 is the kill switch, and an invalid value fails closed.
+  - Practice has its own share, carved out of the global limit, so practice never lowers customer capacity. The default share is the lesser of half the global limit and the greater of 40 and one fifth of it, so the floor is 40. That gives 100 practice / 400 customer at 500, and 25 / 25 at the default 50. `MC_SELF_SERVICE_AI_PRACTICE_DAILY_LIMIT` overrides the share, capped at half.
+  - Anonymous public turns per caller network: at most 150, and at most 75% of the customer pool less a private reserve of 10.
+  - These are turn limits, not a dollar ceiling. The homepage demo, sales desk and legacy shops keep their separate budgets.
+- **Gate:** the `netlify.toml` build command has **69** `node scripts/...` steps; the exact list is that build line, copied under "Checks before committing" in [CLAUDE.md](../CLAUDE.md). It was 67 in release 1; release 2 added `ops-p2-fix-check` and `ops-p2-qa-probe`.
+- **Still open:**
+  - Live provider proof: actual SMS, voice and Calendar delivery, Twilio `StirVerstat`, real-model wording in English and Spanish, and a real Thumbtack notification.
+  - Vapi `updateVoicePrompt` re-sync: a provider write to every legacy assistant, needed for release 1's voice prompt changes. Not performed.
+  - An external uptime monitor on `GET /api/health`: every 5 minutes, alerting after 2 failures. The first post-release scheduler run was not yet observed at publication.
+  - Stripe keys for in-app Checkout (B3). This also needs lawyer-approved Terms and a live Stripe test; billing stays parked until then.
+  - Legal release 3: legal prerequisites rev 3 (independent QA rejected rev 2) and the legal pages. Before any deploy that carries P1 (shared-sender retirement), the live `scripts/legacy-census.mjs` pre-deploy census must run against production. It is a provider read and needs the owner's approval; so far it has run only offline against a fixture.
+  - Human Spanish spot-check (C4), and STOP scope under FCC 26-67, effective 2026-11-25 (C3).
+
+**Everything below is the October 24 readiness record and earlier. Where it conflicts with the section above, the section above wins.**
 
 **PO decision: the controlled website customer journey passed; full-service launch remains NO-GO.** We observed ordinary signup and returning access, saved setup, an installed external widget, a real AI conversation, one retained callback request and the matching owner inbox message. Cleanup is verified. This closes the selected happy-path proof, not unattended or paid onboarding across phone, texting, website chat and Calendar.
 
@@ -57,7 +94,7 @@ Published Google code synchronizes front-desk visits outward and checks owner bl
 
 **Current locally accepted automation:** `/tmp/mc-managed-resource-admission-e5cb`, branch `work/managed-resource-admission`, based on published `e5cb71c`. One durable managed-resource ledger now admits number, initial brand and initial campaign creation under shared tenant/account counts, configured setup fees and monthly commitments. Exact pilot cohorts and automatic admission of new eligible shops use the same retained allowance. Expiry blocks new purchases while preserving authorized recorded maintenance; old unbound resources require review. [Acceptance](MANAGED-RESOURCE-ADMISSION-ACCEPTANCE-2026-10-23.json). All39required commands,8independent groups and11syntax files pass on stable source, with zero physical test traffic. Paid corrections remain outside this first admission.
 
-**Published boundary:** production is `e5cb71c7f23592539d9c292eb50123afbebf0f30`, READY deploy `6adb2d95532eace0e206ee14`, completed build `6adb2d95532eace0e206ee12`, October23at04:50CDT. Three builds have now run October23. The approved one-build/eight-read publication phase is closed. This newer resource-admission batch is local only; no additional publication or activation was performed. Main has unrelated unpublished runtime and must not be pushed wholesale. Earlier snapshots below are historical.
+(Superseded November 12: see "Current production" at the top.) **Published boundary:** production was `e5cb71c7f23592539d9c292eb50123afbebf0f30`, READY deploy `6adb2d95532eace0e206ee14`, completed build `6adb2d95532eace0e206ee12`, October23at04:50CDT. Three builds have now run October23. The approved one-build/eight-read publication phase is closed. This newer resource-admission batch is local only; no additional publication or activation was performed. Main has unrelated unpublished runtime and must not be pushed wholesale. Earlier snapshots below are historical.
 
 ## Current delivery-recovery candidate · October 23
 
@@ -70,13 +107,13 @@ The owner directed the team to finish the actual service rather than repeat unav
 
 [Acceptance and exact evidence](SERVICE-DELIVERY-ACCEPTANCE-2026-10-23.json) records38passing required commands and13passing component-browser groups, with independent recovery/admission/probe checks and retained original failures. No application source changed after the final gate. These establish local mechanics; they do not establish a deployed release or a working customer phone/text/Calendar connection.
 
-Production remains36918ed. Provider account action and current access/delivery proof remain pending; detailed private account observations are retained locally. Existing company filing questions remain separate from dedicated customer registrations. No production flags, credentials, billing, carrier filing or customer data were changed. Actual provider proof, owner Google consent, verified support delivery, installed customer first request, G7 follow-through and commercial acceptance remain open. Main's unrelated runtime and the later unfinished copy checkpoint are excluded.
+(Superseded November 12: see "Current production" at the top.) Production remained 36918ed. Provider account action and current access/delivery proof remain pending; detailed private account observations are retained locally. Existing company filing questions remain separate from dedicated customer registrations. No production flags, credentials, billing, carrier filing or customer data were changed. Actual provider proof, owner Google consent, verified support delivery, installed customer first request, G7 follow-through and commercial acceptance remain open. Main's unrelated runtime and the later unfinished copy checkpoint are excluded.
 
 # Readiness for the first customers
 
 **Decision: not ready for the complete phone, text, website and scheduling offer.** Internal signup and return access work, and the core portal is deployed. Actual service delivery, installation on a customer's website and recovery from real provider failures still need acceptance. Local tests, deployed code, a saved preference and a queued operation are different evidence stages.
 
-This is the working launch record for published application `659cab865c3d49bb7ac99f1e10ffa61cb3068808` and the evolving website-installation implementation based on it. Main contains unrelated unpublished runtime and must not be pushed wholesale. The older native-Calendar proof proposal must be reconciled against the current application before any future execution.
+(Superseded November 12: see "Current production" at the top.) This was the working launch record for published application `659cab865c3d49bb7ac99f1e10ffa61cb3068808` and the evolving website-installation implementation based on it. Main contains unrelated unpublished runtime and must not be pushed wholesale. The older native-Calendar proof proposal must be reconciled against the current application before any future execution.
 
 **Latest availability observation, October23:** one fresh public `/api/health` GET returned200/`ok:true`. [Closed one-request observation](../scratchpad/workspace-simplicity-hosting-observation.json). The earlier pause below is historical; fresh Netlify site/deploy preflight is in progress. No credit purchase or automatic-recharge change is inferred.
 
