@@ -1,0 +1,10 @@
+loopback tcp 127.0.0.1             CONNECTED
+tcp 1.1.1.1:443                    ERR EPERM
+tcp 8.8.8.8:53                     ERR EPERM
+udp 8.8.8.8:53                     ERR EPERM
+unix /var/run/mDNSResponder        ERR EPERM
+dns.lookup example.com             ERR ENOTFOUND
+dns.resolve4 example.com           ERR ECONNREFUSED
+fetch https://1.1.1.1              ERR EPERM
+curl https://example.com           ERR curl: (6) Could not resolve host: example.com
+CANARY PASS: loopback only, DNS denied

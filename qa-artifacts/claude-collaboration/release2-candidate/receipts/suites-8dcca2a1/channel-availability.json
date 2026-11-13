@@ -1,0 +1,246 @@
+{
+  "label": "run",
+  "root": "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/rc2/c1",
+  "at": "2026-11-13T04:45:26.445Z",
+  "mode": "offline: memory store, fake model, physical transport denied, in-process handlers, bundled Chromium",
+  "sourceBefore": {
+    "index.html": "1ff1cc7d2ecb07b42b4fd6260368eebef35719aaa3553d0086633d5fd42cfe3d",
+    "onboard.html": "e4b9cc9b0f76e5a029a947a109739b50bf384a058fe12c4e90346c6c2f216253",
+    "onboard.js": "697d3a31544aaa25dd0186b07b54ed45056536d8db45e87b13f09a1c4d783f14",
+    "desk-setup-guide.js": "fe813acf5e6d77d68a68a6eda430dba1e8547f4f7ca4bd7110963e971678326e",
+    "desk-service-intake.js": "0e1d58478d31bb4528456b87ef05539d2bc5d742161909eb78752c73c1cd328c",
+    "channel-availability.js": "745dff92c1a98729b1370e106a71b6af76828926cb8e708a7337bce0f5ba53a7",
+    "netlify/functions/lib/sales-desk.mjs": "5a6008eba2875c8feb5933efee7fdd6963f16d4a6d7756b62e7bfb6a2c95b51f",
+    "netlify/functions/lib/channel-availability.mjs": "d964339192dec8d9ad1e0ea28ad4c3a2ec39432423498e6156813ec24bd3a9f2",
+    "netlify/functions/channel-availability.mjs": "12a3a6985e9c0220f73fd967df49ecc773f87e6f25be6f72e9ffa2a25d81a8b7",
+    "netlify/functions/client.mjs": "0dc9d38762f6219cf704fbfee153b72381e085cb1962a3bdd8c0daa8180b8730",
+    "netlify/functions/chat.mjs": "fbc6956ebc2d28e3a909b617b4f2474417c1df4c4498fd846e01be36671bb867",
+    "netlify.toml": "87262f4ce8654074714bb8ad066801a5a0cfa5d233a7aae3271e24b1c8e85d68"
+  },
+  "checks": [
+    {
+      "name": "projection: one status per channel follows the gates (off)",
+      "surface": "source",
+      "pass": true,
+      "ms": 0
+    },
+    {
+      "name": "projection: one status per channel follows the gates (on)",
+      "surface": "source",
+      "pass": true,
+      "ms": 2
+    },
+    {
+      "name": "projection: partial gates stay honest (cohort admission, phone acquisition off, unapproved voice, expired texting offer, no at-rest key)",
+      "surface": "source",
+      "pass": true,
+      "ms": 2
+    },
+    {
+      "name": "projection: Calendar is available only under an open self-service policy that allows connections",
+      "surface": "source",
+      "pass": true,
+      "ms": 1
+    },
+    {
+      "name": "current projection: usage brake, used-up shared allowance and a foreign ledger hold phone and texting",
+      "surface": "source",
+      "pass": true,
+      "ms": 5
+    },
+    {
+      "name": "endpoint: public GET returns the projection, tenant-free and cacheable (off)",
+      "surface": "endpoint",
+      "pass": true,
+      "ms": 0
+    },
+    {
+      "name": "endpoint: public GET returns the projection, tenant-free and cacheable (on)",
+      "surface": "endpoint",
+      "pass": true,
+      "ms": 1
+    },
+    {
+      "name": "sales desk: every homepage channel has a fact with the same status (off)",
+      "surface": "sales",
+      "pass": true,
+      "ms": 1
+    },
+    {
+      "name": "sales desk: every homepage channel has a fact with the same status (on)",
+      "surface": "sales",
+      "pass": true,
+      "ms": 1
+    },
+    {
+      "name": "static fallback in index.html equals the projection with every gate off",
+      "surface": "static",
+      "pass": true,
+      "ms": 0
+    },
+    {
+      "name": "static fallback in onboard.html equals the projection with every gate off",
+      "surface": "static",
+      "pass": true,
+      "ms": 0
+    },
+    {
+      "name": "homepage FAQPage JSON-LD says exactly what the visible FAQ says",
+      "surface": "static",
+      "pass": true,
+      "ms": 0
+    },
+    {
+      "name": "public script keeps the shipped state on every failure path (VM)",
+      "surface": "static",
+      "pass": true,
+      "ms": 165
+    },
+    {
+      "name": "sales chat and desk use the current (brake/allowance-aware) projection",
+      "surface": "source",
+      "pass": true,
+      "ms": 1
+    },
+    {
+      "name": "build gate runs this check",
+      "surface": "source",
+      "pass": true,
+      "ms": 0
+    },
+    {
+      "name": "homepage prices appear once and no new em dash in the patched copy",
+      "surface": "static",
+      "pass": true,
+      "ms": 0
+    },
+    {
+      "name": "homepage connections show each channel's status (off, 390)",
+      "surface": "homepage",
+      "pass": true,
+      "ms": 820
+    },
+    {
+      "name": "homepage connections show each channel's status (off, 1440)",
+      "surface": "homepage",
+      "pass": true,
+      "ms": 795
+    },
+    {
+      "name": "homepage connections show each channel's status (on, 390)",
+      "surface": "homepage",
+      "pass": true,
+      "ms": 799
+    },
+    {
+      "name": "homepage connections show each channel's status (on, 1440)",
+      "surface": "homepage",
+      "pass": true,
+      "ms": 798
+    },
+    {
+      "name": "homepage keeps the conservative state when the availability request fails (503, gates on)",
+      "surface": "homepage",
+      "pass": true,
+      "ms": 827
+    },
+    {
+      "name": "homepage keeps the conservative state when the availability request fails (abort, gates on)",
+      "surface": "homepage",
+      "pass": true,
+      "ms": 772
+    },
+    {
+      "name": "onboarding Step 1 labels each choice and previews honestly (off, 390)",
+      "surface": "onboarding",
+      "pass": true,
+      "ms": 862
+    },
+    {
+      "name": "onboarding Step 1 labels each choice and previews honestly (off, 1440)",
+      "surface": "onboarding",
+      "pass": true,
+      "ms": 875
+    },
+    {
+      "name": "onboarding Step 1 labels each choice and previews honestly (on, 390)",
+      "surface": "onboarding",
+      "pass": true,
+      "ms": 856
+    },
+    {
+      "name": "onboarding Step 1 labels each choice and previews honestly (on, 1440)",
+      "surface": "onboarding",
+      "pass": true,
+      "ms": 858
+    },
+    {
+      "name": "desk Connections shows the same availability per channel (off, 390)",
+      "surface": "desk",
+      "pass": true,
+      "ms": 818
+    },
+    {
+      "name": "desk Connections shows the same availability per channel (off, 1440)",
+      "surface": "desk",
+      "pass": true,
+      "ms": 805
+    },
+    {
+      "name": "desk Connections shows the same availability per channel (on, 390)",
+      "surface": "desk",
+      "pass": true,
+      "ms": 809
+    },
+    {
+      "name": "desk Connections shows the same availability per channel (on, 1440)",
+      "surface": "desk",
+      "pass": true,
+      "ms": 806
+    }
+  ],
+  "screenshots": [],
+  "physicalNetwork": 0,
+  "forbidden": [],
+  "pageErrors": [],
+  "gates": "off",
+  "handlers": [
+    "/api/client",
+    "/api/access",
+    "/api/onboard",
+    "/api/intake",
+    "/api/chat",
+    "/api/workspace-billing",
+    "/api/angi",
+    "/api/thumbtack",
+    "/api/thumbtack/self-serve",
+    "/api/thumbtack/connect",
+    "/api/google/auth",
+    "/api/google/callback",
+    "/api/website-installation",
+    "/api/channel-availability"
+  ],
+  "sourceAfter": {
+    "index.html": "1ff1cc7d2ecb07b42b4fd6260368eebef35719aaa3553d0086633d5fd42cfe3d",
+    "onboard.html": "e4b9cc9b0f76e5a029a947a109739b50bf384a058fe12c4e90346c6c2f216253",
+    "onboard.js": "697d3a31544aaa25dd0186b07b54ed45056536d8db45e87b13f09a1c4d783f14",
+    "desk-setup-guide.js": "fe813acf5e6d77d68a68a6eda430dba1e8547f4f7ca4bd7110963e971678326e",
+    "desk-service-intake.js": "0e1d58478d31bb4528456b87ef05539d2bc5d742161909eb78752c73c1cd328c",
+    "channel-availability.js": "745dff92c1a98729b1370e106a71b6af76828926cb8e708a7337bce0f5ba53a7",
+    "netlify/functions/lib/sales-desk.mjs": "5a6008eba2875c8feb5933efee7fdd6963f16d4a6d7756b62e7bfb6a2c95b51f",
+    "netlify/functions/lib/channel-availability.mjs": "d964339192dec8d9ad1e0ea28ad4c3a2ec39432423498e6156813ec24bd3a9f2",
+    "netlify/functions/channel-availability.mjs": "12a3a6985e9c0220f73fd967df49ecc773f87e6f25be6f72e9ffa2a25d81a8b7",
+    "netlify/functions/client.mjs": "0dc9d38762f6219cf704fbfee153b72381e085cb1962a3bdd8c0daa8180b8730",
+    "netlify/functions/chat.mjs": "fbc6956ebc2d28e3a909b617b4f2474417c1df4c4498fd846e01be36671bb867",
+    "netlify.toml": "87262f4ce8654074714bb8ad066801a5a0cfa5d233a7aae3271e24b1c8e85d68"
+  },
+  "sourceStable": true,
+  "summary": {
+    "passed": 30,
+    "failed": 0,
+    "total": 30,
+    "physicalNetwork": 0,
+    "forbiddenBrowserRequests": 0,
+    "pageErrors": 0
+  }
+}

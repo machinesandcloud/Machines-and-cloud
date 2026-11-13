@@ -1,0 +1,424 @@
+{
+  "results": [
+    {
+      "id": "A1",
+      "name": "texting ON + credentials but invalid offer/policy is actionable (not \"waiting\")",
+      "pass": true,
+      "detail": {
+        "providerState": "configured",
+        "reasonCode": "service_configuration_required",
+        "kind": "incident",
+        "severity": "high",
+        "actionable": true,
+        "title": "Text messaging is blocked while the platform reports configured"
+      }
+    },
+    {
+      "id": "A2",
+      "name": "platform blocked while provider state \"configured\" (e.g. brake on, policy invalid) is actionable",
+      "pass": true,
+      "detail": {
+        "kind": "incident",
+        "severity": "high",
+        "group": "platform_config:sms"
+      }
+    },
+    {
+      "id": "A3",
+      "name": "missing provider state (\"unknown\") is not silently informational",
+      "pass": true,
+      "detail": {
+        "kind": "incident",
+        "severity": "high"
+      }
+    },
+    {
+      "id": "A4",
+      "name": "unrecognised platform reasonCode fails toward actionable",
+      "pass": true,
+      "detail": {
+        "kind": "incident",
+        "severity": "high",
+        "group": "platform_unknown_reason:sms"
+      }
+    },
+    {
+      "id": "A5",
+      "name": "recorded setup waiting 30 days (operation recently touched) with platform configured is overdue/actionable",
+      "pass": true,
+      "detail": {
+        "since": "2026-10-14T04:45:41.789Z",
+        "ageHours": 720,
+        "severity": "medium"
+      }
+    },
+    {
+      "id": "A6",
+      "name": "control: needs_attention stays a high incident",
+      "pass": true
+    },
+    {
+      "id": "A7",
+      "name": "control: disabled feature is informational",
+      "pass": true
+    },
+    {
+      "id": "A8",
+      "name": "control: every other issue source stays high and actionable",
+      "pass": true,
+      "detail": [
+        "draft:high",
+        "readiness:high",
+        "svc-op-1:high",
+        "support:x:high",
+        "calendar:b1:high",
+        "service_checks:high",
+        "lead:thumbtack:high",
+        "calendar_connection:high"
+      ]
+    },
+    {
+      "id": "A9",
+      "name": "customer lead-setup request older than 24h escalates to high",
+      "pass": true,
+      "detail": {
+        "severity": "high"
+      }
+    },
+    {
+      "id": "B1",
+      "name": "100 concurrent unauthenticated 503 probes send exactly one email",
+      "pass": true,
+      "detail": {
+        "emails": 1
+      }
+    },
+    {
+      "id": "B2",
+      "name": "scheduler + health evaluations racing send one email",
+      "pass": true,
+      "detail": 1
+    },
+    {
+      "id": "B3",
+      "name": "1440 probes over 24h of unchanged degradation send <= 5 emails (1 + 6h reminders)",
+      "pass": true,
+      "detail": 4
+    },
+    {
+      "id": "B4",
+      "name": "flapping every 10 minutes for 24h sends at most ALERT_POLICY.dailyCap emails",
+      "pass": true,
+      "detail": {
+        "emails": 12,
+        "cap": 12
+      }
+    },
+    {
+      "id": "B5",
+      "name": "alert email excludes customer phone/email/secret text carried in block error messages",
+      "pass": true,
+      "detail": "- workspace_setup: block_error"
+    },
+    {
+      "id": "B6",
+      "name": "alert claimed by a send that never completed is retried later",
+      "pass": true,
+      "detail": {
+        "emails": 1,
+        "second": {
+          "sent": true,
+          "kind": "degraded",
+          "logged": false
+        }
+      }
+    },
+    {
+      "id": "B7",
+      "name": "info: unreadable record emailed as",
+      "pass": true,
+      "detail": "- scheduler: scheduler (no_run_recorded)"
+    },
+    {
+      "id": "C7",
+      "name": "recovery from a rate-limited, never-emailed incident is silent",
+      "pass": true,
+      "detail": [
+        "Platform health needs attention (degraded)",
+        "Recovered: Machines & Cloud platform health is ok"
+      ]
+    },
+    {
+      "id": "R1",
+      "name": "every provider state other than \"disabled\" (incl. unknown/future/case variants) is a high actionable incident",
+      "pass": true,
+      "detail": [
+        "configured:incident/high",
+        "needs_attention:incident/high",
+        "unknown:incident/high",
+        "null:incident/high",
+        "paused_by_vendor:incident/high",
+        "DISABLED:incident/high",
+        ":incident/high"
+      ]
+    },
+    {
+      "id": "R2",
+      "name": "unrecognised reason code with a configured channel is an incident",
+      "pass": true,
+      "detail": {
+        "kind": "incident",
+        "severity": "high"
+      }
+    },
+    {
+      "id": "R3",
+      "name": "overdue clock uses when the wait started (30-day-old wait touched 1h ago is overdue; future times ignored)",
+      "pass": true,
+      "detail": {
+        "since": "2026-10-14T04:45:41.789Z",
+        "ageHours": 720,
+        "overdue": true,
+        "future": null
+      }
+    },
+    {
+      "id": "R4",
+      "name": "known waiting reason is informational only while disabled; otherwise medium and actionable at once",
+      "pass": true,
+      "detail": {
+        "configured": "medium",
+        "disabled": "info"
+      }
+    },
+    {
+      "id": "R5",
+      "name": "alert email has only allowlisted names, fixed categories and catalogue codes, plus the admin link",
+      "pass": true,
+      "detail": [
+        "- scheduler: scheduler (scheduler_stale)",
+        "- workspace_setup: block_error",
+        "- leadImport: unrecognised_failure",
+        "- unnamed_block: block_error",
+        "- serviceDeliveryRecovery: reported_code (managed_delivery_failed)"
+      ]
+    },
+    {
+      "id": "R5b",
+      "name": "control: public /api/health failingBlocks strings are byte-unchanged (pre-existing exposure, out of scope; see PROPOSALS r2)",
+      "pass": false,
+      "detail": 4
+    },
+    {
+      "id": "R6",
+      "name": "in-flight claim: concurrent evaluation is refused (in_flight) and the banner state is \"sending\", not \"emailed\"",
+      "pass": true,
+      "detail": {
+        "second": {
+          "sent": false,
+          "reason": "in_flight"
+        },
+        "emailState": "sending"
+      }
+    },
+    {
+      "id": "R7",
+      "name": "hung send times out, is recorded as failed (not sent, not alerted) and is retried after retryMs",
+      "pass": true,
+      "detail": {
+        "done": {
+          "sent": false,
+          "reason": "send_timeout",
+          "kind": "degraded"
+        },
+        "alerted": false,
+        "emailState": "failed"
+      }
+    },
+    {
+      "id": "R7b",
+      "name": "the timed-out alert is sent on the retry and then reads as emailed",
+      "pass": true,
+      "detail": {
+        "r2": {
+          "sent": true,
+          "kind": "degraded",
+          "logged": false
+        },
+        "emails": 1
+      }
+    },
+    {
+      "id": "R8",
+      "name": "claim from a killed function: banner says unconfirmed (not emailed) and the alert is re-sent",
+      "pass": true,
+      "detail": {
+        "emailState": "unconfirmed",
+        "r": {
+          "sent": true,
+          "kind": "degraded",
+          "logged": false
+        }
+      }
+    },
+    {
+      "id": "R9",
+      "name": "cap: exactly dailyCap emails in the window, the last one says so, capped incident reads \"capped\", next window emails again",
+      "pass": true,
+      "detail": {
+        "n": 12,
+        "cap": 12,
+        "lastMentionsCap": true,
+        "capView": "capped",
+        "after": 13
+      }
+    },
+    {
+      "id": "R10",
+      "name": "failed reminder: banner still credits the confirmed first email and reports the follow-up failure",
+      "pass": true,
+      "detail": {
+        "emailState": "emailed",
+        "state": "degraded",
+        "incidentSince": "2026-11-13T04:45:46.892Z",
+        "emailedAt": "2026-11-13T04:45:46.892Z",
+        "followUpFailedAt": "2026-11-13T10:46:46.892Z",
+        "lastSendFailedAt": "2026-11-13T10:46:46.892Z",
+        "lastKind": "degraded"
+      }
+    },
+    {
+      "id": "C0",
+      "name": "setup: 2 emails (degraded, recovered); new incident rate-limited, not emailed",
+      "pass": true,
+      "detail": {
+        "emails": [
+          "Platform health needs attention (degraded)",
+          "Recovered: Machines & Cloud platform health is ok"
+        ],
+        "alerted": false,
+        "lastSentAt": "recovery email time"
+      }
+    },
+    {
+      "id": "C1-1440",
+      "name": "banner does not claim operators were emailed about an incident that was rate-limited",
+      "pass": true,
+      "detail": "Platform health needs attention No operator email is recorded for this incident yet. workspace setup: storage timeout Last scheduler run 1 min ago. Last healthy run not recorded. Open System"
+    },
+    {
+      "id": "C2-1440",
+      "name": "System nav accessible name conveys the health warning (not just \"!\")",
+      "pass": true,
+      "detail": "- button \"System Platform health needs attention\": System !"
+    },
+    {
+      "id": "C3-1440",
+      "name": "banner visible in first viewport",
+      "pass": true,
+      "detail": 116
+    },
+    {
+      "id": "C4-1440",
+      "name": "no horizontal page overflow",
+      "pass": true
+    },
+    {
+      "id": "C5-1440",
+      "name": "banner action target >= 24px and keyboard reachable",
+      "pass": true,
+      "detail": 40
+    },
+    {
+      "id": "C6-1440",
+      "name": "unchanged role=alert banner is not rewritten on refresh (avoids repeat screen-reader announcements)",
+      "pass": true,
+      "detail": 0
+    },
+    {
+      "id": "R11-1440",
+      "name": "banner: unconfirmed claim reads \"being sent\"; only a confirmed current-incident alert reads \"Operators were emailed\"",
+      "pass": true,
+      "detail": {
+        "sending": "Platform health needs attention An operator alert email is being sent; it is not confirmed yet. workspace setup: storage timeout Last scheduler run 1 min ago. L",
+        "confirmed": "Platform health needs attention Operators were emailed Nov 12, 10:45 PM CT about this incident. workspace setup: storage timeout Last scheduler run 1 min ago. L"
+      }
+    },
+    {
+      "id": "R12-1440",
+      "name": "run-age change updates the timing line without touching the single role=alert region",
+      "pass": true,
+      "detail": {
+        "live": 1,
+        "outer": null,
+        "t1": "Last scheduler run 1 min ago. Last healthy run not recorded.",
+        "t2": "Last scheduler run 4 min ago. Last healthy run not recorded.",
+        "liveMuts": 0
+      }
+    },
+    {
+      "id": "C1-390",
+      "name": "banner does not claim operators were emailed about an incident that was rate-limited",
+      "pass": true,
+      "detail": "Platform health needs attention No operator email is recorded for this incident yet. workspace setup: storage timeout Last scheduler run 1 min ago. Last healthy run not recorded. Open System"
+    },
+    {
+      "id": "C2-390",
+      "name": "System nav accessible name conveys the health warning (not just \"!\")",
+      "pass": true,
+      "detail": "- button \"System Platform health needs attention\": System !"
+    },
+    {
+      "id": "C3-390",
+      "name": "banner visible in first viewport",
+      "pass": true,
+      "detail": 315
+    },
+    {
+      "id": "C4-390",
+      "name": "no horizontal page overflow",
+      "pass": true
+    },
+    {
+      "id": "C5-390",
+      "name": "banner action target >= 24px and keyboard reachable",
+      "pass": true,
+      "detail": 40
+    },
+    {
+      "id": "C6-390",
+      "name": "unchanged role=alert banner is not rewritten on refresh (avoids repeat screen-reader announcements)",
+      "pass": true,
+      "detail": 0
+    },
+    {
+      "id": "R11-390",
+      "name": "banner: unconfirmed claim reads \"being sent\"; only a confirmed current-incident alert reads \"Operators were emailed\"",
+      "pass": true,
+      "detail": {
+        "sending": "Platform health needs attention An operator alert email is being sent; it is not confirmed yet. workspace setup: storage timeout Last scheduler run 1 min ago. L",
+        "confirmed": "Platform health needs attention Operators were emailed Nov 12, 10:45 PM CT about this incident. workspace setup: storage timeout Last scheduler run 1 min ago. L"
+      }
+    },
+    {
+      "id": "R12-390",
+      "name": "run-age change updates the timing line without touching the single role=alert region",
+      "pass": true,
+      "detail": {
+        "live": 1,
+        "outer": null,
+        "t1": "Last scheduler run 1 min ago. Last healthy run not recorded.",
+        "t2": "Last scheduler run 4 min ago. Last healthy run not recorded.",
+        "liveMuts": 0
+      }
+    }
+  ],
+  "summary": {
+    "passed": 45,
+    "failed": [
+      "R5b"
+    ],
+    "physicalNetwork": 0
+  },
+  "mail": 2
+}

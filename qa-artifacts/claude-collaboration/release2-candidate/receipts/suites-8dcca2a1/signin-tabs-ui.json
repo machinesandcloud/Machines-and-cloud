@@ -1,0 +1,1038 @@
+{
+ "check": "signin-tabs-ui-check",
+ "root": "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/rc2/c1",
+ "at": "2026-11-13T04:34:58.161Z",
+ "pass": 71,
+ "fail": 0,
+ "results": [
+  {
+   "name": "email sign-in opens the workspace in the first tab",
+   "pass": true,
+   "detail": {
+    "state": "ready",
+    "status": "Setup in progress",
+    "message": "Sign in with the email you used during setup. If our team set up your workspace, open the link from your welcome email instead.",
+    "url": "http://127.0.0.1:9721/desk.html?c=tabs-1"
+   }
+  },
+  {
+   "name": "sign-in screen offers 'Keep me signed in on this device', off by default, with its duration",
+   "pass": true,
+   "detail": {
+    "offered": true,
+    "text": "Keep me signed in on this device for up to 24 hours. Leave this off on a shared computer; without it you stay signed in across tabs until you close the browser."
+   }
+  },
+  {
+   "name": "session secret is an HttpOnly, SameSite=Strict cookie",
+   "pass": true,
+   "detail": [
+    {
+     "name": "mc_cookie_probe",
+     "httpOnly": true,
+     "sameSite": "Strict",
+     "expires": 1794544763.698065
+    },
+    {
+     "name": "mc_owner",
+     "httpOnly": true,
+     "sameSite": "Strict",
+     "expires": -1
+    }
+   ]
+  },
+  {
+   "name": "page script cannot read the session secret (cookie, tab or local storage)",
+   "pass": true,
+   "detail": {
+    "found": false
+   }
+  },
+  {
+   "name": "a new tab of the same browser opens the workspace without an email",
+   "pass": true,
+   "detail": {
+    "state": "ready",
+    "status": "Setup in progress",
+    "message": "Sign in with the email you used during setup. If our team set up your workspace, open the link from your welcome email instead.",
+    "url": "http://127.0.0.1:9721/desk.html?c=tabs-1"
+   }
+  },
+  {
+   "name": "a bookmarked workspace address (with a section) opens without an email",
+   "pass": true,
+   "detail": {
+    "state": "ready",
+    "status": "Setup in progress",
+    "message": "Sign in with the email you used during setup. If our team set up your workspace, open the link from your welcome email instead.",
+    "url": "http://127.0.0.1:9721/desk.html?c=tabs-1#account"
+   }
+  },
+  {
+   "name": "without 'keep me signed in', a reopened browser asks to sign in (session cookie ended)",
+   "pass": true,
+   "detail": {
+    "state": "recovery",
+    "status": "Signed out",
+    "message": "Your session expired. Sign in by email to reopen your workspace.",
+    "url": "http://127.0.0.1:9721/desk.html?c=tabs-1"
+   }
+  },
+  {
+   "name": "'keep me signed in' sets a persistent cookie no longer than the 24-hour server session",
+   "pass": true,
+   "detail": {
+    "expires": 1794630864.438284
+   }
+  },
+  {
+   "name": "with 'keep me signed in', a reopened browser opens the workspace",
+   "pass": true,
+   "detail": {
+    "first": {
+     "state": "ready",
+     "status": "Setup in progress",
+     "message": "Sign in with the email you used during setup. If our team set up your workspace, open the link from your welcome email instead.",
+     "url": "http://127.0.0.1:9721/desk.html?c=keep-2"
+    },
+    "reopened": {
+     "state": "ready",
+     "status": "Setup in progress",
+     "message": "Sign in with the email you used during setup. If our team set up your workspace, open the link from your welcome email instead.",
+     "url": "http://127.0.0.1:9721/desk.html?c=keep-2"
+    }
+   }
+  },
+  {
+   "name": "sign-out in one tab closes the other open tabs at once, with no request from them",
+   "pass": true,
+   "detail": [
+    {
+     "state": "recovery",
+     "status": "Signed out",
+     "message": "You signed out in another tab. Use an email sign-in link to open your workspace again.",
+     "url": "http://127.0.0.1:9721/desk.html?c=tabs-1"
+    },
+    {
+     "state": "recovery",
+     "status": "Signed out",
+     "message": "You signed out in another tab. Use an email sign-in link to open your workspace again.",
+     "url": "http://127.0.0.1:9721/desk.html?c=tabs-1#account"
+    }
+   ]
+  },
+  {
+   "name": "the signed-out session is revoked on the server for every tab (401)",
+   "pass": true,
+   "detail": {
+    "direct": 401
+   }
+  },
+  {
+   "name": "sign-out clears this browser's session cookies",
+   "pass": true,
+   "detail": [
+    {
+     "name": "mc_cookie_probe",
+     "value": "a45d21d7071965bf657219aff26080ac6f6725f56b22a8d5a0d289548cbc98ec",
+     "domain": "127.0.0.1",
+     "path": "/",
+     "expires": 1794544763.698065,
+     "httpOnly": true,
+     "secure": false,
+     "sameSite": "Strict"
+    }
+   ]
+  },
+  {
+   "name": "a new tab after sign-out asks to sign in",
+   "pass": true,
+   "detail": {
+    "state": "recovery",
+    "status": "Sign in to continue",
+    "message": "Sign in with the email you used during setup. If our team set up your workspace, open the link from your welcome email instead.",
+    "url": "http://127.0.0.1:9721/desk.html?c=tabs-1"
+   }
+  },
+  {
+   "name": "an expired server session never opens the workspace in a new or reloaded tab",
+   "pass": true,
+   "detail": {
+    "key": true,
+    "s": {
+     "state": "recovery",
+     "status": "Signed out",
+     "message": "Your session expired. Sign in by email to reopen your workspace.",
+     "url": "http://127.0.0.1:9721/desk.html?c=expired-3"
+    },
+    "r": {
+     "state": "recovery",
+     "status": "Signed out",
+     "message": "Your session expired. Sign in by email to reopen your workspace.",
+     "url": "http://127.0.0.1:9721/desk.html?c=expired-3"
+    }
+   }
+  },
+  {
+   "name": "a revoked server session never opens the workspace",
+   "pass": true,
+   "detail": {
+    "key": true,
+    "s": {
+     "state": "recovery",
+     "status": "Signed out",
+     "message": "Your session expired. Sign in by email to reopen your workspace.",
+     "url": "http://127.0.0.1:9721/desk.html?c=revoked-4"
+    }
+   }
+  },
+  {
+   "name": "another site's requests never carry the owner cookie (SameSite=Strict)",
+   "pass": true,
+   "detail": [
+    {
+     "method": "POST",
+     "path": "/api/client",
+     "status": 401,
+     "origin": "http://localhost:9722",
+     "site": "cross-site",
+     "cookie": false,
+     "bearer": false
+    },
+    {
+     "method": "GET",
+     "path": "/api/client",
+     "status": 200,
+     "origin": "",
+     "site": "cross-site",
+     "cookie": false,
+     "bearer": false
+    },
+    {
+     "method": "POST",
+     "path": "/api/access",
+     "status": 403,
+     "origin": "http://localhost:9722",
+     "site": "cross-site",
+     "cookie": false,
+     "bearer": false
+    },
+    {
+     "method": "POST",
+     "path": "/api/client",
+     "status": 403,
+     "origin": "http://localhost:9722",
+     "site": "cross-site",
+     "cookie": false,
+     "bearer": true
+    }
+   ]
+  },
+  {
+   "name": "another site cannot change the workspace or sign the owner out",
+   "pass": true,
+   "detail": {
+    "out": {
+     "simplePostClient": {
+      "blocked": "TypeError"
+     },
+     "noCorsGetClient": {
+      "status": 0,
+      "type": "opaque"
+     },
+     "simplePostSignOut": {
+      "blocked": "TypeError"
+     },
+     "guessedBearerPost": {
+      "blocked": "TypeError"
+     }
+    },
+    "seen": [
+     {
+      "method": "POST",
+      "path": "/api/client",
+      "status": 401,
+      "origin": "http://localhost:9722",
+      "site": "cross-site",
+      "cookie": false,
+      "bearer": false
+     },
+     {
+      "method": "GET",
+      "path": "/api/client",
+      "status": 200,
+      "origin": "",
+      "site": "cross-site",
+      "cookie": false,
+      "bearer": false
+     },
+     {
+      "method": "POST",
+      "path": "/api/access",
+      "status": 403,
+      "origin": "http://localhost:9722",
+      "site": "cross-site",
+      "cookie": false,
+      "bearer": false
+     },
+     {
+      "method": "POST",
+      "path": "/api/client",
+      "status": 403,
+      "origin": "http://localhost:9722",
+      "site": "cross-site",
+      "cookie": false,
+      "bearer": true
+     }
+    ],
+    "status": "active",
+    "note": "a GET with neither cookie nor handle can only receive the public embed view"
+   }
+  },
+  {
+   "name": "a forged Authorization header from another site is stopped by the browser (no credentialed CORS)",
+   "pass": true,
+   "detail": {
+    "blocked": "TypeError"
+   }
+  },
+  {
+   "name": "the owner is still signed in after the attempt",
+   "pass": true,
+   "detail": {
+    "state": "ready",
+    "status": "Setup in progress",
+    "message": "Sign in with the email you used during setup. If our team set up your workspace, open the link from your welcome email instead.",
+    "url": "http://127.0.0.1:9721/desk.html?c=csrf-5"
+   }
+  },
+  {
+   "name": "server: cookie alone, handle alone, foreign Origin and cross-site fetch are all refused; cookie+handle works",
+   "pass": true,
+   "detail": {
+    "cookieOnly": "public",
+    "foreignOrigin": "403",
+    "crossSite": "401",
+    "handleOnly": "401",
+    "both": "owner"
+   }
+  },
+  {
+   "name": "operator sign-in sets no browser cookie and leaves the owner cookie unchanged",
+   "pass": true,
+   "detail": {
+    "req": 202,
+    "ex": 200
+   }
+  },
+  {
+   "name": "owner cookie session is refused by the operator API",
+   "pass": true,
+   "detail": {
+    "ownerAtManage": 401
+   }
+  },
+  {
+   "name": "operator session is refused by the owner workspace and setup APIs",
+   "pass": true,
+   "detail": {
+    "operatorAtClient": 401,
+    "operatorAtAccess": 401
+   }
+  },
+  {
+   "name": "an operator session never opens an owner desk",
+   "pass": true,
+   "detail": {
+    "state": "recovery",
+    "status": "Signed out",
+    "message": "Your session expired. Sign in by email to reopen your workspace.",
+    "url": "http://127.0.0.1:9721/desk.html?c=separate-6"
+   }
+  },
+  {
+   "name": "the raw session secret never appears in localStorage or sessionStorage of any tab (desk, new tab, bookmark, setup, public page)",
+   "pass": true,
+   "detail": {
+    "found": [
+     false,
+     false,
+     false,
+     false,
+     false
+    ]
+   }
+  },
+  {
+   "name": "server: the cookie alone (with a same-origin label) is refused by /api/access",
+   "pass": true,
+   "detail": {
+    "accessCookieOnly": 401,
+    "accessHandleOnly": 401,
+    "accessBoth": 200,
+    "accessSameSite": 401,
+    "clientSameSite": 401,
+    "accessNoLabel": 401,
+    "accessNone": 401,
+    "exportBoth": 200
+   }
+  },
+  {
+   "name": "server: a same-site (sibling subdomain) label is refused even with cookie+handle, on /api/access and the CSV export",
+   "pass": true,
+   "detail": {
+    "accessCookieOnly": 401,
+    "accessHandleOnly": 401,
+    "accessBoth": 200,
+    "accessSameSite": 401,
+    "clientSameSite": 401,
+    "accessNoLabel": 401,
+    "accessNone": 401,
+    "exportBoth": 200
+   }
+  },
+  {
+   "name": "server: the cookie needs a positive same-origin label (missing or 'none' is refused)",
+   "pass": true,
+   "detail": {
+    "accessCookieOnly": 401,
+    "accessHandleOnly": 401,
+    "accessBoth": 200,
+    "accessSameSite": 401,
+    "clientSameSite": 401,
+    "accessNoLabel": 401,
+    "accessNone": 401,
+    "exportBoth": 200
+   }
+  },
+  {
+   "name": "server: the cookie is accepted only on the listed owner routes, never on another route or the operator scope",
+   "pass": true,
+   "detail": {
+    "client": true,
+    "access": true,
+    "unlisted": false,
+    "operator": false
+   }
+  },
+  {
+   "name": "https: the session cookie is exactly __Host-mc_owner=…; Path=/; SameSite=Strict; Secure; HttpOnly (no Domain, no Max-Age), and the body has no secret",
+   "pass": true,
+   "detail": {
+    "set": [
+     "__Host-mc_owner=9fcbf6258191eb9d1ee856985e1bdbe425cdb7bece932942986fcacd199e1ff4; Path=/; SameSite=Strict; Secure; HttpOnly"
+    ],
+    "transport": "cookie"
+   }
+  },
+  {
+   "name": "https: the probe cookie is __Host-mc_cookie_probe with the same attributes and a 5-minute life",
+   "pass": true,
+   "detail": [
+    "__Host-mc_cookie_probe=e1e67439372a9c99a0bf7d02a60b809dc339d5876127d90cbeadd8f920e23894; Path=/; SameSite=Strict; Secure; Max-Age=300; HttpOnly"
+   ]
+  },
+  {
+   "name": "https: only __Host-mc_owner is read; unprefixed, lower-case and __Secure- names (cookie tossing) are ignored",
+   "pass": true,
+   "detail": {
+    "host": true,
+    "plain": false,
+    "lower": false,
+    "secure": false
+   }
+  },
+  {
+   "name": "exchange falls back to the per-tab transport (no cookie set, link still signs in) without the probe cookie, with a wrong probe, or without a same-origin label",
+   "pass": true,
+   "detail": {
+    "noProbeCookie": {
+     "status": 200,
+     "transport": "tab",
+     "secretInBody": true,
+     "setCookie": 0
+    },
+    "wrongProbe": {
+     "status": 200,
+     "transport": "tab",
+     "secretInBody": true,
+     "setCookie": 0
+    },
+    "noLabel": {
+     "status": 200,
+     "transport": "tab",
+     "secretInBody": true,
+     "setCookie": 0
+    },
+    "sameSite": {
+     "status": 200,
+     "transport": "tab",
+     "secretInBody": true,
+     "setCookie": 0
+    },
+    "ok": {
+     "status": 200,
+     "transport": "cookie",
+     "secretInBody": false,
+     "setCookie": 1
+    }
+   }
+  },
+  {
+   "name": "a browser that silently drops Set-Cookie still signs in (per-tab fallback) instead of spending the link on a cookie that never lands",
+   "pass": true,
+   "detail": {
+    "first": {
+     "state": "ready",
+     "status": "Setup in progress",
+     "message": "Sign in with the email you used during setup. If our team set up your workspace, open the link from your welcome email instead.",
+     "url": "http://127.0.0.1:9721/desk.html?c=dropped-11"
+    },
+    "jar": [],
+    "source": null
+   }
+  },
+  {
+   "name": "shared computer: the next person's sign-in on this browser does not inherit 'keep me signed in' (session cookie, preference consumed)",
+   "pass": true,
+   "detail": {
+    "first": 1794630868.207605,
+    "second": -1,
+    "pref": null
+   }
+  },
+  {
+   "name": "opening another account's sign-in link in a signed-in browser asks first, naming both accounts",
+   "pass": true,
+   "detail": {
+    "shown": true,
+    "title": "Switch accounts?",
+    "intro": "This browser is signed in as victim-14@example.test. The link you opened signs in as other-15@example.test and signs victim-14@example.test out on this browser.",
+    "keep": "Stay signed in as victim-14@example.test",
+    "go": "Continue as other-15@example.test",
+    "focus": "access-title",
+    "describedBy": "access-intro",
+    "description": "This browser is signed in as victim-14@example.test. The link you opened signs in as other-15@example.test and signs victim-14@example.test out on this browser."
+   }
+  },
+  {
+   "name": "the focused 'Switch accounts?' heading is described by the text naming both accounts (aria-describedby)",
+   "pass": true,
+   "detail": {
+    "shown": true,
+    "title": "Switch accounts?",
+    "intro": "This browser is signed in as victim-14@example.test. The link you opened signs in as other-15@example.test and signs victim-14@example.test out on this browser.",
+    "keep": "Stay signed in as victim-14@example.test",
+    "go": "Continue as other-15@example.test",
+    "focus": "access-title",
+    "describedBy": "access-intro",
+    "description": "This browser is signed in as victim-14@example.test. The link you opened signs in as other-15@example.test and signs victim-14@example.test out on this browser."
+   }
+  },
+  {
+   "name": "while asking, the link is not spent and the current session stays active",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "name": "'Stay signed in' reopens the current account's workspace and leaves the link unspent",
+   "pass": true,
+   "detail": {
+    "state": "ready",
+    "status": "Setup in progress",
+    "message": "Sign in with the email you used during setup. If our team set up your workspace, open the link from your welcome email instead.",
+    "url": "http://127.0.0.1:9721/desk.html?c=victim-14"
+   }
+  },
+  {
+   "name": "'Continue' signs in with the link's account and revokes the replaced session on the server",
+   "pass": true,
+   "detail": {
+    "switched": {
+     "state": "ready",
+     "status": "Setup in progress",
+     "message": "Sign in with the email you used during setup. If our team set up your workspace, open the link from your welcome email instead.",
+     "url": "http://127.0.0.1:9721/desk.html?c=other-15"
+    },
+    "x": "revoked",
+    "by": "replaced"
+   }
+  },
+  {
+   "name": "tabs still holding the replaced session close at once and say why",
+   "pass": true,
+   "detail": {
+    "state": "recovery",
+    "status": "Signed out",
+    "message": "This browser signed in to another account in another tab. Use an email sign-in link to open this workspace again.",
+    "url": "http://127.0.0.1:9721/desk.html?c=victim-14"
+   }
+  },
+  {
+   "name": "the same owner signing in again needs no prompt, and the session it replaces is revoked",
+   "pass": true,
+   "detail": {
+    "again": {
+     "state": "ready",
+     "status": "Setup in progress",
+     "message": "Sign in with the email you used during setup. If our team set up your workspace, open the link from your welcome email instead.",
+     "url": "http://127.0.0.1:9721/desk.html?c=other-15"
+    },
+    "old": "revoked"
+   }
+  },
+  {
+   "name": "the same owner's other open workspace tab says this browser signed in again, never 'another account'",
+   "pass": true,
+   "detail": {
+    "state": "recovery",
+    "status": "Signed out",
+    "message": "This browser signed in again in another tab. Reload this page to continue.",
+    "url": "http://127.0.0.1:9721/desk.html?c=other-15"
+   }
+  },
+  {
+   "name": "after a 401, the stale shared handle is forgotten so later tabs ask to sign in",
+   "pass": true,
+   "detail": {
+    "s": {
+     "state": "recovery",
+     "status": "Signed out",
+     "message": "Your session expired. Sign in by email to reopen your workspace.",
+     "url": "http://127.0.0.1:9721/desk.html?c=stale-16"
+    },
+    "left": {
+     "shared": null,
+     "tab": null
+    },
+    "left2": null
+   }
+  },
+  {
+   "name": "frame policy: the prompt pages include onboard.html and every one also loads owner-session.js",
+   "pass": true,
+   "detail": {
+    "promptPages": [
+     "onboard.html"
+    ],
+    "ownerPages": [
+     "desk.html",
+     "onboard.html"
+    ]
+   }
+  },
+  {
+   "name": "frame policy: X-Frame-Options is exactly SAMEORIGIN (one value, from /*) on every prompt/owner page and its pretty URL",
+   "pass": true,
+   "detail": {
+    "/onboard.html": {
+     "xfo": "SAMEORIGIN",
+     "csp": "frame-ancestors 'none'"
+    },
+    "/onboard": {
+     "xfo": "SAMEORIGIN",
+     "csp": "frame-ancestors 'none'"
+    },
+    "/desk.html": {
+     "xfo": "SAMEORIGIN",
+     "csp": "frame-ancestors 'none'"
+    },
+    "/desk": {
+     "xfo": "SAMEORIGIN",
+     "csp": "frame-ancestors 'none'"
+    }
+   }
+  },
+  {
+   "name": "frame policy: Content-Security-Policy is exactly frame-ancestors 'none' (one policy) on every prompt/owner page and its pretty URL",
+   "pass": true,
+   "detail": {
+    "/onboard.html": {
+     "xfo": "SAMEORIGIN",
+     "csp": "frame-ancestors 'none'"
+    },
+    "/onboard": {
+     "xfo": "SAMEORIGIN",
+     "csp": "frame-ancestors 'none'"
+    },
+    "/desk.html": {
+     "xfo": "SAMEORIGIN",
+     "csp": "frame-ancestors 'none'"
+    },
+    "/desk": {
+     "xfo": "SAMEORIGIN",
+     "csp": "frame-ancestors 'none'"
+    }
+   }
+  },
+  {
+   "name": "frame policy: another site's frame of the setup page never renders it or calls /api/access",
+   "pass": true,
+   "detail": {
+    "rendered": false,
+    "frameUrl": "chrome-error://chromewebdata/",
+    "api": []
+   }
+  },
+  {
+   "name": "server: an exact same-origin label authenticates cookie+handle (with a first-party Origin or none)",
+   "pass": true,
+   "detail": {
+    "access": {
+     "control": 200,
+     "controlNoOrigin": 200,
+     "titleCase": 401,
+     "upperCase": 401,
+     "crossOrigin": 401,
+     "nullOrigin": 401,
+     "otherPort": 401
+    },
+    "client": {
+     "control": 200,
+     "controlNoOrigin": 200,
+     "titleCase": 401,
+     "upperCase": 401,
+     "crossOrigin": 403,
+     "nullOrigin": 403,
+     "otherPort": 403
+    },
+    "export": {
+     "control": 200,
+     "controlNoOrigin": 200,
+     "titleCase": 401,
+     "upperCase": 401,
+     "crossOrigin": 403,
+     "nullOrigin": 403,
+     "otherPort": 403
+    }
+   }
+  },
+  {
+   "name": "server: the label is compared exactly; 'Same-Origin' and 'SAME-ORIGIN' are refused",
+   "pass": true,
+   "detail": {
+    "access": {
+     "control": 200,
+     "controlNoOrigin": 200,
+     "titleCase": 401,
+     "upperCase": 401,
+     "crossOrigin": 401,
+     "nullOrigin": 401,
+     "otherPort": 401
+    },
+    "client": {
+     "control": 200,
+     "controlNoOrigin": 200,
+     "titleCase": 401,
+     "upperCase": 401,
+     "crossOrigin": 403,
+     "nullOrigin": 403,
+     "otherPort": 403
+    },
+    "export": {
+     "control": 200,
+     "controlNoOrigin": 200,
+     "titleCase": 401,
+     "upperCase": 401,
+     "crossOrigin": 403,
+     "nullOrigin": 403,
+     "otherPort": 403
+    }
+   }
+  },
+  {
+   "name": "server: a same-origin label with a foreign, 'null' or other-port Origin is refused (401, or the route's own 403)",
+   "pass": true,
+   "detail": {
+    "access": {
+     "control": 200,
+     "controlNoOrigin": 200,
+     "titleCase": 401,
+     "upperCase": 401,
+     "crossOrigin": 401,
+     "nullOrigin": 401,
+     "otherPort": 401
+    },
+    "client": {
+     "control": 200,
+     "controlNoOrigin": 200,
+     "titleCase": 401,
+     "upperCase": 401,
+     "crossOrigin": 403,
+     "nullOrigin": 403,
+     "otherPort": 403
+    },
+    "export": {
+     "control": 200,
+     "controlNoOrigin": 200,
+     "titleCase": 401,
+     "upperCase": 401,
+     "crossOrigin": 403,
+     "nullOrigin": 403,
+     "otherPort": 403
+    }
+   }
+  },
+  {
+   "name": "a link opened with 'keep me signed in' on still asks before switching accounts (link unspent, current session active)",
+   "pass": true,
+   "detail": {
+    "bodies": [
+     {
+      "persistent": true,
+      "replace": false,
+      "transport": "cookie"
+     }
+    ],
+    "shown": true
+   }
+  },
+  {
+   "name": "same owner: a fresh link in another tab keeps the open setup tab's answers and form (no reset, no 'another account')",
+   "pass": true,
+   "detail": {
+    "firstSave": true,
+    "after": {
+     "form": true,
+     "gate": false,
+     "name": "Riley Renewal",
+     "status": "Checking your secure sign-in link… | Saved. You can leave and continue later."
+    }
+   }
+  },
+  {
+   "name": "same owner: the open setup tab moves onto the new handle; the replaced session is revoked",
+   "pass": true,
+   "detail": {
+    "moved": true,
+    "old": "revoked"
+   }
+  },
+  {
+   "name": "same owner: the setup tab keeps saving after the renewal",
+   "pass": true,
+   "detail": {
+    "secondSave": true,
+    "d2": {
+     "status": 200,
+     "name": "Riley Renewal Jr"
+    }
+   }
+  },
+  {
+   "name": "same owner: a setup save in flight across the renewal is resent on the new handle and lands (form stays open)",
+   "pass": true,
+   "detail": {
+    "held": 1,
+    "saved": true,
+    "view": {
+     "form": true,
+     "gate": false,
+     "name": "Held Save Owner",
+     "status": "Checking your secure sign-in link… | Saved. You can leave and continue later."
+    },
+    "draft": {
+     "status": 200,
+     "name": "Held Save Owner"
+    }
+   }
+  },
+  {
+   "name": "an unknown previous session (ended on the server) is never followed: the open setup tab closes instead of continuing as the newly signed-in account",
+   "pass": true,
+   "detail": {
+    "followed": false,
+    "q1view": {
+     "form": false,
+     "gate": true,
+     "name": "",
+     "status": "This browser signed in again in another tab. Reload this page to continue; your saved answers are kept securely. | Saved. You can leave and continue later."
+    }
+   }
+  },
+  {
+   "name": "D3 precondition reached naturally: a discarded exchange left the cookie on B's session while the stored handle is still A's",
+   "pass": true,
+   "detail": {
+    "aSaved": true,
+    "held": 1,
+    "heldProbe": 1,
+    "r1status": 200,
+    "cookieOwner": "B",
+    "lsIsA": true
+   }
+  },
+  {
+   "name": "D3: A's open setup tab never moves onto B's session",
+   "pass": true,
+   "detail": {
+    "followed": false
+   }
+  },
+  {
+   "name": "D3: A's answers never land in B's draft",
+   "pass": true,
+   "detail": {
+    "bDraftName": "Bob Owner"
+   }
+  },
+  {
+   "name": "D3: A's tab closes with 'signed in again' (gate shown, form hidden, never 'another account')",
+   "pass": true,
+   "detail": {
+    "form": false,
+    "gate": true,
+    "name": "",
+    "status": "This browser signed in again in another tab. Reload this page to continue; your saved answers are kept securely. | Saved. You can leave and continue later."
+   }
+  },
+  {
+   "name": "Sign out pressed during a same-owner renewal is resent exactly once (401 for the replaced handle, then 200) and revokes the new sign-in",
+   "pass": true,
+   "detail": {
+    "held": 1,
+    "xFollowed": true,
+    "outs": [
+     401,
+     200
+    ],
+    "newSession": "revoked"
+   }
+  },
+  {
+   "name": "...and every tab shows signed out: no cookie, no stored handle, the renewing tab says 'signed out in another tab'",
+   "pass": true,
+   "detail": {
+    "jar": 0,
+    "shared": null,
+    "xv": {
+     "form": false,
+     "gate": true,
+     "name": "",
+     "status": "Signed out. Your saved answers are kept securely. | Saved. You can leave and continue later."
+    },
+    "zv": {
+     "form": false,
+     "gate": true,
+     "name": "",
+     "status": "You signed out in another tab. Your saved answers are kept securely. | Your saved answers have been restored."
+    }
+   }
+  },
+  {
+   "name": "A's save in flight while the same tab switches to B is never resent into B's draft",
+   "pass": true,
+   "detail": {
+    "held": 1,
+    "bName": "Bravo Existing"
+   }
+  },
+  {
+   "name": "a 401 for a session that ended (no renewal) is sent once, never retried, and the sign-in gate shows",
+   "pass": true,
+   "detail": {
+    "puts": 1,
+    "v": {
+     "form": false,
+     "gate": true,
+     "name": "Expiring Owner 2",
+     "status": "Your sign-in expired. Request a new link; your saved answers are kept. | Saving your answers…"
+    }
+   }
+  },
+  {
+   "name": "a per-tab (non-cookie) setup tab ignores another tab's same-owner renewal: same session, form open, keeps saving",
+   "pass": true,
+   "detail": {
+    "firstSave": true,
+    "source": null,
+    "kept": true,
+    "after": {
+     "form": true,
+     "gate": false,
+     "name": "Per Tab Owner",
+     "status": "Checking your secure sign-in link… | Saved. You can leave and continue later."
+    },
+    "again": true
+   }
+  },
+  {
+   "name": "deploy log: hostile Sec-Fetch-Site values (tab, email, uppercase, 5,000 chars, missing) and an email in the body log only fixed values",
+   "pass": true,
+   "detail": [
+    "owner_exchange {\"fetchSite\":\"same-origin\",\"transport\":\"cookie\"}",
+    "owner_exchange {\"fetchSite\":\"other\",\"transport\":\"tab\"}",
+    "owner_exchange {\"fetchSite\":\"other\",\"transport\":\"tab\"}",
+    "owner_exchange {\"fetchSite\":\"missing\",\"transport\":\"tab\"}",
+    "owner_exchange {\"fetchSite\":\"other\",\"transport\":\"tab\"}",
+    "owner_exchange {\"fetchSite\":\"other\",\"transport\":\"tab\"}"
+   ]
+  },
+  {
+   "name": "deploy log: each exchange logs only fixed fetch-site/transport values (same-origin+cookie for the browser, missing+tab without the label), never an address, token or session",
+   "pass": true,
+   "detail": {
+    "count": 51,
+    "distinct": [
+     "owner_exchange {\"fetchSite\":\"same-origin\",\"transport\":\"cookie\"}",
+     "owner_exchange {\"fetchSite\":\"same-origin\",\"transport\":\"tab\"}",
+     "owner_exchange {\"fetchSite\":\"missing\",\"transport\":\"tab\"}",
+     "owner_exchange {\"fetchSite\":\"same-site\",\"transport\":\"tab\"}",
+     "owner_exchange {\"fetchSite\":\"other\",\"transport\":\"tab\"}"
+    ]
+   }
+  },
+  {
+   "name": "this harness never uses Playwright route.fetch",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "name": "no permanent owner key or session secret appears in any visited URL",
+   "pass": true,
+   "detail": [
+    "http://127.0.0.1:9721/onboard.html#verify=fbf2a0ea17c172a2346ea075aff5e75b4e3c67efdb75417e9ad53432d9297be6",
+    "http://127.0.0.1:9721/onboard.html#verify=86721156ba714298b4c04a7caa87510f90e497f880321e1cb38f95fdcdb8115c",
+    "http://127.0.0.1:9721/onboard.html#verify=aeda3c345e2f6345d9b2edb03bea08cb79250edd6a8cae2f8fd8e865bb1c6106",
+    "http://127.0.0.1:9721/onboard.html#verify=b22d71b6be38e94b7cd77c782096fbcebce53bcff3741f142e589e8f617af57a",
+    "http://127.0.0.1:9721/onboard.html#verify=a45c4385ded433818f0f6a107a23d7f297ea198d9f9bfb768676a7d7271df6b8",
+    "http://127.0.0.1:9721/onboard.html#verify=6bc37a41d1e4f48b270c47d2883dcd6332b7d4e4305bcc5115059df7d88e7c7c",
+    "http://127.0.0.1:9721/onboard.html#verify=74db7ea480478eaa65cb1e2829e90bcc6743a6958b71cd5eac181372ebaba1e1",
+    "http://127.0.0.1:9721/onboard.html#verify=d71f6fd60bf702d819fb8eaf5456e095b8fbb00907f4f5168a8f59b5c036c371",
+    "http://127.0.0.1:9721/onboard.html#verify=d8cf8387f895e99edeec8c6fcd3b7ff68845ba123dbc8f62220a14b822471521",
+    "http://127.0.0.1:9721/onboard.html#verify=822e66ff4d0f69237e073ec252c2b3275e88ff328b13a24ea713c691fec805f6",
+    "http://127.0.0.1:9721/onboard.html#verify=ae438aac2feff93b5ae51bb7b4e53cca6d16085b7fafc6be4bd226219f3925f5",
+    "http://127.0.0.1:9721/onboard.html#verify=899c4cf23fc516af6438ffa58010fd15374e3bca96a3b75742ba77c489716e03",
+    "http://127.0.0.1:9721/onboard.html#verify=37048aed7775b5e7987cfd5fd77bd383e4cd5a3dd86449cb6ffefe68d4c62670",
+    "http://127.0.0.1:9721/onboard.html#verify=37048aed7775b5e7987cfd5fd77bd383e4cd5a3dd86449cb6ffefe68d4c62670",
+    "http://127.0.0.1:9721/onboard.html#verify=4591aaab93663a91b388c341718b03a18bad28da1f67c88e5b7e2c8ebc067f65",
+    "http://127.0.0.1:9721/onboard.html#verify=4a82fac5be92680e3b0ec599de470e22fd5b784cd3a807043a761382f1691e7e",
+    "http://127.0.0.1:9721/onboard.html#verify=450544eedf44e99635035fccc12ef793b0d8f733afedbe99ffcea831a76bb5fc",
+    "http://127.0.0.1:9721/onboard.html#verify=b7219b34fcc9c3b47407dd7d05dfe16fc74f7d4357e5ceb67cda21bdf0098e2c",
+    "http://127.0.0.1:9721/onboard.html#verify=927d31199846c3ff14840db208678069e5f3ce69e6de0d92e0b5550c8e5d5441",
+    "http://127.0.0.1:9721/onboard.html#verify=2158a4693c17b368456fa3664a06f78528bc5306a09f28e1bb0e4c82dd9921f2",
+    "http://127.0.0.1:9721/onboard.html#verify=d94ad133f44e1049410bbf4ed0ab4681e9e5780217767bd3d33288a7faae2727",
+    "http://127.0.0.1:9721/onboard.html#verify=dafd0e31d5d7c9c55093f9cd5bb3f7bb52e346fe48ae882fb593c0a937057b87",
+    "http://127.0.0.1:9721/onboard.html#verify=6d2c7763575c9268fe5aa8d28f7fecbd83bae4d1823500dc7625804fad926aa5",
+    "http://127.0.0.1:9721/onboard.html#verify=91d585db250d4e67047626ee81f98e5e1abcdcc4600085164f1d1f0c8d7216f8",
+    "http://127.0.0.1:9721/onboard.html#verify=8d8672a2997bc19987048b3e32ef332870af95942409be4e311c5d85e9ad9d33",
+    "http://127.0.0.1:9721/onboard.html#verify=9f64bcf1c9a73ac94d2bd4948537fa14631ebd47ffa765324a1ef33296ace64d",
+    "http://127.0.0.1:9721/onboard.html#verify=2f925bbb470b2038d48031fcfb41dca411927da7a2bd5428d708116bc59d0eff",
+    "http://127.0.0.1:9721/onboard.html#verify=d3de0c278f1926698c3bc994d611d5e9e1fc17256cbcf7a09cbb7c16cfb877b7",
+    "http://127.0.0.1:9721/onboard.html#verify=34da6605117332b091dc910365855e3b37e7aa3b7b7e6a5f3a1fbd974fbc0a42",
+    "http://127.0.0.1:9721/onboard.html#verify=19ce07c271ae16827d151b0a93c67588200f120a95aae20bf4e144d71e2b05d7",
+    "http://127.0.0.1:9721/onboard.html#verify=f3aa68c0fc93d37d86f25b374e5c97a1bcf1a69aff249baf59029123f7e31580",
+    "http://127.0.0.1:9721/onboard.html#verify=4344a54a4915e8270e56b67e998e739d5f7bd30af3f46ca5ebe48d5daf7818e4",
+    "http://127.0.0.1:9721/onboard.html#verify=38eb74ca93c8760920c37398992738f04f74c9b3f2e0dbeddd0b7955e0c65c06",
+    "http://127.0.0.1:9721/onboard.html#verify=a22c3add99c83de822afd5d0a9d63de85e9334d4e7e81c6cb64d4cf6b93bbbf1",
+    "http://127.0.0.1:9721/onboard.html#verify=e2fcb7d277c61f1e197f6b838cfec61965bac354c2753a141a8355b203af4c1a",
+    "http://127.0.0.1:9721/onboard.html#verify=29b966b3f8c8d72118e5d68f83cf755df3212c0ac26a7ee6e81282d98d759fc6"
+   ]
+  },
+  {
+   "name": "no non-loopback network from Node (fetch or sockets)",
+   "pass": true,
+   "detail": []
+  }
+ ]
+}

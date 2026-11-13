@@ -1,0 +1,135 @@
+{
+  "at": "2026-11-13T04:41:15.707Z",
+  "browser": "/Users/stevengoumnai/Library/Caches/ms-playwright/chromium_headless_shell-1223/chrome-headless-shell-mac-arm64/chrome-headless-shell",
+  "qualifications": "Synthetic workspace, session and records; actual local /api/client, /api/access and /api/chat handlers with the fake model; memory storage; no server listener; every non-origin request aborted. No model/provider/email/OAuth/purchase/deployment.",
+  "sourceBefore": {
+    "desk.js": "d4ce378b88cbcefdedef611327cde83b3973aa625528b3bd1a1ea4c62bc11723",
+    "desk.html": "54df92c86bce8c20e11e670bdbd84e90b8227d21120165e156c0dfa1e7f73ee9",
+    "desk.css": "4a6f0799825c7d96a6b9e622ad966397c338498ca225ab2410af6b8cff000b4d",
+    "desk-requests.js": "1307b366debc793505747ee78f1042db17086400607bba2ed3fe19cc9a3867e1",
+    "desk-service-intake.js": "0e1d58478d31bb4528456b87ef05539d2bc5d742161909eb78752c73c1cd328c",
+    "desk-setup-guide.js": "fe813acf5e6d77d68a68a6eda430dba1e8547f4f7ca4bd7110963e971678326e",
+    "netlify/functions/lib/self-service-ai.mjs": "60c28e69b0de13ca862868baa130f3d36fe8dd67213a213728a434ff48c6c077",
+    "netlify/functions/lib/workspace-edit.mjs": "2f3073acc84088cbb54e50cc5611514870ba9e32f755850a31603121053239cd",
+    "netlify/functions/lib/config.mjs": "6a9e259eba12805376d7cd975ed01d573d82c9d2afb0294017467f331550613f",
+    "desk-customers.js": "43e1722f65dcacbb2bd385899d4860fbe031d5e956ab7d8c8428d4d684898184"
+  },
+  "checks": [
+    {
+      "id": "Q08a",
+      "name": "390 Customers: a customer older than the 100 loaded records is not reported as \"no customer\" without qualification",
+      "pass": true
+    },
+    {
+      "id": "Q08b",
+      "name": "390 Customers: \"Jordan 281\" (name plus digits) does not return a different customer",
+      "pass": true
+    },
+    {
+      "id": "Q08c",
+      "name": "390 Customers: focus returns to \"View visit\" after the visit dialog closes across a workspace refresh",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: focus dropped to BODY#[]\n    at file:///private/tmp/mc-claude-desk-p2-fix-20261112/qa-artifacts/claude-collaboration/desk-p2-fix/qa/tools/qa-desk2-probe.mjs:119:12\n    at async check (file:///private/tmp/mc-claude-desk-p2-fix-20261112/qa-artifacts/claude-collaboration/desk-p2-fix/qa/tools/qa-desk2-probe.mjs:74:9)\n    at async file:///private/tmp/mc-claude-desk-p2-fix-20261112/qa-artifacts/claude-collaboration/desk-p2-fix/qa/tools/qa-desk2-probe.mjs:112:3"
+    },
+    {
+      "id": "Q08d",
+      "name": "390 Customers: names and addresses are escaped, no page error, no horizontal scroll at 320 with unbroken strings",
+      "pass": true
+    },
+    {
+      "id": "Q08e",
+      "name": "390 Customers: every action button meets the 44px workspace target (DESIGN.md)",
+      "pass": true
+    },
+    {
+      "id": "Q08f",
+      "name": "Customers handler survives mc:session-expired after an explicit sign-out (no page error)",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n+ actual - expected\n\n+ [\n+   \"Cannot set properties of null (setting 'textContent')\",\n+   \"Cannot read properties of null (reading 'open')\",\n+   \"Cannot set properties of null (setting 'value')\"\n+ ]\n- []\n\n    at file:///private/tmp/mc-claude-desk-p2-fix-20261112/qa-artifacts/claude-collaboration/desk-p2-fix/qa/tools/qa-desk2-probe.mjs:139:12\n    at async check (file:///private/tmp/mc-claude-desk-p2-fix-20261112/qa-artifacts/claude-collaboration/desk-p2-fix/qa/tools/qa-desk2-probe.mjs:74:9)\n    at async file:///private/tmp/mc-claude-desk-p2-fix-20261112/qa-artifacts/claude-collaboration/desk-p2-fix/qa/tools/qa-desk2-probe.mjs:133:3"
+    },
+    {
+      "id": "Q08g",
+      "name": "390 (control) Schedule visit history: focus after the visit dialog closes across a workspace refresh",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: focus dropped to BODY.theme-light product-app desk-app\n    at file:///private/tmp/mc-claude-desk-p2-fix-20261112/qa-artifacts/claude-collaboration/desk-p2-fix/qa/tools/qa-desk2-probe.mjs:147:12\n    at async check (file:///private/tmp/mc-claude-desk-p2-fix-20261112/qa-artifacts/claude-collaboration/desk-p2-fix/qa/tools/qa-desk2-probe.mjs:74:9)\n    at async file:///private/tmp/mc-claude-desk-p2-fix-20261112/qa-artifacts/claude-collaboration/desk-p2-fix/qa/tools/qa-desk2-probe.mjs:141:3"
+    },
+    {
+      "id": "Q09a",
+      "name": "390 one save that edits both the hours grid and the hours line keeps the grid edit (a54 precedence)",
+      "pass": true
+    },
+    {
+      "id": "Q09b",
+      "name": "390 a grid edit does not silently discard the owner's hand-written hours notes",
+      "pass": true
+    },
+    {
+      "id": "Q09c",
+      "name": "390 a grid-only save whose response is lost is confirmed saved, not reported as a conflict",
+      "pass": true
+    },
+    {
+      "id": "Q10a",
+      "name": "390 visit cards: roles kept, labels present, long unbroken values stay inside, View visit 44px and focusable",
+      "pass": true
+    },
+    {
+      "id": "Q13a",
+      "name": "390 Customers: a visit opened from Customers shows the short ref and Booked status",
+      "pass": true
+    },
+    {
+      "id": "--",
+      "name": "No physical transport, forbidden destinations or page errors",
+      "pass": true
+    }
+  ],
+  "requests": 43,
+  "pageErrors": [],
+  "forbidden": [],
+  "physicalNetwork": 0,
+  "screenshots": [
+    "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/rc2/out/suites/desk-p2-qa-probe-q08a-older-customer-390.png",
+    "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/rc2/out/suites/desk-p2-qa-probe-failure-Q08c-3.png",
+    "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/rc2/out/suites/desk-p2-qa-probe-q08d-unbroken-320.png",
+    "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/rc2/out/suites/desk-p2-qa-probe-failure-Q08f-6.png",
+    "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/rc2/out/suites/desk-p2-qa-probe-failure-Q08g-7.png",
+    "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/rc2/out/suites/desk-p2-qa-probe-q09c-lost-response-390.png",
+    "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/rc2/out/suites/desk-p2-qa-probe-q10a-visit-cards-390.png"
+  ],
+  "sourceAfter": {
+    "desk.js": "d4ce378b88cbcefdedef611327cde83b3973aa625528b3bd1a1ea4c62bc11723",
+    "desk.html": "54df92c86bce8c20e11e670bdbd84e90b8227d21120165e156c0dfa1e7f73ee9",
+    "desk.css": "4a6f0799825c7d96a6b9e622ad966397c338498ca225ab2410af6b8cff000b4d",
+    "desk-requests.js": "1307b366debc793505747ee78f1042db17086400607bba2ed3fe19cc9a3867e1",
+    "desk-service-intake.js": "0e1d58478d31bb4528456b87ef05539d2bc5d742161909eb78752c73c1cd328c",
+    "desk-setup-guide.js": "fe813acf5e6d77d68a68a6eda430dba1e8547f4f7ca4bd7110963e971678326e",
+    "netlify/functions/lib/self-service-ai.mjs": "60c28e69b0de13ca862868baa130f3d36fe8dd67213a213728a434ff48c6c077",
+    "netlify/functions/lib/workspace-edit.mjs": "2f3073acc84088cbb54e50cc5611514870ba9e32f755850a31603121053239cd",
+    "netlify/functions/lib/config.mjs": "6a9e259eba12805376d7cd975ed01d573d82c9d2afb0294017467f331550613f",
+    "desk-customers.js": "43e1722f65dcacbb2bd385899d4860fbe031d5e956ab7d8c8428d4d684898184"
+  },
+  "sourceStable": true,
+  "summary": {
+    "passed": 10,
+    "failed": 3,
+    "total": 13,
+    "byFinding": {
+      "Q08a": "pass",
+      "Q08b": "pass",
+      "Q08c": "fail",
+      "Q08d": "pass",
+      "Q08e": "pass",
+      "Q08f": "fail",
+      "Q08g": "fail",
+      "Q09a": "pass",
+      "Q09b": "pass",
+      "Q09c": "pass",
+      "Q10a": "pass",
+      "Q13a": "pass",
+      "--": "pass"
+    },
+    "physicalNetwork": 0,
+    "pageErrors": 0
+  }
+}

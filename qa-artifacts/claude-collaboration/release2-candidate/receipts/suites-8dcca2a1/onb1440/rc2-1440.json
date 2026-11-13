@@ -1,0 +1,1352 @@
+{
+ "at": "2026-11-13T04:37:40.230Z",
+ "label": "rc2",
+ "width": 1440,
+ "root": "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/rc2/c1",
+ "mode": "actual handlers in process; memory store; fake model; fake mailbox; loopback only",
+ "sourceBefore": {
+  "onboard.html": "e4b9cc9b0f76e5a029a947a109739b50bf384a058fe12c4e90346c6c2f216253",
+  "onboard.js": "697d3a31544aaa25dd0186b07b54ed45056536d8db45e87b13f09a1c4d783f14",
+  "onboard.css": "1857cedd407c4f8a1bd4f47557658b30178dae0aa746837b5629f81e22868307",
+  "index.html": "1ff1cc7d2ecb07b42b4fd6260368eebef35719aaa3553d0086633d5fd42cfe3d",
+  "desk.js": "d4ce378b88cbcefdedef611327cde83b3973aa625528b3bd1a1ea4c62bc11723",
+  "desk-billing.js": "c3f45f47a9a1fc2a43972efe0fe16fb7c42550de92c863642afb8512cf9521bb",
+  "admin.js": "bf76f4006a22ce2d396bb20d31ec8a5f592f280d957cc6db70cb5b4b04c061c9",
+  "netlify/functions/onboard.mjs": "0c5d0bbe5150c12ba90c67611b7a493c3f07bb3db6b68dddb4978c984068e891",
+  "netlify/functions/access.mjs": "a302c509fba5ae4e737fb60c20b07531d556fa946ae9db50662b5021a25fb425",
+  "netlify/functions/lib/access.mjs": "ff67c34ed91768145924af902524838f5a1d87bf3dd7bc60f4aa279e4757609c"
+ },
+ "checks": [
+  {
+   "finding": "PRA-ONB-07",
+   "name": "homepage inquiry copy matches what happens next (no second request step)",
+   "pass": true,
+   "detail": "Add your details. We’ll email you a secure sign-in link to save your setup."
+  },
+  {
+   "finding": "PRA-ONB-07",
+   "name": "sign-in link is requested once from the inquiry without pressing Send again",
+   "pass": true,
+   "detail": {
+    "title": "Your test link is ready",
+    "sent": true,
+    "requestsAfterArrival": 1
+   }
+  },
+  {
+   "finding": "PRA-ONB-07",
+   "name": "reloading the page does not send another sign-in email",
+   "pass": true,
+   "detail": {
+    "requests": 1,
+    "intro": "We already sent a secure link to the address you entered. Open it to continue with your saved details, or send another."
+   }
+  },
+  {
+   "finding": "PRA-ONB-03",
+   "name": "no paid plan is pre-selected when the owner never chose one",
+   "pass": true,
+   "detail": {
+    "checkedPlan": "none"
+   }
+  },
+  {
+   "finding": "PRA-ONB-03",
+   "name": "the collapsed plan section states the current choice without opening it",
+   "pass": true,
+   "detail": "Plans & email preferences Optional. No plan chosen yet. No payment is taken here."
+  },
+  {
+   "finding": "PRA-ONB-06",
+   "name": "clearly invalid website text (spaces, no dot) is still rejected",
+   "pass": true,
+   "detail": {
+    "step": "Step 1 of 4",
+    "error": "Enter your website address, such as yourbusiness.com, or leave this blank."
+   }
+  },
+  {
+   "finding": "PRA-ONB-06",
+   "name": "www.bayouair.com is accepted on Step 1",
+   "pass": true,
+   "detail": {
+    "step": "Step 2 of 4",
+    "error": ""
+   }
+  },
+  {
+   "finding": "PRA-ONB-06",
+   "name": "the accepted bare domain is shown and saved as https://www.bayouair.com",
+   "pass": true,
+   "detail": "https://www.bayouair.com"
+  },
+  {
+   "finding": "PRA-ONB-03",
+   "name": "a workspace created without touching the plan control has no paid plan saved",
+   "pass": true,
+   "detail": {
+    "plan": "none"
+   }
+  },
+  {
+   "finding": "PRA-ONB-06",
+   "name": "workspace website is saved with https",
+   "pass": true,
+   "detail": "https://www.bayouair.com"
+  },
+  {
+   "finding": "PRA-ONB-04",
+   "name": "Plan & billing names the saved preference when none was chosen",
+   "pass": true,
+   "detail": "Plan & billing No subscription started Your workspace is free to prepare. You review the full paid offer before entering payment details. Preferred plan: Not chosen yet. Saving your workspace did not choose a paid plan for you. Next: paid service is not offered for this workspace yet. When it is, you’ll review the services, included usage and monthly terms here before entering any payment details."
+  },
+  {
+   "finding": "PRA-ONB-04",
+   "name": "Plan & billing says what happens next while no paid offer is available",
+   "pass": true,
+   "detail": "Plan & billing No subscription started Your workspace is free to prepare. You review the full paid offer before entering payment details. Preferred plan: Not chosen yet. Saving your workspace did not choose a paid plan for you. Next: paid service is not offered for this workspace yet. When it is, you’ll review the services, included usage and monthly terms here before entering any payment details."
+  },
+  {
+   "finding": "PRA-ONB-08",
+   "name": "first Home card does not ask the owner to choose or prepare services again",
+   "pass": true,
+   "detail": {
+    "title": "Check your business details",
+    "intro": "Confirm your services, hours and the answers your front desk should use.",
+    "button": "Review business details"
+   }
+  },
+  {
+   "finding": "PRA-ONB-08",
+   "name": "the Home action is a real next step: it opens a page with that step, not a screen that only repeats the choice",
+   "pass": true,
+   "detail": {
+    "home": {
+     "title": "Check your business details",
+     "intro": "Confirm your services, hours and the answers your front desk should use.",
+     "button": "Review business details"
+    },
+    "landed": {
+     "route": "know",
+     "active": "know",
+     "pageTitle": "Business details",
+     "setupGuide": "Your connections"
+    }
+   }
+  },
+  {
+   "finding": "PRA-ONB-03",
+   "name": "an explicit Coverage choice is kept and is visible without opening the section",
+   "pass": true,
+   "detail": {
+    "checkedPlan": "starter",
+    "planSummary": "Plans & email preferences Preferred plan: Coverage. No payment is taken here."
+   }
+  },
+  {
+   "finding": "PRA-ONB-03",
+   "name": "explicit Coverage choice is saved as starter",
+   "pass": true,
+   "detail": "starter"
+  },
+  {
+   "finding": "PRA-ONB-04",
+   "name": "Plan & billing names Coverage, its monthly price and that it is not started",
+   "pass": true,
+   "detail": "Plan & billing No subscription started Your workspace is free to prepare. You review the full paid offer before entering payment details. Preferred plan: Coverage, $99/month. Not started: no payment has been taken and this choice does not activate any service. Next: paid service is not offered for this workspace yet. When it is, you’ll review the services, included usage and monthly terms here before entering any payment details."
+  },
+  {
+   "finding": "PRA-ONB-05",
+   "name": "the 4th request in 15 minutes returns Retry-After",
+   "pass": true,
+   "detail": {
+    "status": "You can request another link in 15 minutes. Links we already sent still work for 20 minutes after they were sent, so check your inbox and spam folder first.",
+    "title": "Use the link we already sent",
+    "resend": "Resend in 15 min",
+    "disabled": true,
+    "retryAfterHeader": "898"
+   }
+  },
+  {
+   "finding": "PRA-ONB-05",
+   "name": "the page states how long to wait",
+   "pass": true,
+   "detail": "You can request another link in 15 minutes. Links we already sent still work for 20 minutes after they were sent, so check your inbox and spam folder first."
+  },
+  {
+   "finding": "PRA-ONB-05",
+   "name": "the heading explains that earlier links still work",
+   "pass": true,
+   "detail": {
+    "title": "Use the link we already sent",
+    "status": "You can request another link in 15 minutes. Links we already sent still work for 20 minutes after they were sent, so check your inbox and spam folder first."
+   }
+  },
+  {
+   "finding": "PRA-ONB-05",
+   "name": "Resend stays disabled after the 30-second countdown while the limit lasts",
+   "pass": true,
+   "detail": {
+    "resend": "Resend in 15 min",
+    "disabled": true
+   }
+  },
+  {
+   "finding": "PRA-ONB-06",
+   "name": "server saves a bare-domain website as https",
+   "pass": true,
+   "detail": {
+    "ok": true,
+    "website": "https://bayouair.com"
+   }
+  },
+  {
+   "finding": "PRA-ONB-03",
+   "name": "server stores \"none\" (not growth) when no plan is sent",
+   "pass": true,
+   "detail": "none"
+  },
+  {
+   "finding": "PRA-ONB-05",
+   "name": "rate-limit reply carries retryAfter seconds and a matching Retry-After header",
+   "pass": true,
+   "detail": {
+    "status": 429,
+    "body": {
+     "error": "rate_limited",
+     "message": "Please wait before requesting another sign-in email.",
+     "retryAfter": 900
+    },
+    "header": "900"
+   }
+  },
+  {
+   "finding": "07-A",
+   "name": "forwarded #intake link without this tab’s saved inquiry sends no email",
+   "pass": true,
+   "detail": {
+    "handoff": true,
+    "links": 0
+   }
+  },
+  {
+   "finding": "07-B",
+   "name": "?email= on onboard.html triggers no sign-in email",
+   "pass": true
+  },
+  {
+   "finding": "07-C",
+   "name": "intake 503: stays on homepage and no sign-in request",
+   "pass": true,
+   "detail": {
+    "url": "http://127.0.0.1:9771/index.html#pilot",
+    "links": 0
+   }
+  },
+  {
+   "finding": "07-D",
+   "name": "auto-send then a submit of the (hidden) Send form + immediate Resend press: one request",
+   "pass": true,
+   "detail": {
+    "formHidden": true,
+    "first": 1,
+    "after": 1
+   }
+  },
+  {
+   "finding": "07-D1",
+   "name": "after a sent automatic link, a reload says it was already sent and sends nothing",
+   "pass": true,
+   "detail": {
+    "links": 1,
+    "intro": "We already sent a secure link to the address you entered. Open it to continue with your saved details, or send another."
+   }
+  },
+  {
+   "finding": "07-D2",
+   "name": "navigating away and back does not resend",
+   "pass": true,
+   "detail": {
+    "links": 1
+   }
+  },
+  {
+   "finding": "07-E",
+   "name": "opening the emailed #verify link does not send another email",
+   "pass": true,
+   "detail": {
+    "links": 1
+   }
+  },
+  {
+   "finding": "07-F1",
+   "name": "refused automatic send states the wait time",
+   "pass": true,
+   "detail": {
+    "status": "Too many sign-in links were requested. Try again in 15 minutes. If a link already arrived, you can use it now.",
+    "title": "Your business starts here.",
+    "sendDisabled": true,
+    "sendText": "Send again in 15 min"
+   }
+  },
+  {
+   "finding": "07-F2",
+   "name": "refused automatic send keeps Send disabled until the limit ends (no further refused requests)",
+   "pass": true,
+   "detail": {
+    "status": "Too many sign-in links were requested. Try again in 15 minutes. If a link already arrived, you can use it now.",
+    "title": "Your business starts here.",
+    "sendDisabled": true,
+    "sendText": "Send again in 15 min",
+    "before": 4,
+    "after": 4
+   }
+  },
+  {
+   "finding": "07-F2b",
+   "name": "the hold is only for the refused address: another email unlocks Send at once",
+   "pass": true,
+   "detail": {
+    "otherEnabled": true,
+    "otherText": "Send my sign-in link",
+    "backDisabled": true
+   }
+  },
+  {
+   "finding": "07-F3",
+   "name": "after a refused automatic send, a reload does not claim \"We already sent a secure link\"",
+   "pass": true,
+   "detail": {
+    "intro": "We’ll email a secure link to the address you entered. Open it to continue with your saved details.",
+    "links": 4
+   }
+  },
+  {
+   "finding": "07-G",
+   "name": "after a definite delivery failure, a reload does not claim a link was sent",
+   "pass": true,
+   "detail": {
+    "intro": "We’ll email a secure link to the address you entered. Open it to continue with your saved details."
+   }
+  },
+  {
+   "finding": "07-J",
+   "name": "after a lost reply, a reload says a link may have been sent and does not send again",
+   "pass": true,
+   "detail": {
+    "first": 1,
+    "attempts": 1,
+    "intro": "We may already have sent a secure link to the address you entered. Check your inbox first, or send another."
+   }
+  },
+  {
+   "finding": "07-K",
+   "name": "a reload while the automatic request is in flight does not send again and says a link may have been sent",
+   "pass": true,
+   "detail": {
+    "first": 1,
+    "attempts": 1,
+    "intro": "We may already have sent a secure link to the address you entered. Check your inbox first, or send another."
+   }
+  },
+  {
+   "finding": "07-L",
+   "name": "after a sent link, a later refused request does not turn the reload copy into \"not sent\"",
+   "pass": true,
+   "detail": {
+    "sent": true,
+    "refused": "We could not send the sign-in email. Please try again shortly.",
+    "intro": "We already sent a secure link to the address you entered. Open it to continue with your saved details, or send another."
+   }
+  },
+  {
+   "finding": "07-I",
+   "name": "a link sent to a different address is not reported as sent to the inquiry address",
+   "pass": true,
+   "detail": {
+    "sentOther": true,
+    "field": "scope-11.1440.mwehk1vr@example.test",
+    "intro": "We’ll email a secure link to the address you entered. Open it to continue with your saved details."
+   }
+  },
+  {
+   "finding": "07-H",
+   "name": "six homepage inquiries for one victim from six networks: ≤3 reach onboarding and ≤3 automatic sign-in requests are made",
+   "pass": true,
+   "detail": {
+    "reachedOnboarding": 3,
+    "autoRequests": 3,
+    "directAfter": 202
+   }
+  },
+  {
+   "finding": "05-A",
+   "name": "retryAfter counts down from the window start (≈300 s after 10 of 15 min)",
+   "pass": true,
+   "detail": {
+    "status": 429,
+    "retryAfter": 300,
+    "header": "300"
+   }
+  },
+  {
+   "finding": "05-B-missing",
+   "name": "retryAfter missing is handled safely",
+   "pass": true,
+   "detail": {
+    "status": "Please wait before requesting another sign-in email.",
+    "resend": "Resend in 30s",
+    "disabled": true,
+    "errors": []
+   }
+  },
+  {
+   "finding": "05-B-negative",
+   "name": "retryAfter negative is handled safely",
+   "pass": true,
+   "detail": {
+    "status": "Please wait",
+    "resend": "Resend in 30s",
+    "disabled": true,
+    "errors": []
+   }
+  },
+  {
+   "finding": "05-B-string",
+   "name": "retryAfter string is handled safely",
+   "pass": true,
+   "detail": {
+    "status": "Please wait",
+    "resend": "Resend in 30s",
+    "disabled": true,
+    "errors": []
+   }
+  },
+  {
+   "finding": "05-B-huge",
+   "name": "retryAfter huge is handled safely",
+   "pass": true,
+   "detail": {
+    "status": "You can request another link in 24 hours. Links we already sent still work for 20 minutes after they were sent, so check your inbox and spam folder first.",
+    "resend": "Resend in 24 h",
+    "disabled": true,
+    "errors": []
+   }
+  },
+  {
+   "finding": "05-B-hours",
+   "name": "retryAfter hours is handled safely",
+   "pass": true,
+   "detail": {
+    "status": "You can request another link in 3 hours. Links we already sent still work for 20 minutes after they were sent, so check your inbox and spam folder first.",
+    "resend": "Resend in 3 h",
+    "disabled": true,
+    "errors": []
+   }
+  },
+  {
+   "finding": "05-B-under2h",
+   "name": "retryAfter under2h is handled safely",
+   "pass": true,
+   "detail": {
+    "status": "You can request another link in 120 minutes. Links we already sent still work for 20 minutes after they were sent, so check your inbox and spam folder first.",
+    "resend": "Resend in 120 min",
+    "disabled": true,
+    "errors": []
+   }
+  },
+  {
+   "finding": "05-D",
+   "name": "a refused first send under a daily limit says hours and holds Send in hours",
+   "pass": true,
+   "detail": {
+    "status": "Too many sign-in links were requested. Try again in 20 hours. If a link already arrived, you can use it now.",
+    "send": "Send again in 20 h",
+    "disabled": true
+   }
+  },
+  {
+   "finding": "05-C1",
+   "name": "skewed client clock: Resend stays disabled for the server wait, then re-enables",
+   "pass": true,
+   "detail": {
+    "mins": 15,
+    "before": true,
+    "after": false
+   }
+  },
+  {
+   "finding": "05-C2",
+   "name": "refusal is announced: focus on the polite status region holding the wait; button name carries the wait",
+   "pass": true,
+   "detail": {
+    "focus": "access-status",
+    "role": "status",
+    "live": "polite",
+    "disabled": true,
+    "name": "Resend in 15 min",
+    "status": "You can request another link in 15 minutes. Links we already sent still work for 20 minutes after they were sent, so check your inbox and spam folder first."
+   }
+  },
+  {
+   "finding": "06-A",
+   "name": "client accepts bare/www/IDN domains and rejects scripts, other schemes, credentials, empty labels and no-dot text",
+   "pass": true,
+   "detail": []
+  },
+  {
+   "finding": "06-A2",
+   "name": "server adds https:// to exactly the bare domains the client accepts, and keeps everything else as typed",
+   "pass": true,
+   "detail": {
+    "serverBare": [],
+    "serverKept": []
+   }
+  },
+  {
+   "finding": "06-F",
+   "name": "the field never adds https:// to text it will reject (credentials, empty labels, scheme-like or trailing colon)",
+   "pass": true,
+   "detail": []
+  },
+  {
+   "finding": "06-B",
+   "name": "server stores non-web schemes as typed (pre-existing; no new server rejection)",
+   "pass": true,
+   "detail": [
+    "javascript:alert(1) -> javascript:alert(1)",
+    "javascript://bayouair.com/%0aalert(1) -> javascript://bayouair.com/%0aalert(1)",
+    "data:text/html,x -> data:text/html,x"
+   ]
+  },
+  {
+   "finding": "06-C",
+   "name": "IDN bare domains (Unicode and punycode TLD) are accepted by client and server",
+   "pass": true,
+   "detail": [
+    {
+     "v": "bücher.de",
+     "client": "https://bücher.de",
+     "server": "https://bücher.de",
+     "want": "https://bücher.de"
+    },
+    {
+     "v": "shop.xn--p1ai",
+     "client": "https://shop.xn--p1ai",
+     "server": "https://shop.xn--p1ai",
+     "want": "https://shop.xn--p1ai"
+    }
+   ]
+  },
+  {
+   "finding": "06-D",
+   "name": "port form: client accepts what later website steps reject (info)",
+   "pass": true,
+   "detail": [
+    {
+     "v": "bayouair.com:8443",
+     "client": "https://bayouair.com:8443",
+     "server": "https://bayouair.com:8443",
+     "want": "PORT"
+    }
+   ]
+  },
+  {
+   "finding": "06-E",
+   "name": "server normalization never exceeds the 200-char website limit (192 + https:// = 200; one more is kept as typed)",
+   "pass": true,
+   "detail": {
+    "at192": 200,
+    "at193": 193
+   }
+  },
+  {
+   "finding": "04-planChoice",
+   "name": "a new workspace records that its plan was the owner’s own choice (onboarding.planChoice 1)",
+   "pass": true,
+   "detail": {
+    "planChoice": 1,
+    "plan": "growth"
+   }
+  },
+  {
+   "finding": "04-legacy",
+   "name": "pre-change workspace (growth preselected) is not shown as the owner’s \"Preferred plan\"",
+   "pass": true,
+   "detail": "Plan & billing No subscription started Your workspace is free to prepare. You review the full paid offer before entering payment details. Plan noted at setup: Follow-through, $249/month. It may have been preselected for you. Not started: no payment has been taken and nothing was activated. Next: paid service is not offered for this workspace yet. When it is, you’ll review the services, included us"
+  },
+  {
+   "finding": "04-offer-legacy",
+   "name": "with an offer available, a pre-change workspace’s select does not default to the noted plan",
+   "pass": true,
+   "detail": {
+    "select": {
+     "visible": true,
+     "value": "starter",
+     "options": [
+      "starter",
+      "growth"
+     ]
+    },
+    "offered": "Plan & billing No subscription started Your workspace is free to prepare. You review the full paid offer before entering payment details. Plan noted at setup: Follow-through, $249/month. It may have been preselected for you. Not started: no payment has been taken and nothing was activated. Next: rev"
+   }
+  },
+  {
+   "finding": "04-offer-explicit",
+   "name": "with an offer available, an explicit Follow-through choice is the select’s default",
+   "pass": true,
+   "detail": {
+    "select2": {
+     "visible": true,
+     "value": "growth"
+    }
+   }
+  },
+  {
+   "finding": "04-explicit",
+   "name": "a workspace created with an explicit Follow-through choice still shows \"Preferred plan: Follow-through, $249/month\"",
+   "pass": true,
+   "detail": "Plan & billing No subscription started Your workspace is free to prepare. You review the full paid offer before entering payment details. Preferred plan: Follow-through, $249/month. Not started: no payment has been taken and this choice does not activate any service. Next: paid service is not offere"
+  },
+  {
+   "finding": "08-voice-sms-calendar-web",
+   "name": "Home does not re-ask for saved choices and makes no readiness claim for channels that cannot run",
+   "pass": true,
+   "detail": {
+    "made": "ch-air-6c7a",
+    "home": {
+     "title": "Check your business details",
+     "intro": "Confirm your services, hours and the answers your front desk should use.",
+     "button": "Review business details",
+     "route": "know"
+    },
+    "prep": {
+     "prep": {
+      "eligible": true,
+      "prepared": false,
+      "selectionSaved": false,
+      "desired": [
+       "web",
+       "voice",
+       "sms",
+       "calendar"
+      ]
+     },
+     "rows": [
+      {
+       "id": "web",
+       "status": "needs_action",
+       "resp": "customer",
+       "action": "route",
+       "next": "Check and confirm the saved business details used across your front desk."
+      },
+      {
+       "id": "voice",
+       "status": "needs_action",
+       "resp": "customer",
+       "action": "route",
+       "next": "Check and confirm the saved business details used across your front desk."
+      },
+      {
+       "id": "sms",
+       "status": "needs_action",
+       "resp": "customer",
+       "action": "route",
+       "next": "Check and confirm the saved business details used across your front desk."
+      },
+      {
+       "id": "calendar",
+       "status": "waiting_platform",
+       "resp": "platform",
+       "action": "wait",
+       "next": "Your Google approval will be requested here when connection is available."
+      }
+     ]
+    }
+   }
+  },
+  {
+   "finding": "08-voice",
+   "name": "Home does not re-ask for saved choices and makes no readiness claim for channels that cannot run",
+   "pass": true,
+   "detail": {
+    "made": "ch-air-26a3",
+    "home": {
+     "title": "Check your business details",
+     "intro": "Confirm your services, hours and the answers your front desk should use.",
+     "button": "Review business details",
+     "route": "know"
+    },
+    "prep": {
+     "prep": {
+      "eligible": true,
+      "prepared": false,
+      "selectionSaved": false,
+      "desired": [
+       "voice"
+      ]
+     },
+     "rows": [
+      {
+       "id": "voice",
+       "status": "needs_action",
+       "resp": "customer",
+       "action": "route",
+       "next": "Check and confirm the saved business details used across your front desk."
+      }
+     ]
+    }
+   }
+  },
+  {
+   "finding": "08-sms-calendar",
+   "name": "Home does not re-ask for saved choices and makes no readiness claim for channels that cannot run",
+   "pass": true,
+   "detail": {
+    "made": "ch-air-c942",
+    "home": {
+     "title": "Check your business details",
+     "intro": "Confirm your services, hours and the answers your front desk should use.",
+     "button": "Review business details",
+     "route": "know"
+    },
+    "prep": {
+     "prep": {
+      "eligible": true,
+      "prepared": false,
+      "selectionSaved": false,
+      "desired": [
+       "sms",
+       "calendar"
+      ]
+     },
+     "rows": [
+      {
+       "id": "sms",
+       "status": "needs_action",
+       "resp": "customer",
+       "action": "route",
+       "next": "Check and confirm the saved business details used across your front desk."
+      },
+      {
+       "id": "calendar",
+       "status": "waiting_platform",
+       "resp": "platform",
+       "action": "wait",
+       "next": "Your Google approval will be requested here when connection is available."
+      }
+     ]
+    }
+   }
+  },
+  {
+   "finding": "08-web",
+   "name": "Home does not re-ask for saved choices and makes no readiness claim for channels that cannot run",
+   "pass": true,
+   "detail": {
+    "made": "ch-air-0e95",
+    "home": {
+     "title": "Check your business details",
+     "intro": "Confirm your services, hours and the answers your front desk should use.",
+     "button": "Review business details",
+     "route": "know"
+    },
+    "prep": {
+     "prep": {
+      "eligible": true,
+      "prepared": false,
+      "selectionSaved": false,
+      "desired": [
+       "web"
+      ]
+     },
+     "rows": [
+      {
+       "id": "web",
+       "status": "needs_action",
+       "resp": "customer",
+       "action": "route",
+       "next": "Check and confirm the saved business details used across your front desk."
+      }
+     ]
+    }
+   }
+  }
+ ],
+ "screenshots": [
+  "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/rc2/out/suites/onb1440/rc2-1440-07-after-inquiry.png",
+  "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/rc2/out/suites/onb1440/rc2-1440-03-plan-default.png",
+  "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/rc2/out/suites/onb1440/rc2-1440-06-website-www.png",
+  "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/rc2/out/suites/onb1440/rc2-1440-04-billing-no-choice.png",
+  "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/rc2/out/suites/onb1440/rc2-1440-08-home.png",
+  "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/rc2/out/suites/onb1440/rc2-1440-08-after-home-action.png",
+  "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/rc2/out/suites/onb1440/rc2-1440-04-billing-coverage.png",
+  "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/rc2/out/suites/onb1440/rc2-1440-05-rate-limited.png"
+ ],
+ "pageErrors": [],
+ "accessActions": [
+  {
+   "action": "request_link",
+   "email": "inquiry.1440.mwehk1vr@example.test",
+   "at": 1794544660918
+  },
+  {
+   "action": "cookie_probe",
+   "email": null,
+   "at": 1794544663027
+  },
+  {
+   "action": "exchange",
+   "email": null,
+   "at": 1794544663030
+  },
+  {
+   "action": "request_link",
+   "email": "coverage.1440.mwehk1vr@example.test",
+   "at": 1794544699674
+  },
+  {
+   "action": "cookie_probe",
+   "email": null,
+   "at": 1794544700482
+  },
+  {
+   "action": "exchange",
+   "email": null,
+   "at": 1794544700484
+  },
+  {
+   "action": "request_link",
+   "email": "limit.1440.mwehk1vr@example.test",
+   "at": 1794544702823
+  },
+  {
+   "action": "request_link",
+   "email": "limit.1440.mwehk1vr@example.test",
+   "at": 1794544703755
+  },
+  {
+   "action": "request_link",
+   "email": "limit.1440.mwehk1vr@example.test",
+   "at": 1794544704789
+  },
+  {
+   "action": "request_link",
+   "email": "limit.1440.mwehk1vr@example.test",
+   "at": 1794544705822
+  },
+  {
+   "action": "request_link",
+   "email": "api.1440.mwehk1vr@example.test",
+   "at": 1794544706996
+  },
+  {
+   "action": "exchange",
+   "email": null,
+   "at": 1794544706999
+  },
+  {
+   "action": "request_link",
+   "email": "apilimit.1440.mwehk1vr@example.test",
+   "at": 1794544707002
+  },
+  {
+   "action": "request_link",
+   "email": "apilimit.1440.mwehk1vr@example.test",
+   "at": 1794544707003
+  },
+  {
+   "action": "request_link",
+   "email": "apilimit.1440.mwehk1vr@example.test",
+   "at": 1794544707004
+  },
+  {
+   "action": "request_link",
+   "email": "apilimit.1440.mwehk1vr@example.test",
+   "at": 1794544707005
+  },
+  {
+   "action": "request_link",
+   "email": "dbl-3.1440.mwehk1vr@example.test",
+   "at": 1794544711718
+  },
+  {
+   "action": "request_link",
+   "email": "ver-4.1440.mwehk1vr@example.test",
+   "at": 1794544716466
+  },
+  {
+   "action": "cookie_probe",
+   "email": null,
+   "at": 1794544717680
+  },
+  {
+   "action": "exchange",
+   "email": null,
+   "at": 1794544717683
+  },
+  {
+   "action": "request_link",
+   "email": "lim-5.1440.mwehk1vr@example.test",
+   "at": 1794544719184
+  },
+  {
+   "action": "request_link",
+   "email": "lim-5.1440.mwehk1vr@example.test",
+   "at": 1794544719185
+  },
+  {
+   "action": "request_link",
+   "email": "lim-5.1440.mwehk1vr@example.test",
+   "at": 1794544719186
+  },
+  {
+   "action": "request_link",
+   "email": "lim-5.1440.mwehk1vr@example.test",
+   "at": 1794544719402
+  },
+  {
+   "action": "request_link",
+   "email": "keep-10.1440.mwehk1vr@example.test",
+   "at": 1794544730602
+  },
+  {
+   "action": "request_link",
+   "email": "scope-11.1440.mwehk1vr@example.test",
+   "at": 1794544733807
+  },
+  {
+   "action": "request_link",
+   "email": "scope-11.1440.mwehk1vr@example.test",
+   "at": 1794544733808
+  },
+  {
+   "action": "request_link",
+   "email": "scope-11.1440.mwehk1vr@example.test",
+   "at": 1794544733808
+  },
+  {
+   "action": "request_link",
+   "email": "scope-11.1440.mwehk1vr@example.test",
+   "at": 1794544734028
+  },
+  {
+   "action": "request_link",
+   "email": "scope-other-12.1440.mwehk1vr@example.test",
+   "at": 1794544735273
+  },
+  {
+   "action": "request_link",
+   "email": "bomb-13.1440.mwehk1vr@example.test",
+   "at": 1794544736749
+  },
+  {
+   "action": "request_link",
+   "email": "bomb-13.1440.mwehk1vr@example.test",
+   "at": 1794544738177
+  },
+  {
+   "action": "request_link",
+   "email": "bomb-13.1440.mwehk1vr@example.test",
+   "at": 1794544739618
+  },
+  {
+   "action": "request_link",
+   "email": "bomb-13.1440.mwehk1vr@example.test",
+   "at": 1794544768964
+  },
+  {
+   "action": "request_link",
+   "email": "acc-14.1440.mwehk1vr@example.test",
+   "at": 1794544768966
+  },
+  {
+   "action": "request_link",
+   "email": "acc-14.1440.mwehk1vr@example.test",
+   "at": 1794544768966
+  },
+  {
+   "action": "request_link",
+   "email": "acc-14.1440.mwehk1vr@example.test",
+   "at": 1794544768967
+  },
+  {
+   "action": "request_link",
+   "email": "acc-14.1440.mwehk1vr@example.test",
+   "at": 1794545368968
+  },
+  {
+   "action": "request_link",
+   "email": "bmissing-15.1440.mwehk1vr@example.test",
+   "at": 1794544769081
+  },
+  {
+   "action": "request_link",
+   "email": "bnegative-16.1440.mwehk1vr@example.test",
+   "at": 1794544770831
+  },
+  {
+   "action": "request_link",
+   "email": "bstring-17.1440.mwehk1vr@example.test",
+   "at": 1794544772573
+  },
+  {
+   "action": "request_link",
+   "email": "bhuge-18.1440.mwehk1vr@example.test",
+   "at": 1794544774314
+  },
+  {
+   "action": "request_link",
+   "email": "bhours-19.1440.mwehk1vr@example.test",
+   "at": 1794544776057
+  },
+  {
+   "action": "request_link",
+   "email": "bunder2h-20.1440.mwehk1vr@example.test",
+   "at": 1794544777806
+  },
+  {
+   "action": "request_link",
+   "email": "skew-22.1440.mwehk1vr@example.test",
+   "at": 1794544780313
+  },
+  {
+   "action": "request_link",
+   "email": "skew-22.1440.mwehk1vr@example.test",
+   "at": 1794544781254
+  },
+  {
+   "action": "request_link",
+   "email": "skew-22.1440.mwehk1vr@example.test",
+   "at": 1794544782188
+  },
+  {
+   "action": "request_link",
+   "email": "skew-22.1440.mwehk1vr@example.test",
+   "at": 1794544783121
+  },
+  {
+   "action": "request_link",
+   "email": "legacyplan-23.1440.mwehk1vr@example.test",
+   "at": 1794544788775
+  },
+  {
+   "action": "exchange",
+   "email": null,
+   "at": 1794544788776
+  },
+  {
+   "action": "request_link",
+   "email": "ch4voice-24.1440.mwehk1vr@example.test",
+   "at": 1794544794059
+  },
+  {
+   "action": "exchange",
+   "email": null,
+   "at": 1794544794061
+  },
+  {
+   "action": "request_link",
+   "email": "ch1voice-25.1440.mwehk1vr@example.test",
+   "at": 1794544795767
+  },
+  {
+   "action": "exchange",
+   "email": null,
+   "at": 1794544795768
+  },
+  {
+   "action": "request_link",
+   "email": "ch2sms-26.1440.mwehk1vr@example.test",
+   "at": 1794544797451
+  },
+  {
+   "action": "exchange",
+   "email": null,
+   "at": 1794544797452
+  },
+  {
+   "action": "request_link",
+   "email": "ch1web-27.1440.mwehk1vr@example.test",
+   "at": 1794544799132
+  },
+  {
+   "action": "exchange",
+   "email": null,
+   "at": 1794544799132
+  }
+ ],
+ "network": {
+  "nodeDenied": [],
+  "browserBlocked": []
+ },
+ "browser": "148.0.7778.96",
+ "sourceAfter": {
+  "onboard.html": "e4b9cc9b0f76e5a029a947a109739b50bf384a058fe12c4e90346c6c2f216253",
+  "onboard.js": "697d3a31544aaa25dd0186b07b54ed45056536d8db45e87b13f09a1c4d783f14",
+  "onboard.css": "1857cedd407c4f8a1bd4f47557658b30178dae0aa746837b5629f81e22868307",
+  "index.html": "1ff1cc7d2ecb07b42b4fd6260368eebef35719aaa3553d0086633d5fd42cfe3d",
+  "desk.js": "d4ce378b88cbcefdedef611327cde83b3973aa625528b3bd1a1ea4c62bc11723",
+  "desk-billing.js": "c3f45f47a9a1fc2a43972efe0fe16fb7c42550de92c863642afb8512cf9521bb",
+  "admin.js": "bf76f4006a22ce2d396bb20d31ec8a5f592f280d957cc6db70cb5b4b04c061c9",
+  "netlify/functions/onboard.mjs": "0c5d0bbe5150c12ba90c67611b7a493c3f07bb3db6b68dddb4978c984068e891",
+  "netlify/functions/access.mjs": "a302c509fba5ae4e737fb60c20b07531d556fa946ae9db50662b5021a25fb425",
+  "netlify/functions/lib/access.mjs": "ff67c34ed91768145924af902524838f5a1d87bf3dd7bc60f4aa279e4757609c"
+ },
+ "sourceStable": true,
+ "findings": {
+  "PRA-ONB-07": {
+   "pass": 3,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "PRA-ONB-03": {
+   "pass": 6,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "PRA-ONB-06": {
+   "pass": 5,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "PRA-ONB-04": {
+   "pass": 3,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "PRA-ONB-08": {
+   "pass": 2,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "PRA-ONB-05": {
+   "pass": 5,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "07-A": {
+   "pass": 1,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "07-B": {
+   "pass": 1,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "07-C": {
+   "pass": 1,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "07-D": {
+   "pass": 1,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "07-D1": {
+   "pass": 1,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "07-D2": {
+   "pass": 1,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "07-E": {
+   "pass": 1,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "07-F1": {
+   "pass": 1,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "07-F2": {
+   "pass": 1,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "07-F2b": {
+   "pass": 1,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "07-F3": {
+   "pass": 1,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "07-G": {
+   "pass": 1,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "07-J": {
+   "pass": 1,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "07-K": {
+   "pass": 1,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "07-L": {
+   "pass": 1,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "07-I": {
+   "pass": 1,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "07-H": {
+   "pass": 1,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "05-A": {
+   "pass": 1,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "05-B-missing": {
+   "pass": 1,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "05-B-negative": {
+   "pass": 1,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "05-B-string": {
+   "pass": 1,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "05-B-huge": {
+   "pass": 1,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "05-B-hours": {
+   "pass": 1,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "05-B-under2h": {
+   "pass": 1,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "05-D": {
+   "pass": 1,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "05-C1": {
+   "pass": 1,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "05-C2": {
+   "pass": 1,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "06-A": {
+   "pass": 1,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "06-A2": {
+   "pass": 1,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "06-F": {
+   "pass": 1,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "06-B": {
+   "pass": 1,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "06-C": {
+   "pass": 1,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "06-D": {
+   "pass": 1,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "06-E": {
+   "pass": 1,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "04-planChoice": {
+   "pass": 1,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "04-legacy": {
+   "pass": 1,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "04-offer-legacy": {
+   "pass": 1,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "04-offer-explicit": {
+   "pass": 1,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "04-explicit": {
+   "pass": 1,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "08-voice-sms-calendar-web": {
+   "pass": 1,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "08-voice": {
+   "pass": 1,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "08-sms-calendar": {
+   "pass": 1,
+   "fail": 0,
+   "verdict": "PASS"
+  },
+  "08-web": {
+   "pass": 1,
+   "fail": 0,
+   "verdict": "PASS"
+  }
+ },
+ "summary": {
+  "passed": 67,
+  "total": 67,
+  "nodeDenied": 0,
+  "browserBlocked": 0,
+  "pageErrors": 0,
+  "sourceStable": true
+ }
+}

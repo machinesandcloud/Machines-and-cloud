@@ -1,0 +1,10 @@
+81,82c81,82
+< const offerN = Number((offer.match(/up to (\d+) customer chats a day/) || [])[1]);
+< check('S13', 'website chat offer names the daily allowance ("up to N customer chats a day", N = per-shop WEB_LIMIT) and no charge without agreement', offerN === 50 && offerN === webLimit && /nothing is charged without your agreement/i.test(offer), { offerN, webLimit });
+---
+> const offerN = Number((offer.match(/up to (\d+) AI replies a day/) || [])[1]);
+> check('S13', 'website chat offer names the daily allowance ("up to N AI replies a day", N = per-shop WEB_LIMIT) and no charge without agreement', offerN === 50 && offerN === webLimit && /nothing is charged without your agreement/i.test(offer), { offerN, webLimit });
+140c140
+<       if (u.pathname.startsWith('/api/')) report.apiRequests.push(u.pathname);
+---
+>       if (u.pathname.startsWith('/api/') && u.pathname !== '/api/channel-availability') report.apiRequests.push(u.pathname); // RC2 harness: the homepage's channel-availability read (in 43ee2f2c) is not a voice call

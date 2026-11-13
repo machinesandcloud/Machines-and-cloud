@@ -1,0 +1,40 @@
+PASS S1 all 108 enterprise-consulting pages exist and carry robots noindex
+PASS S2 sitemap lists no enterprise page and every indexable page
+PASS S3 llms.txt, llms-full.txt and rss.xml list no enterprise page
+PASS S4 no non-enterprise page links to an enterprise page (footer, 404, nav, related cards)
+PASS S5 JSON-LD on kept pages references no enterprise page
+PASS S6 every footer-simple page has the same footer links, including Customer Care texting and no Guides/Insights
+PASS S7 every navbar includes Connections
+PASS S8 canonical and og:url stay self-referencing on indexable and enterprise pages
+PASS S9 no em dash in visible copy of public pages or demo strings (stories.js)
+PASS S10 unsourced KYC statistic is gone
+PASS S11 priority "What to compare" sentences keep acronym casing and grammar
+PASS S12 homepage shows $99 and $249 exactly once each
+PASS S13 website chat offer names the daily allowance ("up to N AI replies a day", N = per-shop WEB_LIMIT) and no charge without agreement
+PASS S14 sitemap.xml lists no robots-noindex page
+PASS S15 kept set (13 named pages + 53 city pages) is indexable and in the sitemap
+PASS S16 every application/ld+json block on every page is valid JSON
+PASS S17 practice-voice.js maps capture, connect and post-start errors correctly (10 injected cases)
+PASS B1-390 390: loading index.html#plans shows both prices
+PASS B2-390 390: clicking nav Plans shows both prices
+PASS B8-390 390: re-clicking Plans when the hash is already #plans reopens the closed disclosure
+PASS B9-390 390: with JavaScript off, index.html#plans shows both prices
+PASS B10-390 390: plain homepage load keeps plan options collapsed
+PASS B11-390 390: Plans from about.html shows both prices
+FAIL B3-390 390: getUserMedia NotSupportedError says voice is unavailable here, focuses the composer, no API call
+FAIL B4-390 390: getUserMedia OverconstrainedError says voice is unavailable here, no API call
+PASS B5-390 390: a call that never started does not say "connection ended"
+PASS B6-390 390: 404 suggests only home-service content
+PASS B7-390 390: industry-financial has no element wider than the viewport
+PASS B1-1440 1440: loading index.html#plans shows both prices
+PASS B2-1440 1440: clicking nav Plans shows both prices
+PASS B8-1440 1440: re-clicking Plans when the hash is already #plans reopens the closed disclosure
+PASS B9-1440 1440: with JavaScript off, index.html#plans shows both prices
+PASS B10-1440 1440: plain homepage load keeps plan options collapsed
+PASS B11-1440 1440: Plans from about.html shows both prices
+FAIL B3-1440 1440: getUserMedia NotSupportedError says voice is unavailable here, focuses the composer, no API call
+FAIL B4-1440 1440: getUserMedia OverconstrainedError says voice is unavailable here, no API call
+PASS B5-1440 1440: a call that never started does not say "connection ended"
+PASS B6-1440 1440: 404 suggests only home-service content
+PASS B7-1440 1440: industry-financial has no element wider than the viewport
+rc2: 35/39

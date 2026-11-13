@@ -1,0 +1,26 @@
+  Q08a count="100 shown" intro="Searches your most recent 100 requests and 100 visits, grouped by phone number. Read only. Older history is not searched, so earlier customers may be missing." empty="No customer matches “Zed” in your most recent 100 requests and 100 visits\n\nOnly your most recent 100 requests and 100 visits are searched here, so an earlier customer may not appear. Search by part of a name or at least three digits of a phone number." status="0 customers found."
+PASS Q08a 390 Customers: a customer older than the 100 loaded records is not reported as "no customer" without qualification
+  Q08b results=[]
+PASS Q08b 390 Customers: "Jordan 281" (name plus digits) does not return a different customer
+  Q08c focus after close=BODY#[]
+FAIL Q08c 390 Customers: focus returns to "View visit" after the visit dialog closes across a workspace refresh: focus dropped to BODY#[]
+PASS Q08d 390 Customers: names and addresses are escaped, no page error, no horizontal scroll at 320 with unbroken strings
+  Q08e heights=[44,44,44,44]
+PASS Q08e 390 Customers: every action button meets the 44px workspace target (DESIGN.md)
+  Q08f errors=["Cannot set properties of null (setting 'textContent')","Cannot read properties of null (reading 'open')"]
+FAIL Q08f Customers handler survives mc:session-expired after an explicit sign-out (no page error): Expected values to be strictly deep-equal:
+  Q08g focus after close=BODY.theme-light product-app desk-app
+FAIL Q08g 390 (control) Schedule visit history: focus after the visit dialog closes across a workspace refresh: focus dropped to BODY.theme-light product-app desk-app
+  Q09a state=saved text="By appointment, call first" grid={"mon":{"open":"07:00","close":"18:00"},"tue":{"open":"07:00","close":"18:00"},"wed":{"open":"07:00","close":"18:00"},"thu":{"open":"07:00","close":"18:00"},"fri":{"open":"07:00","close":"18:00"},"sat":null,"sun":null}
+PASS Q09a 390 one save that edits both the hours grid and the hours line keeps the grid edit (a54 precedence)
+  Q09b text="Mon-Fri 7am-6pm, Sat 8am-12pm. Closed on holidays, Sunday by appointment" message="All changes saved. Connections shows any review, practice or permission needed for each service. | field note: "
+PASS Q09b 390 a grid edit does not silently discard the owner's hand-written hours notes
+  Q09c lostStatus=200 state=saved message="Your hours line was updated from the hours grid. All changes saved. Connections shows any review, practice or permission needed for each service."
+PASS Q09c 390 a grid-only save whose response is lost is confirmed saved, not reported as a conflict
+  Q10a roles={"table":"table","rows":4,"cells":21,"labels":0}
+  Q10a button={"x":123,"y":351.9375,"width":88.71875,"height":44} focus outline=solid 3px
+PASS Q10a 390 visit cards: roles kept, labels present, long unbroken values stay inside, View visit 44px and focusable
+  Q13a inbox row phone format=["Jordan Ríos","(713) 555-0142","Ref 56351a67af"]
+PASS Q13a 390 Customers: a visit opened from Customers shows the short ref and Booked status
+PASS -- No physical transport, forbidden destinations or page errors
+{"output":"/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/rc2/out/final/desk-p2-qa.json","passed":10,"failed":3,"total":13,"byFinding":{"Q08a":"pass","Q08b":"pass","Q08c":"fail","Q08d":"pass","Q08e":"pass","Q08f":"fail","Q08g":"fail","Q09a":"pass","Q09b":"pass","Q09c":"pass","Q10a":"pass","Q13a":"pass","--":"pass"},"physicalNetwork":0,"pageErrors":0,"sourceStable":true,"failures":[{"id":"Q08c","name":"390 Customers: focus returns to \"View visit\" after the visit dialog closes across a workspace refresh","error":"AssertionError [ERR_ASSERTION]: focus dropped to BODY#[]"},{"id":"Q08f","name":"Customers handler survives mc:session-expired after an explicit sign-out (no page error)","error":"AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:"},{"id":"Q08g","name":"390 (control) Schedule visit history: focus after the visit dialog closes across a workspace refresh","error":"AssertionError [ERR_ASSERTION]: focus dropped to BODY.theme-light product-app desk-app"}]}

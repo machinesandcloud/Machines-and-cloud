@@ -1,0 +1,72 @@
+PASS email sign-in opens the workspace in the first tab
+PASS sign-in screen offers 'Keep me signed in on this device', off by default, with its duration
+PASS session secret is an HttpOnly, SameSite=Strict cookie
+PASS page script cannot read the session secret (cookie, tab or local storage)
+PASS a new tab of the same browser opens the workspace without an email
+PASS a bookmarked workspace address (with a section) opens without an email
+PASS without 'keep me signed in', a reopened browser asks to sign in (session cookie ended)
+PASS 'keep me signed in' sets a persistent cookie no longer than the 24-hour server session
+PASS with 'keep me signed in', a reopened browser opens the workspace
+PASS sign-out in one tab closes the other open tabs at once, with no request from them
+PASS the signed-out session is revoked on the server for every tab (401)
+PASS sign-out clears this browser's session cookies
+PASS a new tab after sign-out asks to sign in
+PASS an expired server session never opens the workspace in a new or reloaded tab
+PASS a revoked server session never opens the workspace
+PASS another site's requests never carry the owner cookie (SameSite=Strict)
+PASS another site cannot change the workspace or sign the owner out
+PASS a forged Authorization header from another site is stopped by the browser (no credentialed CORS)
+PASS the owner is still signed in after the attempt
+PASS server: cookie alone, handle alone, foreign Origin and cross-site fetch are all refused; cookie+handle works
+PASS operator sign-in sets no browser cookie and leaves the owner cookie unchanged
+PASS owner cookie session is refused by the operator API
+PASS operator session is refused by the owner workspace and setup APIs
+PASS an operator session never opens an owner desk
+PASS the raw session secret never appears in localStorage or sessionStorage of any tab (desk, new tab, bookmark, setup, public page)
+PASS server: the cookie alone (with a same-origin label) is refused by /api/access
+PASS server: a same-site (sibling subdomain) label is refused even with cookie+handle, on /api/access and the CSV export
+PASS server: the cookie needs a positive same-origin label (missing or 'none' is refused)
+PASS server: the cookie is accepted only on the listed owner routes, never on another route or the operator scope
+PASS https: the session cookie is exactly __Host-mc_owner=…; Path=/; SameSite=Strict; Secure; HttpOnly (no Domain, no Max-Age), and the body has no secret
+PASS https: the probe cookie is __Host-mc_cookie_probe with the same attributes and a 5-minute life
+PASS https: only __Host-mc_owner is read; unprefixed, lower-case and __Secure- names (cookie tossing) are ignored
+PASS exchange falls back to the per-tab transport (no cookie set, link still signs in) without the probe cookie, with a wrong probe, or without a same-origin label
+PASS a browser that silently drops Set-Cookie still signs in (per-tab fallback) instead of spending the link on a cookie that never lands
+PASS shared computer: the next person's sign-in on this browser does not inherit 'keep me signed in' (session cookie, preference consumed)
+PASS opening another account's sign-in link in a signed-in browser asks first, naming both accounts
+PASS the focused 'Switch accounts?' heading is described by the text naming both accounts (aria-describedby)
+PASS while asking, the link is not spent and the current session stays active
+PASS 'Stay signed in' reopens the current account's workspace and leaves the link unspent
+PASS 'Continue' signs in with the link's account and revokes the replaced session on the server
+PASS tabs still holding the replaced session close at once and say why
+PASS the same owner signing in again needs no prompt, and the session it replaces is revoked
+PASS the same owner's other open workspace tab says this browser signed in again, never 'another account'
+PASS after a 401, the stale shared handle is forgotten so later tabs ask to sign in
+PASS frame policy: the prompt pages include onboard.html and every one also loads owner-session.js
+PASS frame policy: X-Frame-Options is exactly SAMEORIGIN (one value, from /*) on every prompt/owner page and its pretty URL
+PASS frame policy: Content-Security-Policy is exactly frame-ancestors 'none' (one policy) on every prompt/owner page and its pretty URL
+PASS frame policy: another site's frame of the setup page never renders it or calls /api/access
+PASS server: an exact same-origin label authenticates cookie+handle (with a first-party Origin or none)
+PASS server: the label is compared exactly; 'Same-Origin' and 'SAME-ORIGIN' are refused
+PASS server: a same-origin label with a foreign, 'null' or other-port Origin is refused (401, or the route's own 403)
+PASS a link opened with 'keep me signed in' on still asks before switching accounts (link unspent, current session active)
+PASS same owner: a fresh link in another tab keeps the open setup tab's answers and form (no reset, no 'another account')
+PASS same owner: the open setup tab moves onto the new handle; the replaced session is revoked
+PASS same owner: the setup tab keeps saving after the renewal
+PASS same owner: a setup save in flight across the renewal is resent on the new handle and lands (form stays open)
+PASS an unknown previous session (ended on the server) is never followed: the open setup tab closes instead of continuing as the newly signed-in account
+PASS D3 precondition reached naturally: a discarded exchange left the cookie on B's session while the stored handle is still A's
+PASS D3: A's open setup tab never moves onto B's session
+PASS D3: A's answers never land in B's draft
+PASS D3: A's tab closes with 'signed in again' (gate shown, form hidden, never 'another account')
+PASS Sign out pressed during a same-owner renewal is resent exactly once (401 for the replaced handle, then 200) and revokes the new sign-in
+PASS ...and every tab shows signed out: no cookie, no stored handle, the renewing tab says 'signed out in another tab'
+PASS A's save in flight while the same tab switches to B is never resent into B's draft
+PASS a 401 for a session that ended (no renewal) is sent once, never retried, and the sign-in gate shows
+PASS a per-tab (non-cookie) setup tab ignores another tab's same-owner renewal: same session, form open, keeps saving
+PASS deploy log: hostile Sec-Fetch-Site values (tab, email, uppercase, 5,000 chars, missing) and an email in the body log only fixed values
+PASS deploy log: each exchange logs only fixed fetch-site/transport values (same-origin+cookie for the browser, missing+tab without the label), never an address, token or session
+PASS this harness never uses Playwright route.fetch
+PASS no permanent owner key or session secret appears in any visited URL
+PASS no non-loopback network from Node (fetch or sockets)
+71/71 passed

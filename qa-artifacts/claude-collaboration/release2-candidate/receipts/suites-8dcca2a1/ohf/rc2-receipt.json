@@ -1,0 +1,821 @@
+{
+  "tag": "rc2",
+  "at": "2026-11-13T04:45:38.997Z",
+  "mode": "offline; memory store; fake model; Resend stubbed; all other HTTP denied",
+  "checks": [
+    {
+      "name": "seeded 64 synthetic shops",
+      "pass": true,
+      "detail": 64
+    },
+    {
+      "name": "all 64 customers listed across pages",
+      "pass": true,
+      "detail": 64
+    },
+    {
+      "name": "no genuine item dropped: every requested platform-blocked channel is still in the payload (51 shops x 3)",
+      "pass": true,
+      "detail": 153
+    },
+    {
+      "name": "fresh signup platform waits are informational, not high",
+      "pass": true,
+      "detail": [
+        "info"
+      ]
+    },
+    {
+      "name": "platform-disabled items carry a platform group key",
+      "pass": true,
+      "detail": [
+        "platform_disabled:voice",
+        "platform_disabled:sms",
+        "platform_disabled:calendar"
+      ]
+    },
+    {
+      "name": "operator copy, not owner copy, on platform items",
+      "pass": true,
+      "detail": "Expected while the feature is off. The customer selected it at signup; nothing was sent to a provider and the request is kept. No action for this customer until the feature is enabled in System."
+    },
+    {
+      "name": "actionable issues are exactly the real failures and the overdue wait",
+      "pass": true,
+      "detail": [
+        "aa-broken-draft|draft",
+        "ab-live-blocked|readiness",
+        "ac-long-wait|connection:calendar:platform",
+        "ac-long-wait|connection:sms:platform",
+        "ac-long-wait|connection:voice:platform"
+      ]
+    },
+    {
+      "name": "real failures stay high",
+      "pass": true
+    },
+    {
+      "name": "customer waiting past threshold becomes medium/overdue",
+      "pass": true
+    },
+    {
+      "name": "page-1 needsAttention counts only customers with actionable issues",
+      "pass": true,
+      "detail": {
+        "customers": 50,
+        "active": 1,
+        "needsAttention": 3,
+        "waitingOnly": 47,
+        "setupPending": 50,
+        "scope": "Current page"
+      }
+    },
+    {
+      "name": "/api/health returns 503 for a 40-minute-old failing run",
+      "pass": true,
+      "detail": [
+        "serviceDeliveryRecovery: managed_delivery_failed",
+        "workspace_setup: block_timeout"
+      ]
+    },
+    {
+      "name": "admin payload reports degraded platform health",
+      "pass": true,
+      "detail": {
+        "state": "degraded",
+        "checkedAt": "2026-11-13T04:45:39.517Z",
+        "lastRunAt": "2026-11-13T04:05:39.466Z",
+        "lastGoodAt": "2026-11-13T03:35:39.466Z",
+        "minutesAgo": 40,
+        "minutesSinceGood": 70,
+        "failing": [
+          {
+            "name": "scheduler",
+            "reasonCode": "scheduler_stale"
+          },
+          {
+            "name": "serviceDeliveryRecovery",
+            "reasonCode": "managed_delivery_failed",
+            "source": "code"
+          },
+          {
+            "name": "workspace_setup",
+            "reasonCode": "storage timeout",
+            "source": "error"
+          }
+        ],
+        "signature": "scheduler,serviceDeliveryRecovery,workspace_setup",
+        "alert": {
+          "emailState": "emailed",
+          "state": "degraded",
+          "incidentSince": "2026-11-13T04:45:39.467Z",
+          "emailedAt": "2026-11-13T04:45:39.467Z",
+          "followUpFailedAt": null,
+          "lastSendFailedAt": null,
+          "lastKind": "degraded"
+        }
+      }
+    },
+    {
+      "name": "[1440] Overview shows a health banner while /api/health is 503",
+      "pass": true,
+      "detail": "Platform health needs attention\n\nOperators were emailed Nov 12, 10:45 PM CT about this incident.\n\nscheduler: scheduler stale\nserviceDeliveryRecovery: managed delivery failed\nworkspace setup: storage t"
+    },
+    {
+      "name": "[1440] banner lists failing blocks and time since last good run",
+      "pass": true,
+      "detail": "Platform health needs attention\n\nOperators were emailed Nov 12, 10:45 PM CT about this incident.\n\nscheduler: scheduler stale\nserviceDeliveryRecovery: managed delivery failed\nworkspace setup: storage timeout\n\nLast scheduler run 40 min ago. Last healthy run 70 min ago.\n\nOpen System"
+    },
+    {
+      "name": "[1440] System nav item carries a warning badge",
+      "pass": true
+    },
+    {
+      "name": "[1440] Issues nav count shows real work only (<= 5), not 150+",
+      "pass": true,
+      "detail": 5
+    },
+    {
+      "name": "[1440] Overview issues lead with real failures, no platform-setup noise",
+      "pass": true,
+      "detail": "Desk draft needs repair\nhigh\n\nSaved customer answers are retained. Queue a workspace rebuild.\n\nBroken Draft Air →\nWebsite chat is blocked\nhigh\n\nCurrent saved rules have not passed all activation checks.\n\nLive Blocked Plumbing →\nPhone answering is turned off platform-wide\nmedium\n\nCustomers who select"
+    },
+    {
+      "name": "[1440] Need attention stat counts 3 customers",
+      "pass": true,
+      "detail": "3"
+    },
+    {
+      "name": "[1440] Issues view defaults to needs-action rows",
+      "pass": true,
+      "detail": 5
+    },
+    {
+      "name": "[1440] All issues: platform-disabled channels collapse into one row per channel",
+      "pass": true,
+      "detail": {
+        "groupedRows": 5,
+        "sample": "Desk draft needs repair\nhigh\n\nSaved customer answers are retained. Queue a workspace rebuild.\n\nBroken Draft Air →\nWebsite chat is blocked\nhigh\n\nCurrent saved rules have not passed all activation checks.\n\nLive Blocked Plumbing →\nPhone answering is turned off platform-wide\nmedium\n\nCustomers who selected this at signup. Their requests are kept and nothing was sent to a provider. Next action: enable t"
+      }
+    },
+    {
+      "name": "[1440] ungrouping shows every item (nothing hidden)",
+      "pass": true,
+      "detail": 155
+    },
+    {
+      "name": "[1440] type filter: incidents only",
+      "pass": true
+    },
+    {
+      "name": "[1440] no horizontal page overflow",
+      "pass": true
+    },
+    {
+      "name": "[390] Overview shows a health banner while /api/health is 503",
+      "pass": true,
+      "detail": "Platform health needs attention\n\nOperators were emailed Nov 12, 10:45 PM CT about this incident.\n\nscheduler: scheduler stale\nserviceDeliveryRecovery: managed delivery failed\nworkspace setup: storage t"
+    },
+    {
+      "name": "[390] banner lists failing blocks and time since last good run",
+      "pass": true,
+      "detail": "Platform health needs attention\n\nOperators were emailed Nov 12, 10:45 PM CT about this incident.\n\nscheduler: scheduler stale\nserviceDeliveryRecovery: managed delivery failed\nworkspace setup: storage timeout\n\nLast scheduler run 40 min ago. Last healthy run 70 min ago.\n\nOpen System"
+    },
+    {
+      "name": "[390] System nav item carries a warning badge",
+      "pass": true
+    },
+    {
+      "name": "[390] Issues nav count shows real work only (<= 5), not 150+",
+      "pass": true,
+      "detail": 5
+    },
+    {
+      "name": "[390] Overview issues lead with real failures, no platform-setup noise",
+      "pass": true,
+      "detail": "Desk draft needs repair\nhigh\n\nSaved customer answers are retained. Queue a workspace rebuild.\n\nBroken Draft Air →\nWebsite chat is blocked\nhigh\n\nCurrent saved rules have not passed all activation checks.\n\nLive Blocked Plumbing →\nPhone answering is turned off platform-wide\nmedium\n\nCustomers who select"
+    },
+    {
+      "name": "[390] Need attention stat counts 3 customers",
+      "pass": true,
+      "detail": "3"
+    },
+    {
+      "name": "[390] no horizontal page overflow",
+      "pass": true
+    },
+    {
+      "name": "/api/health stays 503 (fail closed) when its record cannot be read",
+      "pass": true,
+      "detail": {
+        "ok": false,
+        "lastRunAt": null,
+        "minutesAgo": null,
+        "failingBlocks": [],
+        "failing": [],
+        "failingComponents": []
+      }
+    },
+    {
+      "name": "admin overview still loads when the health record cannot be read",
+      "pass": true,
+      "detail": 200
+    },
+    {
+      "name": "admin payload reports health \"unknown\", never healthy",
+      "pass": true,
+      "detail": "unknown"
+    },
+    {
+      "name": "[1440] banner says health is unknown when the read fails",
+      "pass": true,
+      "detail": "Platform health unknown\n\nOperators were emailed Nov 12, 10:45 PM CT about this incident.\n\nhealth record: health read failed\n\nThe saved health record could not be read. Do not assume background work is"
+    },
+    {
+      "name": "[1440] healthy record hides banner and badge",
+      "pass": true
+    },
+    {
+      "name": "[1440] failed refresh turns health to unknown instead of keeping a healthy view",
+      "pass": true,
+      "detail": "Platform health unknown\n\nNo operator email is recorded for this incident yet.\n\nThe latest refresh failed, so current platform health cannot be confirmed.\n\nOpen "
+    },
+    {
+      "name": "alert: first 503 emails every ADMIN_EMAILS operator once",
+      "pass": true,
+      "detail": [
+        [
+          "ops-lead@example.test",
+          "ops-second@example.test"
+        ]
+      ]
+    },
+    {
+      "name": "alert: subject/body name failing blocks and carry no owner keys or customer data",
+      "pass": true,
+      "detail": "Platform health needs attention (degraded)"
+    },
+    {
+      "name": "alert: repeated 503 probes and admin loads are deduplicated",
+      "pass": true,
+      "detail": 1
+    },
+    {
+      "name": "scheduler: self-detected failing block is recorded",
+      "pass": true,
+      "detail": [
+        "serviceDeliveryRecovery"
+      ]
+    },
+    {
+      "name": "alert: changed failure inside 30 minutes is rate-limited",
+      "pass": true,
+      "detail": {
+        "mails": 1,
+        "alert": {
+          "sent": false,
+          "reason": "rate_limited"
+        }
+      }
+    },
+    {
+      "name": "alert: scheduler sends one \"changed\" alert after the rate-limit window",
+      "pass": true,
+      "detail": {
+        "n": 2,
+        "alert": {
+          "sent": true,
+          "kind": "changed",
+          "logged": false
+        }
+      }
+    },
+    {
+      "name": "alert: unchanged failure is not re-sent within the 6-hour reminder window",
+      "pass": true,
+      "detail": 2
+    },
+    {
+      "name": "alert: unchanged failure sends one reminder after 6 hours",
+      "pass": true,
+      "detail": [
+        "Platform health needs attention (degraded)",
+        "Platform health changed, still needs attention (degraded)",
+        "Still failing: platform health needs attention (degraded)"
+      ]
+    },
+    {
+      "name": "scheduler: healthy again after the fault clears",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "alert: one recovery notice is sent",
+      "pass": true,
+      "detail": [
+        "Platform health needs attention (degraded)",
+        "Platform health changed, still needs attention (degraded)",
+        "Still failing: platform health needs attention (degraded)",
+        "Recovered: Machines & Cloud platform health is ok"
+      ]
+    },
+    {
+      "name": "alert: recovery notice is not repeated",
+      "pass": true,
+      "detail": 4
+    },
+    {
+      "name": "scheduler record keeps lastGoodAt for \"time since last good run\"",
+      "pass": true,
+      "detail": {
+        "at": "2026-11-13T04:45:41.636Z",
+        "lastGoodAt": "2026-11-13T04:45:41.636Z"
+      }
+    },
+    {
+      "name": "alert: provider send failure never breaks /api/health",
+      "pass": true
+    },
+    {
+      "name": "alert: failed send is not retried before 10 minutes",
+      "pass": true,
+      "detail": 4
+    },
+    {
+      "name": "alert: failed send is retried once after 10 minutes",
+      "pass": true,
+      "detail": [
+        "Platform health needs attention (degraded)",
+        "Platform health changed, still needs attention (degraded)",
+        "Still failing: platform health needs attention (degraded)",
+        "Recovered: Machines & Cloud platform health is ok",
+        "Platform health needs attention (degraded)"
+      ]
+    },
+    {
+      "name": "alert: unreadable alert state does not throw or spam",
+      "pass": true
+    },
+    {
+      "name": "probe: QA adversarial probe ran to completion in a fresh offline process",
+      "pass": true,
+      "detail": {
+        "status": 0,
+        "signal": null,
+        "tail": [
+          "PASS R12-390 run-age change updates the timing line without touching the single role=alert region :: {\"live\":1,\"outer\":null,\"t1\":\"Last scheduler run 1 min ago. Last healthy run not recorded.\",\"t2\":\"Last scheduler run 4 min ago. Last healthy run not recorded.\",\"liveMuts\":0}",
+          "{\"passed\":45,\"failed\":[\"R5b\"],\"physicalNetwork\":0}"
+        ]
+      }
+    },
+    {
+      "name": "probe A1: texting ON + credentials but invalid offer/policy is actionable (not \"waiting\")",
+      "pass": true,
+      "detail": {
+        "providerState": "configured",
+        "reasonCode": "service_configuration_required",
+        "kind": "incident",
+        "severity": "high",
+        "actionable": true,
+        "title": "Text messaging is blocked while the platform reports configured"
+      }
+    },
+    {
+      "name": "probe A2: platform blocked while provider state \"configured\" (e.g. brake on, policy invalid) is actionable",
+      "pass": true,
+      "detail": {
+        "kind": "incident",
+        "severity": "high",
+        "group": "platform_config:sms"
+      }
+    },
+    {
+      "name": "probe A3: missing provider state (\"unknown\") is not silently informational",
+      "pass": true,
+      "detail": {
+        "kind": "incident",
+        "severity": "high"
+      }
+    },
+    {
+      "name": "probe A4: unrecognised platform reasonCode fails toward actionable",
+      "pass": true,
+      "detail": {
+        "kind": "incident",
+        "severity": "high",
+        "group": "platform_unknown_reason:sms"
+      }
+    },
+    {
+      "name": "probe A5: recorded setup waiting 30 days (operation recently touched) with platform configured is overdue/actionable",
+      "pass": true,
+      "detail": {
+        "since": "2026-10-14T04:45:41.789Z",
+        "ageHours": 720,
+        "severity": "medium"
+      }
+    },
+    {
+      "name": "probe A6: control: needs_attention stays a high incident",
+      "pass": true
+    },
+    {
+      "name": "probe A7: control: disabled feature is informational",
+      "pass": true
+    },
+    {
+      "name": "probe A8: control: every other issue source stays high and actionable",
+      "pass": true,
+      "detail": [
+        "draft:high",
+        "readiness:high",
+        "svc-op-1:high",
+        "support:x:high",
+        "calendar:b1:high",
+        "service_checks:high",
+        "lead:thumbtack:high",
+        "calendar_connection:high"
+      ]
+    },
+    {
+      "name": "probe A9: customer lead-setup request older than 24h escalates to high",
+      "pass": true,
+      "detail": {
+        "severity": "high"
+      }
+    },
+    {
+      "name": "probe B1: 100 concurrent unauthenticated 503 probes send exactly one email",
+      "pass": true,
+      "detail": {
+        "emails": 1
+      }
+    },
+    {
+      "name": "probe B2: scheduler + health evaluations racing send one email",
+      "pass": true,
+      "detail": 1
+    },
+    {
+      "name": "probe B3: 1440 probes over 24h of unchanged degradation send <= 5 emails (1 + 6h reminders)",
+      "pass": true,
+      "detail": 4
+    },
+    {
+      "name": "probe B4: flapping every 10 minutes for 24h sends at most ALERT_POLICY.dailyCap emails",
+      "pass": true,
+      "detail": {
+        "emails": 12,
+        "cap": 12
+      }
+    },
+    {
+      "name": "probe B5: alert email excludes customer phone/email/secret text carried in block error messages",
+      "pass": true,
+      "detail": "- workspace_setup: block_error"
+    },
+    {
+      "name": "probe B6: alert claimed by a send that never completed is retried later",
+      "pass": true,
+      "detail": {
+        "emails": 1,
+        "second": {
+          "sent": true,
+          "kind": "degraded",
+          "logged": false
+        }
+      }
+    },
+    {
+      "name": "probe B7: info: unreadable record emailed as",
+      "pass": true,
+      "detail": "- scheduler: scheduler (no_run_recorded)"
+    },
+    {
+      "name": "probe C7: recovery from a rate-limited, never-emailed incident is silent",
+      "pass": true,
+      "detail": [
+        "Platform health needs attention (degraded)",
+        "Recovered: Machines & Cloud platform health is ok"
+      ]
+    },
+    {
+      "name": "probe R1: every provider state other than \"disabled\" (incl. unknown/future/case variants) is a high actionable incident",
+      "pass": true,
+      "detail": [
+        "configured:incident/high",
+        "needs_attention:incident/high",
+        "unknown:incident/high",
+        "null:incident/high",
+        "paused_by_vendor:incident/high",
+        "DISABLED:incident/high",
+        ":incident/high"
+      ]
+    },
+    {
+      "name": "probe R2: unrecognised reason code with a configured channel is an incident",
+      "pass": true,
+      "detail": {
+        "kind": "incident",
+        "severity": "high"
+      }
+    },
+    {
+      "name": "probe R3: overdue clock uses when the wait started (30-day-old wait touched 1h ago is overdue; future times ignored)",
+      "pass": true,
+      "detail": {
+        "since": "2026-10-14T04:45:41.789Z",
+        "ageHours": 720,
+        "overdue": true,
+        "future": null
+      }
+    },
+    {
+      "name": "probe R4: known waiting reason is informational only while disabled; otherwise medium and actionable at once",
+      "pass": true,
+      "detail": {
+        "configured": "medium",
+        "disabled": "info"
+      }
+    },
+    {
+      "name": "probe R5: alert email has only allowlisted names, fixed categories and catalogue codes, plus the admin link",
+      "pass": true,
+      "detail": [
+        "- scheduler: scheduler (scheduler_stale)",
+        "- workspace_setup: block_error",
+        "- leadImport: unrecognised_failure",
+        "- unnamed_block: block_error",
+        "- serviceDeliveryRecovery: reported_code (managed_delivery_failed)"
+      ]
+    },
+    {
+      "name": "probe R5b: control: public /api/health failingBlocks strings are byte-unchanged (pre-existing exposure, out of scope; see PROPOSALS r2)",
+      "pass": false,
+      "detail": 4
+    },
+    {
+      "name": "probe R6: in-flight claim: concurrent evaluation is refused (in_flight) and the banner state is \"sending\", not \"emailed\"",
+      "pass": true,
+      "detail": {
+        "second": {
+          "sent": false,
+          "reason": "in_flight"
+        },
+        "emailState": "sending"
+      }
+    },
+    {
+      "name": "probe R7: hung send times out, is recorded as failed (not sent, not alerted) and is retried after retryMs",
+      "pass": true,
+      "detail": {
+        "done": {
+          "sent": false,
+          "reason": "send_timeout",
+          "kind": "degraded"
+        },
+        "alerted": false,
+        "emailState": "failed"
+      }
+    },
+    {
+      "name": "probe R7b: the timed-out alert is sent on the retry and then reads as emailed",
+      "pass": true,
+      "detail": {
+        "r2": {
+          "sent": true,
+          "kind": "degraded",
+          "logged": false
+        },
+        "emails": 1
+      }
+    },
+    {
+      "name": "probe R8: claim from a killed function: banner says unconfirmed (not emailed) and the alert is re-sent",
+      "pass": true,
+      "detail": {
+        "emailState": "unconfirmed",
+        "r": {
+          "sent": true,
+          "kind": "degraded",
+          "logged": false
+        }
+      }
+    },
+    {
+      "name": "probe R9: cap: exactly dailyCap emails in the window, the last one says so, capped incident reads \"capped\", next window emails again",
+      "pass": true,
+      "detail": {
+        "n": 12,
+        "cap": 12,
+        "lastMentionsCap": true,
+        "capView": "capped",
+        "after": 13
+      }
+    },
+    {
+      "name": "probe R10: failed reminder: banner still credits the confirmed first email and reports the follow-up failure",
+      "pass": true,
+      "detail": {
+        "emailState": "emailed",
+        "state": "degraded",
+        "incidentSince": "2026-11-13T04:45:46.892Z",
+        "emailedAt": "2026-11-13T04:45:46.892Z",
+        "followUpFailedAt": "2026-11-13T10:46:46.892Z",
+        "lastSendFailedAt": "2026-11-13T10:46:46.892Z",
+        "lastKind": "degraded"
+      }
+    },
+    {
+      "name": "probe C0: setup: 2 emails (degraded, recovered); new incident rate-limited, not emailed",
+      "pass": true,
+      "detail": {
+        "emails": [
+          "Platform health needs attention (degraded)",
+          "Recovered: Machines & Cloud platform health is ok"
+        ],
+        "alerted": false,
+        "lastSentAt": "recovery email time"
+      }
+    },
+    {
+      "name": "probe C1-1440: banner does not claim operators were emailed about an incident that was rate-limited",
+      "pass": true,
+      "detail": "Platform health needs attention No operator email is recorded for this incident yet. workspace setup: storage timeout Last scheduler run 1 min ago. Last healthy run not recorded. Open System"
+    },
+    {
+      "name": "probe C2-1440: System nav accessible name conveys the health warning (not just \"!\")",
+      "pass": true,
+      "detail": "- button \"System Platform health needs attention\": System !"
+    },
+    {
+      "name": "probe C3-1440: banner visible in first viewport",
+      "pass": true,
+      "detail": 116
+    },
+    {
+      "name": "probe C4-1440: no horizontal page overflow",
+      "pass": true
+    },
+    {
+      "name": "probe C5-1440: banner action target >= 24px and keyboard reachable",
+      "pass": true,
+      "detail": 40
+    },
+    {
+      "name": "probe C6-1440: unchanged role=alert banner is not rewritten on refresh (avoids repeat screen-reader announcements)",
+      "pass": true,
+      "detail": 0
+    },
+    {
+      "name": "probe R11-1440: banner: unconfirmed claim reads \"being sent\"; only a confirmed current-incident alert reads \"Operators were emailed\"",
+      "pass": true,
+      "detail": {
+        "sending": "Platform health needs attention An operator alert email is being sent; it is not confirmed yet. workspace setup: storage timeout Last scheduler run 1 min ago. L",
+        "confirmed": "Platform health needs attention Operators were emailed Nov 12, 10:45 PM CT about this incident. workspace setup: storage timeout Last scheduler run 1 min ago. L"
+      }
+    },
+    {
+      "name": "probe R12-1440: run-age change updates the timing line without touching the single role=alert region",
+      "pass": true,
+      "detail": {
+        "live": 1,
+        "outer": null,
+        "t1": "Last scheduler run 1 min ago. Last healthy run not recorded.",
+        "t2": "Last scheduler run 4 min ago. Last healthy run not recorded.",
+        "liveMuts": 0
+      }
+    },
+    {
+      "name": "probe C1-390: banner does not claim operators were emailed about an incident that was rate-limited",
+      "pass": true,
+      "detail": "Platform health needs attention No operator email is recorded for this incident yet. workspace setup: storage timeout Last scheduler run 1 min ago. Last healthy run not recorded. Open System"
+    },
+    {
+      "name": "probe C2-390: System nav accessible name conveys the health warning (not just \"!\")",
+      "pass": true,
+      "detail": "- button \"System Platform health needs attention\": System !"
+    },
+    {
+      "name": "probe C3-390: banner visible in first viewport",
+      "pass": true,
+      "detail": 315
+    },
+    {
+      "name": "probe C4-390: no horizontal page overflow",
+      "pass": true
+    },
+    {
+      "name": "probe C5-390: banner action target >= 24px and keyboard reachable",
+      "pass": true,
+      "detail": 40
+    },
+    {
+      "name": "probe C6-390: unchanged role=alert banner is not rewritten on refresh (avoids repeat screen-reader announcements)",
+      "pass": true,
+      "detail": 0
+    },
+    {
+      "name": "probe R11-390: banner: unconfirmed claim reads \"being sent\"; only a confirmed current-incident alert reads \"Operators were emailed\"",
+      "pass": true,
+      "detail": {
+        "sending": "Platform health needs attention An operator alert email is being sent; it is not confirmed yet. workspace setup: storage timeout Last scheduler run 1 min ago. L",
+        "confirmed": "Platform health needs attention Operators were emailed Nov 12, 10:45 PM CT about this incident. workspace setup: storage timeout Last scheduler run 1 min ago. L"
+      }
+    },
+    {
+      "name": "probe R12-390: run-age change updates the timing line without touching the single role=alert region",
+      "pass": true,
+      "detail": {
+        "live": 1,
+        "outer": null,
+        "t1": "Last scheduler run 1 min ago. Last healthy run not recorded.",
+        "t2": "Last scheduler run 4 min ago. Last healthy run not recorded.",
+        "liveMuts": 0
+      }
+    },
+    {
+      "name": "probe: no physical network in the probe process",
+      "pass": true,
+      "detail": 0
+    }
+  ],
+  "mail": [
+    {
+      "from": "Machines & Cloud <desk@machinesandcloud.com>",
+      "to": [
+        "ops-lead@example.test",
+        "ops-second@example.test"
+      ],
+      "subject": "Platform health needs attention (degraded)",
+      "text": "Platform health needs attention.\nState: degraded. Last scheduler run: 2026-11-13T04:05:41.583Z (40 min ago). Last healthy run: 2026-11-13T03:35:41.583Z.\nFailing (details are only in the admin System view):\n- scheduler: scheduler (scheduler_stale)\n- serviceDeliveryRecovery: reported_code (managed_delivery_failed)\n- workspace_setup: block_error\n\nOpen System in the admin portal: http://127.0.0.1:8897/admin.html\nThis alert repeats at most every 6 hours while unchanged, a recovery notice follows, and at most 12 alert emails are sent in 24 hours."
+    },
+    {
+      "from": "Machines & Cloud <desk@machinesandcloud.com>",
+      "to": [
+        "ops-lead@example.test",
+        "ops-second@example.test"
+      ],
+      "subject": "Platform health changed, still needs attention (degraded)",
+      "text": "Platform health changed, still needs attention.\nState: degraded. Last scheduler run: 2026-11-13T04:45:41.624Z (0 min ago). Last healthy run: 2026-11-13T03:35:41.583Z.\nFailing (details are only in the admin System view):\n- serviceDeliveryRecovery: reported_code (service_delivery_unresolved)\n\nOpen System in the admin portal: http://127.0.0.1:8897/admin.html\nThis alert repeats at most every 6 hours while unchanged, a recovery notice follows, and at most 12 alert emails are sent in 24 hours."
+    },
+    {
+      "from": "Machines & Cloud <desk@machinesandcloud.com>",
+      "to": [
+        "ops-lead@example.test",
+        "ops-second@example.test"
+      ],
+      "subject": "Still failing: platform health needs attention (degraded)",
+      "text": "Still failing: platform health needs attention.\nState: degraded. Last scheduler run: 2026-11-13T04:45:41.631Z (0 min ago). Last healthy run: 2026-11-13T03:35:41.583Z.\nFailing (details are only in the admin System view):\n- serviceDeliveryRecovery: reported_code (service_delivery_unresolved)\n\nOpen System in the admin portal: http://127.0.0.1:8897/admin.html\nThis alert repeats at most every 6 hours while unchanged, a recovery notice follows, and at most 12 alert emails are sent in 24 hours."
+    },
+    {
+      "from": "Machines & Cloud <desk@machinesandcloud.com>",
+      "to": [
+        "ops-lead@example.test",
+        "ops-second@example.test"
+      ],
+      "subject": "Recovered: Machines & Cloud platform health is ok",
+      "text": "Platform health recovered at 2026-11-13T04:45:41.636Z.\nLast scheduler run: 2026-11-13T04:45:41.634Z.\nReview anything that queued while it was down: http://127.0.0.1:8897/admin.html"
+    },
+    {
+      "from": "Machines & Cloud <desk@machinesandcloud.com>",
+      "to": [
+        "ops-lead@example.test",
+        "ops-second@example.test"
+      ],
+      "subject": "Platform health needs attention (degraded)",
+      "text": "Platform health needs attention.\nState: degraded. Last scheduler run: 2026-11-13T04:05:41.638Z (40 min ago). Last healthy run: 2026-11-13T03:35:41.638Z.\nFailing (details are only in the admin System view):\n- scheduler: scheduler (scheduler_stale)\n- serviceDeliveryRecovery: reported_code (managed_delivery_failed)\n- workspace_setup: block_error\n\nOpen System in the admin portal: http://127.0.0.1:8897/admin.html\nThis alert repeats at most every 6 hours while unchanged, a recovery notice follows, and at most 12 alert emails are sent in 24 hours.",
+      "failed": true
+    },
+    {
+      "from": "Machines & Cloud <desk@machinesandcloud.com>",
+      "to": [
+        "ops-lead@example.test",
+        "ops-second@example.test"
+      ],
+      "subject": "Platform health needs attention (degraded)",
+      "text": "Platform health needs attention.\nState: degraded. Last scheduler run: 2026-11-13T04:05:41.638Z (40 min ago). Last healthy run: 2026-11-13T03:35:41.638Z.\nFailing (details are only in the admin System view):\n- scheduler: scheduler (scheduler_stale)\n- serviceDeliveryRecovery: reported_code (managed_delivery_failed)\n- workspace_setup: block_error\n\nOpen System in the admin portal: http://127.0.0.1:8897/admin.html\nThis alert repeats at most every 6 hours while unchanged, a recovery notice follows, and at most 12 alert emails are sent in 24 hours."
+    }
+  ],
+  "blocked": [],
+  "pageErrors": [],
+  "screenshots": [
+    "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/rc2/out/suites/ohf/rc2-overview-degraded-1440.png",
+    "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/rc2/out/suites/ohf/rc2-issues-all-grouped-1440.png",
+    "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/rc2/out/suites/ohf/rc2-overview-degraded-390.png",
+    "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/rc2/out/suites/ohf/rc2-overview-health-unknown-1440.png"
+  ],
+  "probe": {
+    "passed": 45,
+    "failed": [
+      "R5b"
+    ],
+    "physicalNetwork": 0
+  },
+  "physicalNetwork": 0,
+  "summary": {
+    "passed": 99,
+    "failed": 1,
+    "pageErrors": 0
+  }
+}

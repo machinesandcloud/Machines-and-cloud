@@ -1,0 +1,154 @@
+{
+  "pass": false,
+  "checkCount": 55,
+  "failures": [
+    {
+      "name": "1440: proof scrubbed before first fetch",
+      "pass": false,
+      "detail": [
+        {
+          "url": "/api/channel-availability",
+          "hash": "#verify=returning-proof",
+          "search": "",
+          "auth": null
+        },
+        {
+          "url": "/api/access",
+          "hash": "",
+          "search": "",
+          "auth": null
+        }
+      ]
+    },
+    {
+      "name": "1440: exactly one POST exchange then one authenticated state GET",
+      "pass": false,
+      "detail": [
+        {
+          "method": "GET",
+          "path": "/api/channel-availability",
+          "body": null,
+          "auth": null
+        },
+        {
+          "method": "POST",
+          "path": "/api/access",
+          "body": {
+            "action": "exchange",
+            "token": "returning-proof"
+          },
+          "auth": null
+        },
+        {
+          "method": "GET",
+          "path": "/api/access",
+          "body": null,
+          "auth": "Bearer session-returning-proof"
+        }
+      ]
+    },
+    {
+      "name": "390: proof scrubbed before first fetch",
+      "pass": false,
+      "detail": [
+        {
+          "url": "/api/channel-availability",
+          "hash": "#verify=returning-proof",
+          "search": "",
+          "auth": null
+        },
+        {
+          "url": "/api/access",
+          "hash": "",
+          "search": "",
+          "auth": null
+        }
+      ]
+    },
+    {
+      "name": "390: exactly one POST exchange then one authenticated state GET",
+      "pass": false,
+      "detail": [
+        {
+          "method": "GET",
+          "path": "/api/channel-availability",
+          "body": null,
+          "auth": null
+        },
+        {
+          "method": "POST",
+          "path": "/api/access",
+          "body": {
+            "action": "exchange",
+            "token": "returning-proof"
+          },
+          "auth": null
+        },
+        {
+          "method": "GET",
+          "path": "/api/access",
+          "body": null,
+          "auth": "Bearer session-returning-proof"
+        }
+      ]
+    },
+    {
+      "name": "races: older exchange response cannot sign in or read state",
+      "pass": false,
+      "detail": [
+        {
+          "method": "GET",
+          "path": "/api/channel-availability",
+          "body": null,
+          "auth": null
+        },
+        {
+          "method": "POST",
+          "path": "/api/access",
+          "body": {
+            "action": "exchange",
+            "token": "proof-a"
+          },
+          "auth": null
+        },
+        {
+          "method": "POST",
+          "path": "/api/access",
+          "body": {
+            "action": "exchange",
+            "token": "proof-b"
+          },
+          "auth": null
+        },
+        {
+          "method": "GET",
+          "path": "/api/access",
+          "body": null,
+          "auth": "Bearer session-proof-b"
+        }
+      ]
+    },
+    {
+      "name": "races: only newest proof session is saved and used",
+      "pass": false
+    },
+    {
+      "name": "400: no automatic email and no retry loop",
+      "pass": false
+    },
+    {
+      "name": "410: no automatic email and no retry loop",
+      "pass": false
+    },
+    {
+      "name": "storage blocked: no redirect loop or repeated exchange",
+      "pass": false
+    },
+    {
+      "name": "state503: retry uses saved session without reconsuming proof",
+      "pass": false
+    }
+  ],
+  "pageErrors": [],
+  "report": "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/rc2/c2/scratchpad/rc2-auto-signin.json/report.json"
+}

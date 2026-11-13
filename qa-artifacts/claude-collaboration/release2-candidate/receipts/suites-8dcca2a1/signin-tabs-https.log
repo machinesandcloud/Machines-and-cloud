@@ -1,0 +1,68 @@
+owner_exchange {"fetchSite":"same-origin","transport":"cookie"}
+PASS apex sign-in opens desk
+PASS probe cookie is __Host-mc_cookie_probe, Secure, HttpOnly, SameSite=Strict, host-only, and holds no session secret
+PASS cookie is __Host-mc_owner, Secure, HttpOnly, SameSite=Strict, Path=/, host-only, session (no Max-Age)
+PASS handle = sha256(prefix+secret) and differs from secret and row key
+PASS no script-visible copy of the secret in desk tab
+PASS no API response body/headers in the whole sign-in journey contains the secret
+PASS sign-in cookie only on the exchange response
+PASS new tab bookmark on apex opens desk
+PASS www: apex __Host- cookie is not sent to www (host-only) and handle alone is refused
+PASS preview host (netlify.app, PSL) cannot use the apex session even with the handle
+PASS no preview/www request carried the apex cookie
+PASS https://evil.machinesandcloud.com:9743: attacker with stolen handle cannot read owner view or CSV via CORS (no ACAC)
+PASS https://evil.machinesandcloud.com:9743: tossed cookies never reach the apex jar as __Host-mc_owner
+PASS https://attacker.example:9743: attacker with stolen handle cannot read owner view or CSV via CORS (no ACAC)
+PASS https://attacker.example:9743: tossed cookies never reach the apex jar as __Host-mc_owner
+PASS cross-site requests never carry the cookie (SameSite=Strict)
+PASS same-site sibling requests that DO carry the cookie (Strict does not stop same-site) are all refused
+PASS session still active and workspace unchanged after all attacks
+PASS owner still signed in
+PASS cookie+handle authenticates on access/client/export
+PASS cookie alone never authenticates on any route
+PASS handle alone never authenticates on any route
+PASS same-site (sibling) and www-labelled requests refused even with cookie+handle
+PASS cookie with a wrong/forged handle never authenticates
+PASS lowercase __host- and unprefixed mc_owner names are not read on https
+PASS requests without a same-origin Sec-Fetch-Site label (non-browser, or 'none') never use the cookie, on any route
+PASS revision 3: the label is compared exactly ('Same-Origin', 'SAME-ORIGIN' refused) on every route
+PASS revision 3: a same-origin label with a sibling, cross-site or 'null' Origin is refused on every route; no Origin still works
+PASS customer-site embed /api/chat never carries the owner cookie
+PASS first-party widget /api/chat with cookie but no handle is not treated as the owner (no 401/owner exemption path)
+PASS FINDING (expected, documented trade-off): XSS on any same-origin page/tab can act as the owner via the shared localStorage handle while the cookie lives
+PASS ...but cannot read the secret to replay it off-device
+PASS other tab closes on sign-out
+PASS __Host- cookie cleared and row revoked
+PASS re-planted stale (revoked) cookie + handle with a 30-day expiry never reopens the workspace
+PASS ...nor after a browser restart
+owner_exchange {"fetchSite":"same-origin","transport":"cookie"}
+PASS keep: persistent cookie expiry <= server expiresAt
+PASS expired server session with a long-lived cookie after restart -> recovery
+owner_exchange {"fetchSite":"same-origin","transport":"cookie"}
+owner_exchange {"fetchSite":"same-origin","transport":"cookie"}
+PASS shared computer: a later user (link requested on another device) does NOT inherit the earlier user's 'keep me signed in' choice
+PASS cookieEnabled=false: legacy per-tab sign-in still opens the first tab
+PASS cookieEnabled=false: a new tab asks to sign in (per-tab fallback, expected)
+owner_exchange {"fetchSite":"same-origin","transport":"tab"}
+PASS cookieEnabled=true but Set-Cookie silently dropped (extension/policy): sign-in still opens the workspace through the per-tab fallback
+owner_exchange {"fetchSite":"same-origin","transport":"cookie"}
+PASS operator exchange sets no cookie
+PASS owner cookie+handle refused at /api/manage
+PASS revision 3: X-Frame-Options SAMEORIGIN and CSP frame-ancestors 'none'/'self' on every page that can show the switch prompt or holds the owner handle (and its pretty URL)
+owner_exchange {"fetchSite":"same-origin","transport":"cookie"}
+PASS revision 3: with the site's headers a sibling cannot frame the setup page: no script, no /api/access call, no prompt to click
+PASS revision 3: each layer alone (X-Frame-Options only, CSP frame-ancestors only) also blocks the frame
+owner_exchange {"fetchSite":"same-origin","transport":"cookie"}
+owner_exchange {"fetchSite":"same-origin","transport":"cookie"}
+PASS revision 3 CONTROL: without a frame policy the framed prompt renders and a hijacked click switches the browser (proves this test can see the attack)
+owner_exchange {"fetchSite":"same-origin","transport":"cookie"}
+owner_exchange {"fetchSite":"same-origin","transport":"cookie"}
+owner_exchange {"fetchSite":"same-origin","transport":"cookie"}
+PASS revision 3: another account's link asks first (409 replace_confirm, link unspent, no cookie) with 'keep me signed in' on and off
+owner_exchange {"fetchSite":"same-origin","transport":"cookie"}
+owner_exchange {"fetchSite":"same-origin","transport":"cookie"}
+PASS revision 3: the same owner's fresh link opens without a prompt and their other workspace tab says 'signed in again', never 'another account'
+PASS this harness never uses Playwright route.fetch
+PASS no non-loopback network from Node (fetch or sockets)
+PASS no browser request left the mapped hosts
+53/53 passed

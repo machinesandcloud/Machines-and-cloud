@@ -1,0 +1,10 @@
+93c93
+<   const contact = 'w' + randomBytes(8).toString('hex'), transcript = [];
+---
+>   let contact = 'w' + randomBytes(8).toString('hex'), conversationToken = null; const transcript = []; // RC2 harness: carry proposal 09's conversation token
+101,102c101,102
+<       const r = await handlers['/api/chat'](new Request(origin + '/api/chat', { method: 'POST', headers: { origin: SITE, 'content-type': 'application/json' }, body: JSON.stringify({ client: x.slug, contact, turnId: randomBytes(16).toString('hex'), messages: transcript.slice(-19), page: '/', stream: false }) }), { ip: '192.0.2.88' });
+<       body = await r.text(); if (r.status !== 200) report.observations.push({ chat: r.status, body: body.slice(0, 200) });
+---
+>       const r = await handlers['/api/chat'](new Request(origin + '/api/chat', { method: 'POST', headers: { origin: SITE, 'content-type': 'application/json' }, body: JSON.stringify({ client: x.slug, contact, ...(conversationToken ? { conversationToken } : {}), turnId: randomBytes(16).toString('hex'), messages: transcript.slice(-19), page: '/', stream: false }) }), { ip: '192.0.2.88' });
+>       body = await r.text(); { const t = r.headers.get('X-MC-Conversation-Token'), k = r.headers.get('X-MC-Contact'); if (t) conversationToken = t; if (k) contact = k; } if (r.status !== 200) report.observations.push({ chat: r.status, body: body.slice(0, 200) });

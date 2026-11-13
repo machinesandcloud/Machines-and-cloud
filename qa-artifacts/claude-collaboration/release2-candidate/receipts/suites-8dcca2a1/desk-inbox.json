@@ -1,0 +1,293 @@
+{
+ "at": "2026-11-13T04:45:16.134Z",
+ "root": "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/rc2/c1",
+ "browser": "/Users/stevengoumnai/Library/Caches/ms-playwright/chromium_headless_shell-1223/chrome-headless-shell-mac-arm64/chrome-headless-shell",
+ "sources": {
+  "desk.js": "d4ce378b88cbcefdedef611327cde83b3973aa625528b3bd1a1ea4c62bc11723",
+  "desk.html": "54df92c86bce8c20e11e670bdbd84e90b8227d21120165e156c0dfa1e7f73ee9",
+  "desk.css": "4a6f0799825c7d96a6b9e622ad966397c338498ca225ab2410af6b8cff000b4d",
+  "desk-conversations.js": "a9ab8871661d482a5253228e1bdf30aae7ca7f2a363cf6e01f22f57fa8fd11fa",
+  "netlify/functions/client.mjs": "0dc9d38762f6219cf704fbfee153b72381e085cb1962a3bdd8c0daa8180b8730",
+  "netlify/functions/lib/store.mjs": "67a7e964cb5b9bf5f100ef841c367b4261691a16c393065af120ef3712fd6223"
+ },
+ "qualifications": "Synthetic workspace, session, requests, visits, events and conversations; actual local /api/client and /api/access handlers; memory storage; fake model. No model/provider/email/OAuth/purchase/deployment.",
+ "checks": [
+  {
+   "name": "PRA-DESK-01 API returns requests and visits newest first",
+   "width": 390,
+   "pass": true
+  },
+  {
+   "name": "PRA-DESK-01/02 Inbox: open emergency, then same day, then newest first",
+   "width": 390,
+   "pass": true
+  },
+  {
+   "name": "PRA-DESK-02 Emergency and same-day rows carry a readable urgent badge",
+   "width": 390,
+   "pass": true
+  },
+  {
+   "name": "PRA-DESK-02 Inbox Open/Done filter, default Open, keyboard operable",
+   "width": 390,
+   "pass": true
+  },
+  {
+   "name": "PRA-DESK-01/02 Home \"Needs your attention\": urgent first, newest first, with issue and time",
+   "width": 390,
+   "pass": false,
+   "error": "first row is the emergency: (832) 555-0133 | Emergency |  | Gas smell near the furnace"
+  },
+  {
+   "name": "PRA-DESK-04 Recent activity: Houston time and owner wording",
+   "width": 390,
+   "pass": true
+  },
+  {
+   "name": "PRA-DESK-05 Conversations: no [Done:] markers, customer titles, owner channel labels",
+   "width": 390,
+   "pass": true
+  },
+  {
+   "name": "PRA-DESK-05 Stored turns keep the [Done:] markers the AI relies on",
+   "width": 390,
+   "pass": true
+  },
+  {
+   "name": "PRA-DESK-05 Saved conversation dialog hides markers",
+   "width": 390,
+   "pass": true
+  },
+  {
+   "name": "PRA-DESK-01 API returns requests and visits newest first",
+   "width": 1440,
+   "pass": true
+  },
+  {
+   "name": "PRA-DESK-01/02 Inbox: open emergency, then same day, then newest first",
+   "width": 1440,
+   "pass": true
+  },
+  {
+   "name": "PRA-DESK-02 Emergency and same-day rows carry a readable urgent badge",
+   "width": 1440,
+   "pass": true
+  },
+  {
+   "name": "PRA-DESK-02 Inbox Open/Done filter, default Open, keyboard operable",
+   "width": 1440,
+   "pass": true
+  },
+  {
+   "name": "PRA-DESK-01/02 Home \"Needs your attention\": urgent first, newest first, with issue and time",
+   "width": 1440,
+   "pass": false,
+   "error": "first row is the emergency: (832) 555-0133 | Emergency |  | Gas smell near the furnace"
+  },
+  {
+   "name": "PRA-DESK-04 Recent activity: Houston time and owner wording",
+   "width": 1440,
+   "pass": true
+  },
+  {
+   "name": "PRA-DESK-05 Conversations: no [Done:] markers, customer titles, owner channel labels",
+   "width": 1440,
+   "pass": true
+  },
+  {
+   "name": "PRA-DESK-05 Stored turns keep the [Done:] markers the AI relies on",
+   "width": 1440,
+   "pass": true
+  },
+  {
+   "name": "PRA-DESK-05 Saved conversation dialog hides markers",
+   "width": 1440,
+   "pass": true
+  },
+  {
+   "name": "R2-D1 a request completed while its alert is still waiting stays in Open with Acknowledge",
+   "width": 390,
+   "pass": true
+  },
+  {
+   "name": "R2-PIN a same-day request older than ordinary open requests is pinned below emergencies",
+   "width": 390,
+   "pass": true
+  },
+  {
+   "name": "R2-TIE createdAt ties order by record id in the API and the Inbox",
+   "width": 390,
+   "pass": true
+  },
+  {
+   "name": "R2-COUNT Requests heading counts open requests and matches the Open filter",
+   "width": 390,
+   "pass": true
+  },
+  {
+   "name": "R2-VIEW website \"View request\" for the completed setup check, chosen while Done is selected, switches to Open and keeps the row focused",
+   "width": 390,
+   "pass": true
+  },
+  {
+   "name": "R2-VIEW website \"View request\" for a completed first website request switches to Done and survives the Inbox refresh",
+   "width": 390,
+   "pass": true
+  },
+  {
+   "name": "R2-RESET a refresh returns Done to Open and shows a request that arrived meanwhile",
+   "width": 390,
+   "pass": true
+  },
+  {
+   "name": "R2-DIALOG while a request dialog is open a refresh keeps Done, and Open says New until viewed",
+   "width": 390,
+   "pass": true
+  },
+  {
+   "name": "R2-HOME waiting-alert request and older same-day request are on Home, same day above ordinary",
+   "width": 390,
+   "pass": true
+  },
+  {
+   "name": "R2-ACK acknowledging the waiting alert moves the completed request to Done",
+   "width": 390,
+   "pass": true
+  },
+  {
+   "name": "R2-DST Setup activity shows CDT then CST for the repeated 1:30 AM on Nov 1 2026",
+   "width": 390,
+   "pass": true
+  },
+  {
+   "name": "R2-DST Home activity times carry the zone abbreviation",
+   "width": 390,
+   "pass": true
+  },
+  {
+   "name": "R2-D2 a marker-only front desk turn shows the saved action, not an empty bubble",
+   "width": 390,
+   "pass": true
+  },
+  {
+   "name": "R2-CUSTOMER a customer turn ending in \"[Done: …]\" is shown exactly as typed (list)",
+   "width": 390,
+   "pass": true
+  },
+  {
+   "name": "R2-DIALOG-TEXT saved conversation dialog: wcustmarker01",
+   "width": 390,
+   "pass": true
+  },
+  {
+   "name": "R2-DIALOG-TEXT saved conversation dialog: wonlymarker01",
+   "width": 390,
+   "pass": true
+  },
+  {
+   "name": "R2-D1 a request completed while its alert is still waiting stays in Open with Acknowledge",
+   "width": 1440,
+   "pass": true
+  },
+  {
+   "name": "R2-PIN a same-day request older than ordinary open requests is pinned below emergencies",
+   "width": 1440,
+   "pass": true
+  },
+  {
+   "name": "R2-TIE createdAt ties order by record id in the API and the Inbox",
+   "width": 1440,
+   "pass": true
+  },
+  {
+   "name": "R2-COUNT Requests heading counts open requests and matches the Open filter",
+   "width": 1440,
+   "pass": true
+  },
+  {
+   "name": "R2-VIEW website \"View request\" for the completed setup check, chosen while Done is selected, switches to Open and keeps the row focused",
+   "width": 1440,
+   "pass": true
+  },
+  {
+   "name": "R2-VIEW website \"View request\" for a completed first website request switches to Done and survives the Inbox refresh",
+   "width": 1440,
+   "pass": true
+  },
+  {
+   "name": "R2-RESET a refresh returns Done to Open and shows a request that arrived meanwhile",
+   "width": 1440,
+   "pass": true
+  },
+  {
+   "name": "R2-DIALOG while a request dialog is open a refresh keeps Done, and Open says New until viewed",
+   "width": 1440,
+   "pass": true
+  },
+  {
+   "name": "R2-HOME waiting-alert request and older same-day request are on Home, same day above ordinary",
+   "width": 1440,
+   "pass": true
+  },
+  {
+   "name": "R2-ACK acknowledging the waiting alert moves the completed request to Done",
+   "width": 1440,
+   "pass": true
+  },
+  {
+   "name": "R2-DST Setup activity shows CDT then CST for the repeated 1:30 AM on Nov 1 2026",
+   "width": 1440,
+   "pass": true
+  },
+  {
+   "name": "R2-DST Home activity times carry the zone abbreviation",
+   "width": 1440,
+   "pass": true
+  },
+  {
+   "name": "R2-D2 a marker-only front desk turn shows the saved action, not an empty bubble",
+   "width": 1440,
+   "pass": true
+  },
+  {
+   "name": "R2-CUSTOMER a customer turn ending in \"[Done: …]\" is shown exactly as typed (list)",
+   "width": 1440,
+   "pass": true
+  },
+  {
+   "name": "R2-DIALOG-TEXT saved conversation dialog: wcustmarker01",
+   "width": 1440,
+   "pass": true
+  },
+  {
+   "name": "R2-DIALOG-TEXT saved conversation dialog: wonlymarker01",
+   "width": 1440,
+   "pass": true
+  },
+  {
+   "name": "PRA-DESK-01 Legacy owner-key workspace lists newest first",
+   "pass": true
+  }
+ ],
+ "screenshots": [
+  "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/rc2/out/suites/desk-inbox-inbox-390.png",
+  "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/rc2/out/suites/desk-inbox-inbox-done-390.png",
+  "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/rc2/out/suites/desk-inbox-home-390.png",
+  "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/rc2/out/suites/desk-inbox-conversations-390.png",
+  "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/rc2/out/suites/desk-inbox-conversation-dialog-390.png",
+  "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/rc2/out/suites/desk-inbox-inbox-1440.png",
+  "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/rc2/out/suites/desk-inbox-inbox-done-1440.png",
+  "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/rc2/out/suites/desk-inbox-home-1440.png",
+  "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/rc2/out/suites/desk-inbox-conversations-1440.png",
+  "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/rc2/out/suites/desk-inbox-conversation-dialog-1440.png",
+  "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/rc2/out/suites/desk-inbox-r2-done-new-cue-390.png",
+  "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/rc2/out/suites/desk-inbox-r2-done-new-cue-1440.png"
+ ],
+ "requests": 66,
+ "pageErrors": [],
+ "forbidden": [],
+ "physicalNetwork": 0,
+ "pass": 49,
+ "total": 51,
+ "ok": false
+}

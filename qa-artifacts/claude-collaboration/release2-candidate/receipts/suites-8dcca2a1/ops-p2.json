@@ -1,0 +1,266 @@
+{
+  "passed": 36,
+  "failed": 0,
+  "skipped": 0,
+  "total": 36,
+  "intercepted": {
+    "email": 8,
+    "sms": 1
+  },
+  "results": [
+    {
+      "id": "S07a",
+      "name": "operator list page of 50 customers is under 300 KB and carries list fields only",
+      "pass": true,
+      "detail": {
+        "bytes": 237718,
+        "total": 68
+      }
+    },
+    {
+      "id": "S07b",
+      "name": "following the cursor reaches every customer, and customer detail still has full setup",
+      "pass": true,
+      "detail": {
+        "customers": 68,
+        "pages": 2
+      }
+    },
+    {
+      "id": "S07c",
+      "name": "later pages (?cursor=) carry customers only, not inquiries, platform texting or System again",
+      "pass": true,
+      "detail": {
+        "firstBytes": 237718,
+        "laterBytes": 85592
+      }
+    },
+    {
+      "id": "S09a",
+      "name": "shared key list omits self-service owner contact data; legacy rows unchanged",
+      "pass": true
+    },
+    {
+      "id": "S09b",
+      "name": "shared key cannot read self-service records, prompt or tasks",
+      "pass": true
+    },
+    {
+      "id": "S09c",
+      "name": "every shared-key request is audited before it is served, with no raw network address",
+      "pass": true,
+      "detail": [
+        "GET list",
+        "GET list_full",
+        "POST records",
+        "POST prompt"
+      ]
+    },
+    {
+      "id": "S09d",
+      "name": "an unwritable audit refuses the shared-key request (fail closed, nothing returned)",
+      "pass": true
+    },
+    {
+      "id": "S09f",
+      "name": "a non-string slug is refused, so every shared-key read names its shop in the audit",
+      "pass": true
+    },
+    {
+      "id": "S09g",
+      "name": "the shared-key inquiry export (/api/intake GET) is audited before it is served and fails closed",
+      "pass": true
+    },
+    {
+      "id": "S09h",
+      "name": "the shared key on /api/sms, /api/voice, /api/twilio-alert and /api/chat is audited before it is used and fails closed; a wrong key is not a bypass",
+      "pass": true,
+      "detail": {
+        "sms": [
+          200,
+          503,
+          403
+        ],
+        "voice": [
+          200,
+          503,
+          403
+        ],
+        "alert": [
+          200,
+          503,
+          403
+        ],
+        "chat": [
+          404,
+          503,
+          404
+        ]
+      }
+    },
+    {
+      "id": "S09e",
+      "name": "operators see shared-key use in the System payload; an owner session cannot read it",
+      "pass": true,
+      "detail": {
+        "last24h": 17
+      }
+    },
+    {
+      "id": "S10a",
+      "name": "scheduler health alert email and text contain no owner key and point to the admin portal",
+      "pass": true
+    },
+    {
+      "id": "S10b",
+      "name": "every notifySteve payload is redacted, including other legacy portal links",
+      "pass": true
+    },
+    {
+      "id": "S10c",
+      "name": "any other k= query value in a founder alert is redacted, first or later in the query",
+      "pass": true
+    },
+    {
+      "id": "S10d",
+      "name": "the scheduler health alert is built without an owner link (no redaction needed)",
+      "pass": true
+    },
+    {
+      "id": "S11a",
+      "name": "operator and non-operator sign-in requests return byte-identical status and body",
+      "pass": true
+    },
+    {
+      "id": "S11b",
+      "name": "rate-limit spend is identical for both paths (per address and per network)",
+      "pass": true,
+      "detail": {
+        "perAddress": [
+          202,
+          202,
+          202,
+          202
+        ],
+        "perNetwork": [
+          202,
+          202,
+          202,
+          202,
+          202,
+          429
+        ]
+      }
+    },
+    {
+      "id": "S16a",
+      "name": "operator sign-in email says it is for operations; owner email unchanged; responses still uniform with real delivery",
+      "pass": true
+    },
+    {
+      "id": "S11c",
+      "name": "operator and owner sessions stay separate",
+      "pass": true
+    },
+    {
+      "id": "S11d",
+      "name": "with context.waitUntil the operator link is sent after the response: operator and non-operator requests take the same time",
+      "pass": true,
+      "detail": {
+        "opMedianMs": 0.1,
+        "otherMedianMs": 0.08,
+        "providerDelayMs": 150
+      }
+    },
+    {
+      "id": "S11e",
+      "name": "a deferred delivery failure keeps the uniform 202, marks the link delivery_failed and logs no address; without waitUntil the failure is still 503",
+      "pass": true
+    },
+    {
+      "id": "S15a",
+      "name": "a fresh healthy signup with all four channels has zero actionable issues",
+      "pass": true
+    },
+    {
+      "id": "B07-390",
+      "name": "admin search, status filter and overview counts cover all customers (390)",
+      "pass": true,
+      "detail": {
+        "count": "1 matching · 70 loaded of 70 customers"
+      }
+    },
+    {
+      "id": "B13-390",
+      "name": "System shows readable step names, a next step for each failing step and a stale-run warning (390)",
+      "pass": true
+    },
+    {
+      "id": "B14-390",
+      "name": "Stop-service dialog: dismiss says Keep service, Stop service waits for a reason (390)",
+      "pass": true
+    },
+    {
+      "id": "B07-1440",
+      "name": "admin search, status filter and overview counts cover all customers (1440)",
+      "pass": true,
+      "detail": {
+        "count": "1 matching · 70 loaded of 70 customers"
+      }
+    },
+    {
+      "id": "B13-1440",
+      "name": "System shows readable step names, a next step for each failing step and a stale-run warning (1440)",
+      "pass": true
+    },
+    {
+      "id": "B14-1440",
+      "name": "Stop-service dialog: dismiss says Keep service, Stop service waits for a reason (1440)",
+      "pass": true
+    },
+    {
+      "id": "B07L",
+      "name": "above 500 customers the first 500 load automatically, the scope is disclosed, and Load more reaches the rest",
+      "pass": true,
+      "detail": {
+        "automatic": 10,
+        "afterLoadMore": 11
+      }
+    },
+    {
+      "id": "B07S",
+      "name": "while customer detail is loading, a refresh never draws the trimmed list row or its actions",
+      "pass": true
+    },
+    {
+      "id": "B12-paused-390",
+      "name": "desk Home of a paused workspace shows no setup to-dos (390)",
+      "pass": true
+    },
+    {
+      "id": "B12-cancelled-390",
+      "name": "desk Home of a cancelled workspace shows no setup to-dos (390)",
+      "pass": true
+    },
+    {
+      "id": "B12-paused-1440",
+      "name": "desk Home of a paused workspace shows no setup to-dos (1440)",
+      "pass": true
+    },
+    {
+      "id": "B12-cancelled-1440",
+      "name": "desk Home of a cancelled workspace shows no setup to-dos (1440)",
+      "pass": true
+    },
+    {
+      "id": "B00",
+      "name": "browser runs had no page errors, no unhandled API route and no external request",
+      "pass": true
+    },
+    {
+      "id": "N00",
+      "name": "no physical or unexpected outbound request was attempted",
+      "pass": true
+    }
+  ]
+}
