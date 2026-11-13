@@ -62,7 +62,7 @@
               </div>
               <div class="row">
                 <div class="form-group"><label class="form-label" for="phone">Your contact cell <span class="required-mark" aria-hidden="true">*</span></label><input class="form-input" id="phone" name="phone" required type="tel" placeholder="(713) 555-0100" autocomplete="tel" aria-describedby="phone-hint"><p id="phone-hint" class="hint">Your contact details and callback destination.</p></div>
-                <div class="form-group"><label class="form-label" for="website">Business website <small>Optional</small></label><input class="form-input" id="website" name="website" type="url" placeholder="https://yourbusiness.com" aria-describedby="website-hint"><p id="website-hint" class="hint">The site where you want customers to find your chat.</p></div>
+                <div class="form-group"><label class="form-label" for="website">Business website <small>Optional</small></label><input class="form-input" id="website" name="website" type="text" inputmode="url" autocomplete="url" autocapitalize="none" spellcheck="false" placeholder="yourbusiness.com" aria-describedby="website-hint"><p id="website-hint" class="hint">The site where you want customers to find your chat.</p></div>
               </div>
             </div>
             <div class="form-section">
@@ -79,9 +79,9 @@
                 </div>
               </section>
             </div>
-            <details id="plan-email-preferences" class="setup-details" data-setup-disclosure><summary><strong>Plans &amp; email preferences</strong><small>Optional. No payment is taken here.</small></summary><div class="details-content">
+            <details id="plan-email-preferences" class="setup-details" data-setup-disclosure><summary><strong>Plans &amp; email preferences</strong><small id="plan-summary">Optional. No plan chosen yet. No payment is taken here.</small></summary><div class="details-content">
               <p class="form-label">Preferred service plan</p>
-              <div class="plans-pick"><label><input type="radio" name="plan" value="starter"><div><b>Coverage</b><small>$99 / month</small></div></label><label class="on"><input type="radio" name="plan" value="growth" checked><div><b>Follow-through</b><small>$249 / month</small></div></label></div>
+              <div class="plans-pick"><label><input type="radio" name="plan" value="starter"><div><b>Coverage</b><small>$99 / month</small></div></label><label><input type="radio" name="plan" value="growth"><div><b>Follow-through</b><small>$249 / month</small></div></label><label class="plan-later on"><input type="radio" name="plan" value="none" checked><div><b>Decide later</b><small>No plan is saved until you choose one</small></div></label></div>
               <p id="plan-preference-note" class="hint" role="status" hidden></p><p class="hint">Save the plan you’re interested in. You’ll review the service, included usage and payment terms before starting paid service.</p>
               <p class="form-label label-spacing" id="email-preference-label">Email updates <small>Optional</small></p><label class="email-preference" for="setup-marketing"><input type="checkbox" id="setup-marketing"><span>Email me practical tips, product updates and offers from Machines &amp; Cloud. Unsubscribe anytime.</span></label><p class="hint">You can finish setup either way. <a href="privacy-policy.html">Privacy Policy</a></p>
             </div></details>

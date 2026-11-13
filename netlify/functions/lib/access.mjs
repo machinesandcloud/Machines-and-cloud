@@ -7,7 +7,7 @@ import { normalizeAccountEmail, findVerifiedAccount, strictRead } from "./accoun
 import { intakeBindingForEmail, adoptIntake, marketingState, saveMarketingPreference, INTAKE_GOALS, INTAKE_CHANNELS } from "./intake.mjs";
 
 export class AccessError extends Error {
-  constructor(code, message, status = 400) { super(message); this.code = code; this.status = status; }
+  constructor(code, message, status = 400, retryAfter = 0) { super(message); this.code = code; this.status = status; if (retryAfter > 0) this.retryAfter = retryAfter; }
 }
 export const accessHash = value => createHash("sha256").update(value).digest("hex");
 const stamp = () => new Date().toISOString();
@@ -57,10 +57,11 @@ async function spendRate(key, limit, duration) {
   const allowed = await atomicUpdate("access_rate", key, previous => {
     const now = Date.now();
     const row = previous && previous.until > now ? previous : { count: 0, until: now + duration };
-    if (row.count >= limit) return { result: false };
+    // A refusal says when this window ends, so the page can say how long to wait instead of inviting failing retries.
+    if (row.count >= limit) return { result: { retryAfter: Math.max(1, Math.ceil((row.until - now) / 1000)) } };
     return { value: { count: row.count + 1, until: row.until }, result: true };
   });
-  if (!allowed) throw new AccessError("rate_limited", "Please wait before requesting another sign-in email.", 429);
+  if (allowed !== true) throw new AccessError("rate_limited", "Please wait before requesting another sign-in email.", 429, allowed?.retryAfter || 0);
 }
 
 export async function requestAccessLink(emailValue, ip, planValue, intakeToken, purpose = "onboarding") {

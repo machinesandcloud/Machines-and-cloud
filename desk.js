@@ -920,7 +920,9 @@
     var next,rows=(setup.connectionJourney?.channels||[]).filter(function(row){return row.requested||row.retained;}),blockers=setup.channels?.web?.blockers||[];
     var modelUnavailable=blockers.some(function(row){return row.id==='model';}),practiceAvailable=!modelUnavailable&&(!d.aiAllowance||d.aiAllowance.private.remaining>0);
     if(cfgDirty||cfgConflict||cfgBusy)next={title:cfgConflict?'Review your saved changes':cfgBusy?'Your changes are being saved':'Finish your business edits',detail:cfgConflict?'Your draft is kept. Compare it with the latest saved details before continuing.':cfgBusy?'Any newer typing stays in your draft.':'Save your draft, then review the answers customers should hear.',label:'Open business details',tab:'know'};
-    else if(setup.connectionPreparation?.eligible===true&&setup.connectionPreparation.prepared!==true)next={title:'Prepare your services',detail:'Choose your services and website once, then review the answers your front desk will use.',label:'Prepare my services',tab:'setup',anchor:'setupGuide'};
+    // Only an owner with no saved service choices still has to choose them (the same rule as the Connections form in
+    // desk-setup-guide.js hasPreparationForm). Choices saved during onboarding go straight to their connection steps below.
+    else if(setup.connectionPreparation?.eligible===true&&setup.connectionPreparation.prepared!==true&&!setup.connectionPreparation.selectionSaved&&!(setup.connectionPreparation.desiredChannels||[]).length)next={title:'Prepare your services',detail:'Choose your services and website once, then review the answers your front desk will use.',label:'Prepare my services',tab:'setup',anchor:'setupGuide'};
     else if(preferenceDirty)next={title:'Finish your connection choices',detail:'Your current choices are kept on this page. Save them or return to your saved choices.',label:'Review connection choices',tab:'setup',anchor:'connectionPreferencesDetails'};
     else {
       var ownerRows=rows.filter(function(row){return row.responsibility==='customer'&&row.action&&row.action.kind!=='wait';});

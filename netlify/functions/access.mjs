@@ -2,8 +2,8 @@ import { AccessError, accessOriginAllowed, requestAccessLink, exchangeAccessToke
 import { IntakeError, attachIntake } from "./lib/intake.mjs";
 import { normalizeAccountEmail } from "./lib/accounts.mjs";
 export const config = { path: "/api/access" };
-const reply = (body, status = 200, cookies = []) => {
-  const headers = new Headers({ "Cache-Control": "no-store", "Referrer-Policy": "no-referrer" });
+const reply = (body, status = 200, cookies = [], extra = {}) => {
+  const headers = new Headers({ "Cache-Control": "no-store", "Referrer-Policy": "no-referrer", ...extra });
   for (const cookie of cookies) headers.append("Set-Cookie", cookie);
   return Response.json(body, { status, headers });
 };
@@ -65,7 +65,7 @@ export default async (req, context) => {
     if (body.action === "sign_out") return reply(await revokeAccessSession(session), 200, ownerCookieSessionHash(req) === session.sessionHash ? clearOwnerSessionCookies(req) : []);
     return reply({ error: "invalid_action" }, 400);
   } catch (error) {
-    if (error instanceof AccessError || error instanceof IntakeError) return reply({ error: error.code, message: error.message }, error.status);
+    if (error instanceof AccessError || error instanceof IntakeError) return reply({ error: error.code, message: error.message, ...(error.retryAfter ? { retryAfter: error.retryAfter } : {}) }, error.status, [], error.retryAfter ? { "Retry-After": String(error.retryAfter) } : {});
     console.error("access operation unavailable");
     return reply({ error: "access_unavailable", message: "We could not confirm this request. Please try again; if a sign-in link was used, request a new one." }, 503);
   }

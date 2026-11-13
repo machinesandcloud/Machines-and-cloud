@@ -91,7 +91,9 @@ async function contextFor(options = {}) {
   return context;
 }
 async function verify(page, email) {
-  await page.locator('#access-send').click(); await page.locator('#access-status').filter({ hasText: 'No email was sent' }).waitFor();
+  // PRA-ONB-07: after a homepage inquiry the link was already requested automatically; otherwise the owner presses Send.
+  if (await page.locator('#access-send').isVisible()) await page.locator('#access-send').click();
+  await page.locator('#access-status').filter({ hasText: 'No email was sent' }).waitFor();
   const delivery = await store.get('access_outbox', accessHash(email)); if (!delivery) throw new Error('No synthetic mailbox link');
   const before = result.requests.filter(row => row.path === '/api/access' && row.action === 'exchange').length;
   await page.goto(delivery.link); await page.locator('#ob').waitFor({ state: 'visible' });
@@ -178,7 +180,8 @@ try {
   check('Pending capture blocks duplicate submissions accessibly', await page.locator('#signup-intake').getAttribute('aria-busy') === 'true' && captured.length === captureBefore + 3);
   release(); holdCapture = null; await page.waitForURL('**/onboard.html'); await page.locator('#access-gate').waitFor();
   check('Successful retry reuses one submission and redirects only after durable save', new Set(captured.slice(captureBefore).map(row => row.submissionId)).size === 1 && (await store.list('prospects')).length === 1 && (await store.list('intake_handoffs')).length === 1);
-  check('Next page carries email without PII or handoff in current address and sends nothing automatically', await page.locator('#access-email').inputValue() === email && !new URL(page.url()).search && !new URL(page.url()).hash && (await store.list('access_outbox')).length === 0 && await page.locator('#intake-notice').isVisible());
+  await page.locator('#access-confirmation').waitFor({ state: 'visible' });
+  check('Next page carries email without PII or handoff in current address and requests exactly one sign-in link automatically', await page.locator('#access-email').inputValue() === email && !new URL(page.url()).search && !new URL(page.url()).hash && (await store.list('access_outbox')).length === 1 && !!(await store.get('access_outbox', accessHash(email))) && result.requests.filter(row => row.path === '/api/access' && row.action === 'request_link').length === 1 && await page.locator('#intake-notice').isVisible());
   await verify(page, email);
   check('Verified questionnaire keeps preliminary name/business/goal and optional marketing unchecked', await page.locator('#name').inputValue() === 'QA Saved Owner' && await page.locator('#business').inputValue() === 'QA Saved Air' && await page.locator('#primaryGoal').inputValue() === 'missed_calls' && !await page.locator('#setup-marketing').isChecked());
   await shotElement(page, '#ob', 'verified-first-step-390');

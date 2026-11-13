@@ -68,10 +68,12 @@ try {
     await screenshot(page.locator('#signup-intake'), `intake-${width}`);
     await page.locator('#intake-submit').click(); await page.waitForURL('**/onboard.html');
     check(`${width}: saves once and handoff URL is scrubbed without personal information`, s.requests.filter(r => r.path === '/api/intake').length === 1 && new URL(page.url()).search === '' && new URL(page.url()).hash === '' && !page.url().includes('Avery'));
-    check(`${width}: next page carries email but sends no automatic sign-in email`, await page.locator('#access-email').inputValue() === email && !s.requests.some(r => r.path === '/api/access'));
-    await page.locator('#access-send').click();
+    // PRA-ONB-07: Continue to setup is the request for the link; the next page sends it once without a second button.
     await page.waitForFunction(() => document.querySelector('#access-title').textContent === 'Check your email' && !document.querySelector('#access-confirmation').hidden);
-    check(`${width}: explicit sign-in request carries opaque handoff and same email`, s.requests.at(-1).body.action === 'request_link' && s.requests.at(-1).body.email === email && s.requests.at(-1).body.intake === handoff);
+    check(`${width}: next page requests exactly one sign-in link for the inquiry email`, await page.locator('#access-email').inputValue() === email && s.requests.filter(r => r.path === '/api/access' && r.body?.action === 'request_link').length === 1);
+    check(`${width}: automatic sign-in request carries opaque handoff and same email`, s.requests.at(-1).body.action === 'request_link' && s.requests.at(-1).body.email === email && s.requests.at(-1).body.intake === handoff);
+    await page.reload(); await page.locator('#access-form').waitFor({ state: 'visible' });
+    check(`${width}: reloading the page does not send another sign-in email`, s.requests.filter(r => r.path === '/api/access' && r.body?.action === 'request_link').length === 1 && /already sent/.test(await page.locator('#access-intro').innerText()));
     await page.goto(base + '/onboard.html#verify=fixture-token'); await page.locator('#ob').waitFor({ state: 'visible' });
     check(`${width}: email-link proof exchanges automatically once without another button`, s.requests.filter(r => r.body?.action === 'exchange').length === 1 && !await page.locator('#access-verify').isVisible() && new URL(page.url()).hash === '');
     check(`${width}: verified answers carry forward and email is readonly`, await page.locator('#name').inputValue() === 'Avery Owner' && await page.locator('#business').inputValue() === 'Bayou Service' && await page.locator('#email').getAttribute('readonly') !== null && await page.locator('#primaryGoal').inputValue() === 'missed_calls');
@@ -86,8 +88,8 @@ try {
     for (const plan of ['starter', 'growth']) {
       const s = await fixture('plan-intent-' + plan), p = s.page; await p.goto(base + '/?plan=' + plan + '#pilot'); await s.fill(); await p.locator('#intake-submit').click(); await p.waitForURL('**/onboard.html?plan=' + plan);
       check(`${plan}: public plan intent survives capture without personal information in query`, new URL(p.url()).search === '?plan=' + plan && await p.locator('input[name="plan"]:checked').inputValue() === plan);
-      await p.locator('#access-send').click(); await p.waitForFunction(() => document.querySelector('#access-title').textContent === 'Check your email' && !document.querySelector('#access-confirmation').hidden);
-      check(`${plan}: explicit secure-link request carries preserved current plan preference`, s.requests.at(-1).body.plan === plan && s.requests.at(-1).body.intake === handoff); await s.context.close();
+      await p.waitForFunction(() => document.querySelector('#access-title').textContent === 'Check your email' && !document.querySelector('#access-confirmation').hidden);
+      check(`${plan}: automatic secure-link request carries preserved current plan preference`, s.requests.at(-1).body.plan === plan && s.requests.at(-1).body.intake === handoff); await s.context.close();
     }
   }
   {

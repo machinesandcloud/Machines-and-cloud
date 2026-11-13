@@ -22,6 +22,13 @@ function slugify(name, site) {
   const base = (name || hostOf(site) || "shop").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 32) || "shop";
   return base + "-" + id(2);
 }
+// Owners type their site the way they know it ("bayouair.com", "www.bayouair.com"). A bare domain becomes https;
+// anything else is kept as typed, exactly as before.
+function normalizeWebsiteInput(value) {
+  const text = s(value, 200);
+  if (!text || text.length > 192 || /\s/.test(text) || /^[a-z][a-z0-9+.-]*:(?!\d)/i.test(text) || /^[/\\]/.test(text)) return text;
+  try { const url = new URL("https://" + text), labels = url.hostname.split("."); return !url.username && !url.password && labels.length > 1 && labels.every(Boolean) && /[a-z]/i.test(labels.at(-1)) ? "https://" + text : text; } catch { return text; }
+}
 function hostOf(u) { try { return new URL(u.startsWith("http") ? u : "https://" + u).hostname.replace(/^www\./, "").split(".")[0]; } catch { return ""; } }
 
 const CORS = (origin) => (origin ? { "Access-Control-Allow-Origin": origin, "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type, Authorization", Vary: "Origin" } : {});
@@ -65,7 +72,7 @@ async function handle(req) {
     return json({ error: "workspace_stopped", slug: existing.slug, portal: `${accessSite()}/desk.html?c=${encodeURIComponent(existing.slug)}`, status: existing.status, reopen: { available: allowed, configurationRevision: allowed ? configurationRevision(existing) : null }, message: allowed ? "This email already has a stopped workspace. Reopen it to keep your saved records and answers. A second workspace is not created." : "This email already has a stopped workspace. Contact Machines & Cloud support to reopen it. A second workspace is not created." }, 409, { ...CORS(origin), "Cache-Control": "no-store" });
   }
   if (existing) return response(existing, { existing: true });
-  const website = s(b.website, 200);
+  const website = normalizeWebsiteInput(b.website);
   const phone = e164(s(b.phone, 30));
   if (!s(b.name) || !s(b.business)) return json({ error: "missing_fields" }, 400);
   if (!/^\+1\d{10}$/.test(phone)) return json({ error: "missing_fields", field: "owner.phone", message: "Add a valid cell number for callback requests. Phone and text service remain inactive until separately verified." }, 400);
@@ -85,7 +92,7 @@ async function handle(req) {
   const c = newClient({ slug: slugify(s(b.business), website), ownerKey: secret(), owner: { name: s(b.name), email, phone }, business: { name: s(b.business, 120), website } });
   if (b.primaryGoal !== undefined && b.primaryGoal !== "" && !INTAKE_GOALS.includes(b.primaryGoal)) return json({ error: "invalid_goal" }, 400);
   if (b.desiredChannels !== undefined && (!Array.isArray(b.desiredChannels) || b.desiredChannels.length > 4 || new Set(b.desiredChannels).size !== b.desiredChannels.length || b.desiredChannels.some(value => !INTAKE_CHANNELS.includes(value)))) return json({ error: "invalid_channels" }, 400);
-  c.onboarding = { version: 1, verifiedEmail: email, verifiedAt: session.createdAt, primaryGoal: b.primaryGoal || "", desiredChannels: b.desiredChannels || ["web"], ...(phoneSetupMode ? { phoneSetupMode } : {}), ...(b.setupVersion === "2" ? { experienceVersion: 2 } : {}) };
+  c.onboarding = { version: 1, planChoice: 1, verifiedEmail: email, verifiedAt: session.createdAt, primaryGoal: b.primaryGoal || "", desiredChannels: b.desiredChannels || ["web"], ...(phoneSetupMode ? { phoneSetupMode } : {}), ...(b.setupVersion === "2" ? { experienceVersion: 2 } : {}) };
   c.channels = { web: { active: false }, voice: { active: false }, sms: { active: false } };
   const bz = c.business;
   Object.assign(bz, {
@@ -94,7 +101,9 @@ async function handle(req) {
     spanish: b.spanish !== false && b.spanish !== "no", licenses: s(b.licenses, 200), googlePlaceId: s(b.googlePlaceId, 120), reviewLink: s(b.reviewLink, 300), payLink: s(b.payLink, 300),
   });
   c.owner = { ...c.owner, name: s(b.name) || c.owner.name, phone: e164(s(b.phone, 30)) || c.owner.phone, backupPhone: e164(s(b.backupPhone, 30)) };
-  c.plan = ["starter", "growth", "pro"].includes(b.plan) ? b.plan : "growth";
+  // Record only a plan the owner actually picked. "none" means no preference yet; it is not a paid plan and never
+  // defaults the owner to Follow-through. Usage views keep their existing fallback for an unknown plan.
+  c.plan = ["starter", "growth", "pro"].includes(b.plan) ? b.plan : "none";
   c.services = lines(b.services, 60);
   c.fees = lines(b.fees, 30).map((line) => { const m = line.match(/^(.*?)[:\-–]\s*(\$?[\d,.]+[^(]*)(?:\((.*)\))?$/); return m ? { label: m[1].trim(), amount: m[2].trim(), note: (m[3] || "").trim() } : { label: line, amount: "", note: "" }; });
   c.windows = lines(b.windows, 8).length ? lines(b.windows, 8) : c.windows;

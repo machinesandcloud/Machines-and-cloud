@@ -3,15 +3,19 @@
   var form = document.getElementById('ob'), steps = [].slice.call(form.querySelectorAll('fieldset')), pills = [].slice.call(document.querySelectorAll('.ob-steps span'));
   var i = 0, back = document.getElementById('back'), next = document.getElementById('next'), err = document.getElementById('err');
   var q = new URLSearchParams(location.search);
-  var PLAN_IDS = ['starter', 'growth'], retiredPlanHint = false;
+  var PLAN_IDS = ['starter', 'growth'], PLAN_NAMES = { starter: 'Coverage', growth: 'Follow-through' }, retiredPlanHint = false;
+  // No paid plan is ever chosen for the owner: without a choice (from the plans link or this control) the saved
+  // preference is "none", shown as Decide later.
   function selectPlan(plan) {
-    var selected = PLAN_IDS.indexOf(plan) >= 0 ? plan : 'growth';
+    var selected = PLAN_IDS.indexOf(plan) >= 0 ? plan : 'none';
     retiredPlanHint = plan === 'pro';
     form.querySelectorAll('input[name=plan]').forEach(function (field) { field.checked = field.value === selected; });
     var note = document.getElementById('plan-preference-note');
     if (note) { note.hidden = plan !== 'pro'; note.textContent = plan === 'pro' ? 'Choose Coverage or Follow-through below, or talk with us about Enterprise. Your selection saves a preference; you’ll review any paid service before it starts.' : ''; }
     var preferences = document.getElementById('plan-email-preferences'); if (preferences && plan === 'pro') preferences.open = true;
     form.querySelectorAll('.plans-pick label').forEach(function (label) { label.classList.toggle('on', label.querySelector('input').checked); });
+    var summary = document.getElementById('plan-summary');
+    if (summary) summary.textContent = PLAN_NAMES[selected] ? 'Preferred plan: ' + PLAN_NAMES[selected] + '. No payment is taken here.' : 'Optional. No plan chosen yet. No payment is taken here.';
   }
   function choosePlan() { selectPlan(new URLSearchParams(location.search).get('plan')); }
   choosePlan();
@@ -122,10 +126,21 @@
       if (intakeToken === storedIntake.handoff) intakeSaved = storedIntake;
     }
   } catch (error) { /* An opaque URL handoff still works without browser storage. */ }
+  // The owner typed this email on the homepage a moment ago, in this tab, and chose Continue to setup. That choice is
+  // the request for the sign-in link, so it is sent once without a second button. Only this tab's own saved inquiry
+  // triggers it (an #intake link alone carries no email), the same rate limits apply, and a reload never sends again.
+  var autoRequestEmail = '';
   if (intakeToken) {
     intakeNotice.hidden = false; intakeNotice.textContent = 'Your business details are saved. Confirm your email to carry them into your setup.';
     document.getElementById('access-intro').textContent = 'We’ll email a secure link to the address you entered. Open it to continue with your saved details.';
-    if (intakeSaved && typeof intakeSaved.email === 'string') document.getElementById('access-email').value = intakeSaved.email;
+    if (intakeSaved && typeof intakeSaved.email === 'string') {
+      document.getElementById('access-email').value = intakeSaved.email;
+      // linkState records what actually happened to the automatic request: sent, uncertain (or interrupted) or failed.
+      var linkState = intakeSaved.linkState || '';
+      if (!linkState && !verifiedToken) { autoRequestEmail = intakeSaved.email; intakeNotice.textContent = 'Your business details are saved. Open the sign-in link we email you to carry them into your setup.'; }
+      else if (linkState === 'sent') { document.getElementById('access-intro').textContent = 'We already sent a secure link to the address you entered. Open it to continue with your saved details, or send another.'; accessSend.textContent = 'Send another sign-in link'; }
+      else if (linkState !== 'failed') { document.getElementById('access-intro').textContent = 'We may already have sent a secure link to the address you entered. Check your inbox first, or send another.'; accessSend.textContent = 'Send another sign-in link'; }
+    }
     else document.getElementById('access-intro').textContent = 'Enter the same email you used a moment ago. We’ll send a secure link to continue with your saved details.';
   }
   // A returning owner (the workspace's sign-in link sends mode=signin; the site's Sign in link sends signin=1) gets sign-in copy.
@@ -190,7 +205,9 @@
       }
       var data; try { data = await response.json(); } catch (error) { if (response.ok || response.status >= 500) throw connectionError(error, !response.ok); data = {}; }
       if (!response.ok) {
-        var failure = new Error(data.message || (response.status < 500 ? 'Machines & Cloud didn’t accept that request. Check your details and try again.' : 'We could not confirm that request. Please try again.')); failure.code = data.error; failure.status = response.status; failure.data = data; failure.field = data.field; if (data.error === 'replace_confirm') { failure.current = data.current; failure.next = data.next; } throw failure;
+        var failure = new Error(data.message || (response.status < 500 ? 'Machines & Cloud didn’t accept that request. Check your details and try again.' : 'We could not confirm that request. Please try again.')); failure.code = data.error; failure.status = response.status; failure.data = data; failure.field = data.field; if (data.error === 'replace_confirm') { failure.current = data.current; failure.next = data.next; }
+        var retryAfter = Number(data.retryAfter) || Number(response.headers.get('Retry-After')) || 0; if (retryAfter > 0) failure.retryAfter = Math.min(retryAfter, 86400);
+        throw failure;
       }
       return data;
     } finally { clearTimeout(timeout); }
@@ -263,6 +280,18 @@
   function escapeText(value){return String(value==null?'':value).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
   document.addEventListener('mc:channel-availability',function(){updateAvailabilityCopy();updateConnectionPreview();});
   updatePhoneSetup(); updateAvailabilityCopy(); updateConnectionPreview();
+  // Owners type their site the way they know it. A bare domain such as www.bayouair.com is saved as https://; the
+  // server applies the same rule. Anything that still is not a web address is rejected with the existing message.
+  function websiteValue(value) {
+    var text = String(value || '').trim();
+    if (!text || text.length > 192 || /\s/.test(text) || /^[a-z][a-z0-9+.-]*:(?!\d)/i.test(text) || /^[/\\]/.test(text)) return text;
+    try { var url = new URL('https://' + text), labels = url.hostname.split('.'); return !url.username && !url.password && labels.length > 1 && labels.every(Boolean) && /[a-z]/i.test(labels[labels.length - 1]) ? 'https://' + text : text; } catch (error) { return text; }
+  }
+  function validWebsite(value) {
+    if (/\s/.test(value)) return false;
+    try { var url = new URL(value); return (url.protocol === 'https:' || url.protocol === 'http:') && !url.username && !url.password && /^[^.]+(?:\.[^.]+)+$/.test(url.hostname); } catch (error) { return false; }
+  }
+  form.elements.website.addEventListener('blur', function () { var field = form.elements.website, value = websiteValue(field.value); if (value !== field.value.trim() && validWebsite(value)) { field.value = value; scheduleSave(); } });
   function collect() {
     document.getElementById('hoursTable').value = JSON.stringify(hoursTable());
     document.getElementById('appointmentHoursTable').value = appointmentSeeded ? JSON.stringify(readAppointmentTable()) : '';
@@ -271,6 +300,7 @@
       if (key === 'leadSources' || key === 'desiredChannels') (fields[key] = fields[key] || []).push(value); else fields[key] = value;
     });
     fields.trade = effectiveTrade(); delete fields.customTrade;
+    if (typeof fields.website === 'string') fields.website = websiteValue(fields.website);
     if (!fields.leadSources) fields.leadSources = [];
     if (!fields.desiredChannels) fields.desiredChannels = [];
     return fields;
@@ -353,7 +383,7 @@
       });
     });
     var savedPlan = fields.plan;
-    selectPlan(PLAN_IDS.indexOf(savedPlan) >= 0 || savedPlan === 'pro' ? savedPlan : retiredPlanHint ? 'pro' : form.elements.plan.value);
+    selectPlan(PLAN_IDS.indexOf(savedPlan) >= 0 || savedPlan === 'pro' || savedPlan === 'none' ? savedPlan : retiredPlanHint ? 'pro' : form.elements.plan.value);
     if (fields.hoursTable) { try { var hours = JSON.parse(fields.hoursTable); hoursTouched = customHours(hours); if (hoursTouched) fillBusinessTable(hours); else fillHours(); } catch (error) { fillHours(); } } else fillHours();
     appointmentMode.value = fields.appointmentHoursMode === 'custom' ? 'custom' : 'business'; appointmentSeeded = false;
     if (fields.appointmentHoursTable) { try { fillAppointmentTable(JSON.parse(fields.appointmentHoursTable)); appointmentSeeded = true; } catch (error) { fillAppointmentTable(null); } } else fillAppointmentTable(null);
@@ -438,15 +468,33 @@
   function accessMessage(message, isError) {
     gateStatus.classList.remove('sr-only'); gateStatus.textContent = message || ''; if (isError) gateStatus.setAttribute('data-error', 'true'); else gateStatus.removeAttribute('data-error');
   }
+  function waitShort(seconds) { return seconds > 90 ? (seconds < 7200 ? Math.ceil(seconds / 60) + ' min' : Math.ceil(seconds / 3600) + ' h') : seconds + 's'; }
   function updateEmailActions() {
     var seconds = Math.max(0, Math.ceil((resendNotBefore - Date.now()) / 1000));
     accessResend.disabled = !!linkRequestPending || seconds > 0;
-    accessResend.textContent = linkRequestPending ? 'Sending link…' : seconds ? 'Resend in ' + seconds + 's' : 'Resend sign-in link';
+    accessResend.textContent = linkRequestPending ? 'Sending link…' : seconds ? 'Resend in ' + waitShort(seconds) : 'Resend sign-in link';
     accessChangeEmail.disabled = !!linkRequestPending;
     if (!seconds && resendTimer) { clearInterval(resendTimer); resendTimer = null; }
   }
-  function startResendWait() {
-    clearInterval(resendTimer); resendNotBefore = Date.now() + 30000;
+  function recordIntakeLink(email, state) {
+    // Only the inquiry's own address: a link sent to a different email says nothing about this inquiry.
+    if (!intakeSaved || String(email || '').trim().toLowerCase() !== String(intakeSaved.email || '').trim().toLowerCase()) return;
+    if (state !== 'sent' && intakeSaved.linkState === 'sent') return; // an earlier link really was sent
+    intakeSaved.linkState = state;
+    try { sessionStorage.setItem(intakeStorageKey, JSON.stringify(intakeSaved)); } catch (error) { /* This page still knows. */ }
+  }
+  // A refused first request keeps Send closed for the same address until the server limit ends.
+  var sendNotBefore = 0, sendHoldEmail = '', sendTimer = null;
+  function updateSendAction() {
+    if (linkRequestPending) return;
+    var seconds = Math.max(0, Math.ceil((sendNotBefore - Date.now()) / 1000)), held = seconds > 0 && accessEmail.value.trim().toLowerCase() === sendHoldEmail;
+    accessSend.disabled = held; accessSend.textContent = held ? 'Send again in ' + waitShort(seconds) : accessSendLabel;
+    if (!seconds && sendTimer) { clearInterval(sendTimer); sendTimer = null; }
+  }
+  function holdSend(email, waitMs) { sendHoldEmail = String(email || '').trim().toLowerCase(); sendNotBefore = Date.now() + waitMs; clearInterval(sendTimer); sendTimer = setInterval(updateSendAction, 1000); }
+  accessEmail.addEventListener('input', updateSendAction);
+  function startResendWait(waitMs) {
+    clearInterval(resendTimer); resendNotBefore = Math.max(resendNotBefore, Date.now() + (waitMs || 30000));
     resendTimer = setInterval(updateEmailActions, 1000); updateEmailActions();
   }
   function resetEmailConfirmation(restoreCopy) {
@@ -466,6 +514,21 @@
     accessMessage(message, state === 'unknown'); gateStatus.classList.toggle('sr-only', state !== 'unknown'); startResendWait();
     document.getElementById('access-title').focus();
   }
+  // The server says how long its sign-in email limit lasts. Say it in words and keep Resend closed until then.
+  // Daily limits can mean a wait of many hours, so waits of 2 hours or more are given in hours (rounded up).
+  function waitWords(seconds) { var minutes = Math.ceil(seconds / 60), hours = Math.ceil(seconds / 3600); return seconds < 90 ? Math.max(1, Math.ceil(seconds)) + ' seconds' : seconds < 7200 ? minutes + ' minutes' : hours + ' hours'; }
+  function rateLimited(error, isResend) {
+    var wait = waitWords(error.retryAfter);
+    if (isResend || emailState === 'email' || emailState === 'test_outbox') {
+      document.getElementById('access-title').textContent = 'Use the link we already sent';
+      document.getElementById('access-intro').textContent = 'You’ve asked for several sign-in links for';
+      accessMessage('You can request another link in ' + wait + '. Links we already sent still work for 20 minutes after they were sent, so check your inbox and spam folder first.', true);
+      startResendWait(error.retryAfter * 1000); gateStatus.focus();
+    } else {
+      accessMessage('Too many sign-in links were requested. Try again in ' + wait + '. If a link already arrived, you can use it now.', true); holdSend(accessEmail.value, error.retryAfter * 1000);
+      accessEmail.setAttribute('aria-describedby', 'access-status'); gateStatus.focus();
+    }
+  }
   async function sendAccessLink(email, isResend) {
     if (linkRequestPending || gate.hidden || (isResend ? accessConfirmation.hidden || Date.now() < resendNotBefore : accessForm.hidden)) return;
     var attempt = { generation: accessGeneration, email: email }; linkRequestPending = attempt;
@@ -478,13 +541,16 @@
       var result = await request('/api/access', 'POST', body);
       if (attempt.generation !== accessGeneration || linkRequestPending !== attempt) return;
       if (!result || result.ok !== true || !['email', 'test_outbox'].includes(result.delivery)) throw new Error('We couldn’t confirm whether your sign-in email was sent.');
-      showEmailConfirmation(email, result.delivery, result.message || (result.delivery === 'test_outbox' ? 'No email was sent.' : 'Your sign-in email is on its way.'));
+      recordIntakeLink(email, 'sent'); showEmailConfirmation(email, result.delivery, result.message || (result.delivery === 'test_outbox' ? 'No email was sent.' : 'Your sign-in email is on its way.'));
     } catch (error) {
       if (attempt.generation !== accessGeneration || linkRequestPending !== attempt) return;
+      recordIntakeLink(email, error.status ? 'failed' : 'uncertain');
       if (!error.status) {
         var uncertain = 'We couldn’t confirm whether ' + (isResend ? 'another email was' : 'the email was') + ' sent. Check your inbox before requesting another link.';
         if (emailState === 'email' || emailState === 'test_outbox') { accessMessage(uncertain, true); startResendWait(); gateStatus.focus(); }
         else showEmailConfirmation(email, 'unknown', uncertain);
+      } else if (error.code === 'rate_limited' && error.retryAfter > 0) {
+        rateLimited(error, isResend);
       } else {
         accessMessage(error.message, true);
         if (isResend) { startResendWait(); gateStatus.focus(); }
@@ -493,12 +559,12 @@
     } finally {
       if (attempt.generation === accessGeneration && linkRequestPending === attempt) {
         linkRequestPending = null; accessEmail.disabled = false; accessSend.disabled = false; accessSend.textContent = accessSendLabel;
-        gate.removeAttribute('aria-busy'); accessForm.removeAttribute('aria-busy'); updateEmailActions();
+        gate.removeAttribute('aria-busy'); accessForm.removeAttribute('aria-busy'); updateEmailActions(); updateSendAction();
       }
     }
   }
   accessForm.addEventListener('submit', function (event) {
-    event.preventDefault(); if (linkRequestPending || gate.hidden || accessForm.hidden || !accessForm.reportValidity()) return;
+    event.preventDefault(); if (linkRequestPending || gate.hidden || accessForm.hidden || accessSend.disabled || !accessForm.reportValidity()) return;
     sendAccessLink(accessEmail.value.trim(), false);
   });
   accessResend.addEventListener('click', function () { if (requestedEmail) sendAccessLink(requestedEmail, true); });
@@ -633,6 +699,7 @@
         if (openDays.length && !openDays.some(function (day) { return range[0] >= clockMinutes(table[day].open) && range[1] <= clockMinutes(table[day].close); })) return 'The window “' + offered[w] + '” falls outside your appointment hours. Adjust the window or choose different appointment hours above.';
       }
     }
+    if (value && field.name === 'website') return validWebsite(websiteValue(value)) ? '' : 'Enter your website address, such as yourbusiness.com, or leave this blank.';
     if (value && !field.checkValidity()) return field.type === 'url' ? 'Enter a full website address, such as https://yourbusiness.com, or leave this blank.' : 'Check this field and try again.';
     return '';
   }
@@ -756,6 +823,13 @@
   } else {
     try { session = sessionStorage.getItem(storageKey); } catch (error) { session = null; }
     var startupGeneration = accessGeneration;
-    if (session) signedIn().catch(function (error) { if (startupGeneration === accessGeneration) signInFailure(error); }); else gateOnly();
+    if (session) signedIn().catch(function (error) { if (startupGeneration === accessGeneration) signInFailure(error); });
+    else {
+      gateOnly();
+      if (autoRequestEmail && intakeSaved) {
+        recordIntakeLink(autoRequestEmail, 'pending'); // a reload while this is in flight never sends again
+        accessEmail.value = autoRequestEmail; sendAccessLink(autoRequestEmail, false);
+      }
+    }
   }
 })();

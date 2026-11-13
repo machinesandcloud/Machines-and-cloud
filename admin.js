@@ -22,7 +22,7 @@
   var brandMark = typeof window.MCBrandMark === 'function' ? window.MCBrandMark : function () { return ''; };
   function array(value) { return Array.isArray(value) ? value : []; }
   function label(value) { return String(value || 'Not recorded').replace(/_/g, ' '); }
-  function planLabel(value) { return ({ starter: 'Coverage', growth: 'Follow-through', enterprise: 'Enterprise', pro: 'Pro' })[value] || label(value); }
+  function planLabel(value) { return ({ starter: 'Coverage', growth: 'Follow-through', enterprise: 'Enterprise', pro: 'Pro', none: 'Not chosen yet' })[value] || label(value); }
   function date(value) { if (!value || !Number.isFinite(Date.parse(value))) return 'Not recorded'; return new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }).format(new Date(value)) + ' CT'; }
   function badge(value) { var good = ['live', 'active', 'connected', 'ready', 'succeeded', 'approved', 'healthy'].indexOf(value) >= 0, bad = ['failed', 'error', 'critical'].indexOf(value) >= 0, neutral = ['cancelled', 'archived', 'unavailable', 'disabled'].indexOf(value) >= 0; return '<span class="badge' + (good ? ' good' : bad ? ' bad' : neutral ? ' neutral' : ' warn') + '">' + esc(label(value)) + '</span>'; }
   function emptyState(title, detail, destination, cta) { return '<div class="empty"><span class="empty-icon" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4m8-4v4M8 12h8m-8 4h5"/></svg></span><h3>' + esc(title) + '</h3><p>' + esc(detail) + '</p>' + (destination ? '<button type="button" class="btn small" data-go="' + esc(destination) + '">' + esc(cta) + '</button>' : '') + '</div>'; }
