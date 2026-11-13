@@ -6,6 +6,7 @@ import { strictRead, normalizeAccountEmail } from "./accounts.mjs";
 import { isSupportedSelfServiceClient } from "./setup.mjs";
 import { deliveryTenant, mayDeliverManagedSMS } from "./managed-consent.mjs";
 import { arrivalInstant } from "./service-time.mjs";
+import { friendlyDate } from "./calendar.mjs";
 import { reserveManagedSMS, assertManagedSMSReservation, managedSMSBudgetPolicy, ManagedSMSBudgetError } from './managed-sms-budget.mjs';
 import { reserveManagedEmail, assertManagedEmailReservation, assertManagedEmailDispatchPolicy, managedEmailBudgetPolicy, ManagedEmailBudgetError } from './managed-email-budget.mjs';
 import { selfServiceAIProofPolicy } from './self-service-ai.mjs';
@@ -120,12 +121,14 @@ function clip(value, limit) {
   const cut = text.slice(0, limit - 3), space = cut.lastIndexOf(" ");
   return (space > limit / 2 ? cut.slice(0, space) : cut).replace(/[\s,.;:]+$/, "") + "...";
 }
+// PRA-COPY-10: a stored YYYY-MM-DD visit date reads "Sat, Nov 14" (America/Chicago); anything else is unchanged.
+const emailDate = value => friendlyDate(value, "en", { relative: false });
 export function ownerRequestHeadline(record, kind = "leads") {
   const issue = clip(record?.issue, 48), what = issue ? `: ${issue}` : "";
   if (kind === "bookings") {
     if (record.status === "cancelled") return `Visit cancelled${what}`;
     if (record.urgency === "emergency") return `EMERGENCY visit request${what}`;
-    const when = clip([record.date, record.window].filter(Boolean).join(" "), 32);
+    const when = clip([emailDate(record.date), record.window].filter(Boolean).join(", "), 32);
     const requested = record.status === "booked" && ["web", "sms", "call", "voice"].includes(record.channel);
     return `${requested ? "Visit request" : "Visit"}${when ? ": " + when : what}`;
   }
@@ -149,7 +152,7 @@ function ownerRecordBody(current, saved, kind, requestedVisit, changeLine = "") 
     `${saved.customer_name || "Customer"} ${saved.phone || ""}`,
     saved.issue || "",
     saved.address || "",
-    `${saved.date || saved.wanted || ""} ${saved.window || ""}`,
+    [saved.date ? emailDate(saved.date) : saved.wanted, saved.window].filter(Boolean).join(", "),
     ...(saved.urgency && saved.urgency !== "emergency" ? [`Urgency: ${String(saved.urgency).replace(/_/g, " ")}`] : []),
     ...(saved.language === "es" ? ["Language: Spanish"] : []),
     "Open your workspace to review and respond.",

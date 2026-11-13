@@ -191,7 +191,7 @@ try {
     await x.page.waitForFunction(() => document.getElementById('requestMessage').dataset.error === 'true'); await waitIdle(x.page, 'requestDialog');
     const first = msgEvents(await live(x.page)); const focus1 = await focusInfo(x.page);
     // Check -> no receipt -> Retry, which 503s again
-    await x.page.keyboard.press('Enter'); await x.page.waitForFunction(() => /No receipt is saved/.test(document.getElementById('requestMessage').textContent)); await waitIdle(x.page, 'requestDialog');
+    await x.page.keyboard.press('Enter'); await x.page.waitForFunction(() => /confirmed this action was saved/.test(document.getElementById('requestMessage').textContent)); await waitIdle(x.page, 'requestDialog');
     await live(x.page);
     x.state.fault = { kind: 'post:seen', status: 503 };
     const focus2 = await focusInfo(x.page); await x.page.keyboard.press('Enter');

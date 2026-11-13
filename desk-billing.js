@@ -54,7 +54,7 @@
     if(capacity?.version!==1||capacity.period!=='paid_invoice'||!limits||capacityUnits.some(function(unit){return !Number.isSafeInteger(limits[unit[0]])||limits[unit[0]]<0;}))throw new Error('The included usage could not be confirmed. Check the offer again before continuing.');
     var included=capacityUnits.filter(function(unit){return offer.services.includes(unit[1]);}).map(function(unit){return new Intl.NumberFormat('en-US').format(limits[unit[0]])+' '+unit[2].toLowerCase();});
     if(!included.length)return '';
-    return 'Included each paid billing period: '+included.join(', ')+'. Call legs round up separately; long texts may use several segments. AI text replies count when delivered.';
+    return 'Included each paid billing period: '+included.join(', ')+'. Each part of a call, such as a transfer, rounds up separately; a long text can count as more than one text. AI text replies count when delivered.';
   }
   function renderCapacity(){
     var panel=$('billingCapacity'),usage=state?.capacity,rows=$('billingCapacityRows'),selected=Array.isArray(state?.services)?state.services:[];rows.replaceChildren();panel.hidden=!usage?.metered||!capacityUnits.some(function(unit){return selected.includes(unit[1]);});if(panel.hidden)return;

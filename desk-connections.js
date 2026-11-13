@@ -192,7 +192,7 @@
     var operation = plan.operation, content = '<div class="connection-plan"><div class="connection-plan-heading"><div><h4>Approved setup progress</h4></div><span class="connection-badge">' + esc(operation ? labelState(operation.state) : plan.available ? 'Ready to review' : 'Not available yet') + '</span></div>';
     content += '<p>Your saved review covers only the services you approved. We prepare those connections in the background; other selected services wait for their own available review.</p>';
     if (operation) {
-      content += '<p role="status">' + esc(operation.detail) + '</p><ol class="connection-progress"><li>Business details saved</li><li>' + (d.phoneActivation?.operation?.state === 'number_acquired' ? 'Front desk number reserved' : operation.numberRequested ? 'Number request saved' : 'Approval saved; number setup queued') + '</li>';
+      content += '<p role="status">' + esc(operation.detail) + '</p><ol class="connection-progress"><li>Business details saved</li><li>' + (d.phoneActivation?.operation?.state === 'number_acquired' ? 'Front desk number reserved' : operation.numberRequested ? 'Number request saved' : 'Approval saved; we’re setting up your number') + '</li>';
       if ((operation.requestedChannels || plan.acceptedChannels || plan.requestedChannels).includes('voice')) content += '<li>' + esc(d.connections.voice.active ? 'Phone answering verified' : operation.voiceRequested ? 'Phone answering setup requested' : 'Phone answering follows number setup') + '</li>';
       if ((operation.requestedChannels || plan.acceptedChannels || plan.requestedChannels).includes('sms')) content += '<li>' + esc(d.connections.messaging.active ? 'Text messaging verified' : operation.messagingRequested ? 'Text registration requested' : 'Text registration follows number setup') + '</li>';
       content += '</ol>';
@@ -512,7 +512,7 @@
     privateReviewAction=null;
     if(action==='check_status'){if(connectionRefreshInFlight)return;if(document.activeElement===target)connectionRefreshFocus={connection:'check_status'};connectionRefreshStop();connectionRefreshInFlight=true;target.disabled=true;message.textContent='Checking saved connection status…';document.dispatchEvent(new CustomEvent('mc:desk-refresh'));return;}
     if (action === 'review_business' || action === 'try_frontdesk') return document.dispatchEvent(new CustomEvent('mc:desk-route', { detail: { tab: action === 'review_business' ? 'know' : 'test' } }));
-    if (action === 'cancel_setup') return review('Cancel connection setup?', '<p>We stop new setup and reconcile any number or services already requested. Your business details and customer records remain saved.</p>', 'Cancel setup', function () { request('cancel_service_onboarding', { expectedRevision: revision, operationId: data.serviceOnboarding.operation.id }); });
+    if (action === 'cancel_setup') return review('Cancel connection setup?', '<p>We stop new setup and clean up any number or services already requested. Your business details and customer records remain saved.</p>', 'Cancel setup', function () { request('cancel_service_onboarding', { expectedRevision: revision, operationId: data.serviceOnboarding.operation.id }); });
     if (action === 'review_setup') {
       var plan = data.serviceOnboarding, quote = plan.offer, chosen = (quote && quote.scopeChannels || plan.authorizableChannels || plan.requestedChannels).slice();
       if (!plan.available || !quote) return;
@@ -533,7 +533,7 @@
         request('request_service_onboarding', body);
       });
     }
-    if(action==='pause_services')return review('Pause your front desk?','<p>Calls, customer texts, chat and calendar updates pause. Existing carrier forwarding may still need to be switched off. Your records remain saved.</p>','Pause front desk',function(){request('pause');});
+    if(action==='pause_services')return review('Pause your front desk?','<p>Your front desk stops answering website chat, calls and texts, and Google Calendar updates pause. Calls may still ring your saved contact cell. Your Inbox, visits, settings and downloads keep working. Call forwarding on your phone does not change.</p>','Pause front desk',function(){request('pause');});
     if(action==='resume_services')return request('resume_services',{expectedRevision:revision});
     if (action === 'start_calendar') return reviewCalendarConnection(revision);
     if (action === 'finish_calendar' && calendarReturn) return request('complete_calendar_connection', calendarReturn);

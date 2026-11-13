@@ -1149,7 +1149,7 @@ export async function monthlyReport(c, month) {
     `Usage: ${usage.minutes || 0} of ${plan.minutes} call minutes, ${usage.texts || 0} of ${plan.texts} texts${overage ? ` (over the plan by $${overage.toFixed(2)})` : " (inside the plan)"}`,
     `What changed: ${changes} edits to what it knows, ${flags} conversations you flagged`,
     `Next month: ${c.nextMonthNote || "Steve reads your flagged conversations and tightens what it says; reply to this email with the one thing you want better."}`,
-    "", `Every conversation is on your portal. Reply to this email any time.`,
+    "", `Every conversation is in your workspace. Reply to this email any time.`,
   ].filter((x) => x !== "");
   const invoice = `Invoice: $${plan.price} plus $${overage.toFixed(2)} overage`;
   return { month: m, subject: `${name}: ${label} statement`, text: lines.join("\n"), invoice, stats: { ...(followthrough?{requestFollowthrough:followthrough}:{}), answered, textedBack, booked: mb.length, voicemailJobs, reviewsSent, positive, kept, promised: promised.length, emergencies, overage } };
@@ -1219,7 +1219,7 @@ export async function weeklyReport(c) {
     `Usage this month: ${u.minutes} of ${u.included.minutes} call minutes, ${u.texts} of ${u.included.texts} texts`,
     `Flags you raised: ${flags}. Changes to what it knows: ${changes}.`,
     quietDays ? `Quiet days: ${quietDays} (no calls, texts, or bookings)` : "",
-    "", `Every conversation is on your portal. Flag anything that reads wrong and Steve sees it the same day.`,
+    "", `Every conversation is in your workspace. Flag anything that reads wrong and our team reviews it the same day.`,
   ].filter((x) => x !== "");
   return { empty: false, subject: `${name}: your front desk, last 7 days`, text: lines.join("\n"), stats: { ...(followthrough?{requestFollowthrough:followthrough}:{}), calls, answered, textedBack, spamCalls, quietDays, actionable: actionable.length, bookable: bookable.length, voicemailJobs, booked: wb.length, bookedCustomers, rate, open: open.length, unbooked: unbooked.length, reasons, emergencies, spam, kept, missed } };
 }

@@ -61,7 +61,7 @@
       '<button type="button" class="connection-guide-link" id="intakeEdit">Edit saved details</button>';
   }
   var installation = {
-    wordpress:['Download the shop’s configured plugin ZIP and keep it zipped. Use one installation method if the snippet is already installed.','Open WordPress Plugins → Add New → Upload Plugin. Choose the ZIP, Install Now, then Activate Plugin.','Return to Machines & Cloud and choose Check published website. A download or self-report is not installation proof.'],
+    wordpress:['Download the shop’s configured plugin ZIP and keep it zipped. Use one installation method if the snippet is already installed.','Open WordPress Plugins → Add New → Upload Plugin. Choose the ZIP, Install Now, then Activate Plugin.','Return to Machines & Cloud and choose Check published website. Downloading the plugin does not confirm it is installed; the website check does.'],
     wix:['Open your Wix dashboard, then Settings → Custom Code.','Add the code below, choose All pages and Body – end.','Apply the change to your published site, then return to check this website.'],
     squarespace:['Open your Squarespace site’s Code Injection settings.','Paste the code below into Footer. Code Injection requires a plan that supports it.','Save your change, then return to check this website.'],
     webflow:['Open your Webflow site settings, then Custom code.','Paste the code below in Footer code, before the closing body tag.','Save and publish the site, then return to check this website.'],

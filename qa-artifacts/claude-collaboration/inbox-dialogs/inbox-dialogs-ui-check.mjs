@@ -223,7 +223,7 @@ try {
       const events = await live(x.page); assert.ok(events.some(e => e.id === 'requestMessage' && e.text === (events.at(-1)?.text)), 'error announced'); noRepeats(events, 'refused save');
       assert.equal((await focusUsable(x.page, 'after the refused save')).id, 'requestCheck', 'the next step is focused');
       await x.page.keyboard.press('Enter'); // the focused next step: Check saved action
-      await x.page.waitForFunction(() => /No receipt is saved/.test(document.getElementById('requestMessage').textContent)); await waitIdle(x.page, 'requestDialog');
+      await x.page.waitForFunction(() => /We haven’t confirmed this action was saved/.test(document.getElementById('requestMessage').textContent)); await waitIdle(x.page, 'requestDialog');
       assert.equal(await focusInfo(x.page).then(f => f.id), 'requestRetry', 'Retry is focused once offered');
       await x.page.keyboard.press('Enter');
       await x.page.waitForFunction(() => /Action saved/.test(document.getElementById('requestMessage').textContent)); await waitIdle(x.page, 'requestDialog');

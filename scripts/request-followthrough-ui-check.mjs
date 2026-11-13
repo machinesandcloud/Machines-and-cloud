@@ -148,7 +148,7 @@ if(phase.startsWith('visit-auth')){
       assert.equal(await x.page.locator('#portalContent').isVisible(),true);assert.equal(await x.page.locator('#visitDialog').isVisible(),true);
       assert.equal(await x.page.evaluate(()=>!!sessionStorage.getItem('mc-onboarding-session-v1')),true);
       assert.equal(await x.page.evaluate(slug=>!!sessionStorage.getItem('mc-owner-visit-pending-v1:'+slug),x.c.slug),true);
-      assert.match(await x.page.locator('#visitMessage').innerText(),/Retry saved change safely/i);
+      assert.match(await x.page.locator('#visitMessage').innerText(),/Your change may not have saved/i);
       await noProviderEffects(x);
     });
     await check('An old denied visit response after independent session expiry cannot replay recovery or restore private data',async()=>{

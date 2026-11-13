@@ -43,10 +43,12 @@ export function visitDate(dateStr, tz = "America/Chicago") {
 // A stored visit date: always YYYY-MM-DD in Houston time, never "today" or "tomorrow".
 export function isoDate(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; }
 export function normalizeDate(dateStr) { if (!dateStr) return ""; return isoDate(visitDate(dateStr)); }
-// "2026-10-21" -> "Tue Oct 21" (or "mañana"-style words in Spanish are handled by desk.mjs dateEs).
-export function friendlyDate(iso, lang = "en") {
+// "2026-10-21" -> "Tue, Oct 21" (or "mañana"-style words in Spanish are handled by desk.mjs dateEs).
+// { relative: false } never says "today"/"tomorrow": for text read later, such as owner emails.
+export function friendlyDate(iso, lang = "en", { relative = true } = {}) {
   const m = String(iso || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
   if (!m) return String(iso || "");
+  if (!relative && lang !== "es") return new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", weekday: "short", month: "short", day: "numeric" }).format(new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], 12)));
   const d = new Date(parseInt(m[1]), parseInt(m[2]) - 1, parseInt(m[3]));
   const today = visitDate("today"); today.setHours(0, 0, 0, 0); d.setHours(0, 0, 0, 0);
   const diff = Math.round((d - today) / 86400000);
