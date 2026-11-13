@@ -1,0 +1,64 @@
+diff --git a/embed.js b/embed.js
+index 286ad95..a954e90 100644
+--- a/embed.js
++++ b/embed.js
+@@ -40,7 +40,9 @@
+   // the visitor reads Spanish: the page language, the browser language, or the customer's own messages. Before config
+   // arrives only an explicitly Spanish page is trusted. The owner-only website setup check stays English.
+   var shopSpanish=null;
+-  function looksSpanish(t){return /[\u00bf\u00a1\u00f1\u00e1\u00e9\u00ed\u00f3\u00fa]|\b(?:hola|gracias|por favor|necesito|necesitamos|quiero|puede[ns]?|cita|ma[\u00f1n]ana|calentador|aire acondicionado|ayuda|fuga|buen[oa]s|tengo|servicio|casa)\b/i.test(String(t||''));}
++  // An accent or a single word is not enough: Houston names and streets (Jos\u00e9, Pe\u00f1a, Casa Grande) appear in English messages.
++  var ES_WORDS=/^(?:hola|gracias|favor|necesito|necesita|necesitamos|quiero|queremos|puede|pueden|cita|ma\u00f1ana|manana|hoy|calentador|aire|ayuda|fuga|agua|ba\u00f1o|bano|bueno|buenos|buenas|tengo|tiene|servicio|casa|el|la|los|las|mi|mis|con|para|por|que|una|se|est\u00e1|esta|cuanto|cu\u00e1nto|cuesta|cobran|arreglar|reparar|descompuso|funciona)$/;
++  function looksSpanish(t){t=String(t||'').toLowerCase();if(/[\u00bf\u00a1]/.test(t))return true;var words=t.match(/[a-z\u00e1\u00e9\u00ed\u00f3\u00fa\u00f1\u00fc]+/g)||[],hits=words.filter(function(w){return ES_WORDS.test(w);}).length;return hits>=2&&hits*4>=words.length||(hits===1&&words.length<=2);}
+   function visitorSpanish(){var page=/^es\b/i.test(String(document.documentElement.lang||'').trim());if(shopSpanish===false)return false;if(shopSpanish===null)return page;return page||/^es\b/i.test(String(navigator.language||''))||state.transcript.some(function(m){return m&&m.role==='user'&&looksSpanish(m.content);});}
+   function L(){return !setupCheck&&!setupInvalid&&visitorSpanish()?'es':'en';}
+   var TEXT={
+@@ -56,16 +58,16 @@
+       noRecovery:'We can\u2019t check a saved reply for this chat. Please contact the shop before sending the request again.',limit:'Chat has reached its daily limit. Please contact the shop directly using the details on this website.'},
+     es:{launch:'Escr\u00edbanos',dialog:'Chat',name:'Recepci\u00f3n',sub:'Recepci\u00f3n automatizada',close:'Cerrar',log:'Conversaci\u00f3n',retry:'Intentar de nuevo',placeholder:'Escriba su mensaje',input:'Su mensaje',send:'Enviar',check:'Revisar respuesta anterior',footer:'Si es urgente, use los datos de contacto del negocio en este sitio web.',greeting:'\u00a1Hola! \u00bfEn qu\u00e9 le podemos ayudar hoy?',
+       recovery:'La respuesta anterior no est\u00e1 confirmada. Revise la respuesta guardada antes de enviar la solicitud de nuevo.',refused:'El chat no est\u00e1 disponible en este momento, as\u00ed que no pudimos revisar su mensaje anterior. Puede que ya est\u00e9 guardado. Comun\u00edquese directamente con el negocio en lugar de enviarlo de nuevo.',
+-      unconfirmed:'No pudimos confirmar si el negocio recibi\u00f3 este mensaje. Comun\u00edquese con el negocio antes de enviarlo de nuevo.',daily:'El chat del sitio web lleg\u00f3 al l\u00edmite de hoy y vuelve a abrir despu\u00e9s de la medianoche, hora de Houston. Comun\u00edquese directamente con el negocio.',unavailable:'El chat del sitio web no est\u00e1 disponible en este momento. Use los datos de contacto del negocio en este sitio web.',
++      unconfirmed:'No pudimos confirmar si el negocio recibi\u00f3 este mensaje. Comun\u00edquese con el negocio antes de enviarlo de nuevo.',daily:'El chat del sitio web lleg\u00f3 al l\u00edmite de hoy y se vuelve a abrir despu\u00e9s de la medianoche, hora de Houston. Comun\u00edquese directamente con el negocio.',unavailable:'El chat del sitio web no est\u00e1 disponible en este momento. Use los datos de contacto del negocio en este sitio web.',
+       trying:'Intentando de nuevo\u2026',noLoad:'El chat no carg\u00f3. Revise su conexi\u00f3n e intente de nuevo.',busyAuto:'El chat est\u00e1 ocupado en este momento. Lo intentaremos de nuevo autom\u00e1ticamente.',busyMinutes:'El chat est\u00e1 ocupado en este momento. Intente de nuevo en unos minutos.',busyMinute:'El chat est\u00e1 ocupado en este momento. Intente de nuevo en un minuto.',
+       againCheck:'El chat est\u00e1 disponible de nuevo. Puede revisar su mensaje anterior.',ready:'El chat est\u00e1 listo.',busyNow:'El chat est\u00e1 ocupado en este momento.',noLoadShort:'El chat no carg\u00f3. Puede intentar de nuevo.',
+-      tooLong:function(n){return 'Su mensaje tiene '+n.toLocaleString('en-US')+' caracteres. Ac\u00f3rtelo a 1,500 o menos antes de enviarlo; no se ha cortado nada.';},
++      tooLong:function(n){return 'Su mensaje tiene '+n.toLocaleString('en-US')+' caracteres. Ac\u00f3rtelo a 1,500 o menos antes de enviarlo; no se recort\u00f3 nada.';},
+       interrupted:'La respuesta se interrumpi\u00f3, as\u00ed que no pudimos confirmar el resultado. Use los datos de contacto del negocio en este sitio web antes de enviar la misma solicitud de nuevo.',
+-      restarted:'Este chat se reinici\u00f3. Su mensaje no se envi\u00f3 y est\u00e1 de nuevo en el cuadro: presione Enviar para enviarlo otra vez.',moved:'Ese mensaje se respondi\u00f3 en un chat anterior que esta ventana ya no puede mostrar. Este chat se reinici\u00f3; comun\u00edquese con el negocio antes de enviar la misma solicitud de nuevo.',
+-      earlierNotSent:'Ese mensaje anterior no se envi\u00f3, as\u00ed que no se registr\u00f3 nada. Puede enviarlo de nuevo.',notSentPress:'Su mensaje no se envi\u00f3 y est\u00e1 de nuevo en el cuadro: presione Enviar para enviarlo otra vez.',notSent:'Su mensaje no se envi\u00f3 y est\u00e1 de nuevo en el cuadro.',
+-      noRecovery:'No podemos revisar una respuesta guardada para este chat. Comun\u00edquese con el negocio antes de enviar la solicitud de nuevo.',limit:'El chat lleg\u00f3 a su l\u00edmite diario. Comun\u00edquese directamente con el negocio con los datos de este sitio web.',
++      restarted:'Este chat se reinici\u00f3. Su mensaje no se envi\u00f3 y est\u00e1 de nuevo en el cuadro de texto: presione Enviar para enviarlo otra vez.',moved:'Ese mensaje se respondi\u00f3 en un chat anterior que esta ventana ya no puede mostrar. Este chat se reinici\u00f3; comun\u00edquese con el negocio antes de enviar la misma solicitud de nuevo.',
++      earlierNotSent:'Ese mensaje anterior no se envi\u00f3, as\u00ed que no se registr\u00f3 nada. Puede enviarlo de nuevo.',notSentPress:'Su mensaje no se envi\u00f3 y est\u00e1 de nuevo en el cuadro de texto: presione Enviar para enviarlo otra vez.',notSent:'Su mensaje no se envi\u00f3 y est\u00e1 de nuevo en el cuadro de texto.',
++      noRecovery:'No podemos revisar una respuesta guardada para este chat. Comun\u00edquese con el negocio antes de enviar la solicitud de nuevo.',limit:'El chat lleg\u00f3 a su l\u00edmite diario. Comun\u00edquese directamente con el negocio usando los datos de contacto de este sitio web.',
+       // Known server refusals (chat.mjs). Anything else falls back to the widget's own truthful message for the outcome.
+-      unavailableDirect:'El chat del sitio web no est\u00e1 disponible en este momento. Comun\u00edquese directamente con el negocio.',tempUnavailable:'El chat no est\u00e1 disponible por el momento. Intente de nuevo m\u00e1s tarde.',allowance:'Se acab\u00f3 el l\u00edmite de chat de hoy. Intente de nuevo despu\u00e9s del reinicio diario.',reload:'Este chat necesita reiniciarse. Vuelva a cargar la p\u00e1gina y env\u00ede su mensaje de nuevo.',changed:'Este chat cambi\u00f3 en otra ventana. Env\u00ede su mensaje de nuevo.'}
++      unavailableDirect:'El chat del sitio web no est\u00e1 disponible en este momento. Comun\u00edquese directamente con el negocio.',tempUnavailable:'El chat no est\u00e1 disponible por el momento. Intente de nuevo m\u00e1s tarde.',allowance:'Se agot\u00f3 el l\u00edmite de chat de hoy. Intente de nuevo despu\u00e9s del reinicio diario.',reload:'Este chat necesita reiniciarse. Vuelva a cargar la p\u00e1gina y env\u00ede su mensaje de nuevo.',changed:'Este chat se actualiz\u00f3 en otra ventana. Env\u00ede su mensaje de nuevo.'}
+   };
+   function T(key,arg){var v=TEXT[L()][key];return typeof v==='function'?v(arg):v;}
+   // Spanish for a known server refusal; '' lets the caller choose its own truthful fallback.
+diff --git a/netlify/functions/lib/desk.mjs b/netlify/functions/lib/desk.mjs
+index e773dce..eb837ba 100644
+--- a/netlify/functions/lib/desk.mjs
++++ b/netlify/functions/lib/desk.mjs
+@@ -207,7 +207,7 @@ STRINGS.es.consent_yes = (c) => `${c.business.name}: gracias, le escribiremos cu
+ TEMPLATES.request_followup = (c, l) => `${c.business.name}: checking once about your service request (ref ${l.id}). Reply here if you need help with it. Reply STOP to end texts or HELP for help.`;
+ TEMPLATES.quote_followup = (c, l, quoteUrl) => `${c.business.name}: any questions about the quote for your requested service (ref ${l.id})?${quoteUrl ? " Your quote: " + quoteUrl : ""} Reply here for help. This is your one requested quote follow-up. Reply STOP to end texts or HELP for help.`;
+ TEMPLATES_ES.request_followup = (c, l) => `${c.business.name}: le escribimos una sola vez sobre su solicitud de servicio (ref ${l.id}). Si necesita ayuda, responda a este mensaje. Responda STOP o ALTO para dejar de recibir mensajes, o AYUDA para ayuda.`;
+-TEMPLATES_ES.quote_followup = (c, l, quoteUrl) => `${c.business.name}: ¿tiene preguntas sobre el presupuesto de su servicio (ref ${l.id})?${quoteUrl ? " Su presupuesto: " + quoteUrl : ""} Si necesita ayuda, responda a este mensaje. Este es el seguimiento del presupuesto que usted ha pedido. Responda STOP o ALTO para dejar de recibir mensajes, o AYUDA para ayuda.`;
++TEMPLATES_ES.quote_followup = (c, l, quoteUrl) => `${c.business.name}: ¿tiene preguntas sobre el presupuesto de su servicio (ref ${l.id})?${quoteUrl ? " Su presupuesto: " + quoteUrl : ""} Si necesita ayuda, responda a este mensaje. Este es el seguimiento que usted ha pedido. Responda STOP o ALTO para dejar de recibir mensajes, o AYUDA para ayuda.`;
+ TEMPLATES.maintenance_reminder = (c, j) => `${c.business.name}: it has been about six months since your last visit${j.issue ? " (" + j.issue + ")" : ""}. A tune-up keeps the system running through the season. Reply here with a day and we will fit you in. Reply STOP to end these.`;
+ TEMPLATES_ES.maintenance_reminder = (c, j) => `${c.business.name}: ya pasaron unos seis meses desde su visita anterior${j.issue ? " (" + j.issue + ")" : ""}. Un mantenimiento mantiene el sistema funcionando toda la temporada. Responda con la fecha que le convenga y lo agendamos. Responda STOP o ALTO para dejar de recibir mensajes.`;
+ export const customerKey = (slug, phone) => `${slug}/${phone}`;
+diff --git a/qa-artifacts/claude-collaboration/fc2-spanish/fc2-spanish-ui-check.mjs b/qa-artifacts/claude-collaboration/fc2-spanish/fc2-spanish-ui-check.mjs
+index d4b9ec4..4e8b6f7 100644
+--- a/qa-artifacts/claude-collaboration/fc2-spanish/fc2-spanish-ui-check.mjs
++++ b/qa-artifacts/claude-collaboration/fc2-spanish/fc2-spanish-ui-check.mjs
+@@ -84,7 +84,7 @@ for (const [w, viewport] of [[390, { width: 390, height: 844 }], [1440, { width:
+     await x.page.waitForFunction(() => /dirección/.test(document.getElementById('mcDesk').innerText));
+     await x.page.locator('#mcDesk textarea').fill('Mi dirección es 12 Oak St'); await x.page.locator('#mcDesk button.s').click();
+     await x.page.waitForFunction(() => /medianoche/.test(document.getElementById('mcDesk').innerText));
+-    const text = await widgetText(x.page); noEnglish(text); assert.match(text, /El chat del sitio web llegó al límite de hoy y vuelve a abrir después de la medianoche, hora de Houston/); assert.match(text, /Su mensaje no se envió y está de nuevo en el cuadro/);
++    const text = await widgetText(x.page); noEnglish(text); assert.match(text, /El chat del sitio web llegó al límite de hoy y se vuelve a abrir después de la medianoche, hora de Houston/); assert.match(text, /Su mensaje no se envió y está de nuevo en el cuadro/);
+     assert.equal(await x.page.locator('#mcDesk textarea').inputValue(), 'Mi dirección es 12 Oak St', 'unsent message back in the box');
+     assert.equal(await x.page.locator('#mcDesk .b.u').count(), 1, 'one shown customer message');
+     await shot(x.page, `embed-es-daily-limit-${w}`);

@@ -33,6 +33,7 @@
       var r = item.row; if (!r.phone || r.websiteSetupCheck) return;
       var c = byPhone[r.phone] || (byPhone[r.phone] = { phone: r.phone, name: '', address: '', requests: [], visits: [], conversations: [], last: '' });
       if (r.customer_name) c.name = r.customer_name;
+      if (r.language === 'es') c.spanish = true; // PRA-FC2-04
       if (r.address && (item.kind === 'visit' || !c.address)) c.address = r.address;
       c[item.kind === 'visit' ? 'visits' : 'requests'].push(r);
       if (String(r.createdAt || '') > c.last) c.last = String(r.createdAt || '');
@@ -62,7 +63,7 @@
     var visits = group('Visits', c.visits, function (visit) { return '<li><strong>' + esc(visitDay(visit.date) + (visit.window ? ', ' + visit.window : '')) + '</strong><br><span class="muted">' + esc(visit.issue || '') + (visit.issue ? ' · ' : '') + esc(visitStatus(visit)) + '</span>' + (own && visit.ownerVisit ? '<br><button type="button" class="btn-pill btn-pill-dark btn-sm" data-customer-visit="' + esc(visit.id) + '">View visit</button>' : '') + '</li>'; }, 'No saved visits');
     var conversations = group('Conversations', c.conversations, function (v) { return '<li><strong>' + esc(word(v.channel)) + '</strong><br><span class="muted">Last message ' + esc(day(v.updatedAt)) + '</span>' + (v.reference ? '<br><button type="button" class="btn-pill btn-pill-dark btn-sm" data-conversation-open="' + esc(v.reference) + '" data-conversation-contact="' + esc(v.contact) + '">Read saved conversation</button>' : '') + '</li>'; }, 'No recent conversations');
     var tel = /^\+1\d{10}$/.test(c.phone) ? '<a href="tel:' + esc(c.phone) + '">' + esc(phoneText(c.phone)) + '</a>' : esc(c.phone);
-    return '<article class="desk-customer" role="listitem" data-customer-phone="' + esc(c.phone) + '"><h4>' + esc(c.name || phoneText(c.phone)) + '</h4><div class="desk-customer-contact">' + tel + (c.address ? '<span>' + esc(c.address) + '</span>' : '') + '</div><div class="desk-customer-groups">' + requests + visits + conversations + '</div></article>';
+    return '<article class="desk-customer" role="listitem" data-customer-phone="' + esc(c.phone) + '"><h4>' + esc(c.name || phoneText(c.phone)) + (c.spanish ? ' <span class="tag lang-tag" data-customer-language="es">Habla español / Spanish</span>' : '') + '</h4><div class="desk-customer-contact">' + tel + (c.address ? '<span>' + esc(c.address) + '</span>' : '') + '</div><div class="desk-customer-groups">' + requests + visits + conversations + '</div></article>';
   }
   function render() {
     var query = $('customerSearch').value, shown = customers.filter(function (c) { return matches(c, query); });

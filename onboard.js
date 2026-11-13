@@ -27,7 +27,23 @@
   t0.addEventListener('input', function () { touched.t0 = true; }); t1.addEventListener('input', function () { touched.t1 = true; });
   var tradeSelect = form.elements.trade, customTrade = form.elements.customTrade, customTradeGroup = document.getElementById('custom-trade-group');
   function effectiveTrade() { return tradeSelect.value === 'other' ? customTrade.value.trim() : tradeSelect.value; }
-  function fillTiers() { if (!touched.t0) t0.value = T0; if (!touched.t1) t1.value = T1[tradeKey(effectiveTrade())] || ''; }
+  function fillTiers() { if (!touched.t0) t0.value = T0; if (!touched.t1) t1.value = T1[tradeKey(effectiveTrade())] || ''; fillExamples(); }
+  // PRA-FC2-13: example text (placeholders only, never saved) follows the chosen trade; anything without its own set gets a neutral one.
+  // Short placeholder style (POLISH-05): one line starting "e.g.".
+  var EXAMPLES = {
+    hvac: { services: 'e.g. AC repair', fees: 'e.g. Diagnostic visit: $89', faq: 'e.g. Do you charge a service call fee? $89.', never: 'e.g. Never quote a replacement price', licenses: 'e.g. TACLA 12345C' },
+    plumbing: { services: 'e.g. Drain cleaning', fees: 'e.g. Service call: $79', faq: 'e.g. Do you charge a service call fee? $79.', never: 'e.g. Never quote a water heater price', licenses: 'e.g. Texas plumbing license M-12345' },
+    electrical: { services: 'e.g. Panel upgrades', fees: 'e.g. Service call: $99', faq: 'e.g. Do you charge a service call fee? $99.', never: 'e.g. Never quote a panel replacement price', licenses: 'e.g. TECL 12345' },
+    roofing: { services: 'e.g. Roof repair', fees: 'e.g. Roof inspection: free', faq: 'e.g. Do you work with insurance claims? Yes.', never: 'e.g. Never promise an insurance claim outcome', licenses: 'e.g. Insured, general liability' },
+    cleaning: { services: 'e.g. Deep cleaning', fees: 'e.g. Standard cleaning: from $140', faq: 'e.g. Do you bring supplies? Yes.', never: 'e.g. No biohazard cleanup', licenses: 'e.g. Insured and bonded' },
+    other: { services: 'e.g. Repairs', fees: 'e.g. Service call: $89', faq: 'e.g. Do you charge a service call fee? $89.', never: 'e.g. Never quote a job we have not seen', licenses: 'e.g. Your license number, if you have one' }
+  };
+  function fillExamples() {
+    var set = EXAMPLES[tradeKey(effectiveTrade())] || EXAMPLES.other, name = form.elements.business ? form.elements.business.value.trim() : '';
+    Object.keys(set).forEach(function (field) { var node = form.elements[field]; if (node) node.placeholder = set[field]; });
+    if (form.elements.greeting) form.elements.greeting.placeholder = 'e.g. Hi, this is the ' + (name ? name + ' ' : '') + 'front desk.';
+  }
+  if (form.elements.business) form.elements.business.addEventListener('input', fillExamples);
   function updateTrade(focusCustom) {
     var other = tradeSelect.value === 'other';
     customTradeGroup.hidden = !other; customTrade.disabled = !other; customTrade.required = other;

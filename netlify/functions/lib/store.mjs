@@ -495,7 +495,7 @@ function blockCount(state, date, windowKey) {
   return Object.values(state.reservations).filter((slots) => slots.some((slot) => windowKey ? slot === `${date}|${windowKey}` : slot.startsWith(date + "|"))).length;
 }
 function blockViews(state) {
-  return (state.blocks || []).map((b) => ({ date: b.date, window: b.window, existingBookings: blockCount(state, b.date, b.windowKey) })).sort((a, b) => a.date.localeCompare(b.date) || a.window.localeCompare(b.window));
+  return (state.blocks || []).map((b) => ({ date: b.date, window: b.window, ...(b.label ? { label: b.label } : {}), existingBookings: blockCount(state, b.date, b.windowKey) })).sort((a, b) => a.date.localeCompare(b.date) || a.window.localeCompare(b.window));
 }
 function openingsFromState(c, state, date, days, calendar = null, occupied = null, excludeBookingId = null) {
   const dates = Array.from({ length: days }, (_, n) => addDays(date, n)).filter(isoDateValid);
@@ -538,26 +538,44 @@ export async function getAvailabilityBlocks(c) {
     return { ...(!current ? { value: state } : {}), result: blockViews(state) };
   });
 }
-export async function setAvailabilityBlock(c, date, window = "", blocked = true) {
+// PRA-FC2-11: an optional "through" date blocks every whole day of a closure (at most 31) in one saved change,
+// and an optional label ("Thanksgiving") is kept with each day. Each day stays its own removable block.
+export const BLOCK_RANGE_DAYS = 31, BLOCK_LABEL_MAX = 60;
+export async function setAvailabilityBlock(c, date, window = "", blocked = true, { through = "", label: name = "" } = {}) {
   await assertCurrentWorkspace(c);
   const day = requestedDate(date, { isoOnly: true, allowPast: !blocked });
   if (typeof window !== "string") throw new AvailabilityInputError("invalid_window", "Choose a listed window or the whole date.");
   const wholeDay = window === "";
+  if (typeof name !== "string" || name.length > BLOCK_LABEL_MAX || /[\u0000-\u001f\u007f-\u009f<>]/.test(name) || (!blocked && name)) throw new AvailabilityInputError("invalid_label", `Use a label of ${BLOCK_LABEL_MAX} characters or fewer, without < or >.`);
+  const tag = name.trim().replace(/\s+/g, " ");
+  if (typeof through !== "string" || (through && !blocked)) throw new AvailabilityInputError("invalid_range", "Remove blocked days one at a time.");
+  const days = [day];
+  if (through && through !== day) {
+    if (!wholeDay) throw new AvailabilityInputError("invalid_range", "A date range blocks whole days. Choose Whole day, or block one date at a time.");
+    const end = requestedDate(through, { isoOnly: true });
+    if (end < day) throw new AvailabilityInputError("invalid_range", "Choose an end date on or after the start date.");
+    while (days.at(-1) < end) { days.push(addDays(days.at(-1), 1)); if (days.length > BLOCK_RANGE_DAYS) throw new AvailabilityInputError("invalid_range", `Block up to ${BLOCK_RANGE_DAYS} days at a time.`); }
+  }
   return atomicUpdate("index", capacityKey(c), async (current) => {
     const state = validateCapacity(c, current) || await initialCapacity(c);
-    const blocks = state.blocks || [];
+    let blocks = state.blocks || [];
     const key = wholeDay ? "" : canonicalWindow(window);
     const existing = blocks.find((b) => b.date === day && b.windowKey === key);
     const label = wholeDay ? "" : listedWindow(c, window) || (!blocked && existing ? existing.window : "");
     if (!wholeDay && !label) throw new AvailabilityInputError("invalid_window", "Choose one of the shop's listed arrival windows.");
     let changed = false;
-    if (blocked && !existing) {
-      // Count all retained blocks, including past ones. Past blocks remain removable; nothing
-      // expires or frees a reservation behind an owner's back.
-      if (blocks.length >= 100) throw new AvailabilityInputError("too_many_blocks", "Remove an old block before adding another (100 maximum).");
-      state.blocks = [...blocks, { date: day, window: label, windowKey: key }]; changed = true;
-    } else if (!blocked && existing) { state.blocks = blocks.filter((b) => b !== existing); changed = true; }
-    const existingBookings = blockCount(state, day, key);
+    if (blocked) {
+      for (const d of days) {
+        const found = blocks.find((b) => b.date === d && b.windowKey === key);
+        if (found) { if (tag && found.label !== tag) { blocks = blocks.map((b) => b === found ? { ...b, label: tag } : b); changed = true; } continue; }
+        // Count all retained blocks, including past ones. Past blocks remain removable; nothing
+        // expires or frees a reservation behind an owner's back.
+        if (blocks.length >= 100) throw new AvailabilityInputError("too_many_blocks", "Remove an old block before adding another (100 maximum).");
+        blocks = [...blocks, { date: d, window: label, windowKey: key, ...(tag ? { label: tag } : {}) }]; changed = true;
+      }
+      if (changed) state.blocks = blocks;
+    } else if (existing) { state.blocks = blocks.filter((b) => b !== existing); changed = true; }
+    const existingBookings = days.reduce((n, d) => n + blockCount(state, d, key), 0);
     const notice = blocked && existingBookings ? `${existingBookings} already reserved visit${existingBookings === 1 ? " remains" : "s remain"} unchanged. This block stops new reservations.` : "";
     return { ...(changed || !current ? { value: state } : {}), result: { ok: true, availabilityBlocks: blockViews(state), existingBookings, notice } };
   });

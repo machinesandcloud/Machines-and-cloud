@@ -466,7 +466,7 @@ async function handle(req, context) {
       return json({ ok: true, setup: setupReadiness(updated) }, 200, { "Cache-Control": "no-store" });
     }
     if (b.action === "availability_block" || b.action === "availability_unblock") {
-      try { return json(await setAvailabilityBlock(c, b.date, b.window, b.action === "availability_block")); }
+      try { return json(await setAvailabilityBlock(c, b.date, b.window, b.action === "availability_block", { through: b.through ?? "", label: b.label ?? "" })); }
       catch (err) { return err instanceof AvailabilityInputError ? json({ error: err.code, message: err.message }, 400) : json({ error: "availability_unavailable", message: "The schedule change could not be confirmed. Reload availability before trying again." }, 503); }
     }
     if (isSelfServiceClient(c) && ["review_rules", "go_live", "resume", "pause", "cancel", "provision", "forwarding_verified"].includes(b.action)) {
@@ -635,14 +635,14 @@ async function exportCSV(c, what, session, req) {
   const today = new Date().toISOString().slice(0, 10);
   let header, rows;
   if (what === "bookings") {
-    header = ["id", "createdAt", "customer_name", "phone", "address", "issue", "date", "window", "urgency", "status", "outcome", "customerType", "channel", "notes", "unsure", "consent.at", "consent.channel", "setup_check"];
-    rows = (await recordsForExport(c,"bookings",2000)).filter(booking => visibleOwnerBooking(c, booking)).map((b) => [b.id, b.createdAt, b.customer_name, b.phone, b.address, b.issue, b.date, b.window, b.urgency, b.status, b.outcome, b.customerType, b.channel, b.notes, b.unsure, b.consent?.at, b.consent?.channel, b.websiteSetupCheck ? 'Website setup check' : '']);
+    header = ["id", "createdAt", "customer_name", "phone", "address", "issue", "date", "window", "urgency", "status", "outcome", "customerType", "channel", "notes", "unsure", "consent.at", "consent.channel", "setup_check", "language"];
+    rows = (await recordsForExport(c,"bookings",2000)).filter(booking => visibleOwnerBooking(c, booking)).map((b) => [b.id, b.createdAt, b.customer_name, b.phone, b.address, b.issue, b.date, b.window, b.urgency, b.status, b.outcome, b.customerType, b.channel, b.notes, b.unsure, b.consent?.at, b.consent?.channel, b.websiteSetupCheck ? 'Website setup check' : '', b.language === 'es' ? 'es' : b.language ? 'en' : '']);
   } else if (what === "leads") {
-    header = ["id", "createdAt", "customer_name", "phone", "address", "issue", "reason", "outcome", "urgency", "wanted", "status", "channel", "unsure", "setup_check"];
+    header = ["id", "createdAt", "customer_name", "phone", "address", "issue", "reason", "outcome", "urgency", "wanted", "status", "channel", "unsure", "setup_check", "language"];
     const leads=await requestFollowthroughSummaries(c,(await recordsForExport(c,'leads',2000)).filter(row=>belongsToWorkspace(c,row)));
     if(isSupportedSelfServiceClient(c))header.push('followthrough_owner','next_action','due_at','contact_outcome','completed_at','resolution','review_required','followthrough_history');
     rows=[];
-    for(const l of leads){const row=[l.id,l.createdAt,l.customer_name,l.phone,l.address,l.issue,l.reason,l.outcome,l.urgency,l.wanted,l.status,l.channel,l.unsure,l.websiteSetupCheck?'Website setup check':''];if(l.followthrough){const f=l.followthrough;const detail=await readRequestFollowthrough(c,session,l.id);row.push(f.state.owner?.email||'',f.state.nextAction||'',f.state.dueAt||'',f.state.contact,f.state.completedAt||'',f.state.resolution||'',f.reviewRequired,JSON.stringify(detail.request.history));}rows.push(row);}
+    for(const l of leads){const row=[l.id,l.createdAt,l.customer_name,l.phone,l.address,l.issue,l.reason,l.outcome,l.urgency,l.wanted,l.status,l.channel,l.unsure,l.websiteSetupCheck?'Website setup check':'',l.language==='es'?'es':l.language?'en':''];if(l.followthrough){const f=l.followthrough;const detail=await readRequestFollowthrough(c,session,l.id);row.push(f.state.owner?.email||'',f.state.nextAction||'',f.state.dueAt||'',f.state.contact,f.state.completedAt||'',f.state.resolution||'',f.reviewRequired,JSON.stringify(detail.request.history));}rows.push(row);}
   } else if (what === "conversations") {
     header = ["channel", "contact", "at", "role", "content", "flag_note", "processing"];
     rows = [];

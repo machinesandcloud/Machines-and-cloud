@@ -8,6 +8,7 @@ import {isSupportedSelfServiceClient} from './setup.mjs';
 import {requestOwnerAuthority,requestSource,requestSourceRevision,requestJournalKey,requestJournalRow,RequestFollowthroughError,readRequestFollowthrough} from './request-followthrough.mjs';
 import {buildMessagingProgram,serviceFollowupProgram,SERVICE_FOLLOWUP_PROGRAM_VERSION} from './messaging-program.mjs';
 import {policyUrls} from './config.mjs';
+import {template} from './desk.mjs';
 const stamp=()=>new Date().toISOString(),hash=value=>createHash('sha256').update(typeof value==='string'?value:JSON.stringify(value)).digest('hex');
 const KINDS=['quote_followup','request_followup'],WORDS={quote_followup:'QUOTE',request_followup:'REQUEST'},VERSION='one_requested_followup_v1';
 const validId=value=>typeof value==='string'&&/^[a-zA-Z0-9_-]{1,80}$/.test(value),validPhone=value=>/^\+1[2-9]\d{9}$/.test(value||''),sid=value=>/^SM[a-f0-9]{32}$/i.test(value||'');
@@ -53,7 +54,9 @@ export function requestFollowupQuestion(c,lead,purpose){
   const subject=purpose==='quote_followup'?'the quote for this service request':'this service request',urls=policyUrls(c.slug);
   return `${c.business.name}: would you like one text within 30 days about ${subject} (ref ${lead.id})? Reply YES ${WORDS[purpose]} ${lead.id} to agree. No promotions. Message and data rates may apply. HELP for help; STOP/ALTO/PARAR to end. Service is available without texts. Terms: ${urls.terms} Privacy: ${urls.privacy}`;
 }
-function outreach(c,lead,plan){return plan.purpose==='quote_followup'?`${c.business.name}: any questions about the quote for your requested service (ref ${lead.id})?${plan.quoteUrl?' Your quote: '+plan.quoteUrl:''} Reply here for help. This is your one requested quote follow-up. Reply STOP to end texts or HELP for help.`:`${c.business.name}: checking once about your service request (ref ${lead.id}). Reply here if you need help with it. Reply STOP to end texts or HELP for help.`;}
+// PRA-FC2-05: the text follows the request's saved language (TEMPLATES / TEMPLATES_ES in desk.mjs).
+export function requestFollowupText(c,lead,plan){return outreach(c,lead,plan);}
+function outreach(c,lead,plan){return template(plan.purpose==='quote_followup'?'quote_followup':'request_followup',lead)(c,lead,plan.quoteUrl||'');}
 async function invitation(c,lead){
   if(!isSupportedSelfServiceClient(c)||!lead?.id||!belongsToWorkspace(c,lead)||lead.websiteSetupCheck||lead.simulation||lead.status==='spam'||lead.urgency==='emergency'||!validPhone(lead.phone))return null;
   const sender=await requestFollowupSender(c);if(!sender)return null;

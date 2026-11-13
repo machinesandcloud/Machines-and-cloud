@@ -70,7 +70,7 @@
     if(!view?.automaticFollowup)return;var quote=$('requestAutoPurpose').value==='quote_followup',url=$('requestAutoQuote').value.trim(),body=view.automaticFollowup.templates?.[$('requestAutoPurpose').value]||'';
     $('requestAutoQuoteField').hidden=!quote;$('requestAutoMilestone').textContent=quote?'Choose this only after you have actually sent the quote. Saving records that milestone.':'Use this only while you are waiting for the customer’s reply.';
     $('requestAutoConfirmText').textContent=quote?'I already sent this quote and checked the saved mobile, message and time.':'I am waiting for a reply and checked the saved mobile, message and time.';
-    if(quote&&url)body=body.replace(' Reply here for help.',' Your quote: '+url+' Reply here for help.');$('requestAutoBody').textContent=body;$('requestAutoRecipient').textContent=view.source.phone||'No mobile saved';
+    if(quote&&url)body=body.indexOf(' Reply here for help.')>=0?body.replace(' Reply here for help.',' Your quote: '+url+' Reply here for help.'):body.replace(' Si necesita ayuda, responda a este mensaje.',' Su presupuesto: '+url+' Si necesita ayuda, responda a este mensaje.');$('requestAutoBody').textContent=body;$('requestAutoRecipient').textContent=view.source.phone||'No mobile saved';
     var due=new Date($('requestAutoDue').value);$('requestAutoTime').textContent=Number.isFinite(due.getTime())?'No earlier than '+time(due.toISOString()):'Choose a future date and time above.';
   }
   function autoRender(reset){
@@ -86,9 +86,9 @@
     autoPreview();
   }
   function render(reset){if(!view)return;var s=view.source,state=view.state;$('requestContent').hidden=false;$('requestTitle').textContent=s.customer_name||'Customer request';
-    var facts=[['Phone',s.phone],['Requested',time(s.createdAt)],['Request',s.issue],['Address',s.address],['Customer wanted',s.wanted],['Reason',word(s.outcome||s.reason)],['Original request status',word(s.status)],['Channel',word(s.channel)]];
+    var facts=[['Phone',s.phone],['Requested',time(s.createdAt)],['Request',s.issue],['Address',s.address],['Customer wanted',s.wanted],['Language',s.language==='es'?'Habla español / Spanish':''],['Reason',word(s.outcome||s.reason)],['Original request status',word(s.status)],['Channel',word(s.channel)]];
     function factRows(rows){return rows.filter(function(row){return row[1];}).map(function(row){return '<div'+(['Request','Address','Customer wanted'].includes(row[0])?' class="request-wide"':'')+'><dt>'+esc(row[0])+'</dt><dd>'+(row[0]==='Phone'&&/^\+1\d{10}$/.test(row[1])?'<a href="tel:'+esc(row[1])+'">'+esc(phoneText(row[1]))+'</a>':esc(row[1]))+'</dd></div>';}).join('');}
-    $('requestFacts').innerHTML=factRows(facts.filter(function(row){return ['Phone','Requested','Request','Customer wanted'].includes(row[0]);}));$('requestOtherFacts').innerHTML=factRows(facts.filter(function(row){return !['Phone','Requested','Request','Customer wanted'].includes(row[0]);}));
+    $('requestFacts').innerHTML=factRows(facts.filter(function(row){return ['Phone','Requested','Request','Customer wanted','Language'].includes(row[0]);}));$('requestOtherFacts').innerHTML=factRows(facts.filter(function(row){return !['Phone','Requested','Request','Customer wanted','Language'].includes(row[0]);}));
     $('requestConversation').hidden=!view.conversation;$('requestScheduleRow').hidden=!view.canChange||!['testing','live','paused'].includes(data?.client?.status);$('requestConversation').dataset.conversationReference=view.conversation?.reference||'';$('requestConversation').dataset.conversationContact=view.conversation?.contact||'';
     $('requestSourceNotice').hidden=!view.reviewRequired;
     var progress=[['Responsible',state.owner?state.owner.name||state.owner.email:'Unassigned'],['Seen',state.seenAt?time(state.seenAt):'Not yet'],['Customer contact',({not_recorded:'Not contacted yet',attempted:'Attempted, not reached',reached:'Reached (owner recorded)'})[state.contact]||'Not contacted yet'],['Follow-up',state.completedAt?'Completed '+time(state.completedAt):'Open'],['Next action',state.nextAction||'Not planned'],['Due',state.dueAt?time(state.dueAt)+(view.due?' · overdue':''):'Not set']];
