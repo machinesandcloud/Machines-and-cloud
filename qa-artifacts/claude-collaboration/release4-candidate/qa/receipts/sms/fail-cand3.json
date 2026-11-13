@@ -1,0 +1,163 @@
+{
+ "phase": "failure",
+ "results": [
+  {
+   "name": "F1 failed receipt: exactly one customer text, never resent over 26h, job failed (not delivered/accepted), owner request",
+   "pass": true,
+   "note": {
+    "attempts": 1
+   }
+  },
+  {
+   "name": "F2 network throw before provider: zero texts reach provider, job uncertain not sent, no second POST in 26h",
+   "pass": true
+  },
+  {
+   "name": "F3 401 auth (code 20003): no text, never retried, state",
+   "pass": true,
+   "note": {
+    "state": "failed",
+    "reason": "provider_rejected",
+    "leads": 1
+   }
+  },
+  {
+   "name": "F3 400 unsubscribed (21610): no text, never retried, state",
+   "pass": true,
+   "note": {
+    "state": "failed",
+    "reason": "provider_rejected",
+    "leads": 1
+   }
+  },
+  {
+   "name": "F3 429 rate limit: no text, never retried, state",
+   "pass": true,
+   "note": {
+    "state": "uncertain",
+    "reason": "provider_receipt_missing",
+    "leads": 1
+   }
+  },
+  {
+   "name": "F4 5xx with code: no retry, uncertain",
+   "pass": true,
+   "note": {
+    "recovery": "done"
+   }
+  },
+  {
+   "name": "E1 owner email cap: 8 customers fail same day with tenantLimit 3 -> 3 emails sent, rest held, none marked sent; 8 requests saved",
+   "pass": true,
+   "note": {
+    "alerts": 8,
+    "states": [
+     "waiting_platform:email_budget_exhausted",
+     "waiting_platform:email_budget_exhausted",
+     "waiting_platform:email_budget_exhausted",
+     "delivered:",
+     "waiting_platform:email_budget_exhausted",
+     "delivered:",
+     "delivered:",
+     "waiting_platform:email_budget_exhausted"
+    ]
+   }
+  },
+  {
+   "name": "E2 same customer, 5 failed replies same day = 1 email; next Houston day = 1 more",
+   "pass": true,
+   "note": {
+    "sends": 6,
+    "replyJobs": [
+     "failed:",
+     "failed:",
+     "failed:",
+     "failed:",
+     "failed:",
+     "failed:"
+    ],
+    "inbound": [
+     "completed:",
+     "completed:",
+     "completed:",
+     "completed:",
+     "completed:",
+     "completed:"
+    ]
+   }
+  },
+  {
+   "name": "L1 sweep under load: 60 callback-failed replies over 3 shops; every run touches <=25; all alerted, zero extra customer texts",
+   "pass": true,
+   "note": {
+    "perRun": [
+     25,
+     25,
+     10,
+     0,
+     0,
+     0
+    ]
+   }
+  },
+  {
+   "name": "L2 25 stale failure-index keys whose delivery rows were deleted (sorted first) must not starve a real failure",
+   "pass": true,
+   "note": {
+    "realAlerted": false,
+    "staleStillOpen": 30
+   }
+  },
+  {
+   "name": "S1 STOP after a failed reply: no confirmation suppressed incorrectly, no later customer text, opt-out honoured",
+   "pass": true,
+   "note": {
+    "stopTwiml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response><Message>Fixture Service: texts stopped. Reply START or EMPEZAR to remove the block.</Message></Response>",
+    "afterStopState": null,
+    "customerTextsViaApi": 1
+   }
+  },
+  {
+   "name": "H1 unverified sender: STOP/HELP/START and a normal text; nothing sent via API; held rows; one request",
+   "pass": true,
+   "note": {
+    "tw": [
+     {
+      "b": "Is anyone there?",
+      "twiml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response></Response>",
+      "state": "held"
+     },
+     {
+      "b": "HELP",
+      "twiml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response><Message>Fixture Service: for help contact sms-qa-h1-195@example.test. Reply STOP, ALTO or PARAR to stop texts.<",
+      "state": null
+     },
+     {
+      "b": "STOP",
+      "twiml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response><Message>Fixture Service: texts stopped. Reply START or EMPEZAR to remove the block.</Message></Response>",
+      "state": null
+     },
+     {
+      "b": "START",
+      "twiml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response><Message>Fixture Service: your texting block is removed. Appointment updates need a separate YES. Reply STOP or ",
+      "state": null
+     },
+     {
+      "b": "Still need help",
+      "twiml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response></Response>",
+      "state": "held"
+     }
+    ],
+    "leads": 1
+   }
+  },
+  {
+   "name": "G1 global: no customer reply attempted twice; no reply job delivered without provider message",
+   "pass": true,
+   "note": {
+    "replyJobs": 82
+   }
+  }
+ ],
+ "blocked": []
+}

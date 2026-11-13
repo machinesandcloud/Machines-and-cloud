@@ -1,0 +1,157 @@
+{
+ "phase": "transcript",
+ "results": [
+  {
+   "name": "T healthy transcript",
+   "pass": true
+  }
+ ],
+ "transcript": {
+  "steps": [
+   {
+    "in": "What are your hours?",
+    "status": 200,
+    "twiml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response></Response>",
+    "state": "completed",
+    "reply": "Automated assistant for Fixture Service.\nSorry to hear that. To get you scheduled I need your best phone number, address, window (8 to 12 or 12 to 5)."
+   },
+   {
+    "in": "Can someone come look at a leaking pipe tomorrow morning?",
+    "status": 200,
+    "twiml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response></Response>",
+    "state": "completed",
+    "reply": "Sorry to hear that. To get you scheduled I need your best phone number, address."
+   },
+   {
+    "in": "HELP",
+    "status": 200,
+    "twiml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response><Message>Fixture Service: for help contact sms-qa-tx-1@example.test. Reply STOP, ALTO or PARAR to stop texts.</Message></Response>",
+    "state": null,
+    "reply": null
+   },
+   {
+    "in": "AYUDA",
+    "status": 200,
+    "twiml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response><Message>Fixture Service: para ayuda, escriba a sms-qa-tx-1@example.test. Responda STOP, ALTO o PARAR para dejar de recibir mensajes.</Message></Response>",
+    "state": null,
+    "reply": null
+   },
+   {
+    "in": "STOP",
+    "status": 200,
+    "twiml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response><Message>Fixture Service: texts stopped. Reply START or EMPEZAR to remove the block.</Message></Response>",
+    "state": null,
+    "reply": null
+   },
+   {
+    "in": "hello are you there",
+    "status": 200,
+    "twiml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response></Response>",
+    "state": null,
+    "reply": null
+   },
+   {
+    "in": "START",
+    "status": 200,
+    "twiml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response><Message>Fixture Service: your texting block is removed. Appointment updates need a separate YES. Reply STOP or ALTO to stop.</Message></Response>",
+    "state": null,
+    "reply": null
+   },
+   {
+    "in": "Thanks, what about Monday?",
+    "status": 200,
+    "twiml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response></Response>",
+    "state": "completed",
+    "reply": "Sorry to hear that. To get you scheduled I need your best phone number, address."
+   }
+  ],
+  "wire": [
+   {
+    "kind": "sms",
+    "to": "+17135550199",
+    "from": "+17135550001",
+    "body": "Automated assistant for Fixture Service.\nSorry to hear that. To get you scheduled I need your best phone number, address, window (8 to 12 or 12 to 5).",
+    "cb": "https://sms-integration.example.test/api/managed-sms/status?job=*"
+   },
+   {
+    "kind": "sms",
+    "to": "+17135550199",
+    "from": "+17135550001",
+    "body": "Sorry to hear that. To get you scheduled I need your best phone number, address.",
+    "cb": "https://sms-integration.example.test/api/managed-sms/status?job=*"
+   },
+   {
+    "kind": "sms",
+    "to": "+17135550199",
+    "from": "+17135550001",
+    "body": "Sorry to hear that. To get you scheduled I need your best phone number, address.",
+    "cb": "https://sms-integration.example.test/api/managed-sms/status?job=*"
+   }
+  ],
+  "jobs": [
+   {
+    "channel": "sms",
+    "purpose": "reply",
+    "state": "delivered",
+    "body": "Automated assistant for Fixture Service.\nSorry to hear that. To get you scheduled I need your best phone number, address, window (8 to 12 or 12 to 5).",
+    "recovery": null
+   },
+   {
+    "channel": "sms",
+    "purpose": "reply",
+    "state": "delivered",
+    "body": "Sorry to hear that. To get you scheduled I need your best phone number, address.",
+    "recovery": null
+   },
+   {
+    "channel": "sms",
+    "purpose": "reply",
+    "state": "delivered",
+    "body": "Sorry to hear that. To get you scheduled I need your best phone number, address.",
+    "recovery": null
+   }
+  ],
+  "conversation": [
+   [
+    {
+     "role": "user",
+     "content": "What are your hours?",
+     "processing": null,
+     "detail": null
+    },
+    {
+     "role": "assistant",
+     "content": "Automated assistant for Fixture Service.\nSorry to hear that. To get you scheduled I need your best phone number, address, window (8 to 12 or 12 to 5).",
+     "processing": null,
+     "detail": null
+    },
+    {
+     "role": "user",
+     "content": "Can someone come look at a leaking pipe tomorrow morning?",
+     "processing": null,
+     "detail": null
+    },
+    {
+     "role": "assistant",
+     "content": "Sorry to hear that. To get you scheduled I need your best phone number, address.",
+     "processing": null,
+     "detail": null
+    },
+    {
+     "role": "user",
+     "content": "Thanks, what about Monday?",
+     "processing": null,
+     "detail": null
+    },
+    {
+     "role": "assistant",
+     "content": "Sorry to hear that. To get you scheduled I need your best phone number, address.",
+     "processing": null,
+     "detail": null
+    }
+   ]
+  ],
+  "leads": []
+ },
+ "blocked": []
+}
