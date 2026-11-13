@@ -191,8 +191,7 @@ export async function queueManagedRecord(c, record, kind = "bookings") {
     body: str(cancelled ? "managed_cancelled" : "managed_confirmation", saved)(current, saved), source, preserveSnapshot: true });
   if (!cancelled && saved.date && saved.window) {
     const start = arrivalInstant(saved.date, saved.window);
-    for (const [purpose, hours] of [["reminder_24h", 24], ["reminder_1h", 1]]) {
-      const due = start - hours * 3600000;
+    for (const [purpose, due] of managedReminderSchedule(start)) {
       if (due > Date.now()) await queueManagedMessage(current, { eventId: `${eventId}:${purpose}`, channel: "sms", purpose, to: saved.phone, body: str("managed_reminder", saved)(current, saved, requestedVisit), source, dueAt: new Date(due).toISOString(), preserveSnapshot: true });
     }
   }
@@ -277,18 +276,38 @@ async function stopPaidBeforeSend(job, c, reason, state = 'suppressed') {
   const stopped = await change(job.id, row => row.providerId ? null : { ...row, state, reasonCode: reason, ...(row.paidSMSCapacity || row.paidAnswerCapacity ? { paidNotDispatched: true } : {}) });
   return reconcilePaidDelivery(stopped, c);
 }
-function inQuietHours() {
-  const parts = new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", weekday: "short", hour: "numeric", hourCycle: "h23" }).formatToParts(new Date());
+function inQuietHours(at = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", weekday: "short", hour: "numeric", hourCycle: "h23" }).formatToParts(at);
   const hour = Number(parts.find(x => x.type === "hour").value), sunday = parts.find(x => x.type === "weekday").value === "Sun";
   return hour < (sunday ? 12 : 9) || hour >= 21;
 }
-function nextSendingWindow() {
-  if(!inQuietHours())return null;
-  const parts=Object.fromEntries(new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',year:'numeric',month:'2-digit',day:'2-digit',hour:'numeric',hourCycle:'h23'}).formatToParts(new Date()).filter(part=>part.type!=='literal').map(part=>[part.type,part.value]));
+function nextSendingWindow(at = new Date()) {
+  if(!inQuietHours(at))return null;
+  const parts=Object.fromEntries(new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',year:'numeric',month:'2-digit',day:'2-digit',hour:'numeric',hourCycle:'h23'}).formatToParts(at).filter(part=>part.type!=='literal').map(part=>[part.type,part.value]));
   let day=`${parts.year}-${parts.month}-${parts.day}`;
   if(Number(parts.hour)>=21)day=new Date(Date.parse(day+'T12:00:00Z')+86400000).toISOString().slice(0,10);
   const sunday=new Date(day+'T12:00:00Z').getUTCDay()===0;
   return new Date(arrivalInstant(day,sunday?'12 to 1':'9 to 10')).toISOString();
+}
+// PRA-HOMEOWNER-06 (rev 2, lead PO decision): reminders wait out quiet hours (before 9 am, before noon on Sunday,
+// after 9 pm) and expire once the arrival window starts, so a 1-hour reminder due in quiet hours was never sent.
+// Such a reminder is sent when the sending window opens on the visit day (9:00 am, noon on Sunday) if that is still
+// at least 30 minutes before the window starts; otherwise at 8:30 pm the evening before (the same evening for a
+// window starting after 10 pm). It is skipped when that time is less than 2 hours after it is queued, so a late
+// booking does not get two texts minutes apart. A 1-hour reminder outside quiet hours and the 24-hour reminder keep
+// their times.
+export function managedReminderSchedule(start, now = Date.now()) {
+  const minute = 60000, hour = 60 * minute, due24 = start - 24 * hour, due1 = start - hour;
+  if (!inQuietHours(new Date(due1))) return [["reminder_24h", due24], ["reminder_1h", due1]];
+  const local = Object.fromEntries(new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',year:'numeric',month:'2-digit',day:'2-digit',hour:'numeric',hourCycle:'h23'}).formatToParts(new Date(due1)).filter(part=>part.type!=='literal').map(part=>[part.type,part.value]));
+  const day = `${local.year}-${local.month}-${local.day}`, previous = new Date(Date.parse(day + 'T12:00:00Z') - 86400000).toISOString().slice(0, 10);
+  let moved;
+  if (Number(local.hour) >= 21) moved = arrivalInstant(day, '8:30 pm to 9 pm');
+  else {
+    const morning = arrivalInstant(day, new Date(day + 'T12:00:00Z').getUTCDay() === 0 ? '12 pm to 1 pm' : '9 am to 10 am');
+    moved = morning <= start - 30 * minute ? morning : arrivalInstant(previous, '8:30 pm to 9 pm');
+  }
+  return moved < start && moved - now >= 2 * hour ? [["reminder_24h", due24], ["reminder_1h", moved]] : [["reminder_24h", due24]];
 }
 async function senderFor(c) { const { messagingSender } = await import("./messaging-activation.mjs"); return messagingSender(c); }
 async function probeFor(c, job) {

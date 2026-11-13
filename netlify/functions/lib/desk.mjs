@@ -163,9 +163,25 @@ export const managedVisitMoved = (b) => b?.ownerVisitMutation ? b.ownerVisitMuta
 // A window that ends in "p. m." closes its own sentence: no doubled period.
 const oneDot = (t) => t.replace(/ m\.\./g, " m.");
 const visitWhenEs = (b) => [b.date ? "el " + managedDateEs(b.date) : "", b.window ? "de " + managedWinEs(b.window) : ""].filter(Boolean).join(", ");
-STRINGS.en.managed_confirmation = (c, b) => `${c.business.name}: visit ${b.id} is saved for ${b.date}, ${b.window}. The shop confirms arrival details directly. Reply STOP to end texts.`;
-STRINGS.en.managed_reminder = (c, b, requested) => `${c.business.name}: reminder of ${requested ? "your requested visit" : "visit"} ${b.id} on ${b.date}, ${b.window}.${requested ? " The shop confirms arrival details directly." : ""} Reply here if anything changes. Reply STOP to end texts.`;
-STRINGS.en.managed_cancelled = (c, b) => `${c.business.name}: visit ${b.id} has been cancelled.`;
+// PRA-HOMEOWNER-05: customer texts carry no internal visit ID (customer changes are matched by the verified
+// number, never by a quoted ref) and an absolute date ("Sat, Oct 24"), because a reminder is written days
+// before it is sent. A reschedule says it moved, from what, and a cancellation says how to rebook.
+export const managedDateEn = (d) => { const m = String(d || "").match(/^(\d{4})-(\d{2})-(\d{2})$/); return m ? new Intl.DateTimeFormat("en-US", { timeZone: "UTC", weekday: "short", month: "short", day: "numeric" }).format(new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])))) : String(d || ""); };
+const visitWhenEn = (b) => [b?.date ? managedDateEn(b.date) : "", b?.window || ""].filter(Boolean).join(", ");
+const movedFrom = (b) => { const last = managedVisitMoved(b) && Array.isArray(b.ownerVisitHistory) ? b.ownerVisitHistory.at(-1) : null; return last?.action === "reschedule_visit" && last.at === b.ownerVisitMutation?.at && last.previous?.date ? visitWhenEn(last.previous) : ""; };
+export const shopPhoneDisplay = (n) => { const d = String(n || "").replace(/\D/g, "").replace(/^1(?=\d{10}$)/, ""); return /^[2-9]\d{9}$/.test(d) ? `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}` : ""; };
+STRINGS.en.managed_confirmation = (c, b) => managedVisitMoved(b)
+  ? `${c.business.name}: your visit has moved to ${visitWhenEn(b)}${movedFrom(b) ? ` (was ${movedFrom(b)})` : ""}. The shop confirms arrival details directly. Reply STOP to end texts.`
+  : `${c.business.name}: your visit is saved for ${visitWhenEn(b)}. The shop confirms arrival details directly. Reply STOP to end texts.`;
+STRINGS.en.managed_reminder = (c, b, requested) => `${c.business.name}: reminder of ${requested ? "your requested visit" : "your visit"} on ${visitWhenEn(b)}.${requested ? " The shop confirms arrival details directly." : ""} Reply here if anything changes. Reply STOP to end texts.`;
+STRINGS.en.managed_cancelled = (c, b) => `${c.business.name}: your visit${visitWhenEn(b) ? ` on ${visitWhenEn(b)}` : ""} has been cancelled. To rebook, reply here${shopPhoneDisplay(c.phone?.businessNumber) ? ` or call ${shopPhoneDisplay(c.phone.businessNumber)}` : ""}.`;
+// PRA-HOMEOWNER-07 (rev 2): the AI-limit reply names only the shop's published business number. Without one it
+// names no number at all: the texting number may have no voice routing, and texting it again only hits the same limit.
+STRINGS.en.managed_ai_limit = (c, { saved = false } = {}) => shopPhoneDisplay(c.phone?.businessNumber)
+  ? `${c.business.name}: I cannot complete this reply right now. Please contact ${shopPhoneDisplay(c.phone.businessNumber)}. The shop can review your message in its workspace.`
+  : saved ? `${c.business.name}: I cannot complete this reply right now. The shop has your message and will contact you.`
+  : `${c.business.name}: I cannot complete this reply right now. The shop can see your message in its workspace.`;
+export const managedTextLooksSpanish = (t) => /[¿¡ñ]|\b(?:hola|gracias|por favor|necesito|quiero|puede[ns]?|cita|ma[ñn]ana|calentador|aire acondicionado|ayuda|fuga)\b/i.test(String(t || ""));
 STRINGS.en.managed_help = (c, contact) => `${c.business.name}: for help contact ${contact}. Reply STOP, ALTO or PARAR to stop texts.`;
 // needs Spanish reviewer
 STRINGS.es.managed_confirmation = (c, b) => oneDot(managedVisitMoved(b)
@@ -174,8 +190,13 @@ STRINGS.es.managed_confirmation = (c, b) => oneDot(managedVisitMoved(b)
 // needs Spanish reviewer
 STRINGS.es.managed_reminder = (c, b, requested) => oneDot(`${c.business.name}: recordatorio de su visita${requested ? " solicitada" : ""} para ${visitWhenEs(b)}.${requested ? " El negocio le confirma la hora de llegada." : ""} Si algo cambia, responda a este mensaje. Responda STOP o ALTO para dejar de recibir mensajes.`);
 // needs Spanish reviewer
-STRINGS.es.managed_cancelled = (c, b) => `${c.business.name}: su visita${visitWhenEs(b) ? " " + visitWhenEs(b).replace(/^el /, "del ") + "," : ""} fue cancelada.`;
+STRINGS.es.managed_cancelled = (c, b) => `${c.business.name}: su visita${visitWhenEs(b) ? " " + visitWhenEs(b).replace(/^el /, "del ") + "," : ""} fue cancelada. Para agendar otra visita, ${shopPhoneDisplay(c.phone?.businessNumber) ? "llame al " + shopPhoneDisplay(c.phone.businessNumber) + " o responda" : "responda a este mensaje"}.`;
 // needs Spanish reviewer
+// Spanish AI-limit replies avoid letters outside GSM-7 (no accented a, i, o, u) so each stays one SMS segment.
+STRINGS.es.managed_ai_limit = (c, { saved = false } = {}) => shopPhoneDisplay(c.phone?.businessNumber)
+  ? `${c.business.name}: en este momento no puedo responderle. Llame o escriba al ${shopPhoneDisplay(c.phone.businessNumber)}. El negocio puede revisar su mensaje.`
+  : saved ? `${c.business.name}: en este momento no puedo responderle. El negocio ya tiene su mensaje y se va a comunicar con usted.`
+  : `${c.business.name}: en este momento no puedo responderle. El negocio puede ver su mensaje.`;
 // Spanish review r4: "al" before a phone number, "escriba a" (no "llame") before an email address, and no English
 // placeholder ("the shop") inside the Spanish reply. "dejar de recibir mensajes" says what STOP ends.
 STRINGS.es.managed_help = (c, contact) => `${c.business.name}: para ayuda, ${/@/.test(String(contact)) ? "escriba a " + contact : /\d/.test(String(contact)) ? "llame o escriba al " + contact : "contacte al negocio"}. Responda STOP, ALTO o PARAR para dejar de recibir mensajes.`;

@@ -52,6 +52,17 @@ async function verifyMessage(fields, binding) {
   if (!response.ok || !binding || data.sid!==fields.MessageSid || data.account_sid!==sid || data.direction!=="inbound" || data.messaging_service_sid!==binding.serviceSid || fields.MessagingServiceSid && fields.MessagingServiceSid!==binding.serviceSid || data.from!==fields.From || data.to!==fields.To || data.to!==binding.number || data.body!==fields.Body || !Number.isFinite(created) || created<Date.parse(binding.since)-5000 || created<Date.now()-86400000 || created>Date.now()+300000) return null;
   return data;
 }
+// PRA-HOMEOWNER-07 (rev 3): the AI-limit reply uses the customer's saved language (their latest own visit or request
+// in this workspace). With none saved, Spanish is used only when the shop serves Spanish and the text reads as Spanish.
+async function aiLimitLanguage(c, job) {
+  try {
+    const { recordsFor } = await import("./store.mjs"), { belongsToWorkspace } = await import("./workspace-identity.mjs");
+    const rows = (await recordsFor("bookings", c, job.from)).concat(await recordsFor("leads", c, job.from)).filter(r => r?.phone === job.from && belongsToWorkspace(c, r) && !r.simulation && !r.websiteSetupCheck && ["en", "es"].includes(r.language)).sort((a, b) => String(a.updatedAt || a.createdAt || "").localeCompare(String(b.updatedAt || b.createdAt || "")));
+    if (rows.length) return rows.at(-1).language;
+  } catch { /* The language is a preference; fall through to the shop setting. */ }
+  const { managedTextLooksSpanish } = await import("./desk.mjs");
+  return c.business?.spanish && managedTextLooksSpanish(job.body) ? "es" : "en";
+}
 export async function handleManagedSMS(req) {
   try {
     const fields = await verifiedFields(req); if (!fields) return new Response("Forbidden",{status:403});
@@ -154,7 +165,7 @@ export async function processManagedSMS(id) {
     // P6: the first front-desk (AI) reply in a conversation says it is automated. "First" means no saved reply
     // in this conversation carried the intro yet (history.disclosedAt, rev 2), so a retry decides the same way. The intro is part
     // of the saved reply, so a paid answer's delivery still matches its source (inbound.reply === body).
-    const firstReply=!history?.disclosedAt, disclose=text=>withAutomatedIntro(c,text,{first:firstReply,language:looksSpanish(job.body)?'es':'en'});
+    const firstReply=!history?.disclosedAt, disclose=(text,language)=>withAutomatedIntro(c,text,{first:firstReply,language:language||(looksSpanish(job.body)?'es':'en')});
     // These recipient-initiated controls are deterministic and do not spend AI
     // allowance. A website/call invitation starts this exchange; only the later
     // provider-verified YES after the sent question grants its stated permission.
@@ -206,8 +217,18 @@ export async function processManagedSMS(id) {
     }
     const allowance=await reserveAIRequest(c,"web",{service:"sms"}); if (!allowance.allowed) {
       job=await releaseUnusedAnswer(c,job);
-      const reply=disclose(`${c.business.name}: I cannot complete this reply right now. Please contact ${c.phone?.businessNumber || c.owner.email}. The shop can review your message in its workspace.`);
+      const { str, flagLead, shopPhoneDisplay } = await import("./desk.mjs"), language=await aiLimitLanguage(c,job);
       if(!await freshAuthority())return {ok:true,suppressed:true};
+      // PRA-HOMEOWNER-07 (rev 4): with no published number to give, the message is first saved as an owner request
+      // (the owner sees it in the workspace and gets the normal request alert). There is one such request per customer
+      // per Houston day: later texts reuse it (same record, same alert, so no new owner email) and stay in the
+      // conversation history. Only an open saved request lets the reply say the shop will contact the customer; if
+      // saving fails or the owner already closed it, the reply promises nothing.
+      let saved=false;
+      if(!shopPhoneDisplay(c.phone?.businessNumber)){try{const received=Date.parse(job.providerDate),day=houstonToday(Number.isFinite(received)?new Date(received):new Date());const lead=await flagLead(c,{customer_name:"",phone:job.from,address:"",issue:`Customer texted during the AI reply limit; no automatic answer was sent. First message: "${String(job.body).slice(0,300)}". Contact this customer.`,reason:"handoff",urgency:"today",wanted:"",language,nobook_reason:"none",unsure:""},{channel:"sms",contact:job.from,managedActionId:hash(`ai_daily_limit:${job.tenant}:${job.from}:${day}`)});saved=lead?.status==="open";}catch{saved=false;}}
+      // Release 3 (Spanish review r4 merge note): the legal P6 automated disclosure stays above the AI-limit reply on a
+      // first reply, in the same language as the reply (the AI-limit language), never in the language guessed from this text.
+      const reply=disclose(str("managed_ai_limit",{language})(c,{saved}),language);
       await updateInbound(id,row=>row.claim?.token===token?{...row,reply,replyPurpose:"reply",reasonCode:"ai_daily_limit"}:null);
       await queueManagedMessage(c,{eventId:`sms_reply:${job.messageSid}`,channel:"sms",purpose:"reply",to:job.from,body:reply});
       await appendHistoryOnce(historyKey,job,reply);
