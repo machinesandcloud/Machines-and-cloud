@@ -220,9 +220,13 @@
     if(row.status==='needs_attention')return 'Needs our attention';
     if(row.status==='partner_required')return 'Partner access needed';
     if(row.id==='calendar'&&data.connections?.calendar?.connected)return 'Google access saved';
+    if(notificationsArriving(row))return 'Notifications arriving';
+    if(row.id==='web'&&row.status==='waiting_platform')return action(row).kind==='wait'?action(row).label:'Waiting for AI service';
     if(row.responsibility==='platform'||['working','waiting_platform'].includes(row.status))return 'Platform check';
     return action(row).kind==='wait'?'Check saved status':'Your next step';
   }
+  // Thumbtack lead notifications carry a lead reference only; a saved one shows they arrive, not full delivery.
+  function notificationsArriving(row) { return row?.id==='thumbtack'&&row.deliveryMode==='self_serve'&&row.status!=='disconnected'&&row.verification?.working!==true&&(row.verification?.checks||[]).some(function(item){return item.id==='notification'&&item.state==='passed';}); }
   function checkedTime(value) { var date=new Date(value);return Number.isFinite(date.getTime())?date.toLocaleString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):''; }
   function renderSetupProgress(row) {
     var progress=row.setupProgress;if(!progress||!row.requested&&!row.retained)return '';
@@ -390,6 +394,9 @@
   motion.addEventListener('change',function(){if(current())render();});
   var autoCheckKey=null, autoLeadKey=null, websiteTaskActive=false, websiteInstructionsFinished=false;
   var websiteTaskCard=$('websiteInstallCard'),websiteTaskHome=websiteTaskCard?.parentElement;
+  // A check was started for the website that is still selected and allowed. A widget seen before a business-details change
+  // still counts (its observation turns stale with the rules, not with the installation); a different website does not.
+  function websiteCheckStarted(){var w=data?.websiteInstallation;if(!w||!w.attempt||w.originAllowed!==true||!w.observation?.origin||w.observation.origin!==w.selectedOrigin)return false;return ['found','stale'].includes(w.observation.state)||w.attempt.state!=='stale';}
   function returnWebsiteTask(){if(websiteTaskActive&&websiteTaskCard&&websiteTaskHome){websiteTaskHome.appendChild(websiteTaskCard);websiteTaskActive=false;}}
   function routeParts() { var parts=location.hash.slice(1).split('/');return parts[0]==='setup'&&labels[parts[1]]?{service:parts[1],screen:/^[a-z0-9_-]+$/.test(parts[2]||'')?parts[2]:'intro'}:null; }
   function pageRoute(id,screen,replace) {
@@ -398,16 +405,16 @@
     selected=id||null;pageScreen=id?screen:'overview';manualSelection=!!id;
   }
   function pageProgress(id,screen) {
-    var row=rows().find(function(item){return item.id===id;}),steps=(row?.guide?.steps||[]).filter(function(step){return id!=='web'||step.id!=='first_request';}),installCount=data?.serviceIntake?.web?.preferences?.builder==='wordpress'?5:4,extra=id==='sms'?2:id==='web'?installCount:0,total=steps.length+extra+1,index=steps.findIndex(function(step){return step.id===screen;});
-    if(/^details-\d(?:-\d)?$/.test(screen||'')){var detail=Number(screen.split('-')[1]);index=id==='sms'?Math.min(detail,2):id==='web'&&detail>0?Math.max(0,steps.findIndex(function(step){return step.id==='install';}))+1+Number(screen.split('-')[2]||0):0;}
+    var row=rows().find(function(item){return item.id===id;}),steps=(row?.guide?.steps||[]).filter(function(step){return id!=='web'||step.id!=='first_request';}),extra=id==='sms'?2:id==='web'?1:0,total=steps.length+extra+1,index=steps.findIndex(function(step){return step.id===screen;});
+    if(/^details-\d(?:-\d)?$/.test(screen||'')){var detail=Number(screen.split('-')[1]);index=id==='sms'?Math.min(detail,2):id==='web'&&detail>0?Math.max(0,steps.findIndex(function(step){return step.id==='install';}))+1:0;}
     else if(screen==='connection-check'||screen==='complete')index=total-1;else if(screen==='installation-check')index=Math.max(0,steps.findIndex(function(step){return step.id==='check';}))+extra;
     else {if(index<0)index=currentStep(row||{},steps);if(id==='sms'&&index>0)index+=extra;if(id==='web')index+=index>=Math.max(0,steps.findIndex(function(step){return step.id==='check';}))?extra:1;}
-    return {index:index,total:total,number:Math.min(index+1,total)};
+    return {index:index,total:total,number:Math.min(index+1,total),held:['voice','sms','calendar'].includes(id)&&!!platformHold(row)};
   }
   window.MCConnectorPages={progress:pageProgress};
   // Angi and Thumbtack step pages show the step the setup dialog shows (MCLeadSteps), so both agree on count and name.
   function leadPagePosition(row){return ['thumbtack','angi'].includes(row.id)&&!stoppedConnection(row)&&!usageHold(row)&&!['intro','complete','connection-check','connection-review','overview'].includes(pageScreen)&&!/^details-/.test(pageScreen)?window.MCLeadSteps?.position(row.id)||null:null;}
-  function leadIntroNext(row){return ['thumbtack','angi'].includes(row.id)&&!row.verification?.working?window.MCLeadSteps?.position(row.id)?.label||null:null;}
+  function leadIntroNext(row){return notificationsArriving(row)?'Review lead references in Inbox':['thumbtack','angi'].includes(row.id)&&!row.verification?.working?window.MCLeadSteps?.position(row.id)?.label||null:null;}
   function pageProgressHtml(row){
     var label=row.label||labels[row.id],position=pageProgress(row.id,pageScreen),stopped=stoppedConnection(row),usage=usageHold(row),index=position.index,total=position.total,lead=leadPagePosition(row);
     if(lead&&!lead.total)return '<div class="connector-page-progress"><span id="connectorStepCount">'+esc(lead.label)+'</span></div>';
@@ -453,7 +460,7 @@
     var verified=row.verification?.working===true,closed=['cancelled','archived','paused'].includes(data.client.status),total=steps.length+1,index=nextIndex;
     if(pageScreen==='complete'&&(!verified||!connectionNotices[selected]?.confirmed||!connectionNotices[selected]?.working||connectionNotices[selected]?.error)){pageScreen='connection-check';pageRoute(selected,'connection-check',true);}
     if(!['intro','connection-check','complete','installation-check','connection-review'].includes(pageScreen)&&!/^details-\d(?:-\d)?$/.test(pageScreen)&&!steps.some(function(step){return step.id===pageScreen;})){pageScreen=canonical.id;pageRoute(selected,pageScreen,true);}
-    if(selected==='web'&&!['intro','connection-check','complete','installation-check','connection-review'].includes(pageScreen)&&!/^details-/.test(pageScreen)&&next.kind==='route'&&next.target==='setup'&&!needsServiceInformation('web')&&!websiteInstructionsFinished&&!platformHold(row)){pageRoute('web','details-1-0',true);}
+    if(selected==='web'&&!['intro','connection-check','complete','installation-check','connection-review'].includes(pageScreen)&&!/^details-/.test(pageScreen)&&next.kind==='route'&&next.target==='setup'&&!needsServiceInformation('web')&&!platformHold(row)){pageRoute('web',websiteInstructionsFinished||websiteCheckStarted()?'installation-check':'details-1-0',true);}
     var viewedIndex=steps.findIndex(function(item){return item.id===pageScreen;});if(viewedIndex>nextIndex){pageRoute(selected,canonical.id,true);viewedIndex=nextIndex;}
     var step=steps.find(function(item){return item.id===pageScreen;})||canonical;index=viewedIndex>=0?viewedIndex:index;
     if(/^details-\d(?:-\d)?$/.test(pageScreen)&&$('serviceIntakeWorkbench')&&window.MCServiceIntake?.isOpen(selected)){window.MCServiceIntake.mount(host.querySelector('.connector-page'),selected,data);return;}
@@ -518,7 +525,7 @@
       var original=$('serviceConnections')?.querySelector(next.target==='show_phone_steps'?'#phoneRoutingSteps':'#textConnectionSteps');
       if(original){var instructions=original.cloneNode(true);instructions.removeAttribute('id');instructions.className='connector-focused-instructions';instructions.querySelectorAll('[id]').forEach(function(node){node.removeAttribute('id');});instructions.querySelectorAll('h4,[data-connection="cancel_voice"],[data-connection="cancel_sms"]').forEach(function(node){node.remove();});host.querySelector('.connector-page-body').appendChild(instructions);}
     }
-    if(!stopped&&selected==='web'&&!hold&&!['intro','connection-check','complete','connection-review'].includes(pageScreen)&&!/^details-/.test(pageScreen)&&!needsServiceInformation(selected)&&next.kind==='route'&&next.target==='setup'&&websiteTaskCard){host.querySelector('.connector-page-body').appendChild(websiteTaskCard);host.querySelector('.connector-page').classList.add('has-website-task');if(!host.querySelector('#connectorReviewOpen')){var help=document.createElement('p');help.innerHTML='<button type="button" id="connectorReviewOpen" class="connection-guide-link">Get help with this connection</button>';host.querySelector('.connector-page-body').appendChild(help);}websiteTaskActive=true;}
+    if(!stopped&&selected==='web'&&!hold&&!['intro','connection-check','complete','connection-review'].includes(pageScreen)&&!/^details-/.test(pageScreen)&&!needsServiceInformation(selected)&&next.kind==='route'&&next.target==='setup'&&websiteTaskCard){host.querySelector('.connector-page-body').appendChild(websiteTaskCard);host.querySelector('.connector-page').classList.add('has-website-task');if(pageScreen==='installation-check'&&!host.querySelector('#connectorReviewInstall')&&window.MCServiceIntake){var steps=document.createElement('p');steps.innerHTML='<button type="button" id="connectorReviewInstall" class="connection-guide-link">Review installation steps</button>';host.querySelector('.connector-page-body').appendChild(steps);}if(!host.querySelector('#connectorReviewOpen')){var help=document.createElement('p');help.innerHTML='<button type="button" id="connectorReviewOpen" class="connection-guide-link">Get help with this connection</button>';host.querySelector('.connector-page-body').appendChild(help);}websiteTaskActive=true;}
     if(!stopped&&['thumbtack','angi'].includes(selected)&&!['intro','connection-check','complete','connection-review'].includes(pageScreen)&&next.kind==='lead'&&autoLeadKey!==selected+'/'+pageScreen){autoLeadKey=selected+'/'+pageScreen;queueMicrotask(function(){if(current()&&selected===row.id&&pageScreen===step.id&&!$('leadSourceDialog')?.open)executeAction(row);});}
     if(!stopped&&!usage&&pageScreen==='connection-check'&&autoCheckKey!==selected){autoCheckKey=selected;queueMicrotask(function(){if(current()&&pageScreen==='connection-check')checkConnection(selected,true);});}
     if(!stopped&&!usage&&/^details-\d(?:-\d)?$/.test(pageScreen)&&!intakeOpeningErrors[selected]&&!restoringPage&&window.MCServiceIntake&&!$('serviceIntakeWorkbench')){restoringPage=true;window.MCServiceIntake.open(selected,false,false,Number(pageScreen.split('-')[1]),Number(pageScreen.split('-')[2]||0)).finally(function(){restoringPage=false;});}

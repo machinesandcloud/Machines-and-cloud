@@ -107,7 +107,7 @@ export async function websiteInstallationView(c, suppliedAllowance) {
   else if (a && (!current || expired) && setupRequest.state !== 'complete') { id = 'check_website'; reason = 'Start a new website check when you are ready.'; }
   else if (observation.state === 'waiting') { id = 'check_status'; reason = 'Waiting for the widget on your selected website.'; }
   else if (observation.state === 'found' && !customerChat.available) { id = customerChat.action; reason = customerChat.reason; }
-  else if (setupRequest.state === 'complete') { id = firstCurrent ? 'view_request' : 'view_setup_request'; reason = firstCurrent ? 'Open the first observed ordinary website request.' : 'Open your labeled setup request.'; }
+  else if (setupRequest.state === 'complete' || firstCurrent && observation.state === 'found' && Date.parse(first.at) >= Date.parse(observation.at)) { id = firstCurrent ? 'view_request' : 'view_setup_request'; reason = firstCurrent ? 'Open the first observed ordinary website request.' : 'Open your labeled setup request.'; }
   else if (observation.state === 'found') { id = 'try_sample'; reason = 'Create a deliberate sample request on your installed widget.'; }
   return { website: c.business?.website || '', selectedOrigin, originAllowed: permitted(c, selectedOrigin), tenantIdentity: deliveryTenant(c), configurationRevision: configurationRevision(c), editRevision: workspaceEditRevision(c), observation, customerChat, setupRequest, firstExternalRequest, attempt: a ? { id: a.id, expiresAt: a.expiresAt, state: setupRequest.state === 'complete' ? 'complete' : !current ? 'stale' : expired ? 'expired' : a.observedAt ? 'observed' : 'waiting' } : null, nextAction: { id, reason } };
 }
@@ -159,7 +159,7 @@ export async function publicWebsiteCheck(c, body, origin) {
   });
   row = await strictRead(KIND, key(c));
   const a = row.attempt, state = chatState(current, await getAIAllowance(current));
-  return { ok: true, check: { id: a.id, contact: a.contact, origin: a.origin, expiresAt: a.expiresAt, observed: !!a.observedAt, chatAvailable: state.available, reason: state.reason, sample: { service: typeof current.services?.[0] === 'string' ? current.services[0].slice(0, 160) : '', area: typeof current.business?.serviceArea?.[0] === 'string' ? current.business.serviceArea[0].slice(0, 160) : '' }, turn: publicTurn(a.turns?.[body.turnId]) } };
+  return { ok: true, check: { id: a.id, contact: a.contact, origin: a.origin, expiresAt: a.expiresAt, observed: !!a.observedAt, chatAvailable: state.available, reason: state.reason, chatAction: state.action, sample: { service: typeof current.services?.[0] === 'string' ? current.services[0].slice(0, 160) : '', area: typeof current.business?.serviceArea?.[0] === 'string' ? current.business.serviceArea[0].slice(0, 160) : '' }, turn: publicTurn(a.turns?.[body.turnId]) } };
 }
 export async function claimWebsiteTurn(c, meta, contact, origin) {
   if (meta === undefined) {

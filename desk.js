@@ -954,6 +954,11 @@
     if(inboxEmpty&&selfService&&!hasWork&&next&&!['live','paused','cancelled','archived'].includes(client.status)&&!historyIncomplete(d.recordListing||{})){
       var inboxAction=document.createElement('button');inboxAction.id='inboxSetupAction';inboxAction.type='button';inboxAction.className='desk-empty-action';inboxAction.textContent=next.label||'View setup progress';inboxAction.dataset.route=next.tab||'setup';if(next.anchor)inboxAction.dataset.anchor=next.anchor;if(next.service)inboxAction.dataset.service=next.service;inboxEmpty.querySelector('div:last-child').appendChild(inboxAction);
     }
+    // Booked visits live in Schedule. Point to recent ones from Home and from an empty Inbox.
+    var recentVisits=selfService?(d.bookings||[]).filter(function(row){var at=Date.parse(row.createdAt);return customerRecord(row)&&row.status!=='cancelled'&&Number.isFinite(at)&&Date.now()-at<=7*864e5;}).length:0,visitText=recentVisits===1?'1 visit was booked in the last 7 days.':recentVisits+' visits were booked in the last 7 days.';
+    if($('homeNewVisits')){$('homeNewVisits').hidden=!recentVisits;$('homeNewVisitsText').textContent=recentVisits?visitText+' Booked visits are kept in Schedule.':'';}
+    $('inboxVisitAction')?.remove();
+    if(inboxEmpty&&recentVisits&&inboxEmpty.querySelector('strong')?.textContent==='No customer requests yet'){inboxEmpty.querySelector('strong').textContent='No requests to follow up';inboxEmpty.querySelector('div:last-child p').textContent=visitText+' Booked visits are kept in Schedule; new customer requests appear here.';var visitAction=document.createElement('button');visitAction.id='inboxVisitAction';visitAction.type='button';visitAction.className='desk-empty-action';visitAction.dataset.route='availability';visitAction.textContent='Open Schedule →';inboxEmpty.querySelector('div:last-child').appendChild(visitAction);}
     syncNextActionVisibility();
   }
   function reviewRequirements(d) {
