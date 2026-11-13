@@ -29,6 +29,10 @@ const store = await import('../netlify/functions/lib/store.mjs'), access = await
 const config = await import('../netlify/functions/lib/config.mjs'), operator = await import('../netlify/functions/lib/operator.mjs'), send = await import('../netlify/functions/lib/send.mjs');
 const manage = (await import('../netlify/functions/manage.mjs')).default, admin = (await import('../netlify/functions/admin.mjs')).default, accessAPI = (await import('../netlify/functions/access.mjs')).default;
 const onboard = (await import('../netlify/functions/onboard.mjs')).default, client = (await import('../netlify/functions/client.mjs')).default, scheduler = await import('../netlify/functions/scheduler.mjs');
+// Release 2 (RC2-T1): a gate run at a fan-out hour (21:00-21:59 Houston autoflag, 18 digest, Mon 8 weekly, 1st 9 monthly)
+// made scheduler.run start the real background fan-out over loopback, which the no-outbound check (N00/N0) rightly
+// refuses. Claim today's fan-outs first, as a deployed scheduler has after its first run of the hour; nothing here tests fan-outs.
+{ const { claimFanout } = await import('../netlify/functions/lib/fanout.mjs'); const day = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago' }).format(new Date()); for (const kind of ['digest', 'autoflag', 'weekly', 'monthly']) await claimFanout(kind, day); }
 const issuesModule = existsSync(root + 'netlify/functions/lib/operator-issues.mjs');
 const read = accounts.strictRead;
 const results = []; let serial = 0;
