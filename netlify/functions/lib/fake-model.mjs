@@ -9,6 +9,7 @@ const WINDOW = (t) => pick(/\b(\d{1,2}\s*(?:to|a)\s*\d{1,2})\b/, t);
 const DATE = (t) => pick(/\b(today|tomorrow|monday|tuesday|wednesday|thursday|friday|saturday|sunday|mañana|hoy)\b/i, t).toLowerCase().replace("mañana", "tomorrow").replace("hoy", "today");
 const es = (t) => /\b(hola|aire|calentador|agende|mañana|necesito|gracias|sí)\b/i.test(t);
 
+export const PORTAL_ONLY_MARKER = "say the shop needs to confirm arrival details directly";
 function desk(system, messages) {
   const user = [...messages].reverse().find((m) => m.role === "user");
   const text = typeof user?.content === "string" ? user.content : (user?.content || []).filter((b) => b.type === "text").map((b) => b.text).join(" ");
@@ -17,7 +18,10 @@ function desk(system, messages) {
   const lang = es(text) ? "es" : "en";
   const phone = E164(all), address = ADDR(all), name = NAME(all), window = WINDOW(all), date = DATE(all) || "tomorrow";
   const sayES = (en, esT) => (lang === "es" ? esT : en);
-  const portalOnly = system.includes("Channel limits: this workspace operates website chat only.");
+  // A self-service (onboarding v1) shop's prompt tells the desk the shop confirms arrival details itself, with no
+  // promised texts. PORTAL_ONLY_MARKER copies that sentence from buildSystemPrompt in config.mjs; no gate check
+  // asserts the match, so change both together or fake website-only detection stops (PRA-FC-10).
+  const portalOnly = system.includes(PORTAL_ONLY_MARKER) || system.includes("Channel limits: this workspace operates website chat only.");
   if (/\b(gas|carbon monoxide|co alarm|smoke|fire|sparks?|burning)\b/i.test(text)) {
     const safety = sayES("Please leave the house right now, call 911 or CenterPoint from outside, then call us.", "Salga de la casa ahora, llame al 911 desde afuera y luego llámenos.");
     if (phone) return { text: safety + " " + (portalOnly ? sayES("Your urgent request is saved in the shop portal; human contact is not confirmed.", "Su solicitud urgente está guardada en el portal; el contacto humano no está confirmado.") : sayES(`I have sent ${owner} your details.`, `Ya le avisé a ${owner}.`)), tool: { name: "notify_owner", input: { customer_name: name, phone, address, issue: text.slice(0, 120), reason: "emergency", urgency: "emergency", wanted: "", language: lang, nobook_reason: "none", unsure: "" } } };

@@ -279,7 +279,7 @@ export async function saveAccessDraft(session, body) {
     const draft = { fields, step: body.step, revision: body.revision + 1, updatedAt: stamp(), ...(current?.intakeApplied ? { intakeApplied: current.intakeApplied } : {}), ...(Object.hasOwn(body, "marketingConsent") ? { emailPreference: { preference: body.marketingConsent, revision: body.revision + 1 } } : current?.emailPreference ? { emailPreference: current.emailPreference } : {}) };
     return { value: draft, result: draft };
   });
-  if (!result) throw new AccessError("draft_changed", "Your saved answers changed in another tab. Reload to continue with the latest version.", 409);
+  if (!result) throw new AccessError("draft_changed", "Your saved answers were changed on another device or tab. Reload to see them, or replace them with the answers on this page. Replacing deletes the other answers and cannot be undone.", 409);
   try {
     const marketing = Object.hasOwn(body, "marketingConsent") ? await saveMarketingPreference(session, body.marketingConsent, result.revision) : await marketingState(session.email);
     return { ok: true, draft: result, marketing };

@@ -175,7 +175,7 @@
   function gateOnly(message) {
     gate.hidden = false; form.hidden = true; document.querySelector('.ob-steps').hidden = true;
     document.body.dataset.setupState = 'signin'; syncPageLabels();
-    document.getElementById('access-signed-in').hidden = true; draftStatus.hidden = true;
+    document.getElementById('access-signed-in').hidden = true; draftStatus.hidden = true; document.getElementById('draft-replace').hidden = true;
     document.getElementById('done').classList.remove('on');
     gate.removeAttribute('aria-busy');
     if (message) gateStatus.textContent = message;
@@ -344,12 +344,12 @@
     }
     var pending = confirm.then(function () { if (generation === accessGeneration) return request('/api/access', 'PUT', saveBody).catch(lateOwnSave); }).then(function (result) {
       if (generation !== accessGeneration) return;
-      revision = result.draft.revision;
+      revision = result.draft.revision; showReplace(false);
       if (!result.marketingPending && Object.prototype.hasOwnProperty.call(saveBody, 'marketingConsent')) marketingSavedVersion = preferenceVersion;
       dirty = JSON.stringify(collect()) !== JSON.stringify(snapshot) || i !== step || marketingVersion !== preferenceVersion;
       draftStatus.textContent = result.marketingPending ? 'Your answers are saved. Your email preference could not be confirmed; it will retry when you save or continue.' : 'Saved. You can leave and continue later.';
     }).catch(function (error) {
-      if (generation !== accessGeneration) return; dirty = true;
+      if (generation !== accessGeneration) return; dirty = true; showReplace(error.code === 'draft_changed');
       // A lost reply or a non-JSON server error leaves the outcome unknown; only a readable server answer is a definite failure.
       var unknown = error.code === 'connection' || error.code === 'unavailable'; if (unknown && !lostSave) lostSave = { fields: snapshot, step: step, revision: saveBody.revision };
       draftStatus.textContent = unknown ? 'We couldn’t confirm whether your changes were saved.' + (error.code === 'connection' ? ' Check your connection.' : '') + ' They’re still on this page.' : error.message + ' Your changes are still on this page.';
@@ -362,6 +362,26 @@
     if (saveAgain || dirty) { saveAgain = false; return saveDraft(options); }
     if (!options.silent) announceDraft(draftStatus.textContent, true);
   }
+  // A newer save from another device or tab: the owner can replace it with this page's answers (PRA-ONB-09).
+  // Two steps, with a warning that the other answers are deleted. The PUT stays conditional on the revision
+  // just read, so a further change elsewhere meets the conflict check again. pointerdown is cancelled so a tap
+  // does not blur the field being edited; that blur would start an autosave and move the buttons mid-tap.
+  var replaceBox = document.getElementById('draft-replace'), keepMine = document.getElementById('draft-keep-mine');
+  var replaceConfirm = document.getElementById('draft-replace-confirm'), replaceYes = document.getElementById('draft-replace-yes'), replaceCancel = document.getElementById('draft-replace-cancel');
+  // A later autosave that meets the same conflict leaves an open confirmation as it is.
+  function showReplace(show) { if (show && !replaceBox.hidden) return; replaceBox.hidden = !show; keepMine.hidden = false; replaceConfirm.hidden = true; replaceYes.disabled = false; }
+  [keepMine, replaceYes, replaceCancel].forEach(function (button) { button.addEventListener('pointerdown', function (event) { event.preventDefault(); }); });
+  keepMine.addEventListener('click', function () { keepMine.hidden = true; replaceConfirm.hidden = false; replaceCancel.focus(); });
+  replaceCancel.addEventListener('click', function () { replaceConfirm.hidden = true; keepMine.hidden = false; keepMine.focus(); });
+  replaceYes.addEventListener('click', function () {
+    if (!session || replaceYes.disabled) return;
+    var generation = accessGeneration; replaceYes.disabled = true;
+    request('/api/access').then(function (state) {
+      if (generation !== accessGeneration || !state.draft) return;
+      revision = state.draft.revision; lostSave = null;
+      return saveDraft();
+    }, function () { if (generation === accessGeneration) draftStatus.textContent = 'We couldn’t load the latest saved version. Nothing was replaced. Your changes are still on this page.'; }).catch(function () {}).then(function () { replaceYes.disabled = false; });
+  });
   function ownLostSave(draft, lost) { return !!draft && draft.revision === lost.revision + 1 && draft.step === lost.step && sameFields(draft.fields, lost.fields); }
   function sameFields(a, b) { var keys = Object.keys(a || {}); return keys.length === Object.keys(b || {}).length && keys.every(function (key) { return JSON.stringify(a[key]) === JSON.stringify(b[key]); }); }
   function scheduleSave() {
@@ -421,7 +441,9 @@
   }
   function workspace(portal, text) {
     document.body.dataset.setupState = 'ready'; syncPageLabels();
-    form.hidden = true; document.querySelector('.ob-steps').hidden = true; draftStatus.hidden = true; gate.hidden = true;
+    form.hidden = true; draftStatus.hidden = true; gate.hidden = true;
+    // The sidebar shows the finished setup, every step complete, not the signed-out path (PRA-ONB-12).
+    document.querySelector('.ob-steps').hidden = false; pills.forEach(function (pill) { pill.classList.add('on'); pill.dataset.stepState = 'complete'; pill.setAttribute('aria-current', 'false'); });
     document.getElementById('done').classList.add('on');
     var doneTitle = document.getElementById('done-title'); doneTitle.textContent = 'Your workspace is ready';
     document.getElementById('buildStatus').textContent = text || 'Your business details are saved. Review your answers, try a private conversation and finish your selected connections.';
@@ -695,7 +717,7 @@
       var offered = value.split(/[\n,;]+/).map(function (item) { return item.trim(); }).filter(Boolean), table = appointmentTable(), openDays = DAYS.filter(function (day) { return !!table[day]; });
       for (var w = 0; w < offered.length; w++) {
         var range = appointmentWindow(offered[w]);
-        if (!range) return 'Use a time range with am or pm, such as 8 am to 12 pm.';
+        if (!range) return 'We couldn’t read “' + offered[w] + '” as an arrival window. Write a start and end time with am or pm, such as 8 am to 12 pm.'; // PRA-ONB-10
         if (openDays.length && !openDays.some(function (day) { return range[0] >= clockMinutes(table[day].open) && range[1] <= clockMinutes(table[day].close); })) return 'The window “' + offered[w] + '” falls outside your appointment hours. Adjust the window or choose different appointment hours above.';
       }
     }

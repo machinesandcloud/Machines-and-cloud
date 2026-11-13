@@ -34,6 +34,9 @@ if (process.env.MC_LOCAL_NO_KEYS !== "0") {
     delete process.env[k];
   }
   process.env.VAPI_WEBHOOK_SECRET = process.env.LOCAL_VAPI_WEBHOOK_SECRET || "local-vapi-secret";
+  // A fixed synthetic at-rest key for the in-memory store only, so local setup storage works (PRA-FC-10).
+  // It replaces any key .env held; it is not a provider credential and never protects real data.
+  process.env.PLATFORM_DATA_ENCRYPTION_KEY = Buffer.alloc(32, 7).toString("base64");
 }
 
 const fnDir = join(root, "netlify/functions");

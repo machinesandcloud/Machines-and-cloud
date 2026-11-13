@@ -591,6 +591,8 @@ ${ownSenderApproved(c) ? "Texts to customers and to you go out from your own num
 // "1402 Mason Rd, Katy, TX 77450" -> street, city, state, zip; without a ZIP the city falls back to the shop's.
 function splitAddress(addr, defaultCity) {
   const t = String(addr || "").trim();
+  // A customer who gave no address gets empty address columns, not the shop's city (PRA-FC-09).
+  if (!t) return { street: "", city: "", state: "", zip: "" };
   const m = t.match(/^(.*?)(?:,\s*([A-Za-z .'-]+?))?(?:,?\s*(TX|Texas))?\s*,?\s*(\d{5})(?:-\d{4})?$/i);
   if (m) return { street: m[1].replace(/,\s*$/, "").trim(), city: (m[2] || defaultCity).trim(), state: "TX", zip: m[4] };
   const parts = t.split(",").map((x) => x.trim()).filter(Boolean);

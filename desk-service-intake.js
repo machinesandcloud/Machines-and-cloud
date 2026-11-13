@@ -24,6 +24,8 @@
     options=options||{};
     return '<div class="intake-field"><label for="intake-'+name+'">'+esc(label)+(options.optional&&!options.requiredWhenShown?' <small>Optional</small>':'')+'</label><input class="form-input" id="intake-'+name+'" name="'+name+'" type="'+(options.type||'text')+'" value="'+esc(value)+'" maxlength="'+(options.max||254)+'"'+(options.optional?'':' required')+(options.autocomplete?' autocomplete="'+options.autocomplete+'"':'')+' aria-describedby="intake-'+name+'-error"><p class="cfg-field-error" id="intake-'+name+'-error"></p></div>';
   }
+  // Dropdowns say Choose, in a sentence written for each control (PRA-FC-07).
+  var CHOOSE_MESSAGES={builder:'Choose your website builder.',installationBy:'Choose who manages your website.',forwardingMode:'Choose how customer calls reach the front desk.',carrier:'Choose your phone provider.',forwarding:'Choose when calls should reach the front desk.',businessType:'Choose your business type.',businessIndustry:'Choose your business industry.',jobPosition:'Choose your position.'};
   function select(name,label,value,items) {
     return '<div class="intake-field"><label for="intake-'+name+'">'+esc(label)+'</label><select class="form-input" id="intake-'+name+'" name="'+name+'" required aria-describedby="intake-'+name+'-error"><option value="">Choose…</option>'+items.map(function(row){return '<option value="'+row[0]+'"'+(value===row[0]?' selected':'')+'>'+esc(row[1])+'</option>';}).join('')+'</select><p class="cfg-field-error" id="intake-'+name+'-error"></p></div>';
   }
@@ -121,7 +123,7 @@
   }
   function validate() {
     var form=$('serviceIntakeForm'), invalid=null;
-    form.querySelectorAll('input,select').forEach(function(input){input.removeAttribute('aria-invalid');var error=$('intake-'+input.name+'-error');if(error)error.textContent='';if(!input.checkValidity()){input.setAttribute('aria-invalid','true');if(error)error.textContent=input.validity.valueMissing?'Enter '+(input.labels[0]?.textContent||'this value').toLowerCase().replace('optional','').trim()+'.':input.type==='email'?'Enter a valid email address.':input.type==='url'?'Enter the full website address, starting with https://.':'Check this value.';invalid=invalid||input;}});
+    form.querySelectorAll('input,select').forEach(function(input){input.removeAttribute('aria-invalid');var error=$('intake-'+input.name+'-error');if(error)error.textContent='';if(!input.checkValidity()){input.setAttribute('aria-invalid','true');if(error)error.textContent=input.validity.valueMissing&&input.tagName==='SELECT'?(CHOOSE_MESSAGES[input.name]||'Choose an option.'):input.validity.valueMissing?'Enter '+(input.labels[0]?.textContent||'this value').toLowerCase().replace('optional','').trim()+'.':input.type==='email'?'Enter a valid email address.':input.type==='url'?'Enter the full website address, starting with https://.':'Check this value.';invalid=invalid||input;}});
     if(invalid){invalid.focus();return false;}return true;
   }
   function applyResponse(result) {

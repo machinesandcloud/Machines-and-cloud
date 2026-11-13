@@ -60,6 +60,7 @@
   // 24px minimum for the small text buttons everywhere, and an AA-contrast placeholder.
   var style = el('style'); style.id = 'mcAgentStyle';
   style.textContent = '#mcAgent .mc-agent-form textarea::placeholder{color:#5d6b82}' +
+    '#mcAgent.is-covering{pointer-events:none}#mcAgent.is-covering .mc-agent-launcher{visibility:hidden;pointer-events:none}' +
     '#mcAgent .mc-agent-copy,#mcAgent .mc-agent-save,#mcAgent .mc-agent-bottom-actions>a{display:inline-flex;align-items:center;min-height:24px}' +
     '#mcAgent .mc-agent-retry{display:flex;align-items:center;width:fit-content;min-height:24px}' +
     '@media (pointer:coarse),(max-width:600px){' +
@@ -404,5 +405,20 @@
     })();
     return true;
   }
+  // The closed launcher steps aside while it would cover the inquiry submit button or the demo
+  // conversation header, at any scroll position (PRA-ACQ-10). It stays while it has keyboard focus.
+  var COVER_TARGETS = '#intake-submit,.site-conversation-head,[data-agent-launcher-avoid]', coverFrame = 0;
+  function overlaps(a, b) { return b.width > 0 && b.height > 0 && a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top; }
+  function updateCovering() {
+    coverFrame = 0;
+    var box = launcher.getBoundingClientRect(), hide = panel.hidden && document.activeElement !== launcher && box.width > 0 &&
+      [].some.call(document.querySelectorAll(COVER_TARGETS), function (node) { return overlaps(box, node.getBoundingClientRect()); });
+    root.classList.toggle('is-covering', !!hide);
+  }
+  function scheduleCovering() { if (!coverFrame) coverFrame = window.requestAnimationFrame(updateCovering); }
+  window.addEventListener('scroll', scheduleCovering, { passive: true });
+  window.addEventListener('resize', scheduleCovering);
+  launcher.addEventListener('focus', updateCovering); launcher.addEventListener('blur', scheduleCovering);
+  scheduleCovering();
   if (window.location.hash === '#agent') open();
 })();

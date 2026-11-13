@@ -201,7 +201,7 @@
     if(!paused&&row.id==='voice'&&data.phoneActivation?.operation?.releaseConfirmed===true)detail+=' Your front desk number has been released.';
     if(!paused&&pending)detail+=uncertain?' Provider cleanup is not confirmed yet. Your saved cancellation remains in place.':' Your cancellation is saved. We are checking the remaining cleanup.';
     else if(!paused)detail+=' Your saved records remain available in Account.';
-    return {status:paused?'Paused':uncertain?'Cleanup needs attention':pending?'Checking cleanup':'Stopped',detail:detail,pending:pending,updatedAt:op?.updatedAt||row.setupProgress?.updatedAt||null};
+    return {status:paused?(row.pausedService===false?(row.activation?.blockedBy==='machines_and_cloud'?'Setup with our team':'Not set up yet'):'Paused'):uncertain?'Cleanup needs attention':pending?'Checking cleanup':'Stopped',detail:detail,pending:pending,paused:paused,updatedAt:op?.updatedAt||row.setupProgress?.updatedAt||null};
   }
   function serviceStatus(row) {
     var stopped=stoppedConnection(row);if(stopped)return stopped.status;
@@ -471,7 +471,7 @@
     var body='',footer='',back='<button type="button" id="connectorBack" class="btn-pill btn-pill-dark btn-sm">Back</button>',exit='<button type="button" id="connectorSaveExit" class="connection-guide-link">Exit setup</button>';
     var hold=platformHold(row);
     if(stopped) {
-      body='<h4 id="setupGuideStageTitle" tabindex="-1">'+esc(labels[selected])+' is '+(stopped.status==='Paused'?'paused':'stopped')+'</h4><p class="connector-page-description" id="connectorStoppedStatus">'+esc(stopped.detail)+'</p>';
+      body='<h4 id="setupGuideStageTitle" tabindex="-1">'+esc(labels[selected])+' is '+(stopped.paused?'paused':'stopped')+'</h4><p class="connector-page-description" id="connectorStoppedStatus">'+esc(stopped.detail)+'</p>';
       if(stopped.updatedAt)body+='<p class="connector-evidence-time">Last saved update: '+esc(checkedTime(stopped.updatedAt))+'</p>';
       if(connectionNotices[selected])body+='<p class="connection-verification-notice" role="status"'+(connectionNotices[selected].error?' data-error="true"':'')+'>'+esc(connectionNotices[selected].text)+'</p>';
       footer='<a class="connection-guide-link" href="mailto:support@machinesandcloud.com">Contact support</a>'+(stopped.pending?'<button type="button" id="setupGuideCheckConnection" class="connection-guide-link"'+(connectionCheck?' disabled':'')+'>'+(connectionCheck?'Checking…':'Check cleanup status')+'</button>':'')+'<button type="button" id="connectorStoppedAccount" class="btn-pill btn-pill-blue btn-sm">Open Account</button>';
