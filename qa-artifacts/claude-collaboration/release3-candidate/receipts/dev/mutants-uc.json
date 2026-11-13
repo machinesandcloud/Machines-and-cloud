@@ -1,0 +1,387 @@
+{
+ "killed": 42,
+ "total": 42,
+ "results": [
+  {
+   "mutant": "M01 HELP contact drops the registered email",
+   "status": "KILLED",
+   "exit": 1,
+   "failedChecks": [
+    "H07 in-app HELP and AYUDA name exactly the registered campaign HELP contact (with and without a business number)",
+    "H06 Monday 8 to 12 booked by text: the 1h reminder is actually sent before the window"
+   ]
+  },
+  {
+   "mutant": "M02 HELP contact ignores the business number",
+   "status": "KILLED",
+   "exit": 1,
+   "failedChecks": [
+    "H07 in-app HELP and AYUDA name exactly the registered campaign HELP contact (with and without a business number)"
+   ]
+  },
+  {
+   "mutant": "M03 no-number reply names the email",
+   "status": "KILLED",
+   "exit": 1,
+   "failedChecks": [
+    "H07 AI-limit without a business number first saves an owner request (with the owner alert), then says the shop will reply",
+    "H07 AI-limit: 5 texts from one customer give 1 request and 1 owner email; another customer gets its own; a closed request gets no promise",
+    "H07 AI-limit language: saved customer language wins; else Spanish only when the shop serves Spanish; Spanish stays GSM-7, 1 segment",
+    "H07 AI-limit + P6: the first reply carries the automated disclosure in the reply language, above the AI-limit body; later replies do not"
+   ]
+  },
+  {
+   "mutant": "M04 AI-limit uses the texted number",
+   "status": "KILLED",
+   "exit": 1,
+   "failedChecks": [
+    "H07 AI-limit without a business number first saves an owner request (with the owner alert), then says the shop will reply",
+    "H07 AI-limit: 5 texts from one customer give 1 request and 1 owner email; another customer gets its own; a closed request gets no promise",
+    "H07 AI-limit: if saving the request fails, the reply promises nothing",
+    "H07 AI-limit language: saved customer language wins; else Spanish only when the shop serves Spanish; Spanish stays GSM-7, 1 segment",
+    "H07 AI-limit + P6: the first reply carries the automated disclosure in the reply language, above the AI-limit body; later replies do not"
+   ]
+  },
+  {
+   "mutant": "M05 promise made without a saved request",
+   "status": "KILLED",
+   "exit": 1,
+   "failedChecks": [
+    "H07 AI-limit: 5 texts from one customer give 1 request and 1 owner email; another customer gets its own; a closed request gets no promise",
+    "H07 AI-limit: if saving the request fails, the reply promises nothing",
+    "H06 Monday 8 to 12 booked by text: the 1h reminder is actually sent before the window"
+   ]
+  },
+  {
+   "mutant": "M06 no owner request saved",
+   "status": "KILLED",
+   "exit": 1,
+   "failedChecks": [
+    "H07 AI-limit without a business number first saves an owner request (with the owner alert), then says the shop will reply",
+    "H07 AI-limit: 5 texts from one customer give 1 request and 1 owner email; another customer gets its own; a closed request gets no promise",
+    "H07 AI-limit language: saved customer language wins; else Spanish only when the shop serves Spanish; Spanish stays GSM-7, 1 segment",
+    "H07 AI-limit + P6: the first reply carries the automated disclosure in the reply language, above the AI-limit body; later replies do not"
+   ]
+  },
+  {
+   "mutant": "M07 request keyed per message",
+   "status": "KILLED",
+   "exit": 1,
+   "failedChecks": [
+    "H07 AI-limit without a business number first saves an owner request (with the owner alert), then says the shop will reply",
+    "H07 AI-limit: 5 texts from one customer give 1 request and 1 owner email; another customer gets its own; a closed request gets no promise",
+    "H06 Sunday 8 to 12: the 24h reminder still goes out, then the moved 1h reminder"
+   ]
+  },
+  {
+   "mutant": "M07b request not keyed by day",
+   "status": "KILLED",
+   "exit": 1,
+   "failedChecks": [
+    "H07 AI-limit without a business number first saves an owner request (with the owner alert), then says the shop will reply",
+    "H07 AI-limit: 5 texts from one customer give 1 request and 1 owner email; another customer gets its own; a closed request gets no promise"
+   ]
+  },
+  {
+   "mutant": "M07c request not keyed by customer",
+   "status": "KILLED",
+   "exit": 1,
+   "failedChecks": [
+    "H07 AI-limit without a business number first saves an owner request (with the owner alert), then says the shop will reply",
+    "H07 AI-limit: 5 texts from one customer give 1 request and 1 owner email; another customer gets its own; a closed request gets no promise",
+    "H07 AI-limit language: saved customer language wins; else Spanish only when the shop serves Spanish; Spanish stays GSM-7, 1 segment",
+    "H06 Sunday 8 to 12: the 24h reminder still goes out, then the moved 1h reminder"
+   ]
+  },
+  {
+   "mutant": "M07d closed request still promises",
+   "status": "KILLED",
+   "exit": 1,
+   "failedChecks": [
+    "H07 AI-limit: 5 texts from one customer give 1 request and 1 owner email; another customer gets its own; a closed request gets no promise",
+    "H06 Monday 8 to 12 booked by text: the 1h reminder is actually sent before the window"
+   ]
+  },
+  {
+   "mutant": "M08 failed save still promises",
+   "status": "KILLED",
+   "exit": 1,
+   "failedChecks": [
+    "H07 AI-limit: 5 texts from one customer give 1 request and 1 owner email; another customer gets its own; a closed request gets no promise",
+    "H07 AI-limit: if saving the request fails, the reply promises nothing",
+    "H06 Monday 8 to 12 booked by text: the 1h reminder is actually sent before the window"
+   ]
+  },
+  {
+   "mutant": "M09 saved language ignored",
+   "status": "KILLED",
+   "exit": 1,
+   "failedChecks": [
+    "H07 AI-limit language: saved customer language wins; else Spanish only when the shop serves Spanish; Spanish stays GSM-7, 1 segment",
+    "H07 AI-limit + P6: the first reply carries the automated disclosure in the reply language, above the AI-limit body; later replies do not"
+   ]
+  },
+  {
+   "mutant": "M10 shop Spanish setting ignored",
+   "status": "KILLED",
+   "exit": 1,
+   "failedChecks": [
+    "H07 AI-limit language: saved customer language wins; else Spanish only when the shop serves Spanish; Spanish stays GSM-7, 1 segment"
+   ]
+  },
+  {
+   "mutant": "M11 always English",
+   "status": "KILLED",
+   "exit": 1,
+   "failedChecks": [
+    "H07 AI-limit: if saving the request fails, the reply promises nothing",
+    "H07 AI-limit language: saved customer language wins; else Spanish only when the shop serves Spanish; Spanish stays GSM-7, 1 segment",
+    "H07 AI-limit + P6: the first reply carries the automated disclosure in the reply language, above the AI-limit body; later replies do not"
+   ]
+  },
+  {
+   "mutant": "M12 Spanish not GSM-7",
+   "status": "KILLED",
+   "exit": 1,
+   "failedChecks": [
+    "H07 AI-limit language: saved customer language wins; else Spanish only when the shop serves Spanish; Spanish stays GSM-7, 1 segment",
+    "H07 AI-limit + P6: the first reply carries the automated disclosure in the reply language, above the AI-limit body; later replies do not"
+   ]
+  },
+  {
+   "mutant": "M13 Spanish failed-save wording promises",
+   "status": "KILLED",
+   "exit": 1,
+   "failedChecks": [
+    "H07 AI-limit: if saving the request fails, the reply promises nothing"
+   ]
+  },
+  {
+   "mutant": "M14 lead saved in the wrong language",
+   "status": "KILLED",
+   "exit": 1,
+   "failedChecks": [
+    "H07 AI-limit language: saved customer language wins; else Spanish only when the shop serves Spanish; Spanish stays GSM-7, 1 segment"
+   ]
+  },
+  {
+   "mutant": "M08 confirmation carries the visit ID again",
+   "status": "KILLED",
+   "exit": 1,
+   "failedChecks": [
+    "H05 confirmation and reminders: no 32-hex ID, absolute date",
+    "H05 owner reschedule says moved, from and to; cancel says how to rebook"
+   ]
+  },
+  {
+   "mutant": "M09 ISO date",
+   "status": "KILLED",
+   "exit": 1,
+   "failedChecks": [
+    "H05 confirmation and reminders: no 32-hex ID, absolute date",
+    "H05 owner reschedule says moved, from and to; cancel says how to rebook",
+    "H05 cancellation with a published number names it (English, and Spanish needing its reviewer); dates are absolute",
+    "H06 Monday 8 to 12 booked by text: the 1h reminder is actually sent before the window"
+   ]
+  },
+  {
+   "mutant": "M10 date formatted in local zone",
+   "status": "KILLED",
+   "exit": 1,
+   "failedChecks": [
+    "H05 confirmation and reminders: no 32-hex ID, absolute date",
+    "H05 owner reschedule says moved, from and to; cancel says how to rebook",
+    "H05 cancellation with a published number names it (English, and Spanish needing its reviewer); dates are absolute",
+    "H06 Monday 8 to 12 booked by text: the 1h reminder is actually sent before the window"
+   ]
+  },
+  {
+   "mutant": "M11 reschedule reads like a new visit",
+   "status": "KILLED",
+   "exit": 1,
+   "failedChecks": [
+    "H05 owner reschedule says moved, from and to; cancel says how to rebook"
+   ]
+  },
+  {
+   "mutant": "M12 moved text without the previous time",
+   "status": "KILLED",
+   "exit": 1,
+   "failedChecks": [
+    "H05 owner reschedule says moved, from and to; cancel says how to rebook"
+   ]
+  },
+  {
+   "mutant": "M13 reminder carries the ID",
+   "status": "KILLED",
+   "exit": 1,
+   "failedChecks": [
+    "H05 confirmation and reminders: no 32-hex ID, absolute date",
+    "H06 Monday 8 to 12 booked by text: the 1h reminder is actually sent before the window"
+   ]
+  },
+  {
+   "mutant": "M14 cancel without rebook line",
+   "status": "KILLED",
+   "exit": 1,
+   "failedChecks": [
+    "H05 owner reschedule says moved, from and to; cancel says how to rebook",
+    "H05 cancellation with a published number names it (English, and Spanish needing its reviewer); dates are absolute"
+   ]
+  },
+  {
+   "mutant": "M15 cancel omits the business number",
+   "status": "KILLED",
+   "exit": 1,
+   "failedChecks": [
+    "H05 cancellation with a published number names it (English, and Spanish needing its reviewer); dates are absolute"
+   ]
+  },
+  {
+   "mutant": "M16 Spanish cancel without rebook line",
+   "status": "KILLED",
+   "exit": 1,
+   "failedChecks": [
+    "H05 cancellation with a published number names it (English, and Spanish needing its reviewer); dates are absolute"
+   ]
+  },
+  {
+   "mutant": "M17 reminder schedule reverted",
+   "status": "KILLED",
+   "exit": 1,
+   "failedChecks": [
+    "H06 exact moved times: same-morning send when 30+ minutes before the window, else 8:30 pm the evening before (DST, Sunday, late night)",
+    "H06 a moved reminder less than 2 hours after queueing is skipped; 2 hours or more is kept",
+    "H06 Monday 8 to 12 booked by text: the 1h reminder is actually sent before the window",
+    "H06 Sunday 8 to 12: the 24h reminder still goes out, then the moved 1h reminder"
+   ]
+  },
+  {
+   "mutant": "M18 always evening before",
+   "status": "KILLED",
+   "exit": 1,
+   "failedChecks": [
+    "H06 exact moved times: same-morning send when 30+ minutes before the window, else 8:30 pm the evening before (DST, Sunday, late night)"
+   ]
+  },
+  {
+   "mutant": "M19 morning even when too late",
+   "status": "KILLED",
+   "exit": 1,
+   "failedChecks": [
+    "H06 exact moved times: same-morning send when 30+ minutes before the window, else 8:30 pm the evening before (DST, Sunday, late night)"
+   ]
+  },
+  {
+   "mutant": "M20 margin 15 minutes",
+   "status": "KILLED",
+   "exit": 1,
+   "failedChecks": [
+    "H06 exact moved times: same-morning send when 30+ minutes before the window, else 8:30 pm the evening before (DST, Sunday, late night)"
+   ]
+  },
+  {
+   "mutant": "M21 Sunday treated as weekday",
+   "status": "KILLED",
+   "exit": 1,
+   "failedChecks": [
+    "H06 exact moved times: same-morning send when 30+ minutes before the window, else 8:30 pm the evening before (DST, Sunday, late night)"
+   ]
+  },
+  {
+   "mutant": "M22 evening moved into quiet hours",
+   "status": "KILLED",
+   "exit": 1,
+   "failedChecks": [
+    "H06 exact moved times: same-morning send when 30+ minutes before the window, else 8:30 pm the evening before (DST, Sunday, late night)",
+    "H06 a moved reminder less than 2 hours after queueing is skipped; 2 hours or more is kept",
+    "H06 Monday 8 to 12 booked by text: the 1h reminder is actually sent before the window",
+    "H06 Sunday 8 to 12: the 24h reminder still goes out, then the moved 1h reminder"
+   ]
+  },
+  {
+   "mutant": "M23 late-night uses the previous evening",
+   "status": "KILLED",
+   "exit": 1,
+   "failedChecks": [
+    "H06 exact moved times: same-morning send when 30+ minutes before the window, else 8:30 pm the evening before (DST, Sunday, late night)"
+   ]
+  },
+  {
+   "mutant": "M24 no 2-hour guard",
+   "status": "KILLED",
+   "exit": 1,
+   "failedChecks": [
+    "H06 a moved reminder less than 2 hours after queueing is skipped; 2 hours or more is kept"
+   ]
+  },
+  {
+   "mutant": "M25 guard 1 hour",
+   "status": "KILLED",
+   "exit": 1,
+   "failedChecks": [
+    "H06 a moved reminder less than 2 hours after queueing is skipped; 2 hours or more is kept"
+   ]
+  },
+  {
+   "mutant": "M26 guard applied to unmoved reminder too",
+   "status": "KILLED",
+   "exit": 1,
+   "failedChecks": [
+    "H06 a moved reminder less than 2 hours after queueing is skipped; 2 hours or more is kept"
+   ]
+  },
+  {
+   "mutant": "M27 quiet check of the due time uses now",
+   "status": "KILLED",
+   "exit": 1,
+   "failedChecks": [
+    "H06 exact moved times: same-morning send when 30+ minutes before the window, else 8:30 pm the evening before (DST, Sunday, late night)",
+    "H06 a moved reminder less than 2 hours after queueing is skipped; 2 hours or more is kept",
+    "H06 Monday 8 to 12 booked by text: the 1h reminder is actually sent before the window",
+    "H06 Sunday 8 to 12: the 24h reminder still goes out, then the moved 1h reminder"
+   ]
+  },
+  {
+   "mutant": "M28 queue loop ignores the schedule",
+   "status": "KILLED",
+   "exit": 1,
+   "failedChecks": [
+    "H06 Monday 8 to 12 booked by text: the 1h reminder is actually sent before the window",
+    "H06 Sunday 8 to 12: the 24h reminder still goes out, then the moved 1h reminder"
+   ]
+  },
+  {
+   "mutant": "R3-1 AI-limit reply loses the automated disclosure",
+   "status": "KILLED",
+   "exit": 1,
+   "failedChecks": [
+    "H07 AI-limit + P6: the first reply carries the automated disclosure in the reply language, above the AI-limit body; later replies do not"
+   ]
+  },
+  {
+   "mutant": "R3-2 AI-limit disclosure language guessed from the text",
+   "status": "KILLED",
+   "exit": 1,
+   "failedChecks": [
+    "H07 AI-limit + P6: the first reply carries the automated disclosure in the reply language, above the AI-limit body; later replies do not"
+   ]
+  },
+  {
+   "mutant": "R3-3 AI-limit disclosure on every reply",
+   "status": "KILLED",
+   "exit": 1,
+   "failedChecks": [
+    "H07 AI-limit + P6: the first reply carries the automated disclosure in the reply language, above the AI-limit body; later replies do not"
+   ]
+  },
+  {
+   "mutant": "R3-4 Spanish cancel order reverted (ambiguous \"al X\")",
+   "status": "KILLED",
+   "exit": 1,
+   "failedChecks": [
+    "H05 cancellation with a published number names it (English, and Spanish needing its reviewer); dates are absolute"
+   ]
+  }
+ ]
+}

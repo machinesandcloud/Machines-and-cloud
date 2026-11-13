@@ -1,0 +1,74 @@
+resend failed 500 {}
+resend failed 500 {}
+resend failed 500 {}
+sms reply send failed fetch failed (check double)
+sms reply send failed fetch failed (check double)
+sms reply resend failed fetch failed (check double)
+sms reply resend failed fetch failed (check double)
+PASS P1 L1 A shop without its own approved sender is never texted through the shared M&C number, and no bridge index is written
+PASS P1 L2 Owner alert for a shop without an approved sender goes by email, not the shared number
+PASS P1 L3 Owner alert that can be neither texted nor emailed reaches the operator (never silently dropped)
+PASS P1 L4 A shop with its own approved sender still texts its owner and customers from its own number
+PASS P1 L5 An owner who texted STOP is not texted by owner alerts (no force override); email still goes
+PASS P1 L6 An inbound text to the M&C number never reaches a shop through the bridge index
+PASS P1 L7 A call to the M&C number is not routed to a shop through the bridge index
+PASS P1 L8 Operator alerts are email only; nothing is texted from the M&C number
+PASS P1 L9 Source: no force:true sends, no bridge writes or lookups remain in the functions
+PASS P1 L10 textOwner falls back to the owner's email when the shop cannot text
+PASS P1 L11 Rev 2 (QA Q1): the owner's email send fails and the shop cannot text: the operator still gets the alert and it is logged
+PASS P1 L12 Rev 2 (QA Q2): textOwner whose owner email fails reaches the operator
+PASS P1 L13 Rev 2 (QA Q3): operator fallback is rate limited per shop and hour, held alerts are logged, and no customer phone or street address reaches the operator
+PASS P1 L14 Rev 2: when the operator email fails too, the fallback is still recorded (operator: failed)
+PASS P1 L15 Rev 2: when only the operator was emailed, the AI tool result never says the owner was sent a text or an email
+PASS P1 L16 Rev 4 (QA r2 B1, r3 B4): HELP/AYUDA to a shop without an approved sender gets the fixed TwiML help reply, is held and the owner is emailed
+PASS P1 L20 Rev 4 (QA r3 B4): a VIP (always-ring-through) number texting HELP is relayed to the owner, as in production, not answered with the help text
+PASS P1 L17 Rev 3/4 (QA r2 B2, r3): a customer text to a shop without an approved sender is held, the owner is emailed at most once per customer per 4 h, no AI runs and nothing is shown as answered
+PASS P1 L18 Rev 3 (QA r2 B2): a background reply that sendSMS refuses is saved as undelivered and never logged as sms_reply
+PASS P1 L19 Rev 3 (QA r2 B5): owner copy about texting is conditional on an approved sender (go-live and number emails, portal, operator Calendar alert)
+PASS P6 L22 Rev 5 (QA r4 B1): a send error saves the reply and rethrows; the retry resends the SAVED reply once, with no model rerun and no second booking
+PASS P6 L23 Rev 5 (QA r4 B1): a send error on every try gives exactly one owner alert after the last try, one booking and one saved reply
+PASS P1 L24 Rev 5 (PO a): HELP/INFO on an approved shop returns the campaign's registered HelpMessage exactly; new filings register and store it
+PASS P1 L25 Rev 5 (Spanish review r4): AYUDA is the Spanish translation of the registered HelpMessage, with 'al' before a number, 'escriba a' before an email and no English fallback
+PASS P1 L26 Release 3: AYUDA names the same filed contact as the registered English HelpMessage after the business number changes
+PASS P3 V1 A VIP call rings the owner's cell with a Dial action and records nothing
+PASS P3 V2 An unanswered VIP call: no recording, a hand-off lead is saved, the caller is texted and told only what happened
+PASS P3 V3 A VIP call when the owner's cell is the forwarded line: no recording, lead saved
+PASS P3 V4 The /api/voice/recorded route is gone and an answered VIP call simply ends
+PASS P3 V5 Rev 2 (QA Q5): a VIP caller is not told the owner 'has been told' when only the operator was emailed
+PASS P3 V6 Rev 5 (Spanish review r4): on a Spanish-enabled shop the VIP missed-call text adds the reviewed Spanish line
+PASS P6 G1 Legacy assistant greeting names the business and says it is automated (Spanish shops add Spanish)
+PASS P6 G2 Assistant-request overrides (known caller and VIP) say it is automated
+PASS P6 G3 Managed assistant body greets as automated; the prompt tells the model how to answer 'are you real'
+PASS P6 G4 Legacy SMS: the first front-desk reply says it is automated; the next reply does not repeat it
+PASS P6 G5 Managed SMS: first-reply disclosure helper, English and Spanish, wired into every queued reply
+PASS P6 G6 SMS cost: both intros are GSM-7 and add at most one segment to a first reply
+PASS P6 G7 Rev 2 (QA Q10): accented or curly-apostrophe shop names never add more than one segment (name left out of the intro)
+PASS P6 G8 Rev 2 (QA): managed SMS 'first reply' is the first disclosed reply, so a first CITAS does not skip it (runs the managed-sms-qa-check row)
+PASS P6 G9 Rev 3 (QA r2 B6): after a templated 'C' confirmation, the next AI reply still carries the automated intro (and the one after does not)
+PASS P7a C1 Legacy calendar.events + calendar.readonly consent URL and code exchange are gone
+FAIL P7b C2 No booking path reads a plaintext refresh token; a legacy booking makes no Google request
+     The input was expected to not match the regular expression /refreshToken|oauth2\.googleapis\.com/. Input:
+
+'\n' +
+  '\n' +
+  '\n' +
+  '\n' +
+  'const CID = process.env.GOOGLE_CLIENT_ID;\n' +
+  'const CSECRET = process.env.GOOGLE_CLIENT_SECRET;\n' +
+  'export const googleEnabled = () => Boolean(CID && CSECRET);\n' +
+  '\n' +
+  'async function accessToken(refreshToken) {\n' +
+  '  const res = await 
+PASS P9 O1 Detector: plain-language opt-outs are 'certain'; booking language is never 'certain'
+PASS P9 O2 Rev 4: a possible opt-out on a shop line suppresses nothing; it is queued for review and the owner is asked once per customer
+PASS P9 O3 Rev 4: legacy line keeps production's decision for 'Unsubscribe me from these messages' (not a production opt-out) and only flags it for review, once per customer
+PASS P9 O4 Platform line: 'please stop texting me, thanks' is a STOP in the ledger
+PASS P9 O5 Operator action: a phone opt-out received by email suppresses every store; an email opt-out suppresses marketing
+PASS P9 O6 Ambiguous opt-out wording is queued for operator review, not applied
+PASS P9 O7 Rev 4: 'cancel the reminders' keeps production's decision (no opt-out, no visit cancellation) and is flagged; a bare CANCEL still asks the owner
+PASS P9 O8 Rev 2 (QA M8): apply_opt_out re-checks the operator session (a session revoked after requireOperator is refused and suppresses nothing)
+PASS P9 O9 Rev 2: detector on QA's 137-message corpus plus the rev-2 held-out set: 0 false positives, every sentence-form opt-out certain
+PASS P9 O10 Rev 2: the managed line treats a rev-2 recall phrase ('no más mensajes') as STOP and still not 'stop by tomorrow'
+PASS P9 O13 Rev 4: auto-opt-out decisions on the legacy, managed and platform lines are byte-identical to unpatched 43ee2f2c for every message in the r2, r3 and own corpora
+PASS P3 C3 Rev 2 (QA): legacy-census counts a VIP recording older than the newest 2000 events and labels alert routing like notifyOwner
+{"passed":53,"failed":1,"skipped":0,"blocked":0,"providerRequestsIntercepted":71}

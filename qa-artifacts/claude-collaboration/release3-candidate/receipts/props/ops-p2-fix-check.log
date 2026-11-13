@@ -1,0 +1,27 @@
+PASS S07a operator list page of 50 customers is under 300 KB and carries list fields only
+PASS S07b following the cursor reaches every customer, and customer detail still has full setup
+PASS S07c later pages (?cursor=) carry customers only, not inquiries, platform texting or System again
+PASS S09a shared key list omits self-service owner contact data; legacy rows unchanged
+PASS S09b shared key cannot read self-service records, prompt or tasks
+PASS S09c every shared-key request is audited before it is served, with no raw network address
+PASS S09d an unwritable audit refuses the shared-key request (fail closed, nothing returned)
+PASS S09f a non-string slug is refused, so every shared-key read names its shop in the audit
+PASS S09g the shared-key inquiry export (/api/intake GET) is audited before it is served and fails closed
+twilio alert for no shop  
+PASS S09h the shared key on /api/sms, /api/voice, /api/twilio-alert and /api/chat is audited before it is used and fails closed; a wrong key is not a bypass
+PASS S09e operators see shared-key use in the System payload; an owner session cannot read it
+scheduler: 0 due [] digests 0 weeklies 0 released 0 ok
+PASS S10a scheduler health alert email contains no owner key, points to the admin portal, and no founder text is sent (legal P1: operator alerts are email-only)
+PASS S10b every notifySteve payload is redacted, including other legacy portal links
+PASS S10c any other k= query value in a founder alert is redacted, first or later in the query
+scheduler: 0 due [] digests 0 weeklies 0 released 0 ok
+PASS S10d the scheduler health alert is built without an owner link (no redaction needed)
+PASS S11a operator and non-operator sign-in requests return byte-identical status and body
+PASS S11b rate-limit spend is identical for both paths (per address and per network)
+PASS S16a operator sign-in email says it is for operations; owner email unchanged; responses still uniform with real delivery
+PASS S11c operator and owner sessions stay separate
+PASS S11d with context.waitUntil the operator link is sent after the response: operator and non-operator requests take the same time
+PASS S11e a deferred delivery failure keeps the uniform 202, marks the link delivery_failed and logs no address; without waitUntil the failure is still 503
+PASS S15a a fresh healthy signup with all four channels has zero actionable issues
+PASS N00 no physical or unexpected outbound request was attempted
+ops-p2-fix-check: 23 passed, 0 failed, 0 skipped

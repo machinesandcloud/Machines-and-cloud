@@ -1,0 +1,799 @@
+{
+  "at": "2026-11-13T05:55:39.876Z",
+  "mode": "all static files and API responses fulfilled locally; no actual email/model/provider",
+  "sourceBefore": {
+    "index.html": "1ff1cc7d2ecb07b42b4fd6260368eebef35719aaa3553d0086633d5fd42cfe3d",
+    "site-refresh.css": "203015c7d624636780f19ddb4475026c899b47844156a11b9dbbd803f425119d",
+    "signup-intake.js": "5de37fe5b0db9456a0d46036a7735ad7cb8071b04b3425da1ddba950479e7423",
+    "onboard.html": "e4b9cc9b0f76e5a029a947a109739b50bf384a058fe12c4e90346c6c2f216253",
+    "onboard.js": "697d3a31544aaa25dd0186b07b54ed45056536d8db45e87b13f09a1c4d783f14",
+    "channel-availability.js": "745dff92c1a98729b1370e106a71b6af76828926cb8e708a7337bce0f5ba53a7",
+    "netlify/functions/channel-availability.mjs": "12a3a6985e9c0220f73fd967df49ecc773f87e6f25be6f72e9ffa2a25d81a8b7",
+    "netlify/functions/lib/channel-availability.mjs": "d964339192dec8d9ad1e0ea28ad4c3a2ec39432423498e6156813ec24bd3a9f2"
+  },
+  "checks": [
+    {
+      "name": "320: four preliminary questions, optional goal and no default marketing selection",
+      "pass": true
+    },
+    {
+      "name": "320: invalid form does not save or email",
+      "pass": true,
+      "detail": [
+        {
+          "path": "/api/channel-availability",
+          "method": "GET",
+          "body": null
+        },
+        {
+          "path": "/api/intake",
+          "method": "POST",
+          "body": {
+            "submissionId": "7e4be859-317b-45c4-85f2-1fddcd1e4fb6",
+            "name": "Avery Owner",
+            "email": "owner@example.test",
+            "business": "Bayou Service",
+            "trade": "",
+            "goal": "missed_calls",
+            "marketingConsent": false,
+            "botfield": ""
+          }
+        },
+        {
+          "path": "/api/channel-availability",
+          "method": "GET",
+          "body": null
+        },
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "owner@example.test",
+            "plan": "none",
+            "intake": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        },
+        {
+          "path": "/api/channel-availability",
+          "method": "GET",
+          "body": null
+        },
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "cookie_probe"
+          }
+        },
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "exchange",
+            "token": "fixture-token"
+          }
+        },
+        {
+          "path": "/api/access",
+          "method": "GET",
+          "body": null
+        },
+        {
+          "path": "/api/access",
+          "method": "PUT",
+          "body": {
+            "fields": {
+              "primaryGoal": "missed_calls",
+              "setupVersion": "2",
+              "name": "Avery Owner",
+              "phone": "7135550100",
+              "website": "",
+              "desiredChannels": [
+                "web",
+                "voice"
+              ],
+              "phoneSetupMode": "forward_business_line",
+              "businessNumber": "7135550120",
+              "carrier": "other",
+              "forwarding": "missed",
+              "plan": "starter",
+              "business": "Bayou Service",
+              "trade": "",
+              "services": "",
+              "serviceArea": "",
+              "city": "Houston",
+              "spanish": "yes",
+              "hours": "",
+              "hoursTable": "{\"mon\":null,\"tue\":null,\"wed\":null,\"thu\":null,\"fri\":null,\"sat\":null,\"sun\":null}",
+              "afterHours": "",
+              "notServed": "",
+              "licenses": "",
+              "fees": "",
+              "appointmentHoursMode": "business",
+              "appointmentHoursTable": "",
+              "windows": "",
+              "faq": "",
+              "greeting": "",
+              "notes": "",
+              "handoff": "",
+              "tier0": "Gas smell\nCarbon monoxide alarm\nSmoke or fire\nSparks or a burning smell from the panel or an outlet\nSewage flooding a living space",
+              "tier1": "",
+              "emergencies": "",
+              "never": "",
+              "leadSources": []
+            },
+            "step": 0,
+            "revision": 0
+          }
+        },
+        {
+          "path": "/api/access",
+          "method": "PUT",
+          "body": {
+            "fields": {
+              "primaryGoal": "missed_calls",
+              "setupVersion": "2",
+              "name": "Avery Owner",
+              "phone": "7135550100",
+              "website": "",
+              "desiredChannels": [
+                "web",
+                "voice"
+              ],
+              "phoneSetupMode": "forward_business_line",
+              "businessNumber": "7135550120",
+              "carrier": "other",
+              "forwarding": "missed",
+              "plan": "starter",
+              "business": "Bayou Service",
+              "trade": "",
+              "services": "",
+              "serviceArea": "",
+              "city": "Houston",
+              "spanish": "yes",
+              "hours": "",
+              "hoursTable": "{\"mon\":null,\"tue\":null,\"wed\":null,\"thu\":null,\"fri\":null,\"sat\":null,\"sun\":null}",
+              "afterHours": "",
+              "notServed": "",
+              "licenses": "",
+              "fees": "",
+              "appointmentHoursMode": "business",
+              "appointmentHoursTable": "",
+              "windows": "",
+              "faq": "",
+              "greeting": "",
+              "notes": "",
+              "handoff": "",
+              "tier0": "Gas smell\nCarbon monoxide alarm\nSmoke or fire\nSparks or a burning smell from the panel or an outlet\nSewage flooding a living space",
+              "tier1": "",
+              "emergencies": "",
+              "never": "",
+              "leadSources": []
+            },
+            "step": 1,
+            "revision": 1
+          }
+        }
+      ]
+    },
+    {
+      "name": "320: form fits horizontally",
+      "pass": true,
+      "detail": {
+        "left": 20,
+        "right": 300,
+        "viewport": 320,
+        "document": 320
+      }
+    },
+    {
+      "name": "320: saves once and handoff URL is scrubbed without personal information",
+      "pass": true
+    },
+    {
+      "name": "320: next page requests exactly one sign-in link for the inquiry email",
+      "pass": true
+    },
+    {
+      "name": "320: automatic sign-in request carries opaque handoff and same email",
+      "pass": true
+    },
+    {
+      "name": "320: reloading the page does not send another sign-in email",
+      "pass": true
+    },
+    {
+      "name": "320: email-link proof exchanges automatically once without another button",
+      "pass": true
+    },
+    {
+      "name": "320: verified answers carry forward and email is readonly",
+      "pass": true
+    },
+    {
+      "name": "320: pending initial marketing request does not subscribe or precheck",
+      "pass": true
+    },
+    {
+      "name": "320: one setup saves desired connections without confirming untouched marketing",
+      "pass": true
+    },
+    {
+      "name": "390: four preliminary questions, optional goal and no default marketing selection",
+      "pass": true
+    },
+    {
+      "name": "390: invalid form does not save or email",
+      "pass": true,
+      "detail": [
+        {
+          "path": "/api/channel-availability",
+          "method": "GET",
+          "body": null
+        },
+        {
+          "path": "/api/intake",
+          "method": "POST",
+          "body": {
+            "submissionId": "cee2f2c3-7a29-4678-8411-de82fb325224",
+            "name": "Avery Owner",
+            "email": "owner@example.test",
+            "business": "Bayou Service",
+            "trade": "",
+            "goal": "missed_calls",
+            "marketingConsent": false,
+            "botfield": ""
+          }
+        },
+        {
+          "path": "/api/channel-availability",
+          "method": "GET",
+          "body": null
+        },
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "owner@example.test",
+            "plan": "none",
+            "intake": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        },
+        {
+          "path": "/api/channel-availability",
+          "method": "GET",
+          "body": null
+        },
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "cookie_probe"
+          }
+        },
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "exchange",
+            "token": "fixture-token"
+          }
+        },
+        {
+          "path": "/api/access",
+          "method": "GET",
+          "body": null
+        },
+        {
+          "path": "/api/access",
+          "method": "PUT",
+          "body": {
+            "fields": {
+              "primaryGoal": "missed_calls",
+              "setupVersion": "2",
+              "name": "Avery Owner",
+              "phone": "7135550100",
+              "website": "",
+              "desiredChannels": [
+                "web",
+                "voice"
+              ],
+              "phoneSetupMode": "forward_business_line",
+              "businessNumber": "7135550120",
+              "carrier": "other",
+              "forwarding": "missed",
+              "plan": "starter",
+              "business": "Bayou Service",
+              "trade": "",
+              "services": "",
+              "serviceArea": "",
+              "city": "Houston",
+              "spanish": "yes",
+              "hours": "",
+              "hoursTable": "{\"mon\":null,\"tue\":null,\"wed\":null,\"thu\":null,\"fri\":null,\"sat\":null,\"sun\":null}",
+              "afterHours": "",
+              "notServed": "",
+              "licenses": "",
+              "fees": "",
+              "appointmentHoursMode": "business",
+              "appointmentHoursTable": "",
+              "windows": "",
+              "faq": "",
+              "greeting": "",
+              "notes": "",
+              "handoff": "",
+              "tier0": "Gas smell\nCarbon monoxide alarm\nSmoke or fire\nSparks or a burning smell from the panel or an outlet\nSewage flooding a living space",
+              "tier1": "",
+              "emergencies": "",
+              "never": "",
+              "leadSources": []
+            },
+            "step": 0,
+            "revision": 0
+          }
+        },
+        {
+          "path": "/api/access",
+          "method": "PUT",
+          "body": {
+            "fields": {
+              "primaryGoal": "missed_calls",
+              "setupVersion": "2",
+              "name": "Avery Owner",
+              "phone": "7135550100",
+              "website": "",
+              "desiredChannels": [
+                "web",
+                "voice"
+              ],
+              "phoneSetupMode": "forward_business_line",
+              "businessNumber": "7135550120",
+              "carrier": "other",
+              "forwarding": "missed",
+              "plan": "starter",
+              "business": "Bayou Service",
+              "trade": "",
+              "services": "",
+              "serviceArea": "",
+              "city": "Houston",
+              "spanish": "yes",
+              "hours": "",
+              "hoursTable": "{\"mon\":null,\"tue\":null,\"wed\":null,\"thu\":null,\"fri\":null,\"sat\":null,\"sun\":null}",
+              "afterHours": "",
+              "notServed": "",
+              "licenses": "",
+              "fees": "",
+              "appointmentHoursMode": "business",
+              "appointmentHoursTable": "",
+              "windows": "",
+              "faq": "",
+              "greeting": "",
+              "notes": "",
+              "handoff": "",
+              "tier0": "Gas smell\nCarbon monoxide alarm\nSmoke or fire\nSparks or a burning smell from the panel or an outlet\nSewage flooding a living space",
+              "tier1": "",
+              "emergencies": "",
+              "never": "",
+              "leadSources": []
+            },
+            "step": 1,
+            "revision": 1
+          }
+        }
+      ]
+    },
+    {
+      "name": "390: form fits horizontally",
+      "pass": true,
+      "detail": {
+        "left": 20,
+        "right": 370,
+        "viewport": 390,
+        "document": 390
+      }
+    },
+    {
+      "name": "390: saves once and handoff URL is scrubbed without personal information",
+      "pass": true
+    },
+    {
+      "name": "390: next page requests exactly one sign-in link for the inquiry email",
+      "pass": true
+    },
+    {
+      "name": "390: automatic sign-in request carries opaque handoff and same email",
+      "pass": true
+    },
+    {
+      "name": "390: reloading the page does not send another sign-in email",
+      "pass": true
+    },
+    {
+      "name": "390: email-link proof exchanges automatically once without another button",
+      "pass": true
+    },
+    {
+      "name": "390: verified answers carry forward and email is readonly",
+      "pass": true
+    },
+    {
+      "name": "390: pending initial marketing request does not subscribe or precheck",
+      "pass": true
+    },
+    {
+      "name": "390: one setup saves desired connections without confirming untouched marketing",
+      "pass": true
+    },
+    {
+      "name": "1440: four preliminary questions, optional goal and no default marketing selection",
+      "pass": true
+    },
+    {
+      "name": "1440: invalid form does not save or email",
+      "pass": true,
+      "detail": [
+        {
+          "path": "/api/channel-availability",
+          "method": "GET",
+          "body": null
+        },
+        {
+          "path": "/api/intake",
+          "method": "POST",
+          "body": {
+            "submissionId": "6aab2036-6a30-4e1c-9ea6-e07504e231c8",
+            "name": "Avery Owner",
+            "email": "owner@example.test",
+            "business": "Bayou Service",
+            "trade": "",
+            "goal": "missed_calls",
+            "marketingConsent": false,
+            "botfield": ""
+          }
+        },
+        {
+          "path": "/api/channel-availability",
+          "method": "GET",
+          "body": null
+        },
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "request_link",
+            "email": "owner@example.test",
+            "plan": "none",
+            "intake": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        },
+        {
+          "path": "/api/channel-availability",
+          "method": "GET",
+          "body": null
+        },
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "cookie_probe"
+          }
+        },
+        {
+          "path": "/api/access",
+          "method": "POST",
+          "body": {
+            "action": "exchange",
+            "token": "fixture-token"
+          }
+        },
+        {
+          "path": "/api/access",
+          "method": "GET",
+          "body": null
+        },
+        {
+          "path": "/api/access",
+          "method": "PUT",
+          "body": {
+            "fields": {
+              "primaryGoal": "missed_calls",
+              "setupVersion": "2",
+              "name": "Avery Owner",
+              "phone": "7135550100",
+              "website": "",
+              "desiredChannels": [
+                "web",
+                "voice"
+              ],
+              "phoneSetupMode": "forward_business_line",
+              "businessNumber": "7135550120",
+              "carrier": "other",
+              "forwarding": "missed",
+              "plan": "starter",
+              "business": "Bayou Service",
+              "trade": "",
+              "services": "",
+              "serviceArea": "",
+              "city": "Houston",
+              "spanish": "yes",
+              "hours": "",
+              "hoursTable": "{\"mon\":null,\"tue\":null,\"wed\":null,\"thu\":null,\"fri\":null,\"sat\":null,\"sun\":null}",
+              "afterHours": "",
+              "notServed": "",
+              "licenses": "",
+              "fees": "",
+              "appointmentHoursMode": "business",
+              "appointmentHoursTable": "",
+              "windows": "",
+              "faq": "",
+              "greeting": "",
+              "notes": "",
+              "handoff": "",
+              "tier0": "Gas smell\nCarbon monoxide alarm\nSmoke or fire\nSparks or a burning smell from the panel or an outlet\nSewage flooding a living space",
+              "tier1": "",
+              "emergencies": "",
+              "never": "",
+              "leadSources": []
+            },
+            "step": 0,
+            "revision": 0
+          }
+        },
+        {
+          "path": "/api/access",
+          "method": "PUT",
+          "body": {
+            "fields": {
+              "primaryGoal": "missed_calls",
+              "setupVersion": "2",
+              "name": "Avery Owner",
+              "phone": "7135550100",
+              "website": "",
+              "desiredChannels": [
+                "web",
+                "voice"
+              ],
+              "phoneSetupMode": "forward_business_line",
+              "businessNumber": "7135550120",
+              "carrier": "other",
+              "forwarding": "missed",
+              "plan": "starter",
+              "business": "Bayou Service",
+              "trade": "",
+              "services": "",
+              "serviceArea": "",
+              "city": "Houston",
+              "spanish": "yes",
+              "hours": "",
+              "hoursTable": "{\"mon\":null,\"tue\":null,\"wed\":null,\"thu\":null,\"fri\":null,\"sat\":null,\"sun\":null}",
+              "afterHours": "",
+              "notServed": "",
+              "licenses": "",
+              "fees": "",
+              "appointmentHoursMode": "business",
+              "appointmentHoursTable": "",
+              "windows": "",
+              "faq": "",
+              "greeting": "",
+              "notes": "",
+              "handoff": "",
+              "tier0": "Gas smell\nCarbon monoxide alarm\nSmoke or fire\nSparks or a burning smell from the panel or an outlet\nSewage flooding a living space",
+              "tier1": "",
+              "emergencies": "",
+              "never": "",
+              "leadSources": []
+            },
+            "step": 1,
+            "revision": 1
+          }
+        }
+      ]
+    },
+    {
+      "name": "1440: form fits horizontally",
+      "pass": true,
+      "detail": {
+        "left": 770,
+        "right": 1340,
+        "viewport": 1440,
+        "document": 1440
+      }
+    },
+    {
+      "name": "1440: saves once and handoff URL is scrubbed without personal information",
+      "pass": true
+    },
+    {
+      "name": "1440: next page requests exactly one sign-in link for the inquiry email",
+      "pass": true
+    },
+    {
+      "name": "1440: automatic sign-in request carries opaque handoff and same email",
+      "pass": true
+    },
+    {
+      "name": "1440: reloading the page does not send another sign-in email",
+      "pass": true
+    },
+    {
+      "name": "1440: email-link proof exchanges automatically once without another button",
+      "pass": true
+    },
+    {
+      "name": "1440: verified answers carry forward and email is readonly",
+      "pass": true
+    },
+    {
+      "name": "1440: pending initial marketing request does not subscribe or precheck",
+      "pass": true
+    },
+    {
+      "name": "1440: one setup saves desired connections without confirming untouched marketing",
+      "pass": true
+    },
+    {
+      "name": "starter: public plan intent survives capture without personal information in query",
+      "pass": true
+    },
+    {
+      "name": "starter: automatic secure-link request carries preserved current plan preference",
+      "pass": true
+    },
+    {
+      "name": "growth: public plan intent survives capture without personal information in query",
+      "pass": true
+    },
+    {
+      "name": "growth: automatic secure-link request carries preserved current plan preference",
+      "pass": true
+    },
+    {
+      "name": "Goal can be skipped without silently choosing one or carrying an invalid plan",
+      "pass": true
+    },
+    {
+      "name": "Failed save keeps all entered answers and opt-in choice",
+      "pass": true
+    },
+    {
+      "name": "An unchanged explicit retry reuses its idempotency key",
+      "pass": true
+    },
+    {
+      "name": "A changed consent answer creates a new capture key and carries false explicitly",
+      "pass": true
+    },
+    {
+      "name": "Double submission during a pending save sends one request",
+      "pass": true
+    },
+    {
+      "name": "Storage-blocked handoff retains opaque capability, removes fragment and explains same-email entry",
+      "pass": true
+    },
+    {
+      "name": "Storage-blocked sign-in request still carries handoff",
+      "pass": true
+    },
+    {
+      "name": "Verified explicit email opt-in is a separate top-level preference",
+      "pass": true
+    },
+    {
+      "name": "Verified explicit opt-out saves false",
+      "pass": true
+    },
+    {
+      "name": "Wrong-account handoff keeps private setup hidden with sign-out recovery",
+      "pass": true
+    },
+    {
+      "name": "Wrong-account fragment is removed even on attachment failure",
+      "pass": true
+    },
+    {
+      "name": "Malformed success response does not navigate or discard entered answers",
+      "pass": true
+    },
+    {
+      "name": "Public channel-availability reads stay tenant-free and carry no signup handoff, proof, session or contact details",
+      "pass": true,
+      "detail": {
+        "leaks": [],
+        "overRead": []
+      }
+    },
+    {
+      "name": "Source remained unchanged during browser verification",
+      "pass": true
+    },
+    {
+      "name": "No browser page errors",
+      "pass": true,
+      "detail": []
+    }
+  ],
+  "externalBlocked": [],
+  "pageErrors": [],
+  "availabilityReads": {
+    "total": 22,
+    "byCase": {
+      "journey-320": 3,
+      "journey-390": 3,
+      "journey-1440": 3,
+      "plan-intent-starter": 2,
+      "plan-intent-growth": 2,
+      "optional-goal": 2,
+      "retry-and-double-submit": 2,
+      "storage-blocked": 2,
+      "verified-marketing": 1,
+      "wrong-account": 1,
+      "invalid-handoff": 1
+    },
+    "documents": {
+      "journey-320": 3,
+      "journey-390": 3,
+      "journey-1440": 3,
+      "plan-intent-starter": 2,
+      "plan-intent-growth": 2,
+      "optional-goal": 2,
+      "retry-and-double-submit": 2,
+      "storage-blocked": 2,
+      "verified-marketing": 1,
+      "wrong-account": 1,
+      "invalid-handoff": 1
+    },
+    "sample": [
+      {
+        "case": "journey-320",
+        "method": "GET",
+        "search": "",
+        "authorization": null,
+        "cookie": null,
+        "referer": "http://127.0.0.1:8897/",
+        "postData": null,
+        "status": 200,
+        "keys": "channels,version",
+        "documentsLoaded": 1
+      },
+      {
+        "case": "journey-320",
+        "method": "GET",
+        "search": "",
+        "authorization": null,
+        "cookie": null,
+        "referer": "",
+        "postData": null,
+        "status": 200,
+        "keys": "channels,version",
+        "documentsLoaded": 2
+      },
+      {
+        "case": "journey-320",
+        "method": "GET",
+        "search": "",
+        "authorization": null,
+        "cookie": null,
+        "referer": "",
+        "postData": null,
+        "status": 200,
+        "keys": "channels,version",
+        "documentsLoaded": 3
+      }
+    ]
+  },
+  "sourceAfter": {
+    "index.html": "1ff1cc7d2ecb07b42b4fd6260368eebef35719aaa3553d0086633d5fd42cfe3d",
+    "site-refresh.css": "203015c7d624636780f19ddb4475026c899b47844156a11b9dbbd803f425119d",
+    "signup-intake.js": "5de37fe5b0db9456a0d46036a7735ad7cb8071b04b3425da1ddba950479e7423",
+    "onboard.html": "e4b9cc9b0f76e5a029a947a109739b50bf384a058fe12c4e90346c6c2f216253",
+    "onboard.js": "697d3a31544aaa25dd0186b07b54ed45056536d8db45e87b13f09a1c4d783f14",
+    "channel-availability.js": "745dff92c1a98729b1370e106a71b6af76828926cb8e708a7337bce0f5ba53a7",
+    "netlify/functions/channel-availability.mjs": "12a3a6985e9c0220f73fd967df49ecc773f87e6f25be6f72e9ffa2a25d81a8b7",
+    "netlify/functions/lib/channel-availability.mjs": "d964339192dec8d9ad1e0ea28ad4c3a2ec39432423498e6156813ec24bd3a9f2"
+  },
+  "passed": 52,
+  "failed": 0
+}

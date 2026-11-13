@@ -1,0 +1,29 @@
+PASS H07 in-app HELP and AYUDA name exactly the registered campaign HELP contact (with and without a business number)
+PASS H07 AI-limit without a business number first saves an owner request (with the owner alert), then says the shop will reply
+PASS H07 AI-limit: 5 texts from one customer give 1 request and 1 owner email; another customer gets its own; a closed request gets no promise
+PASS H07 AI-limit: if saving the request fails, the reply promises nothing
+PASS H07 AI-limit language: saved customer language wins; else Spanish only when the shop serves Spanish; Spanish stays GSM-7, 1 segment
+PASS H07 AI-limit reply with a published business number names that number only
+FAIL H07 AI-limit + P6: the first reply carries the automated disclosure in the reply language, above the AI-limit body; later replies do not
+PASS H05 confirmation and reminders: no 32-hex ID, absolute date
+PASS H05 owner reschedule says moved, from and to; cancel says how to rebook
+PASS H05 cancellation with a published number names it (English, and Spanish needing its reviewer); dates are absolute
+PASS H06 exact moved times: same-morning send when 30+ minutes before the window, else 8:30 pm the evening before (DST, Sunday, late night)
+PASS H06 a moved reminder less than 2 hours after queueing is skipped; 2 hours or more is kept
+FAIL H06 Monday 8 to 12 booked by text: the 1h reminder is actually sent before the window
+FAIL H06 Sunday 8 to 12: the 24h reminder still goes out, then the moved 1h reminder
+[
+ {
+  "name": "H07 AI-limit + P6: the first reply carries the automated disclosure in the reply language, above the AI-limit body; later replies do not",
+  "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ 'Fixture Service: en este momento no puedo responderle. El negocio ya tiene su mensaje y se va a comunicar con usted.'\n- 'Asistente automatizado de Fixture Service.\\n' +\n-   'Fixture Service: en este momento no puedo responderle. El negocio ya tiene su mensaje y se va a comunicar con usted.'\n"
+ },
+ {
+  "name": "H06 Monday 8 to 12 booked by text: the 1h reminder is actually sent before the window",
+  "error": "1h reminder not sent: queued undefined"
+ },
+ {
+  "name": "H06 Sunday 8 to 12: the 24h reminder still goes out, then the moved 1h reminder",
+  "error": "reminder_24h not sent: waiting_consent consent_required"
+ }
+]
+uncovered-cards-check: 11/14
