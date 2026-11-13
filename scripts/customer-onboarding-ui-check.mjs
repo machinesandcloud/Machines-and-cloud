@@ -167,8 +167,11 @@ try {
     const beforeConfig = await store.getClient(created.slug); failConfig = true;
     await page.locator('#cfg [name="business.serviceArea"]').fill('Katy\nCypress');
     check('Unsaved rule edits prevent false review completion', await page.locator('#reviewRules').isDisabled());
-    await page.locator('#cfg button[type="submit"]').click(); await page.locator('#saveMsg').filter({ hasText: 'could not be saved' }).waitFor();
-    check('Failed rule save retains edits and persisted record', await page.locator('#cfg [name="business.serviceArea"]').inputValue() === 'Katy\nCypress' && JSON.stringify(beforeConfig) === JSON.stringify(await store.getClient(created.slug)) && /edits are still here/.test(await page.locator('#saveMsg').innerText()));
+    // A 5xx may follow a committed write, so the desk re-reads (GET only, no second PUT) and, finding the revision unchanged, reports the save as unconfirmed with the edits kept.
+    const failedSaveStart = result.requests.length;
+    await page.locator('#cfg button[type="submit"]').click(); await page.locator('#saveMsg').filter({ hasText: 'couldn’t confirm this save yet' }).waitFor();
+    const failedSaveRequests = result.requests.slice(failedSaveStart);
+    check('Failed rule save retains edits and persisted record', await page.locator('#cfg [name="business.serviceArea"]').inputValue() === 'Katy\nCypress' && JSON.stringify(beforeConfig) === JSON.stringify(await store.getClient(created.slug)) && /edits are still here/.test(await page.locator('#saveMsg').innerText()) && !/^Saved|All changes saved/.test(await page.locator('#saveMsg').innerText()) && await page.locator('#reviewRules').isDisabled() && failedSaveRequests.length === 1 && failedSaveRequests[0].method === 'GET' && failedSaveRequests[0].path === '/api/client' && !failedSaveRequests.some(row => row.method === 'PUT'), failedSaveRequests);
     const configResponse = page.waitForResponse(response => response.url().includes('/api/client?') && response.request().method() === 'PUT');
     await page.locator('#cfg button[type="submit"]').click(); await configResponse; await page.locator('#saveMsg').filter({ hasText: 'Saved.' }).waitFor();
     check('Retry saves corrected rules and invalidates earlier review', (await store.getClient(created.slug)).business.serviceArea.includes('Cypress') && !/Review saved/.test(await page.locator('#reviewMessage').innerText()));
@@ -195,11 +198,17 @@ try {
     check('Actual activation handler rejects simulated proof without changing the workspace', fakeActivation.status === 409 && fakeActivation.body.error === 'not_ready' && fakeActivation.body.setup.canActivateWeb === false && JSON.stringify(afterFake) === JSON.stringify(await store.getClient(created.slug)));
     check('Successful fake test stays blocked from real customer activation', afterFake.setupProof?.testMode === 'fake' && afterFake.status === 'testing' && !setupReadiness(afterFake).canActivateWeb && await page.locator('#golive').count() === 0 && !['activate_web','resume_web'].includes(await page.locator('#websiteInstallPrimary').getAttribute('data-action')));
     await page.locator('[data-t="setup"]').click();
-    const unselectedConnections = await page.locator('#connection-guide-voice, #connection-guide-sms').evaluateAll(cards => cards.map(card => ({ channel: card.dataset.channel, badge: card.querySelector('.connection-guide-badge').textContent.trim(), choose: !!card.querySelector('[data-journey-choose]'), visible: card.getBoundingClientRect().width > 0 })));
-    check('Web-only practice keeps all four services discoverable and unselected phone/text inactive', !afterFake.channels.voice.active && !afterFake.channels.sms.active && await page.locator('.connection-guide-card').count() === 4 && unselectedConnections.length === 2 && unselectedConnections.every(card => card.visible && card.choose && card.badge === 'Not selected') && !await page.locator('#connectionPreferences [value="voice"]').isChecked() && !await page.locator('#connectionPreferences [value="sms"]').isChecked(), unselectedConnections);
+    // Connections is now one connector list (a row per service opening its guided page); service choices live under "Manage service choices".
+    await page.locator('#connectionsCard .connector-service-list [data-guide-service="web"]').waitFor({ state: 'visible' });
+    const serviceRows = await page.locator('#connectionsCard .connector-service-list [data-guide-service]').evaluateAll(rows => rows.map(row => ({ channel: row.dataset.guideService, status: row.querySelector('.connector-choice-status').textContent.trim(), visible: row.checkVisibility() && row.getBoundingClientRect().width > 0 })));
+    const unselectedConnections = serviceRows.filter(row => ['voice', 'sms'].includes(row.channel));
+    const choosable = await page.locator('#connectionPreferences [value="voice"], #connectionPreferences [value="sms"]').evaluateAll(inputs => inputs.map(input => ({ value: input.value, checked: input.checked, enabled: !input.disabled })));
+    check('Web-only practice keeps all four services discoverable and unselected phone/text inactive', !afterFake.channels.voice.active && !afterFake.channels.sms.active && ['web', 'voice', 'sms', 'calendar'].every(id => serviceRows.some(row => row.channel === id && row.visible)) && serviceRows.find(row => row.channel === 'web').status !== 'Not selected' && unselectedConnections.length === 2 && unselectedConnections.every(row => row.visible && row.status === 'Not selected') && choosable.length === 2 && choosable.every(input => !input.checked && input.enabled) && await page.locator('#connectionPreferencesDetails').isVisible(), { serviceRows, choosable });
     await shot(page, 'test-390');
-    await page.locator('[data-t="availability"]').click(); await page.locator('#availabilityDate').fill('2099-01-07'); await page.locator('#availabilityWindow').selectOption(''); await page.locator('#availabilitySubmit').click();
-    await page.locator('#availabilityMessage').filter({ hasText: 'Time blocked.' }).waitFor(); await page.reload(); await page.locator('#title').filter({ hasText: 'QA Browser Air' }).waitFor(); await page.locator('[data-t="availability"]').click();
+    // Blocked time sits in Schedule under the "Manage blocked time" disclosure.
+    const openBlockedTime = async () => { await page.locator('[data-t="availability"]').click(); if (!await page.locator('#scheduleBlockManager').evaluate(node => node.open)) await page.locator('#scheduleBlockManager > summary').click(); await page.locator('#availabilityDate').waitFor({ state: 'visible' }); };
+    await openBlockedTime(); await page.locator('#availabilityDate').fill('2099-01-07'); await page.locator('#availabilityWindow').selectOption(''); await page.locator('#availabilitySubmit').click();
+    await page.locator('#availabilityMessage').filter({ hasText: 'Time blocked.' }).waitFor(); await page.reload(); await page.locator('#title').filter({ hasText: 'QA Browser Air' }).waitFor(); await openBlockedTime();
     check('Real availability action survives reload from new customer workspace', await page.locator('.availability-remove').count() === 1 && /2099/.test(await page.locator('#availabilityBlocks').innerText()));
     await page.locator('.availability-remove').click(); await page.locator('#availabilityMessage').filter({ hasText: 'Block removed.' }).waitFor();
     check('Owner can remove actual availability block', await page.locator('.availability-remove').count() === 0);
@@ -228,7 +237,9 @@ try {
     await page.reload(); await page.locator('#portalRecovery').waitFor({ state: 'visible' });
     check('Reload after portal sign out reveals no saved customer workspace', !await page.locator('#portalContent').isVisible() && !/QA Browser Air|Alex Demo/.test(await page.locator('body').innerText()));
     await page.goto(base + '/desk.html?c=' + created.slug + '&k=wrong'); await page.locator('#portalRecovery').waitFor({ state: 'visible' });
-    check('Wrong private link is recoverable without legacy JS crash', /invalid|expired|sign in/i.test(await page.locator('#recoveryMessage').innerText()) && !await page.locator('#portalContent').isVisible());
+    // Since owner keys left the address bar, a wrong legacy key reads "This workspace link is no longer valid" with the sign-in link beside it.
+    const wrongLinkErrors = result.pageErrors.length;
+    check('Wrong private link is recoverable without legacy JS crash', /no longer valid|invalid|expired/i.test(await page.locator('#recoveryMessage').innerText()) && await page.locator('#portalRecovery a[href="onboard.html?signin=1"]').isVisible() && !await page.locator('#portalContent').isVisible() && !/QA Browser Air|Alex Demo/.test(await page.locator('body').innerText()) && !new URL(page.url()).searchParams.has('k') && result.pageErrors.length === wrongLinkErrors, { message: await page.locator('#recoveryMessage').innerText(), url: page.url() });
     await page.goto(base + '/desk.html');
     check('Missing private link offers email recovery instead of dead end', await page.locator('#portalRecovery').isVisible() && await page.locator('#portalRecovery a').getAttribute('href') === 'onboard.html?signin=1');
     await shot(page, 'recovery-390');

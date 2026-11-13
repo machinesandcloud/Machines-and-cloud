@@ -6,23 +6,33 @@ import { chromium } from '/Users/stevengoumnai/.npm/_npx/e41f203b7505f1fb/node_m
 const root=resolve('.'), outputIndex=process.argv.indexOf('--output'), out=resolve(outputIndex<0?'scratchpad/automatic-signin-ui-check':process.argv[outputIndex+1]), base='http://127.0.0.1:8963';
 if(existsSync(out))throw Error('Choose a fresh output directory; prior QA evidence is preserved.');
 mkdirSync(out+'/screenshots',{recursive:true});
-const sourceFiles=['scripts/automatic-signin-ui-check.mjs','onboard.js','onboard.html','onboard.css','product-ui.css','styles.css'];
+const sourceFiles=['scripts/automatic-signin-ui-check.mjs','onboard.js','onboard.html','onboard.css','product-ui.css','styles.css','channel-availability.js','netlify/functions/channel-availability.mjs','netlify/functions/lib/channel-availability.mjs'];
+// onboard.html loads channel-availability.js (deferred, before onboard.js), which reads the public, tenant-free /api/channel-availability once per load.
+// It is answered by the actual handler and audited separately (availabilityReads); the sign-in exchange assertions use the /api/access requests only.
+const availabilityPath='/api/channel-availability',availabilityHandler=(await import('../netlify/functions/channel-availability.mjs')).default,availabilityReads=[];
+const access=s=>s.requests.filter(r=>r.path==='/api/access');
+const signinFetches=list=>list.filter(r=>new URL(r.url,'http://127.0.0.1:8963').pathname!==availabilityPath);
 const sourceFor=file=>root+'/'+file;
 const report={at:new Date().toISOString(),mode:'intercepted automatic sign-in regression',boundary:'All API responses and static assets fulfilled from local files. Workspace destination is a stub HTML marker. External requests aborted. No production, provider, email or model requests.',sources:Object.fromEntries(sourceFiles.map(file=>[file,createHash('sha256').update(readFileSync(sourceFor(file))).digest('hex')])),checks:[],externalBlocked:[],pageErrors:[],cases:[]};
 const check=(name,pass,detail)=>report.checks.push({name,pass:!!pass,...(detail===undefined?{}:{detail})});
 const browser=await chromium.launch({channel:'chrome',headless:true});
-const portal=slug=>base+'/desk.html?c='+slug;
+const portal=slug=>base+'/desk.html?c='+slug,fixtures=[],documentsByCase={};
 async function fixture(name,{width=1440,session,denyStorage=false,state,exchange,statuses,holdTokens=[],holdGetAuth=[],getStatusByAuth={},attachStatuses=[]}={}){
  const context=await browser.newContext({viewport:{width,height:950},reducedMotion:'reduce'});
- const s={name,context,requests:[],pageErrors:[],holds:new Map(),state:state||{email:'owner@example.test',existing:{slug:'bayou-service',portal:portal('bayou-service')}},stateStatuses:statuses?[...statuses]:[],exchange:exchange||{},attachStatuses:[...attachStatuses],history:[]};
+ fixtures.push(name);const s={name,context,documents:0,requests:[],pageErrors:[],holds:new Map(),state:state||{email:'owner@example.test',existing:{slug:'bayou-service',portal:portal('bayou-service')}},stateStatuses:statuses?[...statuses]:[],exchange:exchange||{},attachStatuses:[...attachStatuses],history:[]};
  await context.addInitScript(({session,denyStorage})=>{
   if(session&&location.pathname==='/onboard.html')sessionStorage.setItem('mc-onboarding-session-v1',session);
   if(denyStorage)Object.defineProperty(window,'sessionStorage',{get(){throw Error('Fixture storage blocked');}});
-  window.__qaFetch=[];const originalFetch=window.fetch;window.fetch=function(url,options){window.__qaFetch.push({url:String(url),hash:location.hash,search:location.search,auth:options?.headers?.Authorization||null});return originalFetch.apply(this,arguments);};
+  window.__qaFetch=[];const originalFetch=window.fetch;window.fetch=function(url,options){window.__qaFetch.push({url:String(url),hash:location.hash,search:location.search,auth:options?.headers?.Authorization||null,credentials:options?.credentials||null});return originalFetch.apply(this,arguments);};
  },{session,denyStorage});
  await context.route('**/*',async route=>{
   const req=route.request(),url=new URL(req.url());
   if(url.origin!==base){report.externalBlocked.push({case:name,origin:url.origin});return route.abort('blockedbyclient');}
+  if(url.pathname===availabilityPath){
+   const headers=await req.allHeaders(),response=await availabilityHandler(new Request(url,{method:req.method()})),bytes=Buffer.from(await response.arrayBuffer());let keys=null;try{keys=Object.keys(JSON.parse(bytes)).sort().join(',');}catch{}
+   availabilityReads.push({case:name,method:req.method(),search:url.search,authorization:headers.authorization||null,cookie:headers.cookie||null,referer:headers.referer||'',postData:req.postData(),status:response.status,keys,documents:s.documents});
+   return route.fulfill({status:response.status,headers:Object.fromEntries(response.headers),body:bytes});
+  }
   if(url.pathname.startsWith('/api/')){
    let body;try{body=req.postDataJSON();}catch{}
    // The stateless, non-secret cookie probe (sign-in across tabs) is declined here, which selects the per-tab transport this fixture
@@ -51,13 +61,14 @@ async function fixture(name,{width=1440,session,denyStorage=false,state,exchange
   if(!file.startsWith(root+'/'))return route.fulfill({status:404,body:'blocked'});
   if(['onboard.js','onboard.html'].includes(url.pathname.slice(1)))file=sourceFor(url.pathname.slice(1));
   if(!existsSync(file)||statSync(file).isDirectory())return route.fulfill({status:404,body:'not found'});
+  if(req.isNavigationRequest()&&url.pathname==='/onboard.html')s.documents++;
   const type={'.html':'text/html','.js':'text/javascript','.css':'text/css','.png':'image/png','.jpg':'image/jpeg','.svg':'image/svg+xml','.webp':'image/webp'}[extname(file)]||'application/octet-stream';
   return route.fulfill({status:200,contentType:type,body:readFileSync(file)});
  });
  const page=await context.newPage();s.page=page;
  page.on('pageerror',error=>{s.pageErrors.push(error.message);report.pageErrors.push({case:name,message:error.message});});
  s.go=token=>page.goto(base+'/onboard.html'+(token?'#verify='+token:''));
- s.close=async()=>{report.cases.push({name,requests:s.requests,pageErrors:s.pageErrors,url:page.url()});await context.close();};
+ s.close=async()=>{documentsByCase[name]=s.documents;report.cases.push({name,requests:s.requests,pageErrors:s.pageErrors,url:page.url()});await context.close();};
  return s;
 }
 async function settle(page){await page.waitForTimeout(350);}
@@ -68,11 +79,11 @@ try{
    await s.page.waitForTimeout(120);check(width+': exchanges automatically with no user action',s.requests.filter(r=>r.body?.action==='exchange').length===1);
    await s.page.screenshot({path:out+'/screenshots/loading-'+width+'.png',fullPage:true});
    check(width+': loading does not show misleading email request or confirmation',!await s.page.locator('#access-form').isVisible()&&!await s.page.locator('#access-verify').isVisible());
-   const startFetch=await s.page.evaluate(()=>window.__qaFetch);check(width+': proof scrubbed before first fetch',startFetch.length>0&&startFetch.every(r=>r.hash===''),startFetch);
+   const startFetch=await s.page.evaluate(()=>window.__qaFetch),preScrub=startFetch.filter(r=>r.hash!=='');check(width+': proof scrubbed before first sign-in fetch; only the public availability read may precede the scrub',signinFetches(startFetch).length>0&&signinFetches(startFetch).every(r=>r.hash==='')&&preScrub.every(r=>r.url===availabilityPath&&r.search===''&&r.auth===null&&r.credentials==='omit'),startFetch);
    check(width+': new proof is never sent using old owner authorization',s.requests.filter(r=>r.body?.action==='exchange').every(r=>r.auth===null)&&!s.requests.some(r=>r.auth==='Bearer old-owner-session'));
    s.holds.get('returning-proof')?.();await s.page.waitForURL('**/desk.html?c=bayou-service');
    check(width+': returning owner navigates directly to existing workspace',s.page.url()===portal('bayou-service'));
-   check(width+': exactly one POST exchange then one authenticated state GET',s.requests.length===2&&s.requests[0].method==='POST'&&s.requests[0].body.action==='exchange'&&s.requests[1].method==='GET'&&s.requests[1].auth==='Bearer session-returning-proof',s.requests);
+   const exchangeFlow=access(s);check(width+': exactly one POST exchange then one authenticated state GET',exchangeFlow.length===2&&exchangeFlow[0].method==='POST'&&exchangeFlow[0].body.action==='exchange'&&exchangeFlow[1].method==='GET'&&exchangeFlow[1].auth==='Bearer session-returning-proof'&&s.requests.every(r=>r.path==='/api/access'),s.requests);
    check(width+': fresh session survives destination navigation',await s.page.evaluate(()=>sessionStorage.getItem('mc-onboarding-session-v1'))==='session-returning-proof');
    await s.page.screenshot({path:out+'/screenshots/workspace-route-'+width+'.png',fullPage:true});await s.close();
   });
@@ -89,7 +100,7 @@ try{
    s.state={email:'new@example.test',existing:{slug:'new-owner',portal:portal('new-owner')}};
    await s.page.evaluate(()=>location.hash='verify=same-tab-proof');await s.page.waitForURL('**/desk.html?c=new-owner');
    check('same tab: hash-only link automatically authenticates and routes to new owner',s.page.url()===portal('new-owner'));
-   check('same tab: exchange drops old identity and new GET uses new session',s.requests.find(r=>r.body?.action==='exchange')?.auth===null&&s.requests.at(-1).auth==='Bearer session-same-tab-proof',s.requests);
+   check('same tab: exchange drops old identity and new GET uses new session',s.requests.find(r=>r.body?.action==='exchange')?.auth===null&&access(s).at(-1).auth==='Bearer session-same-tab-proof',s.requests);
    await s.close();
   });
   await run('late-old-startup-get-failure',async()=>{
@@ -120,22 +131,22 @@ try{
    await s.page.evaluate(()=>location.hash='verify=proof-a');await settle(s.page);
    check('duplicates: same pending proof is exchanged once',s.requests.filter(r=>r.body?.token==='proof-a').length===1,s.requests);
    await s.page.evaluate(()=>location.hash='verify=proof-b');await settle(s.page);s.holds.get('proof-a')?.();await settle(s.page);
-   check('races: older exchange response cannot sign in or read state',!s.requests.some(r=>r.method==='GET')&&await s.page.evaluate(()=>sessionStorage.getItem('mc-onboarding-session-v1'))===null,s.requests);
+   check('races: older exchange response cannot sign in or read state',!access(s).some(r=>r.method==='GET')&&await s.page.evaluate(()=>sessionStorage.getItem('mc-onboarding-session-v1'))===null,s.requests);
    s.holds.get('proof-b')?.();await s.page.waitForURL('**/desk.html?c=bayou-service');
-   check('races: only newest proof session is saved and used',await s.page.evaluate(()=>sessionStorage.getItem('mc-onboarding-session-v1'))==='session-proof-b'&&s.requests.filter(r=>r.method==='GET').every(r=>r.auth==='Bearer session-proof-b'));
+   check('races: only newest proof session is saved and used',await s.page.evaluate(()=>sessionStorage.getItem('mc-onboarding-session-v1'))==='session-proof-b'&&access(s).filter(r=>r.method==='GET').every(r=>r.auth==='Bearer session-proof-b'));
    await s.close();
   });
   for(const status of [400,410])await run('invalid-proof-'+status,async()=>{
    const message=status===410?'This sign-in link has expired. Request a new link.':'This sign-in link is invalid. Request a new link.';
    const s=await fixture('invalid-proof-'+status,{width:390,exchange:{bad:{status,data:{error:status===410?'expired_link':'invalid_link',message}}}});await s.go('bad');await settle(s.page);
    check(status+': displays failure and offers explicit replacement link request',await s.page.locator('#access-status').textContent()===message&&await s.page.locator('#access-form').isVisible());
-   check(status+': no automatic email and no retry loop',s.requests.length===1&&s.requests[0].body.action==='exchange');
+   check(status+': no automatic email and no retry loop',access(s).length===1&&access(s)[0].body.action==='exchange'&&s.requests.every(r=>r.path==='/api/access'),s.requests);
    check(status+': no stale session or proof remains',await s.page.evaluate(()=>sessionStorage.getItem('mc-onboarding-session-v1'))===null&&new URL(s.page.url()).hash==='');
    await s.page.screenshot({path:out+'/screenshots/invalid-'+status+'-mobile.png',fullPage:true});await s.close();
   });
   await run('storage-blocked',async()=>{
    const s=await fixture('storage-blocked',{denyStorage:true});await s.go('storage-proof');await settle(s.page);
-   check('storage blocked: no redirect loop or repeated exchange',s.requests.filter(r=>r.body?.action==='exchange').length===1&&s.requests.length<=2);
+   check('storage blocked: no redirect loop or repeated exchange',s.requests.filter(r=>r.body?.action==='exchange').length===1&&access(s).length<=2&&s.requests.every(r=>r.path==='/api/access'),s.requests);
    check('storage blocked: destination is not opened without transferable session',!s.page.url().includes('/desk.html'));
    check('storage blocked: explains recovery instead of blank or misleading email',/storage|browser|cookies/i.test(await s.page.locator('#access-status').textContent()));
    await s.page.screenshot({path:out+'/screenshots/storage-blocked.png',fullPage:true});await s.close();
@@ -147,7 +158,7 @@ try{
    await s.page.screenshot({path:out+'/screenshots/state-retry.png',fullPage:true});
    const retry=s.page.locator('#access-verify');check('state503: offers an explicit workspace retry',await retry.isVisible()&&/retry|try|workspace/i.test(await retry.textContent()));
    if(await retry.isVisible()){await retry.click();await s.page.waitForURL('**/desk.html?c=bayou-service');}
-   check('state503: retry uses saved session without reconsuming proof',s.requests.filter(r=>r.body?.action==='exchange').length===1&&s.requests.filter(r=>r.method==='GET').length===2);
+   check('state503: retry uses saved session without reconsuming proof',s.requests.filter(r=>r.body?.action==='exchange').length===1&&access(s).filter(r=>r.method==='GET').length===2);
    await s.close();
   });
   for(const target of ['https://attacker.invalid/desk.html?c=bayou-service','/admin.html','/desk.html?c=another-account','javascript:alert(1)','http://user:password@127.0.0.1:8963/desk.html?c=bayou-service'])await run('unsafe-destination-'+target,async()=>{
@@ -155,6 +166,11 @@ try{
    check('unsafe destination refused: '+target,s.page.url().includes('/onboard.html')&&!await s.page.locator('#goPortal').isVisible());
    check('unsafe destination gives actionable error: '+target,!!(await s.page.locator('#access-status').textContent()).trim());await s.close();
   });
-}finally{await browser.close();report.sourcesAfter=Object.fromEntries(sourceFiles.map(file=>[file,createHash('sha256').update(readFileSync(sourceFor(file))).digest('hex')]));check('tested source remains unchanged throughout independent browser run',JSON.stringify(report.sources)===JSON.stringify(report.sourcesAfter));check('No browser page errors',report.pageErrors.length===0);report.pass=report.checks.every(c=>c.pass);report.checkCount=report.checks.length;writeFileSync(out+'/'+'report.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify({pass:report.pass,checkCount:report.checkCount,failures:report.checks.filter(c=>!c.pass),pageErrors:report.pageErrors,report:out+'/'+'report.json'},null,2));}
+}finally{await browser.close();
+ const counts={};for(const read of availabilityReads)counts[read.case]=(counts[read.case]||0)+1;
+ const leaks=availabilityReads.filter(read=>read.method!=='GET'||read.search!==''||read.postData||read.authorization||read.cookie||/#|verify=|intake=|proof|session|owner%40|owner@/i.test(read.referer)||read.status!==200||read.keys!=='channels,version');
+ const overRead=Object.entries(counts).filter(([name,count])=>count>(documentsByCase[name]||0));
+ report.availabilityReads={total:availabilityReads.length,byCase:counts,documents:documentsByCase,sample:availabilityReads.slice(0,2)};
+ check('public availability reads carry no proof, session or account details and stay at most one per onboarding load',availabilityReads.length>0&&!leaks.length&&!overRead.length,{leaks,overRead});report.sourcesAfter=Object.fromEntries(sourceFiles.map(file=>[file,createHash('sha256').update(readFileSync(sourceFor(file))).digest('hex')]));check('tested source remains unchanged throughout independent browser run',JSON.stringify(report.sources)===JSON.stringify(report.sourcesAfter));check('No browser page errors',report.pageErrors.length===0);report.pass=report.checks.every(c=>c.pass);report.checkCount=report.checks.length;writeFileSync(out+'/'+'report.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify({pass:report.pass,checkCount:report.checkCount,failures:report.checks.filter(c=>!c.pass),pageErrors:report.pageErrors,report:out+'/'+'report.json'},null,2));}
 
 if(!report.pass)process.exitCode=1;

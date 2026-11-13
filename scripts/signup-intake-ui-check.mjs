@@ -8,16 +8,23 @@ if (!output?.startsWith('scratchpad/') || !output.endsWith('.json')) throw new E
 if (outputIndex >= 0 && existsSync(output)) throw new Error('Refusing to overwrite retained QA evidence');
 const imagePrefix = outputIndex < 0 ? 'scratchpad/signup' : output.slice(0, -5);
 async function screenshot(page, suffix) { const path = imagePrefix + '-' + suffix + '.png'; if (outputIndex >= 0 && existsSync(path)) throw new Error('Refusing to overwrite retained screenshot'); await page.screenshot({ path }); }
-const sources = ['index.html', 'site-refresh.css', 'signup-intake.js', 'onboard.html', 'onboard.js'];
+const sources = ['index.html', 'site-refresh.css', 'signup-intake.js', 'onboard.html', 'onboard.js', 'channel-availability.js', 'netlify/functions/channel-availability.mjs', 'netlify/functions/lib/channel-availability.mjs'];
+// index.html and onboard.html read public channel availability once per load (channel-availability.js). It is answered by the
+// actual tenant-free handler and audited below; it is not part of the signup/sign-in exchange, so journey assertions use signupRequests().
+const availabilityHandler = (await import('../netlify/functions/channel-availability.mjs')).default;
+const availabilityPath = '/api/channel-availability';
+const signupRequests = state => state.requests.filter(r => r.path !== availabilityPath);
+const availabilityReads = [];
 const hashes = () => Object.fromEntries(sources.map(file => [file, createHash('sha256').update(readFileSync(file)).digest('hex')]));
 const report = { at: new Date().toISOString(), mode: 'all static files and API responses fulfilled locally; no actual email/model/provider', sourceBefore: hashes(), checks: [], externalBlocked: [], pageErrors: [] };
 const check = (name, pass, detail) => report.checks.push({ name, pass: !!pass, ...(detail === undefined ? {} : { detail }) });
 const { chromium } = await import('/Users/stevengoumnai/.npm/_npx/e41f203b7505f1fb/node_modules/playwright/index.mjs');
 const browser = await chromium.launch({ channel: 'chrome', headless: true });
 const handoff = 'a'.repeat(64), email = 'owner@example.test';
+const fixtureStates = [], fixtureDocumentsProxy = () => Object.fromEntries(fixtureStates.map(state => [state.name, state.documents]));
 async function fixture(name, width = 390, options = {}) {
   const context = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: 'reduce' });
-  const state = { name, requests: [], failure: false, invalidHandoff: false, hold: false, release: null, attachFails: false, revision: 0, marketing: false, fields: { name: 'Avery Owner', business: 'Bayou Service', primaryGoal: 'missed_calls', desiredChannels: ['web'], plan: 'starter' } };
+  const state = { name, requests: [], documents: 0, failure: false, invalidHandoff: false, hold: false, release: null, attachFails: false, revision: 0, marketing: false, fields: { name: 'Avery Owner', business: 'Bayou Service', primaryGoal: 'missed_calls', desiredChannels: ['web'], plan: 'starter' } };
   await context.addInitScript(({ deny, session }) => {
     if (session) sessionStorage.setItem('mc-onboarding-session-v1', 'fixture-session');
     if (deny) Object.defineProperty(window, 'sessionStorage', { get() { throw new Error('Fixture storage blocked'); } });
@@ -26,6 +33,13 @@ async function fixture(name, width = 390, options = {}) {
   await context.route('**/*', async route => {
     const request = route.request(), url = new URL(request.url());
     if (url.origin !== base) { report.externalBlocked.push({ case: name, origin: url.origin }); return route.abort('blockedbyclient'); }
+    if (url.pathname === availabilityPath) {
+      const headers = await request.allHeaders(), response = await availabilityHandler(new Request(url, { method: request.method() })), bytes = Buffer.from(await response.arrayBuffer());
+      let keys = null; try { keys = Object.keys(JSON.parse(bytes)).sort().join(','); } catch {}
+      state.requests.push({ path: url.pathname, method: request.method(), body: null });
+      availabilityReads.push({ case: name, method: request.method(), search: url.search, authorization: headers.authorization || null, cookie: headers.cookie || null, referer: headers.referer || '', postData: request.postData(), status: response.status, keys, documentsLoaded: state.documents });
+      return route.fulfill({ status: response.status, headers: Object.fromEntries(response.headers), body: bytes });
+    }
     if (url.pathname.startsWith('/api/')) {
       const body = request.method() === 'GET' ? null : request.postDataJSON(); state.requests.push({ path: url.pathname, method: request.method(), body });
       const respond = (status, value) => route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(value) });
@@ -48,10 +62,11 @@ async function fixture(name, width = 390, options = {}) {
     if (!file.startsWith(root + '/') || file.split('/').some(part => part.startsWith('.'))) return route.fulfill({ status: 404, body: 'blocked' });
     if (!existsSync(file) && existsSync(file + '.html')) file += '.html';
     if (!existsSync(file) || statSync(file).isDirectory()) return route.fulfill({ status: 404, body: 'not found' });
+    if (request.isNavigationRequest() && extname(file) === '.html') state.documents++;
     const type = ({ '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml' })[extname(file)] || 'application/octet-stream';
     return route.fulfill({ status: 200, contentType: type, body: readFileSync(file) });
   });
-  const page = await context.newPage(); state.page = page; state.context = context;
+  const page = await context.newPage(); state.page = page; state.context = context; fixtureStates.push(state);
   page.on('pageerror', error => report.pageErrors.push({ case: name, message: error.message }));
   state.fill = async () => { await page.locator('#intake-name').fill('Avery Owner'); await page.locator('#intake-email').fill(email); await page.locator('#intake-business').fill('Bayou Service'); await page.locator('#intake-goal').selectOption('missed_calls'); };
   return state;
@@ -61,7 +76,7 @@ try {
     const s = await fixture(`journey-${width}`, width), page = s.page;
     await page.goto(base + '/#pilot');
     check(`${width}: four preliminary questions, optional goal and no default marketing selection`, await page.locator('#signup-intake [required]').count() === 3 && !await page.locator('#intake-goal').getAttribute('required') && !await page.locator('#intake-marketing').isChecked());
-    await page.locator('#intake-submit').click(); check(`${width}: invalid form does not save or email`, s.requests.length === 0);
+    await page.locator('#intake-submit').click(); check(`${width}: invalid form does not save or email`, signupRequests(s).length === 0, s.requests);
     await s.fill();
     const geometry = await page.locator('#signup-intake').evaluate(form => ({ left: form.getBoundingClientRect().left, right: form.getBoundingClientRect().right, viewport: innerWidth, document: document.documentElement.scrollWidth }));
     check(`${width}: form fits horizontally`, geometry.left >= 0 && geometry.right <= width + 1 && geometry.document <= width + 1, geometry);
@@ -71,7 +86,7 @@ try {
     // PRA-ONB-07: Continue to setup is the request for the link; the next page sends it once without a second button.
     await page.waitForFunction(() => document.querySelector('#access-title').textContent === 'Check your email' && !document.querySelector('#access-confirmation').hidden);
     check(`${width}: next page requests exactly one sign-in link for the inquiry email`, await page.locator('#access-email').inputValue() === email && s.requests.filter(r => r.path === '/api/access' && r.body?.action === 'request_link').length === 1);
-    check(`${width}: automatic sign-in request carries opaque handoff and same email`, s.requests.at(-1).body.action === 'request_link' && s.requests.at(-1).body.email === email && s.requests.at(-1).body.intake === handoff);
+    check(`${width}: automatic sign-in request carries opaque handoff and same email`, signupRequests(s).at(-1).body.action === 'request_link' && signupRequests(s).at(-1).body.email === email && signupRequests(s).at(-1).body.intake === handoff);
     await page.reload(); await page.locator('#access-form').waitFor({ state: 'visible' });
     check(`${width}: reloading the page does not send another sign-in email`, s.requests.filter(r => r.path === '/api/access' && r.body?.action === 'request_link').length === 1 && /already sent/.test(await page.locator('#access-intro').innerText()));
     await page.goto(base + '/onboard.html#verify=fixture-token'); await page.locator('#ob').waitFor({ state: 'visible' });
@@ -89,31 +104,31 @@ try {
       const s = await fixture('plan-intent-' + plan), p = s.page; await p.goto(base + '/?plan=' + plan + '#pilot'); await s.fill(); await p.locator('#intake-submit').click(); await p.waitForURL('**/onboard.html?plan=' + plan);
       check(`${plan}: public plan intent survives capture without personal information in query`, new URL(p.url()).search === '?plan=' + plan && await p.locator('input[name="plan"]:checked').inputValue() === plan);
       await p.waitForFunction(() => document.querySelector('#access-title').textContent === 'Check your email' && !document.querySelector('#access-confirmation').hidden);
-      check(`${plan}: automatic secure-link request carries preserved current plan preference`, s.requests.at(-1).body.plan === plan && s.requests.at(-1).body.intake === handoff); await s.context.close();
+      check(`${plan}: automatic secure-link request carries preserved current plan preference`, signupRequests(s).at(-1).body.plan === plan && signupRequests(s).at(-1).body.intake === handoff); await s.context.close();
     }
   }
   {
     const s = await fixture('optional-goal'), p = s.page; await p.goto(base + '/?plan=retired#pilot'); await s.fill(); await p.locator('#intake-goal').selectOption(''); await p.locator('#intake-submit').click(); await p.waitForURL('**/onboard.html');
-    check('Goal can be skipped without silently choosing one or carrying an invalid plan', s.requests[0].body.goal === '' && new URL(p.url()).search === ''); await s.context.close();
+    check('Goal can be skipped without silently choosing one or carrying an invalid plan', signupRequests(s)[0].path === '/api/intake' && signupRequests(s)[0].body.goal === '' && new URL(p.url()).search === ''); await s.context.close();
   }
   {
     const s = await fixture('retry-and-double-submit'), p = s.page; await p.goto(base + '/'); await s.fill(); await p.locator('#intake-marketing').check(); s.failure = true;
-    await p.locator('#intake-submit').click(); await p.locator('#intake-status.is-error').waitFor(); const first = s.requests.at(-1).body;
+    await p.locator('#intake-submit').click(); await p.locator('#intake-status.is-error').waitFor(); const first = signupRequests(s).at(-1).body;
     check('Failed save keeps all entered answers and opt-in choice', await p.locator('#intake-email').inputValue() === email && await p.locator('#intake-marketing').isChecked());
     await p.locator('#intake-submit').click(); await p.locator('#intake-status.is-error').waitFor();
-    check('An unchanged explicit retry reuses its idempotency key', s.requests.at(-1).body.submissionId === first.submissionId);
+    check('An unchanged explicit retry reuses its idempotency key', signupRequests(s).at(-1).body.submissionId === first.submissionId);
     await p.locator('#intake-marketing').uncheck(); await p.locator('#intake-submit').click(); await p.locator('#intake-status.is-error').waitFor();
-    check('A changed consent answer creates a new capture key and carries false explicitly', s.requests.at(-1).body.submissionId !== first.submissionId && s.requests.at(-1).body.marketingConsent === false);
+    check('A changed consent answer creates a new capture key and carries false explicitly', signupRequests(s).at(-1).body.submissionId !== first.submissionId && signupRequests(s).at(-1).body.marketingConsent === false);
     s.failure = false; s.hold = true; await p.locator('#intake-submit').click(); await p.waitForFunction(() => document.querySelector('#intake-submit').disabled);
-    const before = s.requests.length; await p.locator('#signup-intake').evaluate(form => form.requestSubmit()); await p.waitForTimeout(60);
-    check('Double submission during a pending save sends one request', s.requests.length === before);
+    const before = signupRequests(s).length; await p.locator('#signup-intake').evaluate(form => form.requestSubmit()); await p.waitForTimeout(60);
+    check('Double submission during a pending save sends one request', signupRequests(s).length === before);
     s.release(); await p.waitForURL('**/onboard.html'); await s.context.close();
   }
   {
     const s = await fixture('storage-blocked', 390, { denyStorage: true }), p = s.page; await p.goto(base + '/'); await s.fill(); await p.locator('#intake-submit').click(); await p.waitForURL('**/onboard.html');
     check('Storage-blocked handoff retains opaque capability, removes fragment and explains same-email entry', new URL(p.url()).hash === '' && /same email/.test(await p.locator('#access-intro').innerText()) && await p.locator('#access-email').inputValue() === '');
     await p.locator('#access-email').fill(email); await p.locator('#access-send').click(); await p.waitForFunction(() => document.querySelector('#access-title').textContent === 'Check your email' && !document.querySelector('#access-confirmation').hidden);
-    check('Storage-blocked sign-in request still carries handoff', s.requests.at(-1).body.intake === handoff); await s.context.close();
+    check('Storage-blocked sign-in request still carries handoff', signupRequests(s).at(-1).body.intake === handoff); await s.context.close();
   }
   {
     const s = await fixture('verified-marketing', 390, { session: true }), p = s.page; await p.goto(base + '/onboard.html'); await p.locator('#ob').waitFor({ state: 'visible' });
@@ -133,6 +148,13 @@ try {
     check('Malformed success response does not navigate or discard entered answers', new URL(p.url()).pathname === '/' && await p.locator('#intake-business').inputValue() === 'Bayou Service'); await s.context.close();
   }
 } finally {
+  // Public availability reads carry nothing from the signup: GET, no query/body, no Authorization or Cookie, a Referer without the
+  // #intake/#verify fragment or personal details, the actual tenant-free {channels,version} payload, and at most one read per page load.
+  const fixtureDocuments = fixtureDocumentsProxy(); const loadsByCase = {}; for (const read of availabilityReads) loadsByCase[read.case] = (loadsByCase[read.case] || 0) + 1;
+  const leaks = availabilityReads.filter(read => read.method !== 'GET' || read.search !== '' || read.postData || read.authorization || read.cookie || /#|intake=|verify=|fixture-token|session|owner%40|owner@|Avery|Bayou/i.test(read.referer) || read.status !== 200 || read.keys !== 'channels,version');
+  const overRead = availabilityReads.filter(read => read.documentsLoaded < 1 || availabilityReads.filter(other => other.case === read.case).length > (fixtureDocuments[read.case] || 0));
+  report.availabilityReads = { total: availabilityReads.length, byCase: loadsByCase, documents: fixtureDocuments, sample: availabilityReads.slice(0, 3) };
+  check('Public channel-availability reads stay tenant-free and carry no signup handoff, proof, session or contact details', availabilityReads.length > 0 && !leaks.length && !overRead.length, { leaks, overRead });
   report.sourceAfter = hashes(); check('Source remained unchanged during browser verification', JSON.stringify(report.sourceBefore) === JSON.stringify(report.sourceAfter));
   check('No browser page errors', report.pageErrors.length === 0, report.pageErrors);
   report.passed = report.checks.filter(c => c.pass).length; report.failed = report.checks.filter(c => !c.pass).length;
