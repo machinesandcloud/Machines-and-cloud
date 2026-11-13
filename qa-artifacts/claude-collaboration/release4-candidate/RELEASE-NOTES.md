@@ -3,22 +3,27 @@
 **Nothing here is pushed, deployed or merged. No provider was called.** Every run was offline:
 - `env -i` with `MC_MEMORY_STORE=1`, `MC_FAKE_MODEL=1` and `MC_LOCAL_NO_KEYS=1`, no `.env`;
 - release 3's `sandbox-exec` deny-remote profile (`harness/deny-net.sb`, loopback only);
-- a throwaway `git archive` copy under the session scratchpad (`r4/r4-gate`), `node_modules` symlinked to `scratchpad/p10/nm`. The copy was deleted after the run.
+- throwaway `git archive` copies under the session scratchpad (`r4/r4-gate`, then `r4/r4-gate-fc`), `node_modules` symlinked to `scratchpad/p10/nm`. Each copy was deleted after its run.
 
 `route.fetch` was never used.
 
 - **Worktree / branch:** `/tmp/mc-claude-release4-candidate-20261113`, `work/claude-release4-candidate-20261113`.
 - **Base:** production release 3, `c470c7a7`. Release 4 is a fast-forward from production.
-- **Product head tested:** `6aa33436`.
+- **Product head tested:** `d35c2de6` (after FC-01..06 and QA's fixes). The first run was at `6aa33436` (P3 and SEO only).
 
 ## 1. Result
 
 | Run | Result |
 |---|---|
-| **Deploy gate**, each `node scripts/…` step of the `netlify.toml` build line in a fresh process | **71/71 exit 0** (`receipts/gate/SUMMARY.tsv`). Release 3's 70 plus `p3-cards-check`. |
-| Same build line verbatim as one `&&` chain | `GATE_EXIT=0` (`receipts/gate/gate-chain-tail.log`) |
-| `python3 -I scripts/sitecheck.py .` | 182 pages, 0 broken references, 0 sitemap, redirect or canonical issues |
-| P3 rev 2 checks (`receipts/p3/`) | unit **11/11**, ui **45/45**, desk-ui **12/12**, the same counts QA accepted in `p3-cards/qa/QA-REVIEW-R2.md` |
+| **Deploy gate at `d35c2de6`**, each `node scripts/…` step of the `netlify.toml` build line in a fresh process | **71/71 exit 0** (`receipts/gate-fc/SUMMARY.tsv`). Release 3's 70 plus `p3-cards-check`. This is the full gate after QA's D1-D3 fixes, which QA had not rerun. |
+| Same build line verbatim as one `&&` chain at `d35c2de6` | `GATE_EXIT=0` (`receipts/gate-fc/gate-chain-tail.log`) |
+| Earlier gate at `6aa33436` (P3 + SEO only) | 71/71, `GATE_EXIT=0` (`receipts/gate/`) |
+| `python3 -I scripts/sitecheck.py .` at `d35c2de6` | 182 pages, 0 broken references, 0 sitemap, redirect or canonical issues |
+| FC author checks at `d35c2de6` (`receipts/fc/`) | fc01 **6/6**, fc02 **4/4**, fc03 **4/4**, fc04 **4/4**, fc05 **4/4**, fc06 **8/8** |
+| QA adversarial check at `d35c2de6`, 390 and 1440 (`receipts/fc/`) | **22/22** (16/22 before QA's fixes, per QA-REVIEW.md) |
+| P3 rev 2 checks, rerun at `d35c2de6` because FC changes `desk.js` (`receipts/fc/p3-*`) | unit **11/11**, ui **45/45**, desk-ui **12/12**; also 11/45/12 at `6aa33436` (`receipts/p3/`), the counts QA accepted in `p3-cards/qa/QA-REVIEW-R2.md` |
+
+Every browser report shows physicalNetwork=0, forbidden=0, pageErrors=0.
 
 ## 2. Commits (on `c470c7a7`)
 
@@ -27,9 +32,14 @@
 | 1 | `f6fba244` | **P3 card fixes rev 2**: FC-07, FC-08, FC-09, FC-10, FC-11, ONB-09, ONB-10, ONB-12, ACQ-10, plus the three checks under `qa-artifacts/claude-collaboration/p3-cards/checks/` | `/tmp/mc-claude-p3-cards-20261112/.../p3-cards/patches/r2/all-on-c470c7a7.patch`, applied unchanged with `git apply` (no offsets beyond those QA recorded, no rejects) |
 | 1 (same commit) | | **Gate addition**: the offline unit check copied to `scripts/p3-cards-check.mjs` (header comment only differs) and added to the `netlify.toml` build line before `build-site`, mirroring release 3's `uncovered-cards-check`. The CLAUDE.md gate copy is updated to match. | this candidate |
 | 2 | `6aa33436` | **SEO descender CSS (PRA-LIVE-01)**: `padding-bottom:0.2em` on `.site-refresh.public-reading .hero-stat-value` | `/tmp/mc-claude-seo-descender-20261113/.../PRA-LIVE-01-styles.patch`, applied unchanged |
-| 3 | (this commit) | These notes, receipts and harness | |
+| 3 | `633eacba` | These notes, receipts and harness (first version) | |
+| 4 | `a409f76c` | **First-customer FC-01..06** (patches 01-06): `desk-requests.js`, `desk-setup-guide.js`, `desk.css`, `desk.js`, `client.mjs`, `lib/agent.mjs`, `lib/owner-test.mjs`. Adds the author's checks (`first-customer-fix/checks/fc-lib.mjs`, `fc01..fc06`) and `QA-REVIEW.md` | `/tmp/mc-claude-first-customer-fix-20261112/.../qa/fc01-06-on-r3-p3.patch` (sha256 `d551bcf7…6e0b`, QA's rebase on c470c7a7 + P3), applied unchanged with `git apply`, no rejects |
+| 5 | `d35c2de6` | **QA fixes D1-D3** (client text only, `desk-requests.js`, `desk.js`), plus QA's `first-customer-fix/qa/checks/qa-adversarial-check.mjs` | `.../qa/qa-suggested-fixes-on-fc01-06.patch` (sha256 `bb639fde…0331`), applied unchanged |
+| 6 | (this commit) | Notes and receipts updated for FC-01..06 | |
 
 **Gate decision.** `p3-unit-check` is pure Node (memory store, fake model, fetch blocked, about 1 s), so it belongs in the gate. `p3-ui-check` and `p3-desk-ui-check` need a Playwright module and a Chromium binary passed by flag, which the Netlify build does not have; they stay in `qa-artifacts` as release evidence and were run here by hand.
+
+The same applies to FC: all six author checks and QA's adversarial check launch Chromium through `fc-lib.mjs` with `--playwright` and `--out`, so none is a gate step; they were run by hand on the gate copy (the adversarial check is copied beside `fc-lib.mjs` to run). The FC patches add no pure-Node check, so the gate stays at 71.
 
 ## 3. What changes for customers
 
@@ -41,6 +51,12 @@
 - **Arrival window (ONB-10):** new placeholder and the error "We couldn’t read “X” as an arrival window. Write a start and end time with am or pm, such as 8 am to 12 pm."
 - **Finished setup (ONB-12):** the sidebar shows the four completed steps instead of the signed-out welcome.
 - **Homepage chat launcher (ACQ-10):** hides, and takes no taps, while it would cover the inquiry submit button or the demo header.
+- **Visit dialog (FC-01):** the customer's name and tap-to-call / tap-to-text links sit above the fold; with no phone, "No phone saved" and "Add a phone number with Edit details". A saved number that can't be dialed shows "Phone saved: X (check this number)" with no link (QA D3).
+- **Visit receipts (FC-06):** with no live texting, "The customer was not notified. Call or text them at …". The Calendar line reads the v1 connection (QA D2), so a connected owner is no longer told Calendar is not connected.
+- **Completing a follow-up (FC-02):** acknowledges that request's alert and moves it to Done. If the acknowledgment fails, the message says the request stays in Open until Acknowledge (QA D1).
+- **Home progress (FC-03):** services held for our team show "Setup with our team", no owner task, and are not counted as owner work.
+- **Practice checks (FC-04):** a reply that does not count names the real reason and says when an earlier check still counts.
+- **Review requests (FC-05):** says our team will email, no promised response time, and gives support@machinesandcloud.com.
 - **SEO pages (PRA-LIVE-01):** gradient hero stat descenders (g, y) are no longer clipped.
 - **Local/test only (FC-10):** fake-model website-only marker and a synthetic encryption key in `MC_LOCAL_NO_KEYS` mode. No production behavior.
 
@@ -48,17 +64,17 @@
 
 - HOMEOWNER-09: START copy is carrier-registered; owner decision.
 - FC-10 second half: a fake-mode activation path relaxes a safety gate; PO decision.
+- FC residuals from QA-REVIEW.md, none blocking: a parked confirmation or reminder can be delivered later if texting goes live before the visit; reopening a completed request does not re-arm reminders; a lost POST response after the journal saved but the ack did not shows no alert notice (the request stays in Open); FC-03 held-row heading can read "Available now" in one Calendar edge case; "Our team will email you" (FC-05) is a commitment the team must keep; real-model wording for FC-04 is unchecked (fake model only).
 - ACQ-10 refinement (QA, not blocking): use `:focus-visible` instead of `document.activeElement` for the focused-launcher exception.
 
 ## 5. Coming later (room left)
 
-- **First-customer FC-01..06:** in QA; the reviewer will produce `qa/fc01-06-on-r3-p3.patch`. Note: P3 touches `desk.js` at two one-line hunks (FC-08, FC-11) that the P3 author reported are outside the FC-01..06 changes.
-- **Managed-SMS failure-gap fix:** in progress.
-
-Each will be applied as its own commit on top of `6aa33436`, then the full gate rerun on a fresh `r4-*` copy and these notes updated.
+- **Managed-SMS failure-gap fix:** in QA; it adds a gate step. It will be applied as its own commit on top of this one, then the full gate rerun on a fresh `r4-*` copy and these notes updated.
 
 ## 6. Harness and receipts
 
 - `harness/`: `mk.sh` (archives from this worktree into `scratchpad/r4/<name>`), `gate.sh`, `run1.sh`, `deny-net.sb`, adapted from release 3's `rc3-scripts`.
 - `receipts/gate/`: `SUMMARY.tsv` (71 steps), `p3-cards-check.log`, `gate-chain-tail.log`.
-- `receipts/p3/`: unit, ui and desk-ui logs and JSON.
+- `receipts/p3/`: unit, ui and desk-ui logs and JSON at `6aa33436`.
+- `receipts/gate-fc/`: `SUMMARY.tsv` (71 steps) and chain tail at `d35c2de6`.
+- `receipts/fc/`: FC author checks, QA adversarial check and the P3 rerun at `d35c2de6`, logs and JSON (screenshots not kept, to save disk).
