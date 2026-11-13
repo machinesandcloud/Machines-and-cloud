@@ -129,12 +129,22 @@ export async function brandStatus(brandSid) {
 
 // Rev 5 (PO decision a): the legacy HELP reply is the campaign's registered HelpMessage. New filings register this
 // text and store it on the client (phone.campaignHelpMessage); sms.mjs replies with the stored text, else this builder.
-export const legacyHelpMessage = (client) => `${client.business?.name || "Front desk"}: for help contact ${client.phone?.businessNumber || client.owner?.email || "the shop"}. Reply STOP to opt out. Msg and data rates may apply.`;
+const currentHelpContact = (client) => String(client.phone?.businessNumber || client.owner?.email || "");
+export const legacyHelpMessage = (client, contact = currentHelpContact(client)) => `${client.business?.name || "Front desk"}: for help contact ${contact || "the shop"}. Reply STOP to opt out. Msg and data rates may apply.`;
+// Release 3 (QA r5 note): AYUDA must name the contact that was FILED with the campaign, not the shop's current one, so a
+// later business-number change cannot make the English and Spanish replies disagree. Order: the contact stored at filing,
+// else the contact inside the stored filed HelpMessage, else (nothing filed yet) the current contact, as the English reply.
+export const filedHelpContact = (client) => {
+  if (typeof client.phone?.campaignHelpContact === "string") return client.phone.campaignHelpContact;
+  const m = /for help contact (.+?)\. Reply STOP/.exec(String(client.phone?.campaignHelpMessage || ""));
+  if (m) return m[1] === "the shop" ? "" : m[1];
+  return currentHelpContact(client);
+};
 // AYUDA: the Spanish translation of the same registered content (Spanish review r4: "al" before a number, "escriba a"
 // before an email, no English placeholder, "dejar de recibir mensajes").
-export const legacyHelpMessageEs = (client) => { const contact = String(client.phone?.businessNumber || client.owner?.email || ""); return `${client.business?.name || "Front desk"}: para ayuda, ${/@/.test(contact) ? "escriba a " + contact : /\d/.test(contact) ? "llame o escriba al " + contact : "contacte al negocio"}. Responda STOP para dejar de recibir mensajes. Pueden aplicar tarifas de mensajes y datos.`; };
+export const legacyHelpMessageEs = (client) => { const contact = filedHelpContact(client); return `${client.business?.name || "Front desk"}: para ayuda, ${/@/.test(contact) ? "escriba a " + contact : /\d/.test(contact) ? "llame o escriba al " + contact : "contacte al negocio"}. Responda STOP para dejar de recibir mensajes. Pueden aplicar tarifas de mensajes y datos.`; };
 export async function createCampaign(client, serviceSid, brandSid) {
-  const name = client.business.name, helpMessage = legacyHelpMessage(client);
+  const name = client.business.name, helpContact = currentHelpContact(client), helpMessage = legacyHelpMessage(client, helpContact);
   const c = await tw(msg(`Services/${serviceSid}/Compliance/Usa2p`), {
     BrandRegistrationSid: brandSid,
     Description: `${name} is a ${client.business.trade || "home service"} company. This number texts customers who contacted the business about service: replies to their questions, appointment confirmations and reminders, on-the-way notices, follow-up on open estimates, and review requests after a completed job. One-to-one conversational messaging; no marketing blasts.`,
@@ -155,7 +165,7 @@ export async function createCampaign(client, serviceSid, brandSid) {
     AgeGated: "false",
     DirectLending: "false",
   });
-  return { campaignSid: c.sid, campaignStatus: c.campaign_status, campaignHelpMessage: c.help_message || helpMessage };
+  return { campaignSid: c.sid, campaignStatus: c.campaign_status, campaignHelpMessage: c.help_message || helpMessage, campaignHelpContact: helpContact };
 }
 
 export async function campaignStatus(serviceSid, campaignSid) {
