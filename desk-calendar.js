@@ -3,7 +3,7 @@
   'use strict';
   var host=document.getElementById('scheduleCalendar');if(!host)return;
   var params=new URLSearchParams(location.search),initial=params.get('calendar_date');
-  var data=null,selected=date(initial)?initial:today(),anchor=selected,view=['month','week','agenda'].includes(params.get('calendar_view'))?params.get('calendar_view'):'month',snapshot=null,busy=false,blockBusy=false,error='',message='',rangeKey='',focusedBlock=null,jumpDraft=null,removing=null,notice=null,retryShown=false;
+  var data=null,selected=date(initial)?initial:today(),anchor=selected,view=['month','week','agenda'].includes(params.get('calendar_view'))?params.get('calendar_view'):window.matchMedia&&window.matchMedia('(max-width:640px)').matches?'agenda':'month',snapshot=null,busy=false,blockBusy=false,error='',message='',rangeKey='',focusedBlock=null,jumpDraft=null,removing=null,notice=null,retryShown=false;
   var motion=window.matchMedia('(prefers-reduced-motion: reduce)');
   var $=function(id){return document.getElementById(id);};
   function esc(value){return String(value==null?'':value).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}

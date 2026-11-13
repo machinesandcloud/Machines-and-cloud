@@ -855,3 +855,12 @@
     }
   }
 })();
+// PRA-POLISH-08 rev 2: keep a focused onboarding field clear of the sticky Back / Save and continue bar (html scroll-padding).
+// Scrolling only; focus is unchanged.
+(function () {
+  var form = document.getElementById('ob'); if (!form) return;
+  form.addEventListener('focusin', function (event) {
+    var field = event.target;
+    if (field && field.matches && field.matches('input:not([type=checkbox]):not([type=radio]):not([type=hidden]),select,textarea')) field.scrollIntoView({ block: 'nearest', behavior: 'instant' });
+  });
+})();

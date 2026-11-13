@@ -53,3 +53,14 @@
   dialog.addEventListener('close',function(){clear();context=null;});
   $('visitChangeForm').addEventListener('submit',function(event){if(!$('newVisitFields').hidden&&['visitName','visitPhone','visitAddress','visitIssue'].some(function(id){return !$(id).value.trim();}))return;if(context&&!context.pending&&(!valid()||!snapshot.openings.some(function(day){return day.date===$('visitDate').value&&day.windows.includes($('visitWindow').value);} ))){event.preventDefault();event.stopImmediatePropagation();['visitName','visitPhone','visitAddress','visitIssue'].forEach(function(id){$(id).removeAttribute('aria-invalid');$(id+'Error').textContent='';});clear('Check available times and choose a listed opening before saving.');$('visitFindTimes').focus();}},true);
 })();
+// PRA-POLISH-03 rev 2: Chrome only scrolls a focused field "if needed", so a field already on screen can sit under the
+// sticky dialog footer. Bring it clear of the header and footer (dialog scroll-padding). Scrolling only; focus is unchanged.
+(function () {
+  var FIELD = 'input:not([type=checkbox]):not([type=radio]):not([type=hidden]),select,textarea';
+  document.addEventListener('focusin', function (event) {
+    var field = event.target;
+    if (!field || !field.matches || !field.matches(FIELD)) return;
+    var dialog = field.closest('#requestDialog,#conversationDialog,#visitDialog,#supportDialog');
+    if (dialog && dialog.open) field.scrollIntoView({ block: 'nearest', behavior: 'instant' });
+  });
+})();

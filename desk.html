@@ -37,6 +37,7 @@
   <section class="workspace-guide card2" id="workspaceGuide" hidden="" aria-labelledby="guideTitle"><div class="desk-next-icon"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"></path></svg></div><div class="desk-next-copy"><h2 id="guideTitle">Review your business details</h2><p id="guideIntro">Check the answers your front desk will give customers.</p></div><button class="btn-pill btn-pill-blue btn-sm" id="nextSetupAction" type="button">Review business rules</button><div id="homeSetupSecondaryWrap" hidden><p id="homeSetupReminder" class="desk-secondary-reminder" hidden></p><button type="button" class="desk-secondary-action" id="homeSetupSecondary" hidden></button></div></section>
     <details class="home-connection-progress card2" id="homeConnectionProgress" hidden open><summary><span>Connection progress<small id="homeConnectionProgressSummary">Your selected services and their next steps</small></span></summary><div id="homeConnectionProgressRows"></div></details>
     <details class="desk-home-activity" id="homeActivityDetails" open><summary><span>Customer activity<small id="homeActivitySummary">Your saved requests and visits</small></span></summary>
+    <div class="desk-home-body">
     <section class="desk-work-summary" id="todayTourSummary" aria-labelledby="todayTourHeading"><h3 id="todayTourHeading">Today in your workspace</h3><div class="grid2" id="today"></div><p id="homeServiceContext" class="muted"></p></section><div class="desk-home-columns"><section class="desk-work-section"><h3>Needs your attention</h3><p id="homeNewVisits" class="desk-new-visits" hidden><span id="homeNewVisitsText"></span> <button type="button" class="desk-empty-action" data-route="availability">Open Schedule →</button></p><div id="needsYou" class="muted"></div></section><section class="desk-work-section desk-recent-section"><h3>Recent activity</h3><div id="todayEvents" class="muted"></div></section></div>
 
 
@@ -47,6 +48,7 @@
       <p id="activityReportStatus" class="muted" role="status" aria-live="polite"></p>
       <div id="activityReportResults" hidden><p id="activityReportPeriod" class="muted"></p><dl class="activity-report-metrics" id="activityReportMetrics"></dl><p id="activityReportExplanation" class="muted"></p></div>
     </section>
+    </div>
     </details>
   </section>
 
@@ -251,7 +253,7 @@
       <div class="form-group" id="requestAttemptField" hidden><label class="form-label" for="requestAttemptResult">What happened?</label><select class="form-input" id="requestAttemptResult"><option value="no_answer">No answer</option><option value="left_message">Left a message</option><option value="sent_message">Sent a message, no reply yet</option><option value="other">Other</option></select></div>
       <div class="form-group" id="requestResolutionField" hidden><label class="form-label" for="requestResolution">Resolution</label><select class="form-input" id="requestResolution"><option value="resolved">Answered or resolved</option><option value="not_proceeding">Customer is not proceeding</option><option value="no_followup_needed">No further follow-up needed</option></select></div>
       <div class="form-group"><label class="form-label" for="requestNote">Note <span id="requestNoteRequirement">(optional)</span></label><textarea class="form-input" id="requestNote" maxlength="1000" rows="3"></textarea></div>
-      <button type="submit" class="btn-pill btn-pill-blue btn-sm" id="requestSave">Save action</button><p class="muted request-save-scope">This records work you have done or plan to do. It does not send a message, place a call or change a visit.</p>
+      <div class="dlg-foot"><button type="submit" class="btn-pill btn-pill-blue btn-sm" id="requestSave">Save action</button></div><p class="muted request-save-scope">This records work you have done or plan to do. It does not send a message, place a call or change a visit.</p>
     </form>
     <details class="request-automatic" id="requestAutoSection" hidden><summary><span>One customer text<small>Follow up once about this request</small></span></summary>
       <p class="request-auto-status" id="requestAutoStatus" role="status" aria-live="polite"></p><p class="muted" id="requestAutoDetail"></p><button type="button" class="btn-pill btn-pill-dark btn-sm" id="requestAutoRefresh" hidden>Check text status</button> <button type="button" class="btn-pill btn-pill-dark btn-sm" id="requestAutoConnections" hidden>Review texting setup</button>
@@ -305,7 +307,7 @@
     <section class="visit-availability" id="visitAvailability" aria-labelledby="visitAvailabilityTitle"><h3 id="visitAvailabilityTitle">Choose an available time</h3><p class="muted">Check the next seven days from your chosen date. We check again when you save.</p><button type="button" class="btn-pill btn-pill-dark btn-sm" id="visitFindTimes">Find available times</button><p id="visitAvailabilityStatus" role="status" aria-live="polite" tabindex="-1"></p><button type="button" class="btn-pill btn-pill-dark btn-sm" id="visitReviewCalendar" hidden>Review Calendar setup</button><div id="visitAvailableTimes" class="visit-available-times"></div></section>
     <div class="visit-change-fields"><div class="form-group"><label class="form-label" for="visitDate">Visit date <span class="required-mark" aria-hidden="true">*</span></label><input class="form-input" type="date" id="visitDate" aria-required="true" aria-describedby="visitDateError"><p id="visitDateError" class="visit-field-error"></p></div>
     <div class="form-group"><label class="form-label" for="visitWindow">Arrival window <span class="required-mark" aria-hidden="true">*</span></label><select class="form-input" id="visitWindow" aria-required="true" aria-describedby="visitWindowError"></select><p id="visitWindowError" class="visit-field-error"></p></div></div>
-    <button type="submit" class="btn-pill btn-pill-blue btn-sm" id="saveVisit">Save new time</button>
+    <div class="dlg-foot"><button type="submit" class="btn-pill btn-pill-blue btn-sm" id="saveVisit">Save new time</button></div>
     <div class="visit-cancel"><label for="visitCancelConfirm"><input type="checkbox" id="visitCancelConfirm"> I want to cancel this visit. Its history will remain in my workspace.</label><button type="button" class="walkthrough-dismiss" id="cancelVisit">Cancel visit</button></div>
   </form>
   <section class="visit-post" id="visitPost" hidden aria-labelledby="visitPostTitle"><h3 id="visitPostTitle">After the visit</h3><p id="visitPostStatus" class="muted"></p>

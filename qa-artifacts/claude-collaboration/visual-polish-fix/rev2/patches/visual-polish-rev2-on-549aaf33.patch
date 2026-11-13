@@ -1,0 +1,240 @@
+diff --git a/desk-calendar.js b/desk-calendar.js
+index 59f25fb..186a540 100644
+--- a/desk-calendar.js
++++ b/desk-calendar.js
+@@ -3,7 +3,7 @@
+   'use strict';
+   var host=document.getElementById('scheduleCalendar');if(!host)return;
+   var params=new URLSearchParams(location.search),initial=params.get('calendar_date');
+-  var data=null,selected=date(initial)?initial:today(),anchor=selected,view=['month','week','agenda'].includes(params.get('calendar_view'))?params.get('calendar_view'):'month',snapshot=null,busy=false,blockBusy=false,error='',message='',rangeKey='',focusedBlock=null,jumpDraft=null,removing=null,notice=null,retryShown=false;
++  var data=null,selected=date(initial)?initial:today(),anchor=selected,view=['month','week','agenda'].includes(params.get('calendar_view'))?params.get('calendar_view'):window.matchMedia&&window.matchMedia('(max-width:640px)').matches?'agenda':'month',snapshot=null,busy=false,blockBusy=false,error='',message='',rangeKey='',focusedBlock=null,jumpDraft=null,removing=null,notice=null,retryShown=false;
+   var motion=window.matchMedia('(prefers-reduced-motion: reduce)');
+   var $=function(id){return document.getElementById(id);};
+   function esc(value){return String(value==null?'':value).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+diff --git a/desk-visits.js b/desk-visits.js
+index 6e9b4fa..f80dcd6 100644
+--- a/desk-visits.js
++++ b/desk-visits.js
+@@ -53,3 +53,14 @@
+   dialog.addEventListener('close',function(){clear();context=null;});
+   $('visitChangeForm').addEventListener('submit',function(event){if(!$('newVisitFields').hidden&&['visitName','visitPhone','visitAddress','visitIssue'].some(function(id){return !$(id).value.trim();}))return;if(context&&!context.pending&&(!valid()||!snapshot.openings.some(function(day){return day.date===$('visitDate').value&&day.windows.includes($('visitWindow').value);} ))){event.preventDefault();event.stopImmediatePropagation();['visitName','visitPhone','visitAddress','visitIssue'].forEach(function(id){$(id).removeAttribute('aria-invalid');$(id+'Error').textContent='';});clear('Check available times and choose a listed opening before saving.');$('visitFindTimes').focus();}},true);
+ })();
++// PRA-POLISH-03 rev 2: Chrome only scrolls a focused field "if needed", so a field already on screen can sit under the
++// sticky dialog footer. Bring it clear of the header and footer (dialog scroll-padding). Scrolling only; focus is unchanged.
++(function () {
++  var FIELD = 'input:not([type=checkbox]):not([type=radio]):not([type=hidden]),select,textarea';
++  document.addEventListener('focusin', function (event) {
++    var field = event.target;
++    if (!field || !field.matches || !field.matches(FIELD)) return;
++    var dialog = field.closest('#requestDialog,#conversationDialog,#visitDialog,#supportDialog');
++    if (dialog && dialog.open) field.scrollIntoView({ block: 'nearest', behavior: 'instant' });
++  });
++})();
+diff --git a/desk.css b/desk.css
+index 0fe0ade..3123f17 100644
+--- a/desk.css
++++ b/desk.css
+@@ -444,3 +444,106 @@ body.desk-app.guide-tour-open { overflow:hidden; }
+ .post-visit-toggle small { color:#5b6878; font-size:.88rem; line-height:1.4; }
+ .post-visit-program { padding:14px 16px; background:#f5f7fa; border-radius:12px; display:grid; gap:6px; overflow-wrap:anywhere; }
+ .post-visit-program p { margin:0; }
++/* 2026-11-13 visual polish r3 (PRA-POLISH-01..07, P3-11, P3-14). Scoped to the owner desk; CSS only except the Home wrapper. */
++/* POLISH-04: one field rhythm when errors or hints appear. Grouped fields space by gap, the group spaces by margin. */
++.desk-app .visit-change-fields>.form-group{margin-bottom:0}
++.desk-app .visit-change-fields:not(:last-child),.desk-app #requestPlanFields:not(:last-child){margin-bottom:20px}
++.desk-app .form-input::placeholder{color:#677386;opacity:1;font-style:italic}
++.desk-app .form-input[aria-invalid=true]::placeholder{color:transparent}
++/* POLISH-01: desktop request actions sit side by side under the time and status. */
++.desk-app .desk-request-meta{flex-direction:row;flex-wrap:wrap;align-items:center;gap:8px}
++.desk-app .desk-request-meta>time,.desk-app .desk-request-meta>.desk-request-status,.desk-app .desk-request-meta>.muted{flex:1 1 100%}
++.desk-app .desk-request-meta time{white-space:nowrap}
++.desk-app .desk-request-meta .btn-pill{min-height:40px}
++/* POLISH-02: Recent activity links to a request instead of repeating its button. */
++.desk-app #todayEvents [data-request-open]{display:inline-flex;align-items:center;min-height:32px;margin-left:6px;padding:0 2px;border:0;background:none;box-shadow:none;color:var(--ui-blue);font-size:13px;font-weight:600;text-decoration:underline;text-underline-offset:3px}
++.desk-app #todayEvents [data-request-open]:hover{background:none;color:#1746bd;transform:none}
++/* POLISH-03: one dialog shell. Content dialogs are right-side drawers on desktop and full-height sheets on phones;
++   the title row and close button stay visible; the main Save stays reachable above a sticky footer bar.
++   Short confirmations (cancel service, cancel number, end renewal) stay centred alerts. */
++.desk-app dialog:is(.request-dialog,.conversation-dialog,.visit-dialog,.support-dialog){--dlg-pad:32px;margin:0 0 0 auto;width:min(760px,100%);max-width:100vw;height:100dvh;max-height:100dvh;box-sizing:border-box;padding:0 var(--dlg-pad);overflow:auto;border-width:0 0 0 1px;border-radius:0;box-shadow:-14px 0 60px #11283f21;scroll-padding:96px 0 96px;scroll-padding-bottom:max(96px,calc(env(safe-area-inset-bottom) + 88px))}
++.desk-app dialog:is(.visit-dialog,.support-dialog){width:min(620px,100%)}
++.desk-app dialog:is(.request-dialog,.conversation-dialog,.visit-dialog,.support-dialog)>:last-child{margin-bottom:24px}
++.desk-app :is(.request-dialog,.conversation-dialog) .request-dialog-heading{top:0;z-index:4;align-items:center;margin:0 calc(var(--dlg-pad)*-1) 12px;padding:14px var(--dlg-pad);border-bottom:1px solid var(--ui-line)}
++.desk-app :is(.request-dialog,.conversation-dialog) .request-dialog-heading::before{display:none}
++.desk-app :is(.request-dialog,.conversation-dialog) .request-dialog-heading h2{margin:0!important;font-size:22px;line-height:1.3}
++.desk-app :is(.visit-dialog-head,.support-dialog-head){position:sticky;top:0;z-index:5;display:flex;justify-content:flex-end;align-items:flex-start;height:0;margin:0;overflow:visible}
++.desk-app :is(.visit-dialog-head,.support-dialog-head)>button{margin-top:12px}
++.desk-app :is(#visitTitle,#supportTitle){position:sticky;top:0;z-index:4;margin:0 calc(var(--dlg-pad)*-1) 16px;padding:18px 76px 14px var(--dlg-pad);background:#fff;border-bottom:1px solid var(--ui-line);font-size:22px;line-height:1.3}
++.desk-app :is(#requestClose,#conversationClose,#closeVisit,#supportClose){position:relative;display:inline-block;flex:none;overflow:hidden;width:44px;height:44px;min-height:44px;padding:0;border:1px solid var(--ui-line);border-radius:10px;background:#fff;color:var(--ui-ink);font-size:0;line-height:0;text-decoration:none;box-shadow:none;cursor:pointer}
++.desk-app :is(#requestClose,#conversationClose,#closeVisit,#supportClose)::before{content:"";position:absolute;inset:0;margin:auto;width:16px;height:16px;background:linear-gradient(45deg,transparent 45%,currentColor 45% 55%,transparent 55%),linear-gradient(-45deg,transparent 45%,currentColor 45% 55%,transparent 55%)}
++.desk-app :is(#requestClose,#conversationClose,#closeVisit,#supportClose):hover{background:#f3f6fa;transform:none}
++.desk-app :is(#requestForm,#visitChangeForm,#visitEditForm) :is(.dlg-foot,.visit-edit-actions){position:sticky;bottom:0;z-index:3;margin:16px calc(var(--dlg-pad)*-1) 0;padding:12px var(--dlg-pad) 14px;background:#fff;border-top:1px solid var(--ui-line)}
++.desk-app #visitChangeForm .visit-cancel{margin-top:20px}
++.desk-app .visit-edit-actions{display:flex;flex-wrap:wrap;gap:10px}
++@media(max-width:640px){
++.desk-app dialog:is(.request-dialog,.conversation-dialog,.visit-dialog,.support-dialog){--dlg-pad:16px;width:100%;border-width:0}
++.desk-app :is(.request-dialog,.conversation-dialog) .request-dialog-heading h2,.desk-app :is(#visitTitle,#supportTitle){font-size:20px}
++.desk-app :is(#visitTitle,#supportTitle){padding:16px 68px 12px var(--dlg-pad)}
++.desk-app :is(.visit-dialog-head,.support-dialog-head)>button{margin-top:10px}
++.desk-app .dlg-foot>:is(#requestSave,#saveVisit){width:100%}
++.desk-app .visit-edit-actions>.btn-pill{flex:1 1 140px}
++}
++@media(max-width:480px){.desk-app .visit-change-fields{gap:20px}}
++/* POLISH-01: phone request rows read who, what, when, then one row of actions. */
++@media(max-width:640px){
++.desk-app .desk-request-row{display:flex!important;flex-direction:column;gap:8px;padding:18px 16px!important}
++.desk-app .desk-request-person{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px}
++.desk-app .desk-request-person strong{line-height:1.45}
++.desk-app .desk-request-person .muted,.desk-app .desk-request-person .tag{margin-top:0}
++.desk-app .desk-request-ref{flex:1 1 100%;font-size:12px}
++.desk-app .desk-request-job>p{margin:0 0 4px}
++.desk-app .desk-request-meta{max-width:none;align-items:center;gap:8px 10px}
++.desk-app .desk-request-meta>time,.desk-app .desk-request-meta>.desk-request-status{flex:0 1 auto;text-align:left;font-size:12px}
++.desk-app .desk-request-meta::after{content:"";flex-basis:100%;order:1}
++.desk-app .desk-request-meta .btn-pill{order:2;flex:1 1 0;min-width:0;min-height:44px;font-size:13px}
++.desk-app .desk-request-meta>.muted{order:3}
++}
++/* POLISH-02: on a phone, Home leads with the requests that need the owner; setup progress follows them. */
++@media(max-width:640px){
++.desk-app #p-today.pane.on{display:flex;flex-direction:column}
++.desk-app #p-today>#homeActivityDetails{order:1}
++.desk-app #p-today>#homeConnectionProgress{order:2;margin:24px 0 0!important}
++.desk-app .desk-home-body{display:flex;flex-direction:column;gap:24px}
++.desk-app .desk-home-body>.desk-home-columns{display:contents}
++.desk-app .desk-home-body .desk-work-section:not(.desk-recent-section){order:-1}
++.desk-app .desk-home-body>.desk-work-summary{margin:0}
++.desk-app #workspaceGuide{gap:14px;margin-bottom:20px;padding:20px}
++.desk-app #workspaceGuide #guideTitle{margin-bottom:6px;font-size:19px}
++.desk-app #todayEvents [data-request-open]{min-height:44px}
++.desk-app #p-today:has(#nextSetupAction[data-route=leads]:not([hidden])) #guideIntro{display:none}
++.desk-app #workspaceGuide #nextSetupAction[data-route=leads]{justify-self:start;width:auto;min-height:44px;padding:0;border:0;background:none;color:#fff;text-decoration:underline;text-underline-offset:4px}
++.desk-app #workspaceGuide #homeSetupSecondaryWrap p{margin:0;font-size:13px;line-height:1.55}
++.desk-app #homeActivityDetails>summary small{display:none}
++.desk-app .desk-home-body .desk-work-section:not(.desk-recent-section){display:flex;flex-direction:column}
++.desk-app .desk-home-body #homeNewVisits{order:1;margin:16px 0 0}
++}
++/* POLISH-06: compact Schedule controls on a phone; fixed-size navigation that does not move between views. */
++@media(max-width:640px){
++.desk-app #scheduleCalendar .calendar-toolbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
++.desk-app #scheduleCalendar .calendar-toolbar>div:first-child{flex:1 1 100%;min-width:0}
++.desk-app #scheduleCalendar .calendar-toolbar h3{margin:0;font-size:18px;white-space:normal}
++.desk-app #scheduleCalendar .calendar-toolbar p{display:none}
++.desk-app #scheduleCalendar .calendar-navigation{flex:none;gap:4px}
++.desk-app #scheduleCalendar .calendar-navigation .calendar-nav-button{width:44px;min-height:44px;padding:0}
++.desk-app #scheduleCalendar .calendar-navigation .calendar-today-button{width:64px;min-height:44px;padding:0}
++.desk-app #scheduleCalendar .calendar-jump{justify-content:space-between;margin:0 0 10px}
++.desk-app #scheduleCalendar .calendar-controls-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin-bottom:8px}
++.desk-app #scheduleCalendar .calendar-view-switch{flex:1 1 auto}
++.desk-app #scheduleCalendar .calendar-legend{flex:1 1 auto;flex-wrap:wrap;gap:2px 12px;font-size:11px}
++.desk-app #scheduleCalendar[data-calendar-mode=agenda] .calendar-legend{display:none}
++.desk-app #scheduleCalendar .calendar-status{min-height:0;padding:0 0 8px;margin:0 0 10px}
++.desk-app #scheduleCalendar .calendar-connection{display:block;margin:0 0 12px}
++.desk-app #scheduleCalendar .calendar-connection p{display:inline;font-size:12px}
++.desk-app #scheduleCalendar .calendar-connection p::after{content:" "}
++.desk-app #scheduleCalendar .calendar-connection .calendar-text-button{display:inline;min-height:0;padding:0}
++}
++/* POLISH-07: customers list skips empty groups so each customer stays compact. */
++.desk-app .desk-customer-groups>section:not(:has(ul)){display:none}
++@media(max-width:640px){.desk-app .desk-customer{padding:14px 0}.desk-app .desk-customer-contact{margin:2px 0 8px}.desk-app .desk-customer-groups{gap:10px}}
++/* P3-11: desktop hours rows keep fixed-width time boxes aligned on their centre. */
++@media(min-width:641px){.desk-app .hours-rows .hours-row{grid-template-columns:56px 140px 24px 140px;justify-content:start;align-items:center}}
++/* P3-14: phone tap targets and readable header controls. */
++@media(max-width:640px){.desk-app #deskSignOut{min-height:44px;padding:8px 12px;font-size:13px}.desk-app .desk-rail-help .desk-account-button,.desk-app .desk-rail-help .desk-guide-button{font-size:13px}}
++.desk-app .desk-rail-help :is(.desk-account-button,.desk-guide-button){white-space:nowrap}
++@media(max-width:360px){.desk-app .desk-rail-help :is(.desk-account-button,.desk-guide-button){padding:8px 4px;font-size:12px}.desk-app #deskSignOut{padding:8px 10px;font-size:12px}}
+diff --git a/desk.html b/desk.html
+index dcf88fc..02671c2 100644
+--- a/desk.html
++++ b/desk.html
+@@ -37,6 +37,7 @@
+   <section class="workspace-guide card2" id="workspaceGuide" hidden="" aria-labelledby="guideTitle"><div class="desk-next-icon"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"></path></svg></div><div class="desk-next-copy"><h2 id="guideTitle">Review your business details</h2><p id="guideIntro">Check the answers your front desk will give customers.</p></div><button class="btn-pill btn-pill-blue btn-sm" id="nextSetupAction" type="button">Review business rules</button><div id="homeSetupSecondaryWrap" hidden><p id="homeSetupReminder" class="desk-secondary-reminder" hidden></p><button type="button" class="desk-secondary-action" id="homeSetupSecondary" hidden></button></div></section>
+     <details class="home-connection-progress card2" id="homeConnectionProgress" hidden open><summary><span>Connection progress<small id="homeConnectionProgressSummary">Your selected services and their next steps</small></span></summary><div id="homeConnectionProgressRows"></div></details>
+     <details class="desk-home-activity" id="homeActivityDetails" open><summary><span>Customer activity<small id="homeActivitySummary">Your saved requests and visits</small></span></summary>
++    <div class="desk-home-body">
+     <section class="desk-work-summary" id="todayTourSummary" aria-labelledby="todayTourHeading"><h3 id="todayTourHeading">Today in your workspace</h3><div class="grid2" id="today"></div><p id="homeServiceContext" class="muted"></p></section><div class="desk-home-columns"><section class="desk-work-section"><h3>Needs your attention</h3><p id="homeNewVisits" class="desk-new-visits" hidden><span id="homeNewVisitsText"></span> <button type="button" class="desk-empty-action" data-route="availability">Open Schedule →</button></p><div id="needsYou" class="muted"></div></section><section class="desk-work-section desk-recent-section"><h3>Recent activity</h3><div id="todayEvents" class="muted"></div></section></div>
+ 
+ 
+@@ -47,6 +48,7 @@
+       <p id="activityReportStatus" class="muted" role="status" aria-live="polite"></p>
+       <div id="activityReportResults" hidden><p id="activityReportPeriod" class="muted"></p><dl class="activity-report-metrics" id="activityReportMetrics"></dl><p id="activityReportExplanation" class="muted"></p></div>
+     </section>
++    </div>
+     </details>
+   </section>
+ 
+@@ -251,7 +253,7 @@
+       <div class="form-group" id="requestAttemptField" hidden><label class="form-label" for="requestAttemptResult">What happened?</label><select class="form-input" id="requestAttemptResult"><option value="no_answer">No answer</option><option value="left_message">Left a message</option><option value="sent_message">Sent a message, no reply yet</option><option value="other">Other</option></select></div>
+       <div class="form-group" id="requestResolutionField" hidden><label class="form-label" for="requestResolution">Resolution</label><select class="form-input" id="requestResolution"><option value="resolved">Answered or resolved</option><option value="not_proceeding">Customer is not proceeding</option><option value="no_followup_needed">No further follow-up needed</option></select></div>
+       <div class="form-group"><label class="form-label" for="requestNote">Note <span id="requestNoteRequirement">(optional)</span></label><textarea class="form-input" id="requestNote" maxlength="1000" rows="3"></textarea></div>
+-      <button type="submit" class="btn-pill btn-pill-blue btn-sm" id="requestSave">Save action</button><p class="muted request-save-scope">This records work you have done or plan to do. It does not send a message, place a call or change a visit.</p>
++      <div class="dlg-foot"><button type="submit" class="btn-pill btn-pill-blue btn-sm" id="requestSave">Save action</button></div><p class="muted request-save-scope">This records work you have done or plan to do. It does not send a message, place a call or change a visit.</p>
+     </form>
+     <details class="request-automatic" id="requestAutoSection" hidden><summary><span>One customer text<small>Follow up once about this request</small></span></summary>
+       <p class="request-auto-status" id="requestAutoStatus" role="status" aria-live="polite"></p><p class="muted" id="requestAutoDetail"></p><button type="button" class="btn-pill btn-pill-dark btn-sm" id="requestAutoRefresh" hidden>Check text status</button> <button type="button" class="btn-pill btn-pill-dark btn-sm" id="requestAutoConnections" hidden>Review texting setup</button>
+@@ -305,7 +307,7 @@
+     <section class="visit-availability" id="visitAvailability" aria-labelledby="visitAvailabilityTitle"><h3 id="visitAvailabilityTitle">Choose an available time</h3><p class="muted">Check the next seven days from your chosen date. We check again when you save.</p><button type="button" class="btn-pill btn-pill-dark btn-sm" id="visitFindTimes">Find available times</button><p id="visitAvailabilityStatus" role="status" aria-live="polite" tabindex="-1"></p><button type="button" class="btn-pill btn-pill-dark btn-sm" id="visitReviewCalendar" hidden>Review Calendar setup</button><div id="visitAvailableTimes" class="visit-available-times"></div></section>
+     <div class="visit-change-fields"><div class="form-group"><label class="form-label" for="visitDate">Visit date <span class="required-mark" aria-hidden="true">*</span></label><input class="form-input" type="date" id="visitDate" aria-required="true" aria-describedby="visitDateError"><p id="visitDateError" class="visit-field-error"></p></div>
+     <div class="form-group"><label class="form-label" for="visitWindow">Arrival window <span class="required-mark" aria-hidden="true">*</span></label><select class="form-input" id="visitWindow" aria-required="true" aria-describedby="visitWindowError"></select><p id="visitWindowError" class="visit-field-error"></p></div></div>
+-    <button type="submit" class="btn-pill btn-pill-blue btn-sm" id="saveVisit">Save new time</button>
++    <div class="dlg-foot"><button type="submit" class="btn-pill btn-pill-blue btn-sm" id="saveVisit">Save new time</button></div>
+     <div class="visit-cancel"><label for="visitCancelConfirm"><input type="checkbox" id="visitCancelConfirm"> I want to cancel this visit. Its history will remain in my workspace.</label><button type="button" class="walkthrough-dismiss" id="cancelVisit">Cancel visit</button></div>
+   </form>
+   <section class="visit-post" id="visitPost" hidden aria-labelledby="visitPostTitle"><h3 id="visitPostTitle">After the visit</h3><p id="visitPostStatus" class="muted"></p>
+diff --git a/onboard.css b/onboard.css
+index b47abde..66dd46d 100644
+--- a/onboard.css
++++ b/onboard.css
+@@ -266,3 +266,37 @@ body:not([data-setup-state=questions]) .workspace-toolbar{margin:24px auto -24px
+ .access-keep{margin-top:16px}
+ .ob .access-replace-keep{border-color:#bbc9dd;background:#fff;color:var(--ob-ink);overflow-wrap:anywhere}
+ .ob #access-replace-continue{overflow-wrap:anywhere}
++/* 2026-11-13 visual polish r3 (PRA-POLISH-04, -05, -08). */
++/* POLISH-05: examples read as examples; an empty field in error shows no sample that could pass for an answer. */
++.ob .form-input::placeholder{color:#677386;font-style:italic}
++.ob .form-input[aria-invalid=true]::placeholder{color:transparent}
++@media(max-width:640px){
++/* POLISH-04: a row of stacked fields keeps the same 24px rhythm as any other field, with or without an error. */
++.ob .row:not(:last-child){margin-bottom:24px}
++.ob .row+.row{margin-top:0}
++/* POLISH-08: body is a scroll container (styles.css overflow-x:hidden), which would pin the sticky footer to it; clip keeps the same horizontal clipping without one. */
++body.onboarding-page{overflow-x:clip}
++/* POLISH-08: compact header so the first question starts in the top half of a phone screen. */
++.onboard-aside{padding:8px 16px}
++.onboard-header{min-height:40px}
++.onboard-brand{width:112px}
++.onboard-workspace{padding:0 16px 24px}
++.onboard-topbar{min-height:44px;padding:6px 0}
++body[data-setup-state=questions] .setup-stage-heading{margin:12px auto 10px}
++.setup-stage-heading h1{margin-bottom:4px;font-size:24px}
++.setup-stage-heading>p{font-size:14px;line-height:1.55}
++.onboard-stage-progress{margin-top:6px;font-size:12px}
++body[data-setup-state=questions] .workspace-toolbar{margin-bottom:10px;padding-bottom:6px}
++body[data-setup-state=questions] .workspace-toolbar :is(.access-signed-in,.draft-status){font-size:12px}
++body[data-setup-state=questions] #access-identity{min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
++body[data-setup-state=questions] .ob .required-note{margin-bottom:10px}
++/* POLISH-08: Back and Save and continue stay within thumb reach on every step. */
++html:has(body.onboarding-page[data-setup-state=questions]){scroll-padding-bottom:88px}
++body[data-setup-state=questions] .ob .nav{position:sticky;bottom:0;z-index:5;margin:28px -16px 0;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:#fff;border-top:1px solid var(--ob-line);box-shadow:0 -8px 18px #10233c0d}
++body[data-setup-state=questions] .ob .nav .btn-pill{min-height:44px}
++}
++/* PRA-POLISH-08 rev 2: with the keyboard open (short viewport) the bar would hide the field being typed in; keep it in the flow. */
++@media(max-width:640px) and (max-height:560px){
++html:has(body.onboarding-page[data-setup-state=questions]){scroll-padding-bottom:0}
++body[data-setup-state=questions] .ob .nav{position:static;box-shadow:none}
++}
+diff --git a/onboard.js b/onboard.js
+index cae7944..c654083 100644
+--- a/onboard.js
++++ b/onboard.js
+@@ -855,3 +855,12 @@
+     }
+   }
+ })();
++// PRA-POLISH-08 rev 2: keep a focused onboarding field clear of the sticky Back / Save and continue bar (html scroll-padding).
++// Scrolling only; focus is unchanged.
++(function () {
++  var form = document.getElementById('ob'); if (!form) return;
++  form.addEventListener('focusin', function (event) {
++    var field = event.target;
++    if (field && field.matches && field.matches('input:not([type=checkbox]):not([type=radio]):not([type=hidden]),select,textarea')) field.scrollIntoView({ block: 'nearest', behavior: 'instant' });
++  });
++})();
