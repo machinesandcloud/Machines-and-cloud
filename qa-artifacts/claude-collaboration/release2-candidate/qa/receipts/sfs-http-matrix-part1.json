@@ -1,0 +1,231 @@
+{
+ "at": "2026-11-13T05:20:10.756Z",
+ "base": "http://127.0.0.1:9853",
+ "results": [
+  {
+   "id": "X-same-origin exchange succeeds",
+   "ok": true,
+   "status": 200,
+   "transport": "cookie",
+   "hasSecret": false,
+   "hasHandle": true,
+   "setCookie": true
+  },
+  {
+   "id": "X-same-origin transport cookie",
+   "ok": true,
+   "transport": "cookie"
+  },
+  {
+   "id": "X-same-origin cookie session follow-up same-origin -> 200",
+   "ok": true,
+   "status": 200
+  },
+  {
+   "id": "X-same-origin cookie session follow-up missing -> 401 (refused)",
+   "ok": true,
+   "status": 401
+  },
+  {
+   "id": "X-same-origin cookie session follow-up same-site -> 401 (refused)",
+   "ok": true,
+   "status": 401
+  },
+  {
+   "id": "X-same-origin cookie session follow-up cross-site -> 401 (refused)",
+   "ok": true,
+   "status": 401
+  },
+  {
+   "id": "X-same-origin cookie session follow-up none -> 401 (refused)",
+   "ok": true,
+   "status": 401
+  },
+  {
+   "id": "X-same-origin cookie session follow-up garbage -> 401 (refused)",
+   "ok": true,
+   "status": 401
+  },
+  {
+   "id": "X-same-origin handle without cookie -> 401",
+   "ok": true,
+   "status": 401
+  },
+  {
+   "id": "X-missing exchange succeeds",
+   "ok": true,
+   "status": 200,
+   "transport": "tab",
+   "hasSecret": true,
+   "hasHandle": false,
+   "setCookie": false
+  },
+  {
+   "id": "X-missing transport tab (fallback)",
+   "ok": true,
+   "transport": "tab"
+  },
+  {
+   "id": "X-missing tab session follow-up same-origin -> 200",
+   "ok": true,
+   "status": 200
+  },
+  {
+   "id": "X-missing tab session follow-up missing -> 200",
+   "ok": true,
+   "status": 200
+  },
+  {
+   "id": "X-missing tab session follow-up same-site -> 200",
+   "ok": true,
+   "status": 200
+  },
+  {
+   "id": "X-missing tab session follow-up cross-site -> 200",
+   "ok": true,
+   "status": 200
+  },
+  {
+   "id": "X-missing tab session follow-up none -> 200",
+   "ok": true,
+   "status": 200
+  },
+  {
+   "id": "X-missing tab session follow-up garbage -> 200",
+   "ok": true,
+   "status": 200
+  },
+  {
+   "id": "X-same-site exchange succeeds",
+   "ok": true,
+   "status": 200,
+   "transport": "tab",
+   "hasSecret": true,
+   "hasHandle": false,
+   "setCookie": false
+  },
+  {
+   "id": "X-same-site transport tab (fallback)",
+   "ok": true,
+   "transport": "tab"
+  },
+  {
+   "id": "X-same-site tab session follow-up same-origin -> 200",
+   "ok": true,
+   "status": 200
+  },
+  {
+   "id": "X-same-site tab session follow-up missing -> 200",
+   "ok": true,
+   "status": 200
+  },
+  {
+   "id": "X-same-site tab session follow-up same-site -> 200",
+   "ok": true,
+   "status": 200
+  },
+  {
+   "id": "X-same-site tab session follow-up cross-site -> 200",
+   "ok": true,
+   "status": 200
+  },
+  {
+   "id": "X-same-site tab session follow-up none -> 200",
+   "ok": true,
+   "status": 200
+  },
+  {
+   "id": "X-same-site tab session follow-up garbage -> 200",
+   "ok": true,
+   "status": 200
+  },
+  {
+   "id": "X-cross-site exchange succeeds",
+   "ok": true,
+   "status": 200,
+   "transport": "tab",
+   "hasSecret": true,
+   "hasHandle": false,
+   "setCookie": false
+  },
+  {
+   "id": "X-cross-site transport tab (fallback)",
+   "ok": true,
+   "transport": "tab"
+  },
+  {
+   "id": "X-cross-site tab session follow-up same-origin -> 200",
+   "ok": true,
+   "status": 200
+  },
+  {
+   "id": "X-cross-site tab session follow-up missing -> 200",
+   "ok": true,
+   "status": 200
+  },
+  {
+   "id": "X-cross-site tab session follow-up same-site -> 200",
+   "ok": true,
+   "status": 200
+  },
+  {
+   "id": "X-cross-site tab session follow-up cross-site -> 200",
+   "ok": true,
+   "status": 200
+  },
+  {
+   "id": "X-cross-site tab session follow-up none -> 200",
+   "ok": true,
+   "status": 200
+  },
+  {
+   "id": "X-cross-site tab session follow-up garbage -> 200",
+   "ok": true,
+   "status": 200
+  },
+  {
+   "id": "X-none exchange succeeds",
+   "ok": true,
+   "status": 200,
+   "transport": "tab",
+   "hasSecret": true,
+   "hasHandle": false,
+   "setCookie": false
+  },
+  {
+   "id": "X-none transport tab (fallback)",
+   "ok": true,
+   "transport": "tab"
+  },
+  {
+   "id": "X-none tab session follow-up same-origin -> 200",
+   "ok": true,
+   "status": 200
+  },
+  {
+   "id": "X-none tab session follow-up missing -> 200",
+   "ok": true,
+   "status": 200
+  },
+  {
+   "id": "X-none tab session follow-up same-site -> 200",
+   "ok": true,
+   "status": 200
+  },
+  {
+   "id": "X-none tab session follow-up cross-site -> 200",
+   "ok": true,
+   "status": 200
+  },
+  {
+   "id": "X-none tab session follow-up none -> 200",
+   "ok": true,
+   "status": 200
+  },
+  {
+   "id": "X-none tab session follow-up garbage -> 200",
+   "ok": true,
+   "status": 200
+  }
+ ]
+}

@@ -1,0 +1,66 @@
+{
+ "at": "2026-11-13T05:19:21.778Z",
+ "base": "http://127.0.0.1:9853",
+ "results": [
+  {
+   "id": "X-garbage exchange succeeds",
+   "ok": true,
+   "status": 200,
+   "transport": "tab",
+   "hasSecret": true,
+   "hasHandle": false,
+   "setCookie": false
+  },
+  {
+   "id": "X-garbage transport tab (fallback)",
+   "ok": true,
+   "transport": "tab"
+  },
+  {
+   "id": "X-garbage tab session follow-up same-origin -> 200",
+   "ok": true,
+   "status": 200
+  },
+  {
+   "id": "X-garbage tab session follow-up missing -> 200",
+   "ok": true,
+   "status": 200
+  },
+  {
+   "id": "X-garbage tab session follow-up same-site -> 200",
+   "ok": true,
+   "status": 200
+  },
+  {
+   "id": "X-garbage tab session follow-up cross-site -> 200",
+   "ok": true,
+   "status": 200
+  },
+  {
+   "id": "X-garbage tab session follow-up none -> 200",
+   "ok": true,
+   "status": 200
+  },
+  {
+   "id": "X-garbage tab session follow-up garbage -> 200",
+   "ok": true,
+   "status": 200
+  },
+  {
+   "id": "D-cookies dropped -> tab fallback with secret",
+   "ok": true,
+   "status": 200,
+   "transport": "tab"
+  },
+  {
+   "id": "L-legacy exchange (no transport) returns session, no cookie",
+   "ok": true,
+   "status": 200,
+   "transport": null
+  },
+  {
+   "id": "L-legacy session follow-up without header -> 200",
+   "ok": true
+  }
+ ]
+}

@@ -1,0 +1,37 @@
+{
+ "steps": [
+  {
+   "id": "M1-cookie-signin (header present)",
+   "ok": true
+  },
+  {
+   "id": "M1-cookie-set",
+   "ok": true,
+   "cookies": [
+    "mc_cookie_probe",
+    "mc_owner"
+   ]
+  },
+  {
+   "id": "M2-header-lost-mid-session -> owner asked to sign in again (not silent breakage)",
+   "ok": true,
+   "signedIn": false,
+   "msg": "Skip to setup\nYour front desk\nSet up your front desk\nBack to site\n↗\nSign in to your workspace\n\nRequest a fresh sign-in link below. Your saved business details are kept.\n\nEmail address\nKeep me signed i"
+  },
+  {
+   "id": "M3-sign-in again while header missing -> per-tab session works",
+   "ok": true
+  },
+  {
+   "id": "M4-tab session survives reload in same tab",
+   "ok": true
+  },
+  {
+   "id": "M5-no page errors",
+   "ok": true,
+   "pageErrors": []
+  }
+ ],
+ "pageErrors": [],
+ "lastAt": "2026-11-13T05:44:51.446Z"
+}
