@@ -182,6 +182,18 @@ export async function queueManagedRecord(c, record, kind = "bookings") {
   // A change made by the customer on a verified channel says so, with the old and new time.
   const last = kind === 'bookings' && saved.ownerVisitMutation ? saved.ownerVisitHistory?.at(-1) : null, byCustomer = typeof last?.actor === 'string' && last.actor.startsWith('customer:') && last.at === saved.ownerVisitMutation.at;
   const changeLine = byCustomer ? `${last.action === 'cancel_visit' ? 'CANCELLED BY THE CUSTOMER' : 'MOVED BY THE CUSTOMER'} (${last.actor === 'customer:call' ? 'phone call' : 'text'})${last.previous ? `, was ${last.previous.date} ${last.previous.window}` : ''}${last.action === 'cancel_visit' ? '' : `, now ${last.next.date} ${last.next.window}`}.${last.customerReason ? ` Reason: ${String(last.customerReason).slice(0, 200)}` : ''}\n` : '';
+  // sms-followups: a request saved because texting is down account-wide shares one owner email per shop per
+  // Houston day; every affected customer is still its own request in the workspace.
+  if (kind === "leads" && /^\d{4}-\d{2}-\d{2}$/.test(saved.replyOutage?.day || "")) {
+    const outageEvent = `reply_outage:${saved.replyOutage.day}`;
+    if (!scope && !await strictRead(STORE, messageId(current, "email", outageEvent))) await queueManagedMessage(current, { eventId: outageEvent, channel: "email", purpose: "owner_lead", to: current.owner.email, subject: "Texting is temporarily unavailable: customers did not get replies", body: [
+      "Texting is temporarily unavailable: customers did not get replies",
+      `${current.business.name}: automatic text replies are not reaching your customers right now because of a problem on our side with our texting provider. We are working on it.`,
+      "Replies that could not be sent were not sent again. Each customer who did not get a reply is saved as a request in your workspace, with what they wrote. Please call or text them yourself.",
+      `This is the only email about this for ${saved.replyOutage.day}. Customers affected later that day are added to your workspace without another email.`,
+      "Open your workspace to review and respond."].join("\n") });
+    return;
+  }
   const body = ownerRecordBody(current, saved, kind, requestedVisit, changeLine);
   await queueManagedMessage(current, { eventId: `${eventId}:owner`, channel: "email", purpose: kind === "bookings" ? "owner_booking" : "owner_lead", to: current.owner.email, body, subject: ownerRequestSubject(saved, kind), source, preserveSnapshot: true });
   if (scope) return; // This internal phase proves owner email only, not customer SMS.
@@ -287,7 +299,37 @@ async function stopPaidBeforeSend(job, c, reason, state = 'suppressed') {
 // and marks the request resolved.
 const REPLY_PURPOSES = new Set(["reply", "consent_ask"]);
 export const REPLY_RECOVERY = Object.freeze({ unconfirmedMs: 30 * 60000, maxAgeMs: 24 * 3600000, resend: false });
-class ProviderRejectedError extends Error { constructor(code) { super("SMS rejected by provider"); this.code = code; } }
+class ProviderRejectedError extends Error { constructor(code, status = null) { super("SMS rejected by provider"); this.code = code; this.status = status; } }
+// sms-followups: an account-level rejection (authentication failure, inactive or suspended account) fails every
+// text for every shop, not just this one. Classified by HTTP status or documented Twilio code only.
+export const SMS_ACCOUNT_WIDE = Object.freeze({ statuses: Object.freeze([401]), codes: Object.freeze([10001, 20003, 20005]), operatorRetryMs: 15 * 60000, operatorSendMs: 5000 });
+export const accountWideSMSRejection = (status, code) => SMS_ACCOUNT_WIDE.statuses.includes(status) || SMS_ACCOUNT_WIDE.codes.includes(code);
+// One operator email per Houston day for an account-wide texting failure (retried after 15 minutes if the email
+// itself failed). The record keeps the first/last time and count for the admin view; no customer data.
+// rev 2 (QA R1): the send is bounded by min(5 s, the run's remaining time). A timeout is a failed attempt: it is
+// recorded and retried after 15 minutes, and the delivery run continues.
+async function alertOperatorSMSAccountOutage(error, deadlineAt = Date.now() + SMS_ACCOUNT_WIDE.operatorSendMs) {
+  const day = houstonDay(), now = stamp();
+  const send = await atomicUpdate("health", "managedSMS:accountOutage", row => {
+    const same = row?.day === day, retry = same && !row.emailedAt && !(Date.now() - (Date.parse(row.attemptAt || "") || 0) < SMS_ACCOUNT_WIDE.operatorRetryMs);
+    const go = !same || retry;
+    return { value: { version: 1, day, firstAt: same ? row.firstAt : now, lastAt: now, count: (same ? Number(row.count) || 0 : 0) + 1, status: Number.isSafeInteger(error?.status) ? error.status : null, code: Number.isSafeInteger(error?.code) ? error.code : null, emailedAt: same ? row.emailedAt || null : null, attemptAt: go ? now : row.attemptAt || null }, result: go };
+  });
+  if (!send) return false;
+  const { alertRecipients } = await import("./operator-health.mjs"), { STEVE_EMAIL } = await import("./send.mjs");
+  const site = String(process.env.URL || process.env.PUBLIC_SITE_URL || "https://machinesandcloud.com").replace(/\/$/, "");
+  const subject = "Texting is down for every shop: Twilio account-level rejection", text = `Twilio rejected a managed customer text with an account-level error (HTTP ${error?.status ?? "unknown"}, code ${error?.code ?? "unknown"}) at ${now}.\nThis usually means the Twilio account is suspended or its credentials no longer work, so every shop's texts will fail until it is fixed.\nNothing is resent. Each failed customer reply is marked not delivered and saved as a request in that shop's workspace; each shop's owner gets at most one email per Houston day saying texting is temporarily unavailable.\nThis is the only alert email for today (${day}). Check Twilio, then the admin portal: ${site}/admin.html`;
+  const ms = Math.min(SMS_ACCOUNT_WIDE.operatorSendMs, deadlineAt - Date.now());
+  let ok = false, failure = null;
+  if (!process.env.RESEND_API_KEY) { console.log(`[email:disabled] to=${alertRecipients().join(",")} :: ${subject}`); failure = "email_disabled"; }
+  else if (!(ms >= 1)) failure = "no_time_left";
+  else try {
+    const response = await fetch("https://api.resend.com/emails", { method: "POST", signal: AbortSignal.timeout(ms), redirect: "error", headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, "Content-Type": "application/json" }, body: JSON.stringify({ from: process.env.FROM_EMAIL || "Machines & Cloud <desk@machinesandcloud.com>", to: alertRecipients().length ? alertRecipients() : [STEVE_EMAIL], subject, text }) });
+    ok = response.ok; if (!ok) failure = "http_" + response.status;
+  } catch (e) { failure = e?.name === "TimeoutError" || e?.name === "AbortError" ? "timeout" : "send_failed"; }
+  await atomicUpdate("health", "managedSMS:accountOutage", row => row?.day === day ? { value: { ...row, ...(ok ? { emailedAt: stamp(), lastError: null } : { lastError: failure }) } } : {});
+  return ok;
+}
 const isCustomerReply = job => job?.channel === "sms" && REPLY_PURPOSES.has(job.purpose);
 const houstonDay = (at = new Date()) => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Chicago", year: "numeric", month: "2-digit", day: "2-digit" }).format(at);
 const leadKey = (slug, id) => `${slug}/${id}`;
@@ -321,8 +363,9 @@ export async function recoverManagedReply(c, job) {
   await markHistoryUndelivered(c, job, true);
   const inbound = await replyOrigin(c, job), { flagLead } = await import("./desk.mjs"), { looksSpanish } = await import("./automated-disclosure.mjs");
   const wrote = String(inbound?.body || "").slice(0, 300), reply = String(job.body || "").slice(0, 300);
-  const what = plan.reason === "unconfirmed" ? "We could not confirm that the automatic text reply reached this customer. It was not sent again." : "The automatic text reply to this customer was not delivered. It was not sent again.";
-  const lead = await flagLead(c, { customer_name: "", phone: job.to, address: "", issue: `${what} Please call or text them yourself.${wrote ? ` They wrote: "${wrote}".` : ""} Reply that was not delivered: "${reply}".`, reason: "handoff", urgency: "today", wanted: "", language: c.business?.spanish && looksSpanish(wrote) ? "es" : "en", nobook_reason: "none", unsure: "" }, { channel: "sms", contact: job.to, managedActionId: hash(`reply_undelivered:${job.tenant}:${job.to}:${houstonDay()}`) });
+  const outage = job.providerScope === "account" && plan.reason === "undelivered";
+  const what = outage ? "Texting is temporarily unavailable on our side, so the automatic text reply to this customer was not delivered. It was not sent again. We are working on it." : plan.reason === "unconfirmed" ? "We could not confirm that the automatic text reply reached this customer. It was not sent again." : "The automatic text reply to this customer was not delivered. It was not sent again.";
+  const lead = await flagLead(c, { customer_name: "", phone: job.to, address: "", issue: `${what} Please call or text them yourself.${wrote ? ` They wrote: "${wrote}".` : ""} Reply that was not delivered: "${reply}".`, reason: "handoff", urgency: "today", wanted: "", language: c.business?.spanish && looksSpanish(wrote) ? "es" : "en", nobook_reason: "none", unsure: "" }, { channel: "sms", contact: job.to, managedActionId: hash(`reply_undelivered:${job.tenant}:${job.to}:${houstonDay()}`), ...(outage ? { replyOutage: { day: houstonDay() } } : {}) });
   // rev 3 (QA B6): a new undelivered reply reopens a request that a late delivery had resolved.
   if (lead?.id) await atomicUpdate("leads", leadKey(c.slug, lead.id), row => row ? { value: { ...row, undeliveredReplies: { ...(row.undeliveredReplies || {}), [job.id]: stamp() }, ...(row.outcome === "resolved" ? { outcome: "needs_action", resolvedAt: null, resolution: null } : {}) } } : {});
   const done = await change(job.id, row => row.replyRecovery?.state === "pending" ? { ...row, replyRecovery: { ...row.replyRecovery, state: "done", leadId: lead?.id || null, doneAt: stamp() } } : null);
@@ -455,7 +498,7 @@ function providerAdapter(deadlineAt=Date.now()+10000) {
       smsWireStarted = true;
       const { response, data } = await request(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`, { method: "POST", headers: { Authorization: "Basic " + Buffer.from(`${sid}:${secret}`).toString("base64"), "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ To: job.to, From: sender.number, MessagingServiceSid: sender.serviceSid, Body: job.body, StatusCallback: url.href }) });
       // A documented Twilio 4xx error (other than timeout/rate limit) means no message was created.
-      if (!response.ok && response.status >= 400 && response.status < 500 && ![408, 409, 429].includes(response.status) && Number.isSafeInteger(data?.code)) throw new ProviderRejectedError(data.code);
+      if (!response.ok && response.status >= 400 && response.status < 500 && ![408, 409, 429].includes(response.status) && Number.isSafeInteger(data?.code)) throw new ProviderRejectedError(data.code, response.status);
       if (!response.ok || !/^SM[a-f0-9]{32}$/i.test(data.sid || "")) throw new Error("SMS result unconfirmed");
       return { id: data.sid, status: data.status, from: sender.number, serviceSid: sender.serviceSid,sentAt:data.date_created };
       } catch (error) {
@@ -618,7 +661,9 @@ function engine({ provider = null, gate = managedDeliveryEnabled, sender = sende
         return change(id,row=>!row.providerId&&row.claim?.token===token?{...row,state:'waiting_platform',claim:null,attemptStartedAt:null,attempts:Math.max(0,row.attempts-1),reasonCode:error.code,detail:error.message}:null);
       }
       if (error instanceof ProviderRejectedError && job.channel === "sms") {
-        const rejected = await change(id,row=>!row.providerId&&row.claim?.token===token?{...row,state:'failed',claim:null,reasonCode:'provider_rejected',providerErrorCode:error.code,...(row.paidSMSCapacity||row.paidAnswerCapacity?{paidNotDispatched:true}:{})}:null);
+        const accountWide = accountWideSMSRejection(error.status, error.code);
+        const rejected = await change(id,row=>!row.providerId&&row.claim?.token===token?{...row,state:'failed',claim:null,reasonCode:'provider_rejected',providerErrorCode:error.code,...(accountWide?{providerScope:'account'}:{}),...(row.paidSMSCapacity||row.paidAnswerCapacity?{paidNotDispatched:true}:{})}:null);
+        if (accountWide) try { await alertOperatorSMSAccountOutage(error, deadlineAt); } catch { /* The next account-wide rejection retries the operator email. */ }
         return reconcilePaidDelivery(rejected,latest);
       }
       if (job.paidSMSCapacity && (!providerInvoked || undispatchedSMS.get(error) === paidDispatchIdentity(job))) {
@@ -732,6 +777,7 @@ export async function runManagedDelivery({ limit = 3, discoveryLimit = 15, budge
       const result = await engine({deadlineAt:deadline}).run(key);
       if (result?.attempts>before.attempts || result?.lastCheckedAt!==before.lastCheckedAt) processed++;
       if (result?.state === "uncertain") errors.push("delivery_needs_review");
+      if (result?.providerScope === "account") errors.push("sms_provider_account_unavailable");
       if (!scope && result?.state === "failed" && isCustomerReply(result) && result.replyRecovery?.state !== "done") { try { await followUpFailedReply(result); } catch { errors.push("reply_alert_failed"); } }
     } catch { errors.push("delivery_unavailable"); }
   }
@@ -741,7 +787,11 @@ export async function runManagedDelivery({ limit = 3, discoveryLimit = 15, budge
     const failed = await strictRead(INDEX, "active");
     for (const key of Object.keys(failed?.failures || {}).filter(key => !failed.failures[key].followedUp).sort().slice(0, 25)) {
       if (Date.now() >= deadline) break;
-      try { const row = await strictRead(STORE, key); if (row?.state === "failed" && isCustomerReply(row) && row.replyRecovery?.state !== "done") await followUpFailedReply(row); else if (row) await indexPending(row); }
+      try { const row = await strictRead(STORE, key); if (row?.state === "failed" && isCustomerReply(row) && row.replyRecovery?.state !== "done") await followUpFailedReply(row); else if (row) await indexPending(row);
+        // sms-followups: the delivery record is gone (interrupted erasure or manual delete), so nothing can be
+        // followed up. Drop the orphan so it cannot hold one of the 25 sweep slots forever.
+        // rev 2 (QA N1): only the exact entry that was read is removed; a newer failure for the same id is kept.
+        else await atomicUpdate(INDEX, "active", v => v?.failures?.[key] && !v.entries?.[key] && JSON.stringify(v.failures[key]) === JSON.stringify(failed.failures[key]) ? { value: { ...v, failures: Object.fromEntries(Object.entries(v.failures).filter(([k]) => k !== key)) } } : {}); }
       catch { errors.push("reply_alert_failed"); }
     }
   }

@@ -573,6 +573,7 @@ export async function flagLead(c, input, ctx = {}) {
     ...(stable ? { id: ctx.managedActionId.slice(0,32), managedActionId: ctx.managedActionId } : {}),
     ...(stable && Number.isFinite(Date.parse(ctx.managedHumanDeadlineAt)) ? {managedHumanDeadlineAt:ctx.managedHumanDeadlineAt} : {}),
     ...(stable && /^[a-zA-Z0-9_-]{1,80}$/.test(ctx.relatedVisitId || "") ? { relatedVisitId: ctx.relatedVisitId } : {}),
+    ...(stable && /^\d{4}-\d{2}-\d{2}$/.test(ctx.replyOutage?.day || "") ? { replyOutage: { day: ctx.replyOutage.day } } : {}),
     ...(stable && ["cancel", "reschedule"].includes(ctx.customerVisitRequest?.action) && /^[a-f0-9]{64}$/.test(ctx.customerVisitRequest?.visitFacts || "") ? { customerVisitRequest: { action: ctx.customerVisitRequest.action, visitFacts: ctx.customerVisitRequest.visitFacts } } : {}),
     customer_name: esc(input.customer_name), phone, address: esc(input.address), issue: esc(input.issue),
     reason, urgency: input.urgency, wanted: esc(input.wanted), language: input.language, unsure: esc(input.unsure), nobook_reason: NOBOOK_REASONS.includes(input.nobook_reason) ? input.nobook_reason : "none",
