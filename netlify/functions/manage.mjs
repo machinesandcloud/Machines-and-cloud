@@ -40,6 +40,12 @@ export default async (req, context) => {
         return reply(result);
       }
       const session = await requireOperator(req);
+      if (body.action === 'apply_opt_out' || body.action === 'dismiss_opt_out_review') {
+        await requireCurrentOperator(session);
+        const { applyOperatorOptOut, dismissOptOutReview, OptOutRequestError } = await import('./lib/optout-requests.mjs');
+        try { return reply(await (body.action === 'apply_opt_out' ? applyOperatorOptOut : dismissOptOutReview)(session.email, body)); }
+        catch (error) { if (error instanceof OptOutRequestError) return reply({ error: error.code, message: error.message }, error.status); throw error; }
+      }
       if (body.action === 'sign_out') {
         if (Object.keys(body).some(k => k !== 'action')) return reply({ error: 'invalid_request' }, 400);
         return reply(await revokeAccessSession(session));
@@ -73,7 +79,8 @@ export default async (req, context) => {
     const health = await readPlatformHealth();
     let scheduler = null; try { scheduler = await strictRead('health', 'scheduler:lastRun'); } catch { scheduler = null; }
     const {healthy,minutesAgo:age,blocks}=schedulerHealthState(scheduler);
-    const result = { ok: true, operator: { email: session.email, expiresAt: session.expiresAt }, ...page, inquiries: await prospectAudience('all'), providerCleanupPending: await pendingProviderCleanup(), platformSMS: await platformSMSView(), system: { health, scheduler: { readable: health.state !== 'unknown', at: scheduler?.at || null, healthy, minutesAgo: age, blocks: blocks.map(([name, saved]) => { const row=saved && typeof saved === 'object' ? saved : {}; return ({ name, ok: row.ok === true, queued: row.queued, failed: row.failed, uncertain: row.uncertain, openFailures: row.openFailures, pending: row.pending, unresolved: row.unresolved, cleanupPending: row.cleanupPending, inspected: row.inspected, ...(row.ok !== true && row.error ? { error: String(row.error).slice(0, 300) } : {}), reasonCode: name === 'serviceDeliveryRecovery' ? serviceHealthFailureFacts(row)[0]?.reasonCode || (row.ok === true ? null : 'service_delivery_unresolved') : row.reasonCode, ...(name === 'serviceDeliveryRecovery' ? { failingComponents: serviceHealthFailureFacts(row) } : {}) }); }) }, providerStates: operatorProviderStates() } };
+    let optOutReview = null; try { optOutReview = await (await import('./lib/optout-requests.mjs')).optOutReviewView(); } catch { /* shown as unavailable */ }
+    const result = { ok: true, operator: { email: session.email, expiresAt: session.expiresAt }, ...page, inquiries: await prospectAudience('all'), providerCleanupPending: await pendingProviderCleanup(), platformSMS: await platformSMSView(), optOutReview, system: { health, scheduler: { readable: health.state !== 'unknown', at: scheduler?.at || null, healthy, minutesAgo: age, blocks: blocks.map(([name, saved]) => { const row=saved && typeof saved === 'object' ? saved : {}; return ({ name, ok: row.ok === true, queued: row.queued, failed: row.failed, uncertain: row.uncertain, openFailures: row.openFailures, pending: row.pending, unresolved: row.unresolved, cleanupPending: row.cleanupPending, inspected: row.inspected, ...(row.ok !== true && row.error ? { error: String(row.error).slice(0, 300) } : {}), reasonCode: name === 'serviceDeliveryRecovery' ? serviceHealthFailureFacts(row)[0]?.reasonCode || (row.ok === true ? null : 'service_delivery_unresolved') : row.reasonCode, ...(name === 'serviceDeliveryRecovery' ? { failingComponents: serviceHealthFailureFacts(row) } : {}) }); }) }, providerStates: operatorProviderStates() } };
     try { result.system.legacyKeyAudit = await adminKeyAuditView(); } catch { result.system.legacyKeyAudit = { unavailable: true }; }
     await requireCurrentOperator(session);
     return reply(result);

@@ -26,7 +26,7 @@ export async function fanout(kind) {
       if (kind === "digest") {
         const d = await dailyDigest(c);
         const text = !d.empty && c.digest?.text !== false && c.owner.phone;
-        if (text) await sendSMS({ to: c.owner.phone, client: c, force: true, type: "digest", body: d.text });
+        if (text) await sendSMS({ to: c.owner.phone, client: c, type: "digest", body: d.text });
         if (!d.empty) await sendEmail({ to: c.owner.email, subject: `${c.business.name}: today's front desk`, text: d.email });
         if ((c.liveAt && Date.now() - new Date(c.liveAt).getTime() < 7 * D) || d.steveNote) await notifySteve(`Digest: ${c.business.name}`, d.email + (d.steveNote || ""));
         await logEvent(c, "digest", { text: d.text, empty: !!d.empty, texted: !!text, emailed: !d.empty });

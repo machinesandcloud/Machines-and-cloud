@@ -1,13 +1,14 @@
-// Twilio inbound SMS webhook. The "To" number identifies the client (or, on the shared bridge number,
-// the "From" number is looked up in the bridge index). Texts from the owner's phone are commands
+// Twilio inbound SMS webhook. The "To" number identifies the client; the shared M&C number is not a
+// shop line (its inbound goes to /api/platform-sms). Texts from the owner's phone are commands
 // (ok/otw/done/quote/paid/cancel/help); everything else is a customer talking to the front desk.
-import { clientByNumber, getClient, get, getConversation, saveConversation, logEvent, cancelTasksForNumber, noteInbound } from "./lib/store.mjs";
+import { clientByNumber, getConversation, saveConversation, logEvent, cancelTasksForNumber, noteInbound } from "./lib/store.mjs";
 import { runAgent, toApiMessages } from "./lib/agent.mjs";
 import { auditedAdminKey } from "./lib/admin-key-audit.mjs";
 import { buildSystemPrompt, BOOK_VISIT, NOTIFY_OWNER, UPDATE_VISIT, ACTIVE } from "./lib/config.mjs";
 import { bookVisit, flagLead, ownerCommand, upcomingBookings, confirmVisit, rescheduleVisit, cancelRequest, noteReviewReply, noteConsentReply, when, dateEs, winEs } from "./lib/desk.mjs";
 import { sendSMS, twilioSignatureValid, e164, recordOptOut, clearOptOut, notifyOwner, optOutStatus } from "./lib/send.mjs";
 import { classifySMSKeyword } from "./lib/sms-keywords.mjs";
+import { detectOptOutIntent, optOutGuarded } from "./lib/optout-intent.mjs";
 
 export const config = { path: "/api/sms" };
 
@@ -24,13 +25,9 @@ const TWILIO_STOP = /^\s*(stop|stopall|unsubscribe|end|quit|cancel|revoke|optout
 // While the opt-out state is unknown only an explicit opt-in keyword re-subscribes: "yes"/"sí" can answer a question.
 const START_KEYWORD = /^\s*(start|unstop|empezar|iniciar)\s*[.!]*\s*$/i;
 
-async function resolveClient(to, from) {
-  let c = await clientByNumber(to);
-  if (c) return c;
-  const mcNumber = e164(process.env.MC_TWILIO_NUMBER || "");
-  if (mcNumber && to === mcNumber) { const slug = await get("index", "bridge:" + from); if (slug) c = await getClient(slug); }
-  return c;
-}
+// Only a shop's own number identifies it. The retired shared-sender bridge ("bridge:<from>") is
+// never consulted, so a text to the M&C number can never reach a shop (legal precondition P1).
+const resolveClient = (to) => clientByNumber(to);
 
 export default async (req) => {
   if (req.method !== "POST") return new Response("method", { status: 405 });
@@ -45,7 +42,7 @@ export default async (req) => {
   if (!adminOk && !twilioSignatureValid(sigUrl, params, req.headers.get("x-twilio-signature") || "")) return new Response("bad signature", { status: 403 });
 
   const to = e164(params.To), from = e164(params.From), body = String(params.Body || "").trim();
-  const c = await resolveClient(to, from);
+  const c = await resolveClient(to);
   if (!c || !body) return twiml("");
   const name = c.business?.name || "We";
 
@@ -55,8 +52,10 @@ export default async (req) => {
   // from the owner's phone and from always-ring-through numbers. The owner's phone uses only the
   // whole-message keywords, so a command or free-text reply is never read as an opt-out.
   // The shared classifier (proposal 01) adds normalized keywords; the legacy phrases stay for customers.
-  const keyword = classifySMSKeyword(body);
-  if (STOP_RE.test(body) || keyword === "stop" || !isOwner && STOP_PHRASE.test(body)) {
+  // Rev 2: the older phrase list counts only when no detector guard applies (third party, one item, a time, reported
+  // speech...) and the detector did not send the text to review ("remove me from the 2pm slot").
+  const keyword = classifySMSKeyword(body), intent = isOwner ? null : detectOptOutIntent(body), phrase = !isOwner && STOP_PHRASE.test(body) && !optOutGuarded(body) && intent?.level !== "review";
+  if (STOP_RE.test(body) || keyword === "stop" || phrase || !isOwner && intent?.level === "certain") {
     // Already out: one confirmation is all CTIA allows, so repeats are silent. An unreadable store (null) confirms again.
     if ((await optOutStatus(from)) === true) return twiml("");
     const stored = await recordOptOut(from, c.slug, body.slice(0, 80));
@@ -64,8 +63,10 @@ export default async (req) => {
     await logEvent(c, "opt_out", { from, cancelled: n, viaTwilio: !!params.OptOutType, ...(isOwner ? { owner: true } : {}) });
     await notifyOwner(c, isOwner ? `${name} front desk: your phone ${from} opted out of texts. Alerts now go to your email only. Reply START to resume.` : `${name} front desk: ${from} opted out of texts. Nothing more will be sent to them.`, { type: "owner_note" });
     // "cancel" from someone with a visit on the books is also a cancellation request: the owner decides.
+    // Rev 2 (QA Q7): only the whole-message keyword ("CANCEL") counts; a plain-language opt-out such as
+    // "cancel the reminders" stops texts but does not ask the owner to cancel a visit.
     let told = "";
-    if (!isOwner && /^\s*cancel\b/i.test(body) && ACTIVE.includes(c.status)) {
+    if (!isOwner && (STOP_RE.test(body) || keyword === "stop") && /^\s*cancel\b/i.test(body) && ACTIVE.includes(c.status)) {
       const visits = await upcomingBookings(c, from);
       for (const b of visits) await cancelRequest(c, b);
       if (visits.length) told = ` We've told ${c.owner?.name || "the owner"} about your visit.`;
@@ -120,6 +121,7 @@ export default async (req) => {
     return twiml(`Thanks for texting ${name}. Please call ${c.phone?.businessNumber || "our main line"} and we will help right away.`);
   }
 
+  if (intent?.level === "review") { try { const { recordOptOutReview } = await import("./lib/optout-requests.mjs"); await recordOptOutReview({ line: "legacy", slug: c.slug, phone: from, text: body, messageSid: params.MessageSid || "", reason: "plain_language_review" }); } catch (err) { console.error("opt-out review", err); } }
   await logEvent(c, "sms_inbound", { from }); await noteInbound(c);
   try { await noteReviewReply(c, from, body); } catch (err) { console.error("review reply", err); }
   const conv = await getConversation(c, "sms", from);

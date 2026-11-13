@@ -7,6 +7,7 @@ import { e164, notifyOwner } from "./lib/send.mjs";
 import { addUsage } from "./lib/usage.mjs";
 import { standardGreeting } from "./lib/vapi.mjs";
 import { timingSafeEqual } from "node:crypto";
+import { automatedDesk, voiceGreeting } from "./lib/automated-disclosure.mjs";
 
 export const config = { path: "/api/vapi" };
 
@@ -42,7 +43,8 @@ async function savedSince(c, kind, phone, before) {
 async function recoveryAlert(c, kind, rec) {
   const what = kind === "bookings" ? `a visit (ref ${rec.id}, ${rec.date || "date not set"} ${rec.window || ""})` : `a request (ref ${rec.id})`;
   const text = `${c.business?.name || "Front desk"} front desk: a phone call saved ${what} for ${rec.customer_name || "a caller"} ${rec.phone || ""}, but the confirmation step failed. Check the portal. This may repeat an earlier alert.`;
-  try { return (await notifyOwner(c, text, { type: "owner_alert", settle: true })).some((r) => r?.ok); } catch { return false; }
+  // Legal P1 rev 2: only an owner channel counts; the operator fallback email does not mean the owner was alerted.
+  try { return (await notifyOwner(c, text, { type: "owner_alert", settle: true })).some((r) => r?.ok && r.channel !== "operator"); } catch { return false; }
 }
 function uncertainResult(c, name, kind, rec, alerted) {
   const owner = c.owner?.name || "the owner";
@@ -84,12 +86,12 @@ export default async (req) => {
     if (caller && (c.rules?.bypass || []).includes(caller)) {
       await logEvent(c, "vip_call", { from: caller, rang: !cellIsForwardedLine(c) && c.owner?.phone ? "cell" : "assistant" });
       if (!cellIsForwardedLine(c) && c.owner?.phone) return json({ destination: { type: "number", number: c.owner.phone, message: `Connecting you to ${owner}.` } });
-      return json({ assistantId, assistantOverrides: { firstMessage: `This is ${c.business?.name || "the front desk"}. ${owner} cannot pick up right now. I can take a message for ${owner}.`, variableValues: { customerName: "", isExisting: "", upcomingVisit: "", vip: "yes" } } });
+      return json({ assistantId, assistantOverrides: { firstMessage: `This is ${automatedDesk(c)}. ${owner} cannot pick up right now. I can take a message for ${owner}.`, variableValues: { customerName: "", isExisting: "", upcomingVisit: "", vip: "yes" } } });
     }
     const ctx = await callerContext(c, caller, body?.at || undefined);
     const first = ctx.upcomingVisit
-      ? `Thanks for calling ${c.business?.name}. This is the front desk assistant. Hi ${ctx.customerName}, your visit is ${ctx.upcomingVisit}. How can I help?`
-      : ctx.customerName ? `Thanks for calling ${c.business?.name}. This is the front desk assistant. Hi ${ctx.customerName}, how can I help today?` : standardGreeting(c);
+      ? voiceGreeting(c, `Hi ${ctx.customerName}, your visit is ${ctx.upcomingVisit}. How can I help?`)
+      : ctx.customerName ? voiceGreeting(c, `Hi ${ctx.customerName}, how can I help today?`) : standardGreeting(c);
     await logEvent(c, "call_started", { from: caller, known: !!ctx.customerName }); await noteInbound(c, "call");
     return json({ assistantId, assistantOverrides: { firstMessage: first, variableValues: { customerName: ctx.customerName, isExisting: ctx.isExisting, upcomingVisit: ctx.upcomingVisit, vip: "" } } });
   }

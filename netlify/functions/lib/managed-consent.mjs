@@ -3,6 +3,7 @@ import { strictRead } from "./accounts.mjs";
 import { workspaceTenant } from './workspace-identity.mjs';
 import { classifySMSKeyword } from './sms-keywords.mjs';
 import { reviewRequestsAvailable } from './messaging-program.mjs';
+import { detectOptOutIntent } from './optout-intent.mjs';
 export const deliveryTenant = workspaceTenant;
 const key = (c, phone) => `${c.slug}/${deliveryTenant(c)}/${phone}`;
 const validPhone = phone => typeof phone === "string" && /^\+1[2-9]\d{9}$/.test(phone);
@@ -40,12 +41,14 @@ export async function recordManagedInbound(c, { phone, text, messageSid, provide
     if (Object.keys(row.seen || {}).length >= 4096) throw new Error("Consent history needs archival before accepting more messages");
     // Same normalized vocabulary as the platform line (CTIA 5.1.3); YES/SÍ consent stays exact below.
     const matched = classifySMSKeyword(word);
-    const keyword = matched === "stop" || providerOptOutType === "STOP" ? "stop" : matched === "start" || providerOptOutType === "START" ? "start" : matched === "help" || providerOptOutType === "HELP" ? "help" : "message";
+    // P9: a plain-language opt-out ("please stop texting me") is honored like STOP.
+    const plainStop = !providerOptOutType && !matched && detectOptOutIntent(word)?.level === "certain";
+    const keyword = matched === "stop" || providerOptOutType === "STOP" || plainStop ? "stop" : matched === "start" || providerOptOutType === "START" ? "start" : matched === "help" || providerOptOutType === "HELP" ? "help" : "message";
     const next = { ...row, transactional: currentProof(row), pendingAsk: currentAsk(row.pendingAsk) ? row.pendingAsk : null, seen: { ...row.seen, [messageSid]: { keyword, at: now } }, lastMessageSid: messageSid, lastInboundAt: now, lastKeyword: keyword, updatedAt: now };
     const serviceControl=/^(?:APPOINTMENTS|CITAS|YES|SI|SÍ)$/i.test(word)||REVIEW_KEYWORD.test(word)||REVIEW_YES.test(word)||/^(?:YES\s+)?(?:QUOTE|REQUEST)\s+[a-zA-Z0-9_-]{1,80}$/i.test(word);
     if(keyword==="message"&&!serviceControl){next.lastServiceReplyAt=now;next.lastServiceReplyMessageSid=messageSid;}
     next.lastAffirmation=!next.suppressed && /^(yes|si|sí)$/i.test(word)?{messageSid,providerDate,at:now}:null;
-    if (keyword === "stop") { next.reviewProof = null; next.reviewAsk = null; next.suppressed = true; next.transactional = false; next.pendingAsk = null; next.lastAffirmation=null; next.stoppedAt = now; next.directiveDate = Math.max(Number(row.directiveDate) || 0, Date.parse(providerDate) || Date.now()); }
+    if (keyword === "stop") { if (plainStop) next.stopSource = "plain_language"; next.reviewProof = null; next.reviewAsk = null; next.suppressed = true; next.transactional = false; next.pendingAsk = null; next.lastAffirmation=null; next.stoppedAt = now; next.directiveDate = Math.max(Number(row.directiveDate) || 0, Date.parse(providerDate) || Date.now()); }
     if (keyword === "start" && Number.isFinite(Date.parse(providerDate)) && Date.parse(providerDate) > (Number(row.directiveDate) || 0)) { next.suppressed = false; next.startedAt = now; next.directiveDate = Date.parse(providerDate); }
     if (!next.suppressed && /^(yes|si|sí)$/i.test(word) && next.pendingAsk && Date.parse(next.pendingAsk.expiresAt) > Date.now() && Date.parse(providerDate) > Date.parse(next.pendingAsk.askedAt)) {
       next.transactional = true; next.proof = { messageSid, wording: next.pendingAsk.wording, wordingVersion: MANAGED_APPOINTMENT_CONSENT_VERSION, at: now, purpose: "ongoing_appointment_updates", askMessageSid: next.pendingAsk.messageSid, source: 'verified_inbound_sms', recipient: phone, providerDate, senderNumber: next.pendingAsk.senderNumber || null, messagingServiceSid: next.pendingAsk.messagingServiceSid || null }; next.pendingAsk = null;

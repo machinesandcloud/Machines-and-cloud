@@ -3,6 +3,7 @@ import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 import { atomicUpdate } from './store.mjs';
 import { strictRead } from './accounts.mjs';
 import { SMS_KEYWORDS, classifySMSKeyword } from './sms-keywords.mjs';
+import { detectOptOutIntent } from './optout-intent.mjs';
 
 export const PLATFORM_SMS_WEBHOOK_URL = 'https://machinesandcloud.com/api/platform-sms';
 export const PLATFORM_SMS_KEYWORDS = SMS_KEYWORDS;
@@ -34,6 +35,8 @@ function keyword(body, type) {
   // Case, whitespace, punctuation and short polite opt-out phrases are normalized (CTIA 5.1.3).
   const word = classifySMSKeyword(body);
   if (word === 'stop' || type === 'STOP') return 'stop';
+  // P9: a plain-language opt-out ("please stop texting me") is honored like STOP.
+  if (!type && !word && detectOptOutIntent(body)?.level === 'certain') return 'stop';
   if (word === 'start' || type === 'START') return 'start';
   if (word === 'help' || type === 'HELP') return 'help';
   return 'question';
@@ -112,6 +115,7 @@ export async function handlePlatformSMS(req) {
       if (entry.state!=='receipt_saved_reply_unknown' || result.entry.state==='receipt_saved_reply_unknown') return {};
       return {value:{...result.entry}};
     });
+    if (kind === 'question' && !first.duplicate && detectOptOutIntent(fields.Body)?.level === 'review') { try { const {recordOptOutReview} = await import('./optout-requests.mjs'); await recordOptOutReview({line:'platform',phone:fields.From,text:redact(fields.Body),messageSid:fields.MessageSid,reason:'plain_language_review'}); } catch { /* The ledger keeps the text for the operator. */ } }
     await atomicUpdate('health','platformSMS:lastRun',()=>({value:{ok:true,at:now()}}));
     // A first response can be lost after the durable fence commits. Replaying it could
     // charge/send twice, so a duplicate is empty and the original remains delivery-unknown.
@@ -137,4 +141,18 @@ export async function platformSMSView({limit=60}={}) {
 export async function platformSMSHealth() {
   const view = await platformSMSView({limit:100}), last = await strictRead('health','platformSMS:lastRun');
   return {ok:!view.atCapacity && last?.ok!==false,enabled:view.enabled,at:last?.at || null,total:view.total,inspected:view.rows.length,replyBudget:view.replyBudget,atCapacity:view.atCapacity,unverifiedReplies:view.rows.filter(row=>row.replyDelivery==='unknown').length,reasonCode:view.atCapacity?'platform_sms_reply_budget_reached':last?.ok===false?'platform_sms_processing_failed':null};
+}
+// P9: an operator-applied opt-out also stops the M&C platform line for this contact. Returns null when
+// the platform line is not configured; the directive is written like an inbound STOP at time `at`.
+export async function suppressPlatformContact(phoneNumber, at = Date.now()) {
+  const config = settings(); if (!config.configured || !phone(phoneNumber)) return null;
+  const binding = hash(JSON.stringify([config.account,config.service,config.number])), contact = `${binding}/${phoneNumber}`;
+  await atomicUpdate(STORE,KEY,previous => {
+    const ledger = previous || {version:1,entries:{},directives:{},replyBudget:{day:'',used:0},received:0};
+    if (ledger.version !== 1 || !ledger.entries || !ledger.directives) throw new Error('SMS ledger unavailable');
+    const directive = ledger.directives[contact];
+    if (directive?.suppressed && directive.at >= at) return {};
+    return {value:{...ledger,directives:{...ledger.directives,[contact]:{suppressed:true,at:Math.max(at,directive?.at || 0),keyword:'stop',source:'operator_request'}},updatedAt:now()}};
+  });
+  return true;
 }
