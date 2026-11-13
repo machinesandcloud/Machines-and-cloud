@@ -1022,7 +1022,15 @@
     speaker.textContent = role === 'agent' ? examples[scenario].agent : examples[scenario].customer;
     p.textContent = text; row.append(speaker, p); messages.appendChild(row); return row;
   }
-  function follow() { messages.scrollTop = messages.scrollHeight; }
+  function follow() {
+    // Pin to the end, but never past the top of the latest message: a tall reply plus the
+    // typing indicator can exceed the pane (320px), which used to clip the reply's first lines.
+    var list = messages.querySelectorAll('.site-message'), last = list[list.length - 1];
+    var end = messages.scrollHeight - messages.clientHeight;
+    if (!last || last.offsetParent !== messages) { messages.scrollTop = messages.scrollHeight; return; }
+    var pad = parseFloat(getComputedStyle(messages).paddingTop) || 0;
+    messages.scrollTop = Math.min(end, Math.max(0, last.offsetTop - pad));
+  }
   function removeTyping() { if (typing) typing.remove(); typing = null; }
   function showTyping() {
     removeTyping();
