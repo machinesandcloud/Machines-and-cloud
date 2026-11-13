@@ -1,0 +1,482 @@
+diff --git a/netlify.toml b/netlify.toml
+index 731c54e..3dce099 100644
+--- a/netlify.toml
++++ b/netlify.toml
+@@ -1,6 +1,6 @@
+ [build]
+   publish = "dist"
+-  command = "node scripts/build-practice-voice.mjs && node scripts/smoke.mjs && node scripts/scheduler-gate-check.mjs && node scripts/account-setup-check.mjs && node scripts/intake-check.mjs && node scripts/platform-operations-check.mjs && node scripts/phone-activation-check.mjs && node scripts/operator-management-qa-check.mjs && node scripts/account-lifecycle-check.mjs && node scripts/support-report-check.mjs && node scripts/connection-assistance-check.mjs && node scripts/request-followthrough-check.mjs && node scripts/request-automation-check.mjs && node scripts/workspace-activity-check.mjs && node scripts/workspace-edit-check.mjs && node scripts/website-installation-check.mjs && node scripts/tenant-isolation-check.mjs && node scripts/conversation-history-check.mjs && node scripts/owner-test-check.mjs && node scripts/self-service-delivery-check.mjs && node scripts/self-service-scheduler-check.mjs && node scripts/self-service-ai-check.mjs && node scripts/self-service-ai-proof-check.mjs && node scripts/sales-desk-check.mjs && node scripts/sales-budget-check.mjs && node scripts/sales-agent-check.mjs && node scripts/calendar-execution-check.mjs && node scripts/calendar-self-service-check.mjs && node scripts/calendar-scoped-admission-check.mjs && node scripts/calendar-connection-check.mjs && node scripts/calendar-delivery-check.mjs && node scripts/calendar-busy-check.mjs && node scripts/agent-delivery-check.mjs && node scripts/owner-visits-check.mjs && node scripts/schedule-calendar-check.mjs && node scripts/owner-availability-check.mjs && node scripts/voice-activation-check.mjs && node scripts/voice-provider-evidence-check.mjs && node scripts/managed-voice-handoff-check.mjs && node scripts/messaging-activation-check.mjs && node scripts/managed-resource-admission-check.mjs && node scripts/managed-sms-budget-check.mjs && node scripts/managed-email-budget-check.mjs && node scripts/managed-delivery-proof-check.mjs && node scripts/managed-delivery-qa-check.mjs && node scripts/managed-sms-qa-check.mjs && node scripts/service-reconciliation-check.mjs && node scripts/platform-sms-check.mjs && node scripts/sms-policy-check.mjs && node scripts/service-onboarding-check.mjs && node scripts/service-onboarding-qa-check.mjs && node scripts/connection-journey-check.mjs && node scripts/service-intake-check.mjs && node scripts/service-intake-cas-check.mjs && node scripts/connection-admissions-check.mjs && node scripts/connection-admissions-cas-check.mjs && node scripts/workspace-billing-check.mjs && node scripts/workspace-billing-recovery-check.mjs && node scripts/paid-service-authority-check.mjs && node scripts/workspace-billing-public-proof-check.mjs && node scripts/lead-connections-check.mjs && node scripts/thumbtack-api-transport-check.mjs && node scripts/thumbtack-connection-check.mjs && node scripts/platform-ai-check.mjs && node scripts/data-erasure-check.mjs && node scripts/channel-availability-check.mjs && node scripts/ops-p2-fix-check.mjs && node scripts/ops-p2-qa-probe.mjs && node scripts/uncovered-cards-check.mjs && node scripts/p3-cards-check.mjs && node scripts/build-site.mjs"
++  command = "node scripts/build-practice-voice.mjs && node scripts/smoke.mjs && node scripts/scheduler-gate-check.mjs && node scripts/account-setup-check.mjs && node scripts/intake-check.mjs && node scripts/platform-operations-check.mjs && node scripts/phone-activation-check.mjs && node scripts/operator-management-qa-check.mjs && node scripts/account-lifecycle-check.mjs && node scripts/support-report-check.mjs && node scripts/connection-assistance-check.mjs && node scripts/request-followthrough-check.mjs && node scripts/request-automation-check.mjs && node scripts/workspace-activity-check.mjs && node scripts/workspace-edit-check.mjs && node scripts/website-installation-check.mjs && node scripts/tenant-isolation-check.mjs && node scripts/conversation-history-check.mjs && node scripts/owner-test-check.mjs && node scripts/self-service-delivery-check.mjs && node scripts/self-service-scheduler-check.mjs && node scripts/self-service-ai-check.mjs && node scripts/self-service-ai-proof-check.mjs && node scripts/sales-desk-check.mjs && node scripts/sales-budget-check.mjs && node scripts/sales-agent-check.mjs && node scripts/calendar-execution-check.mjs && node scripts/calendar-self-service-check.mjs && node scripts/calendar-scoped-admission-check.mjs && node scripts/calendar-connection-check.mjs && node scripts/calendar-delivery-check.mjs && node scripts/calendar-busy-check.mjs && node scripts/agent-delivery-check.mjs && node scripts/owner-visits-check.mjs && node scripts/schedule-calendar-check.mjs && node scripts/owner-availability-check.mjs && node scripts/voice-activation-check.mjs && node scripts/voice-provider-evidence-check.mjs && node scripts/managed-voice-handoff-check.mjs && node scripts/messaging-activation-check.mjs && node scripts/managed-resource-admission-check.mjs && node scripts/managed-sms-budget-check.mjs && node scripts/managed-email-budget-check.mjs && node scripts/managed-delivery-proof-check.mjs && node scripts/managed-delivery-qa-check.mjs && node scripts/managed-sms-qa-check.mjs && node scripts/service-reconciliation-check.mjs && node scripts/platform-sms-check.mjs && node scripts/sms-policy-check.mjs && node scripts/service-onboarding-check.mjs && node scripts/service-onboarding-qa-check.mjs && node scripts/connection-journey-check.mjs && node scripts/service-intake-check.mjs && node scripts/service-intake-cas-check.mjs && node scripts/connection-admissions-check.mjs && node scripts/connection-admissions-cas-check.mjs && node scripts/workspace-billing-check.mjs && node scripts/workspace-billing-recovery-check.mjs && node scripts/paid-service-authority-check.mjs && node scripts/workspace-billing-public-proof-check.mjs && node scripts/lead-connections-check.mjs && node scripts/thumbtack-api-transport-check.mjs && node scripts/thumbtack-connection-check.mjs && node scripts/platform-ai-check.mjs && node scripts/data-erasure-check.mjs && node scripts/channel-availability-check.mjs && node scripts/ops-p2-fix-check.mjs && node scripts/ops-p2-qa-probe.mjs && node scripts/uncovered-cards-check.mjs && node scripts/p3-cards-check.mjs && node scripts/managed-reply-recovery-check.mjs && node scripts/build-site.mjs"
+ 
+ [functions]
+   directory = "netlify/functions"
+diff --git a/netlify/functions/lib/managed-delivery.mjs b/netlify/functions/lib/managed-delivery.mjs
+index e3c1f09..05a9760 100644
+--- a/netlify/functions/lib/managed-delivery.mjs
++++ b/netlify/functions/lib/managed-delivery.mjs
+@@ -105,7 +105,7 @@ async function indexPending(job) {
+     const entries={...(value?.entries || {})},failures={...(value?.failures || {})};
+     if (terminal(job.state) && !paidDeliveryPending(job)) delete entries[job.id];
+     else { if (!entries[job.id] && Object.keys(entries).length>=500) throw new Error("Delivery queue is full"); entries[job.id]={dueAt:job.dueAt,createdAt:job.createdAt,snapshot:entries[job.id]?.snapshot || job}; }
+-    if(["failed","uncertain"].includes(job.state) || job.receiptCheckFailedAt && Date.now()-(Date.parse(job.lastCheckedAt || job.acceptedAt || job.attemptStartedAt || job.createdAt) || 0)>25*60000)failures[job.id]={state:job.receiptCheckFailedAt?"receipt_unavailable":job.state,at:job.receiptCheckFailedAt || job.updatedAt};
++    if(["failed","uncertain"].includes(job.state) || job.receiptCheckFailedAt && Date.now()-(Date.parse(job.lastCheckedAt || job.acceptedAt || job.attemptStartedAt || job.createdAt) || 0)>25*60000)failures[job.id]={state:job.receiptCheckFailedAt?"receipt_unavailable":job.state,at:job.receiptCheckFailedAt || job.updatedAt,...(job.state!=="failed" || !isCustomerReply(job) || job.replyRecovery?.state==="done"?{followedUp:true}:{})};
+     else if(["delivered","superseded","expired"].includes(job.state) || job.state==="suppressed" && !job.attemptStartedAt || job.receiptVerifiedAt && Date.parse(job.receiptVerifiedAt)>=Date.parse(failures[job.id]?.at || ""))delete failures[job.id];
+     return {value:{version:1,entries,failures,cursor:value?.cursor || ""}};
+   });
+@@ -276,6 +276,83 @@ async function stopPaidBeforeSend(job, c, reason, state = 'suppressed') {
+   const stopped = await change(job.id, row => row.providerId ? null : { ...row, state, reasonCode: reason, ...(row.paidSMSCapacity || row.paidAnswerCapacity ? { paidNotDispatched: true } : {}) });
+   return reconcilePaidDelivery(stopped, c);
+ }
++// ---- Managed customer-reply failure (managed-sms-gaps rev 2) ----
++// No automatic resend: a second customer text is never sent from this path. A reply whose delivery
++// failed (verified failed/undelivered/canceled receipt, or a documented provider rejection) or stayed
++// unconfirmed for 30 minutes is shown as not delivered, and the owner gets one saved request (with its
++// normal email) per customer per Houston day. A later verified "delivered" receipt corrects the status
++// and marks the request resolved.
++const REPLY_PURPOSES = new Set(["reply", "consent_ask"]);
++export const REPLY_RECOVERY = Object.freeze({ unconfirmedMs: 30 * 60000, maxAgeMs: 24 * 3600000, resend: false });
++class ProviderRejectedError extends Error { constructor(code) { super("SMS rejected by provider"); this.code = code; } }
++const isCustomerReply = job => job?.channel === "sms" && REPLY_PURPOSES.has(job.purpose);
++const houstonDay = (at = new Date()) => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Chicago", year: "numeric", month: "2-digit", day: "2-digit" }).format(at);
++const leadKey = (slug, id) => `${slug}/${id}`;
++async function replyOrigin(c, job) {
++  // Keys only (no reads) until the one matching inbound row: key = slug/tenant/SID, job id = hash of that SID.
++  const prefix = `${c.slug}/${job.tenant}/`;
++  for (const key of await list("managed_sms_inbound", prefix)) {
++    const sid = key.slice(prefix.length);
++    if (!/^SM[a-f0-9]{32}$/i.test(sid) || messageId(c, "sms", `sms_reply:${sid}`) !== job.id) continue;
++    const inbound = await strictRead("managed_sms_inbound", key);
++    return inbound && inbound.slug === c.slug && inbound.tenant === job.tenant && inbound.from === job.to ? inbound : null;
++  }
++  return null;
++}
++async function markHandled(job, reason) { return change(job.id, row => row.replyRecovery ? null : { ...row, replyRecovery: { state: "done", action: "none", reason, at: stamp() } }); }
++async function followUpFailedReply(job) {
++  const c = await strictRead("clients", job.slug);
++  if (!c || !isSupportedSelfServiceClient(c) || deliveryTenant(c) !== job.tenant) return markHandled(job, "workspace_changed");
++  return recoverManagedReply(c, job);
++}
++export async function recoverManagedReply(c, job) {
++  if (!c || !managedDeliveryEnabled() || await managedDeliveryProofScope()) return job;
++  if (!isCustomerReply(job) || job.replyRecovery?.state === "done") return job;
++  if (!isSupportedSelfServiceClient(c) || deliveryTenant(c) !== job.tenant) return markHandled(job, "workspace_changed");
++  const unconfirmed = job.state === "uncertain" && !job.providerId;
++  if (job.state !== "failed" && !unconfirmed) return job;
++  if (!(Date.now() - Date.parse(job.createdAt) < REPLY_RECOVERY.maxAgeMs)) return markHandled(job, "too_old");
++  // Plan first (durable), then act idempotently: a crash replays the same stable owner request.
++  job = await change(job.id, row => row.replyRecovery || row.providerId !== job.providerId || row.state !== job.state ? null : { ...row, replyRecovery: { state: "pending", action: "owner_alert", reason: unconfirmed ? "unconfirmed" : "undelivered", at: stamp() } });
++  const plan = job.replyRecovery; if (!plan || plan.state === "done") return job;
++  await markHistoryUndelivered(c, job, true);
++  const inbound = await replyOrigin(c, job), { flagLead } = await import("./desk.mjs"), { looksSpanish } = await import("./automated-disclosure.mjs");
++  const wrote = String(inbound?.body || "").slice(0, 300), reply = String(job.body || "").slice(0, 300);
++  const what = plan.reason === "unconfirmed" ? "We could not confirm that the automatic text reply reached this customer. It was not sent again." : "The automatic text reply to this customer was not delivered. It was not sent again.";
++  const lead = await flagLead(c, { customer_name: "", phone: job.to, address: "", issue: `${what} Please call or text them yourself.${wrote ? ` They wrote: "${wrote}".` : ""} Reply that was not delivered: "${reply}".`, reason: "handoff", urgency: "today", wanted: "", language: c.business?.spanish && looksSpanish(wrote) ? "es" : "en", nobook_reason: "none", unsure: "" }, { channel: "sms", contact: job.to, managedActionId: hash(`reply_undelivered:${job.tenant}:${job.to}:${houstonDay()}`) });
++  // rev 3 (QA B6): a new undelivered reply reopens a request that a late delivery had resolved.
++  if (lead?.id) await atomicUpdate("leads", leadKey(c.slug, lead.id), row => row ? { value: { ...row, undeliveredReplies: { ...(row.undeliveredReplies || {}), [job.id]: stamp() }, ...(row.outcome === "resolved" ? { outcome: "needs_action", resolvedAt: null, resolution: null } : {}) } } : {});
++  const done = await change(job.id, row => row.replyRecovery?.state === "pending" ? { ...row, replyRecovery: { ...row.replyRecovery, state: "done", leadId: lead?.id || null, doneAt: stamp() } } : null);
++  // The receipt may have turned delivered while the request was being saved.
++  if (done.state === "delivered" && done.replyRecovery?.leadId) await resolveDeliveredLater(c, done);
++  return done;
++}
++// A verified delivered receipt after the owner was told: record it, and once every undelivered reply on
++// that request is delivered, mark the request resolved (no field in its revision changes: no new email).
++// rev 3 (QA B9): the AI history marks an undelivered reply (like the [Done: ...] markers), and when that reply
++// carried the automated-assistant intro, disclosedAt is cleared so the next delivered reply discloses again.
++// A later verified delivery removes the marker (the intro then simply appears once more, which is harmless).
++const UNDELIVERED_MARK = "\n[Not delivered: the customer never received this message.]";
++const INTRO = /^(?:Automated assistant|Asistente automatizado)\b/;
++async function markHistoryUndelivered(c, job, undelivered) {
++  await atomicUpdate("managed_sms_history", `${c.slug}/${job.tenant}/${job.to}`, row => {
++    if (!row || row.tenant !== job.tenant || !Array.isArray(row.messages)) return {};
++    const from = undelivered ? job.body : job.body + UNDELIVERED_MARK, to = undelivered ? job.body + UNDELIVERED_MARK : job.body;
++    if (!row.messages.some(m => m.role === "assistant" && m.content === from) && !(undelivered && INTRO.test(job.body) && row.disclosedAt)) return {};
++    const messages = row.messages.map(m => m.role === "assistant" && m.content === from ? { ...m, content: to } : m);
++    return { value: { ...row, messages, ...(undelivered && INTRO.test(job.body) ? { disclosedAt: null } : {}), updatedAt: stamp() } };
++  });
++}
++async function resolveDeliveredLater(c, job) {
++  const leadId = job.replyRecovery?.leadId; if (!leadId) return;
++  await markHistoryUndelivered(c, job, false);
++  await change(job.id, row => row.replyRecovery && !row.replyRecovery.deliveredLaterAt ? { ...row, replyRecovery: { ...row.replyRecovery, deliveredLaterAt: stamp() } } : null);
++  await atomicUpdate("leads", leadKey(c.slug, leadId), row => {
++    if (!row || row.slug !== c.slug || !row.undeliveredReplies?.[job.id]) return {};
++    const { [job.id]: _done, ...rest } = row.undeliveredReplies, deliveredLater = { ...(row.deliveredLater || {}), [job.id]: stamp() };
++    return { value: { ...row, undeliveredReplies: rest, deliveredLater, ...(Object.keys(rest).length ? {} : { outcome: "resolved", resolvedAt: stamp(), resolution: "The text reply was delivered after all." }) } };
++  });
++}
+ function inQuietHours(at = new Date()) {
+   const parts = new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", weekday: "short", hour: "numeric", hourCycle: "h23" }).formatToParts(at);
+   const hour = Number(parts.find(x => x.type === "hour").value), sunday = parts.find(x => x.type === "weekday").value === "Sun";
+@@ -374,6 +451,8 @@ function providerAdapter(deadlineAt=Date.now()+10000) {
+       await assertPaidSMS(c,job);
+       smsWireStarted = true;
+       const { response, data } = await request(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`, { method: "POST", headers: { Authorization: "Basic " + Buffer.from(`${sid}:${secret}`).toString("base64"), "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ To: job.to, From: sender.number, MessagingServiceSid: sender.serviceSid, Body: job.body, StatusCallback: url.href }) });
++      // A documented Twilio 4xx error (other than timeout/rate limit) means no message was created.
++      if (!response.ok && response.status >= 400 && response.status < 500 && ![408, 409, 429].includes(response.status) && Number.isSafeInteger(data?.code)) throw new ProviderRejectedError(data.code);
+       if (!response.ok || !/^SM[a-f0-9]{32}$/i.test(data.sid || "")) throw new Error("SMS result unconfirmed");
+       return { id: data.sid, status: data.status, from: sender.number, serviceSid: sender.serviceSid,sentAt:data.date_created };
+       } catch (error) {
+@@ -428,13 +507,16 @@ function engine({ provider = null, gate = managedDeliveryEnabled, sender = sende
+         await saveManagedConsentAsk(c, job.to, { wording: job.body, messageSid: receipt.id, sentAt: receipt.sentAt, senderNumber: job.from, messagingServiceSid: job.serviceSid });
+       }
+       const saved = await change(id, row => terminal(row.state) || row.providerId !== receipt.id ? null : ({ ...row, state: receipt.status === "delivered" ? "delivered" : ["failed", "undelivered", "canceled"].includes(receipt.status) ? "failed" : "accepted", lastCheckedAt: stamp(),receiptCheckFailedAt:null,receiptVerifiedAt:stamp(),reasonCode:null, ...(receipt.status === "delivered" ? { deliveredAt: stamp() } : {}) }));
++      if (saved.state === "delivered" && saved.replyRecovery?.leadId) await resolveDeliveredLater(c, saved);
+       return retainPaidReceipt(saved, receipt, c);
+     }
+     if (job.attemptStartedAt) {
+       // The same SMS POST is never repeated after an unknown result. Email's real provider
+       // idempotency lasts 24h; this implementation conservatively keeps unknown sends for review.
+       if (job.state === "sending" && Date.parse(job.claim?.until) > Date.now()) return job;
+-      return change(id, row => ({ ...row, state: "uncertain", reasonCode: "provider_receipt_missing" }));
++      const unconfirmed = await change(id, row => row.providerId ? null : ({ ...row, state: "uncertain", reasonCode: "provider_receipt_missing" }));
++      if (!scope && isCustomerReply(unconfirmed) && !unconfirmed.providerId && unconfirmed.state === "uncertain" && !unconfirmed.replyRecovery && Date.now() - Date.parse(unconfirmed.attemptStartedAt) >= REPLY_RECOVERY.unconfirmedMs) return recoverManagedReply(c, unconfirmed);
++      return unconfirmed;
+     }
+     if (!gate() || (c.status !== "live" && !await testingDeliveryAuthorized(c,job))) return change(id, row => ({ ...row, state: "waiting_platform", reasonCode: c.status !== "live" ? "workspace_not_live" : "delivery_gate_closed" }));
+     if (job.postVisit && !(Date.parse(job.postVisit.expiresAt) > Date.now())) return stopPaidBeforeSend(job,c,'post_visit_expired','expired');
+@@ -532,6 +614,10 @@ function engine({ provider = null, gate = managedDeliveryEnabled, sender = sende
+         }
+         return change(id,row=>!row.providerId&&row.claim?.token===token?{...row,state:'waiting_platform',claim:null,attemptStartedAt:null,attempts:Math.max(0,row.attempts-1),reasonCode:error.code,detail:error.message}:null);
+       }
++      if (error instanceof ProviderRejectedError && job.channel === "sms") {
++        const rejected = await change(id,row=>!row.providerId&&row.claim?.token===token?{...row,state:'failed',claim:null,reasonCode:'provider_rejected',providerErrorCode:error.code,...(row.paidSMSCapacity||row.paidAnswerCapacity?{paidNotDispatched:true}:{})}:null);
++        return reconcilePaidDelivery(rejected,latest);
++      }
+       if (job.paidSMSCapacity && (!providerInvoked || undispatchedSMS.get(error) === paidDispatchIdentity(job))) {
+         const blocked = await change(id,row=>!row.providerId&&row.claim?.token===token?{...row,state:'waiting_platform',claim:null,paidNotDispatched:true,reasonCode:'sms_preflight_unavailable'}:null);
+         return reconcilePaidDelivery(blocked,latest);
+@@ -559,7 +645,11 @@ export async function recordManagedSMSReceipt(id, fields) {
+   if(sender.number!==job.from || sender.serviceSid!==job.serviceSid)return false;
+   const receipt = await providerAdapter().status({ ...job, providerId: fields.MessageSid });
+   if (!receipt || receipt.id !== fields.MessageSid) return false;
+-  const saved = await change(id, row => terminal(row.state) || (row.providerId && row.providerId !== receipt.id) ? null : ({ ...row, providerId: receipt.id, from: sender.number, state: receipt.status === "delivered" ? "delivered" : ["failed", "undelivered", "canceled"].includes(receipt.status) ? "failed" : "accepted", reasonCode: null, receiptCheckFailedAt:null,receiptVerifiedAt:stamp(),lastCheckedAt: stamp(), ...(receipt.status === "delivered" ? { deliveredAt: stamp() } : {}) }));
++  // managed-sms-gaps rev 2: a reply already marked undelivered (failed, owner told) is corrected by a verified
++  // "delivered" receipt for the same message. Nothing is ever resent from this path.
++  const correction = receipt.status === "delivered" && isCustomerReply(job) && job.state === "failed" && job.reasonCode !== "provider_rejected";
++  const saved = await change(id, row => (terminal(row.state) && !(correction && row.state === "failed")) || (row.providerId && row.providerId !== receipt.id) ? null : ({ ...row, providerId: receipt.id, from: sender.number, state: receipt.status === "delivered" ? "delivered" : ["failed", "undelivered", "canceled"].includes(receipt.status) ? "failed" : "accepted", reasonCode: null, receiptCheckFailedAt:null,receiptVerifiedAt:stamp(),lastCheckedAt: stamp(), ...(receipt.status === "delivered" ? { deliveredAt: stamp() } : {}) }));
++  if (saved.state === "delivered" && saved.replyRecovery?.leadId) await resolveDeliveredLater(c, saved);
+   await retainPaidReceipt(saved, receipt, c);
+   if(job.purpose==='followup_consent_ask'){const {saveRequestFollowupAsk}=await import('./request-followup.mjs');await saveRequestFollowupAsk(c,job,{...receipt,from:job.from,serviceSid:job.serviceSid});}
+   if(job.consentAsk && !["failed","undelivered","canceled"].includes(receipt.status)){const {saveManagedConsentAsk}=await import("./managed-consent.mjs");await saveManagedConsentAsk(c,job.to,{wording:job.body,messageSid:receipt.id,sentAt:receipt.sentAt,senderNumber:job.from,messagingServiceSid:job.serviceSid});}
+@@ -639,8 +729,19 @@ export async function runManagedDelivery({ limit = 3, discoveryLimit = 15, budge
+       const result = await engine({deadlineAt:deadline}).run(key);
+       if (result?.attempts>before.attempts || result?.lastCheckedAt!==before.lastCheckedAt) processed++;
+       if (result?.state === "uncertain") errors.push("delivery_needs_review");
++      if (!scope && result?.state === "failed" && isCustomerReply(result) && result.replyRecovery?.state !== "done") { try { await followUpFailedReply(result); } catch { errors.push("reply_alert_failed"); } }
+     } catch { errors.push("delivery_unavailable"); }
+   }
++  // Durable owner alert for failed customer replies (status callbacks and crashes included). Entries that
++  // are handled, or cannot be handled (workspace gone or changed), are flagged so they never fill the window.
++  if (!scope && managedDeliveryEnabled()) {
++    const failed = await strictRead(INDEX, "active");
++    for (const key of Object.keys(failed?.failures || {}).filter(key => !failed.failures[key].followedUp).sort().slice(0, 25)) {
++      if (Date.now() >= deadline) break;
++      try { const row = await strictRead(STORE, key); if (row?.state === "failed" && isCustomerReply(row) && row.replyRecovery?.state !== "done") await followUpFailedReply(row); else if (row) await indexPending(row); }
++      catch { errors.push("reply_alert_failed"); }
++    }
++  }
+   if(last) { if(scope)await atomicUpdate('managed_delivery_cursors',cursorKey('pending'),()=>({value:{key:last,at:stamp()}}));else await atomicUpdate(INDEX,"active",value=>({value:{...value,cursor:last}})); }
+   const index=await strictRead(INDEX,"active"),openFailures=Object.keys(index?.failures || {}).filter(key=>!scope || key.startsWith(prefix)).length;
+   return { ok: errors.length === 0 && openFailures === 0 && !partialRepair, processed, inspected, partialRepair, pending:Object.keys(index?.entries || {}).filter(key=>!scope || key.startsWith(prefix)).length, openFailures, errors: [...new Set(errors)], enabled: managedDeliveryEnabled() };
+diff --git a/netlify/functions/lib/managed-history.mjs b/netlify/functions/lib/managed-history.mjs
+index 7a023ab..b5dd150 100644
+--- a/netlify/functions/lib/managed-history.mjs
++++ b/netlify/functions/lib/managed-history.mjs
+@@ -19,7 +19,7 @@ function safeText(value, c) {
+     .replace(/\b[a-f0-9]{64}\b/gi, "[private reference removed]")
+     .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, "").slice(0, 1800);
+ }
+-const progress = state => ({ queued: "queued", running: "running", failed: "failed", suppressed: "suppressed", waiting_platform: "awaiting_delivery", waiting_consent: "awaiting_delivery", waiting_hours: "awaiting_delivery", sending: "awaiting_delivery", accepted: "awaiting_delivery", uncertain: "uncertain", superseded: "superseded", expired: "expired" })[state] || null;
++const progress = state => ({ held: "not_answered", queued: "queued", running: "running", failed: "failed", suppressed: "suppressed", waiting_platform: "awaiting_delivery", waiting_consent: "awaiting_delivery", waiting_hours: "awaiting_delivery", sending: "awaiting_delivery", accepted: "awaiting_delivery", uncertain: "uncertain", superseded: "superseded", expired: "expired" })[state] || null;
+ function capacityProgress(reason, unit) {
+   if(reason==='paid_capacity_exhausted')return {processingDetail:`Your included ${unit} are used or reserved for this billing period. This message stays saved. Review usage in Account.`,processingAction:'account'};
+   if(reason==='paid_capacity_previous_answer_unconfirmed')return {processingDetail:'The earlier answer needs checking. It has not been repeated; renewing does not resend it automatically.'};
+@@ -27,6 +27,9 @@ function capacityProgress(reason, unit) {
+   if(typeof reason==='string'&&reason.startsWith('paid_capacity_'))return {processingDetail:'The saved usage for this reply needs checking. This message stays saved.',processingAction:'account'};
+   return {};
+ }
++const heldProgress = () => ({ processingDetail: "Not answered: texting from your business number is not switched on yet. Saved in your requests." });
++// managed-sms-gaps rev 2: a failed reply, or one still unconfirmed after the owner was told, is shown as not delivered.
++const undelivered = delivery => delivery.state === "failed" || delivery.state === "uncertain" && delivery.replyRecovery?.state === "done";
+ export async function managedSMSConversations(c, { limit = 60 } = {}) {
+   if (!Number.isInteger(limit) || limit < 1 || limit > 100) throw new Error("Choose from 1 to 100 conversation contacts");
+   const current = c?.slug ? await strictRead("clients", c.slug) : null;
+@@ -54,12 +57,12 @@ export async function managedSMSConversations(c, { limit = 60 } = {}) {
+       const jobs = [...target.inbound.values()].sort((a, b) => (date(a.providerDate) || date(a.createdAt) || "").localeCompare(date(b.providerDate) || date(b.createdAt) || "") || (date(a.createdAt) || "").localeCompare(date(b.createdAt) || "") || a.messageSid.localeCompare(b.messageSid)).slice(-20);
+       for (const row of jobs) {
+         const content = safeText(row.body, current), at = date(row.providerDate) || date(row.createdAt), processing = progress(row.state);
+-        if (content) messages.push({ role: "user", content, ...(at ? { at } : {}), ...(processing ? { processing, ...capacityProgress(row.reasonCode,'AI text replies') } : {}) });
++        if (content) messages.push({ role: "user", content, ...(at ? { at } : {}), ...(processing ? { processing, ...(row.state === "held" ? heldProgress() : capacityProgress(row.reasonCode,'AI text replies')) } : {}) });
+         if (typeof row.reply === "string" && row.reply.trim()) {
+           const replyId = `${current.slug}/${hash(`${tenant}:sms:sms_reply:${row.messageSid}`)}`, delivery = await strictRead("managed_deliveries", replyId);
+           if (!delivery || delivery.slug !== current.slug || delivery.tenant !== tenant || delivery.channel !== "sms" || delivery.to !== contact || !["reply", "consent_ask"].includes(delivery.purpose)) continue;
+           const reply = safeText(row.reply, current), state = progress(delivery.state) || (delivery.state === "delivered" ? null : "awaiting_delivery"), at = date(delivery.deliveredAt) || date(delivery.acceptedAt) || date(row.updatedAt);
+-          if (reply) messages.push({ role: "assistant", content: reply, ...(at ? { at } : {}), ...(state ? { processing: state, ...capacityProgress(delivery.reasonCode,'text segments') } : {}) });
++          if (reply) messages.push({ role: "assistant", content: reply, ...(at ? { at } : {}), ...(undelivered(delivery) ? { processing: "not_delivered", processingDetail: "Reply not delivered: call or text the customer." } : state ? { processing: state, ...capacityProgress(delivery.reasonCode,'text segments') } : {}) });
+         }
+       }
+     } else messages = target.history.messages.filter(message => ["user", "assistant"].includes(message?.role) && typeof message.content === "string").slice(-40).map(message => ({ role: message.role, content: safeText(message.content, current), ...(date(message.at) ? { at: message.at } : {}) })).filter(message => message.content);
+diff --git a/netlify/functions/lib/managed-sms.mjs b/netlify/functions/lib/managed-sms.mjs
+index 5e8849d..2127f4e 100644
+--- a/netlify/functions/lib/managed-sms.mjs
++++ b/netlify/functions/lib/managed-sms.mjs
+@@ -92,13 +92,28 @@ export async function handleManagedSMS(req) {
+     if (consent.suppressed || !managedDeliveryEnabled()) return twiml();
+     const probe = await pendingMessagingProbe(c);
+     const kind = probe && probe.to===fields.From && String(fields.Body).trim()===probe.nonce ? "probe" : "conversation";
+-    if (kind !== "probe" && (!["testing","live"].includes(c.status) || !await messagingSender(c))) return twiml();
++    // managed-sms-gaps: in a testing/live workspace whose number is not yet verified for texting, a customer
++    // text is kept (never answered from this number) and the owner gets one saved request per customer per
++    // Houston day, with its normal email under the usual delivery gates. Paused or closed workspaces keep the
++    // existing behaviour (nothing stored), which is a separate owner decision.
++    if (kind !== "probe" && !["testing","live"].includes(c.status)) return twiml();
++    if (kind !== "probe" && !await messagingSender(c)) { await holdManagedInbound(c,fields,verified); return twiml(); }
+     const key = `${c.slug}/${deliveryTenant(c)}/${fields.MessageSid}`;
+     await atomicUpdate("managed_sms_inbound",key,row=>row ? {} : {value:{id:key,slug:c.slug,tenant:deliveryTenant(c),kind,from:fields.From,messageSid:fields.MessageSid,body:String(fields.Body).slice(0,1500),providerDate:verified.date_created,state:"queued",attempts:0,createdAt:stamp(),updatedAt:stamp()}});
+     try { await dispatchServiceWorker("managed-sms-background",{id:key}); } catch { /* Durable scheduled dispatch is the fallback. */ }
+     return twiml();
+   } catch { return new Response("Message handling unavailable",{status:503}); }
+ }
++async function holdManagedInbound(c, fields, verified) {
++  if (!["testing","live"].includes(c.status)) return;
++  const tenant=deliveryTenant(c), key=`${c.slug}/${tenant}/${fields.MessageSid}`, reasonCode="sender_not_ready";
++  const body=String(fields.Body).slice(0,1500);
++  await atomicUpdate("managed_sms_inbound",key,row=>row ? {} : {value:{id:key,slug:c.slug,tenant,kind:"conversation",from:fields.From,messageSid:fields.MessageSid,body,providerDate:verified.date_created,state:"held",reasonCode,attempts:0,createdAt:stamp(),updatedAt:stamp()}});
++  try {
++    const { flagLead } = await import("./desk.mjs"), received=Date.parse(verified.date_created), day=houstonToday(Number.isFinite(received)?new Date(received):new Date());
++    await flagLead(c,{customer_name:"",phone:fields.From,address:"",issue:`A customer texted your business number while texting from it was not switched on. No automatic reply was sent, and no text can be sent from this number yet. Please contact them yourself. First message: "${body.slice(0,300)}".`,reason:"handoff",urgency:"today",wanted:"",language:c.business?.spanish&&looksSpanish(body)?"es":"en",nobook_reason:"none",unsure:""},{channel:"sms",contact:fields.From,managedActionId:hash(`sms_held:${tenant}:${fields.From}:${day}`)});
++  } catch { /* The text itself is saved and shown in the conversation; the request is advisory. */ }
++}
+ async function updateInbound(id, updater) { return atomicUpdate("managed_sms_inbound",id,row=>{const next=updater(row);return next?{value:{...next,updatedAt:stamp()},result:next}:{result:row};}); }
+ async function releaseUnusedAnswer(c, job) {
+   if (!job.paidAnswerCapacity || job.paidAnswerGenerated) return job;
+@@ -131,7 +146,7 @@ async function appendHistoryOnce(key,job,reply) {
+ export async function processManagedSMS(id) {
+   if (!managedDeliveryEnabled() || typeof id!=="string" || id.length>220) return {ok:false,reasonCode:"sms_unavailable"};
+   if (await managedDeliveryProofScope()) return {ok:true,skipped:true,reasonCode:'delivery_proof_scope'};
+-  let job = await strictRead("managed_sms_inbound",id); if (!job || ["completed","suppressed","failed"].includes(job.state)) return {ok:true,skipped:true};
++  let job = await strictRead("managed_sms_inbound",id); if (!job || ["completed","suppressed","failed","held"].includes(job.state)) return {ok:true,skipped:true};
+   const c = await strictRead("clients",job.slug);
+   if (!c || deliveryTenant(c)!==job.tenant) return {ok:false,reasonCode:"workspace_changed"};
+   if (job.kind==="probe") {
+diff --git a/scripts/managed-reply-recovery-check.mjs b/scripts/managed-reply-recovery-check.mjs
+new file mode 100644
+index 0000000..1f374e0
+--- /dev/null
++++ b/scripts/managed-reply-recovery-check.mjs
+@@ -0,0 +1,215 @@
++// Managed customer-reply failure (no resend, owner alert) and unverified-number inbound (managed-sms-gaps rev 2).
++// Reuses the fixture/provider-double setup of managed-sms-qa-check.mjs (everything before its first
++// check), then runs the scenarios below the TAIL marker. Real handlers, installed SDK CAS, fake model,
++// zero external network. Usage: node scripts/managed-reply-recovery-check.mjs [--output scratchpad/x.json]
++import { readFileSync, writeFileSync, rmSync } from "node:fs";
++import { dirname, join } from "node:path";
++import { fileURLToPath, pathToFileURL } from "node:url";
++const here = dirname(fileURLToPath(import.meta.url)), self = readFileSync(fileURLToPath(import.meta.url), "utf8");
++const setup = readFileSync(join(here, "managed-sms-qa-check.mjs"), "utf8"), cut = setup.indexOf("\nawait check(");
++if (cut < 0) throw new Error("managed-sms-qa-check setup marker not found");
++const tail = self.slice(self.indexOf("\n// ---TAIL---") + 1, self.lastIndexOf("*/"));
++const temp = join(here, `.managed-reply-recovery-${process.pid}.mjs`);
++writeFileSync(temp, setup.slice(0, cut).replace(/^const outputIndex = .*$/m, "const outputIndex = -1, output = null;") + "\n" + tail);
++process.on("exit", () => rmSync(temp, { force: true }));
++try { await import(pathToFileURL(temp).href); } finally { rmSync(temp, { force: true }); }
++/*
++// ---TAIL---
++process.env.MC_SELF_SERVICE_AI_GLOBAL_DAILY_LIMIT = "500"; // many fixtures in one Houston day; per-tenant limits unchanged
++const outAt = process.argv.indexOf("--output"), outPath = outAt < 0 ? null : process.argv[outAt + 1];
++// Provider double extensions: a POST that fails before reaching the provider, a POST whose response is lost
++// after the message was created (optionally stored with a normalised body), and a documented 4xx rejection.
++const mode = { throwPost: 0, lostResponse: 0, alterStored: false, reject4xx: 0, lists: 0 }; const priorFetch = globalThis.fetch;
++globalThis.fetch = async (input, init = {}) => {
++  const url = new URL(String(input)), method = String(init.method || "GET").toUpperCase();
++  if (url.origin === "https://api.twilio.com" && url.pathname === `/2010-04-01/Accounts/${account}/Messages.json`) {
++    if (method === "GET") { mode.lists++; return new Response("{}", { status: 503 }); }
++    if (method === "POST" && mode.throwPost > 0) { mode.throwPost--; throw new TypeError("fetch failed (network double)"); }
++    if (method === "POST" && mode.reject4xx > 0) { mode.reject4xx--; return Response.json({ code: 21610, message: "Attempt to send to unsubscribed recipient", status: 400 }, { status: 400 }); }
++    if (method === "POST" && mode.lostResponse > 0) {
++      mode.lostResponse--; const r = await priorFetch(input, init), row = await r.json();
++      if (mode.alterStored) messages.get(row.sid).body = row.body.replace(/'/g, "’").replace(/\.$/, "");
++      throw new TypeError("socket hang up (response lost double)");
++    }
++  }
++  return priorFetch(input, init);
++};
++const results = [];
++async function scenario(name, fn) { try { const note = await fn(); results.push({ name, pass: true, ...(note ? { note } : {}) }); } catch (error) { results.push({ name, pass: false, error: String(error?.message || error).slice(0, 600) }); } }
++const sends = f => [...messages.values()].filter(row => row.direction === "outbound-api" && row.from === f.number);
++const sentTo = (f, phone = caller) => sends(f).filter(row => row.to === phone).map(row => row.body);
++const jobs = async f => store.listJSON("managed_deliveries", f.c.slug + "/");
++const replies = async (f, phone = caller) => (await jobs(f)).filter(j => j.channel === "sms" && ["reply", "consent_ask"].includes(j.purpose) && j.to === phone);
++const ownerAlerts = async f => (await jobs(f)).filter(j => j.channel === "email" && j.purpose === "owner_lead" && /was not delivered|could not confirm|while texting from it was not switched on/.test(j.body));
++const leadsFor = async (f, phone = caller) => (await store.listJSON("leads", f.c.slug + "/")).filter(l => l.phone === phone);
++async function refresh(f) { await store.atomicUpdate("messaging_activation", f.row.id, r => ({ value: { ...r, lastVerifiedAt: stamp() } })); }
++async function wave(f, n = 1) { for (let i = 0; i < n; i++) { await refresh(f); await delivery.runManagedDelivery({ limit: 50, discoveryLimit: 50 }); } }
++async function advance(f, minutes, step = 5) { for (let m = 0; m < minutes; m += step) { clock += step * 60000; await wave(f, 1); } }
++async function text(f, body, from = caller) {
++  clock += 2000; const fields = inbound(f, body, { from }); fields.From = from;
++  const response = await httpHandler(signed(fields)), twiml = await response.text(), id = inboundKey(f, fields);
++  if ((await strictRead("managed_sms_inbound", id))?.state === "queued") await processManagedSMS(id);
++  await wave(f, 1);
++  return { status: response.status, twiml, id, row: await strictRead("managed_sms_inbound", id), fields };
++}
++const historyLen = async (f, phone = caller) => (await strictRead("managed_sms_history", `${f.c.slug}/${f.tenant}/${phone}`))?.messages?.length || 0;
++const failuresIndex = async () => (await strictRead("managed_delivery_pending", "active"))?.failures || {};
++const lastAssistant = async f => (await managedSMSConversations(await strictRead("clients", f.c.slug))).find(c => c.contact === caller).messages.filter(m => m.role === "assistant").at(-1);
++const NOT_DELIVERED = "Reply not delivered: call or text the customer.";
++function oneTextPerReply(f, expected) { const b = sentTo(f); assert.equal(b.length, expected, `customer texts ${b.length}, expected ${expected}: ${JSON.stringify(b.map(x => x.slice(0, 40)))}`); assert.equal(new Set(b).size, b.length, "same text sent twice"); }
++
++await scenario("R0 policy: no automatic resend; unconfirmed alert after 30 minutes", async () => {
++  const RR = delivery.REPLY_RECOVERY; assert.ok(RR, "REPLY_RECOVERY missing"); assert.equal(RR.resend, false); assert.equal(RR.unconfirmedMs, 1800000); assert.equal(typeof delivery.recoverManagedReply, "function");
++});
++await scenario("R1 failed receipt: one text only, shown not delivered, one owner request and email", async () => {
++  const f = await fixture("rv-fail"); const prev = sendStatus; sendStatus = "failed"; const r = await text(f, "Can you come Friday?"); sendStatus = prev; await advance(f, 180);
++  oneTextPerReply(f, 1); assert.equal((await strictRead("managed_sms_inbound", r.id)).attempts, 1, "model rerun"); assert.equal(await historyLen(f), 2);
++  const [job] = await replies(f); assert.equal(job.state, "failed"); assert.equal(job.replyRecovery?.state, "done");
++  const leads = await leadsFor(f); assert.equal(leads.length, 1); assert.match(leads[0].issue, /was not delivered\. It was not sent again/); assert.match(leads[0].issue, /Can you come Friday/);
++  assert.equal((await ownerAlerts(f)).length, 1); assert.ok(job.id in await failuresIndex(), "operator health signal kept");
++  const m = await lastAssistant(f); assert.equal(m.processing, "not_delivered"); assert.equal(m.processingDetail, NOT_DELIVERED);
++});
++await scenario("R2 network error before the provider: no text ever, owner told after 30 minutes, no list lookups", async () => {
++  const f = await fixture("rv-throw"); mode.throwPost = 1; await text(f, "Do you service tankless heaters?"); mode.throwPost = 0;
++  await advance(f, 25); assert.equal((await leadsFor(f)).length, 0, "alerted before 30 minutes"); assert.equal((await lastAssistant(f)).processing, "uncertain");
++  await advance(f, 180); oneTextPerReply(f, 0);
++  const [job] = await replies(f); assert.equal(job.state, "uncertain"); assert.equal(job.replyRecovery?.reason, "unconfirmed");
++  assert.equal((await leadsFor(f)).length, 1); assert.match((await leadsFor(f))[0].issue, /could not confirm/); assert.equal((await ownerAlerts(f)).length, 1);
++  assert.equal((await lastAssistant(f)).processingDetail, NOT_DELIVERED); assert.equal(mode.lists, 0, "provider list lookups");
++});
++await scenario("R3 (QA A1) failure, then the customer texts again: the old reply is never sent after the new one", async () => {
++  const f = await fixture("rv-a1"); const prev = sendStatus; sendStatus = "failed"; const one = await text(f, "Question one"); sendStatus = prev;
++  const two = await text(f, "Hello? any update"); await advance(f, 180);
++  const b = sentTo(f); oneTextPerReply(f, 2); assert.equal(b[0], one.row.reply); assert.equal(b[1], two.row.reply);
++  assert.equal((await leadsFor(f)).length, 1);
++});
++await scenario("R4 (QA A2) failure, workspace paused, resumed 3 hours later: no further text", async () => {
++  const f = await fixture("rv-a2"); const prev = sendStatus; sendStatus = "failed"; await text(f, "Need help with my sink"); sendStatus = prev;
++  const c = await strictRead("clients", f.c.slug); await store.put("clients", f.c.slug, { ...c, status: "paused" }); await advance(f, 180, 15);
++  await store.put("clients", f.c.slug, { ...(await strictRead("clients", f.c.slug)), status: "live" }); await advance(f, 120, 10);
++  oneTextPerReply(f, 1); assert.equal((await replies(f)).length, 1, "a resend job exists");
++});
++await scenario("R5 (QA A3) response lost, provider stored a normalised body, no callback: one text, owner told, never resent", async () => {
++  const f = await fixture("rv-a3"); mode.lostResponse = 1; mode.alterStored = true; await text(f, "Is Saturday possible? I'm free."); mode.lostResponse = 0; mode.alterStored = false;
++  await advance(f, 240); assert.equal(sends(f).filter(m => m.to === caller).length, 1, "customer texts");
++  const [job] = await replies(f); assert.equal(job.state, "uncertain"); assert.equal(job.replyRecovery?.reason, "unconfirmed"); assert.equal((await leadsFor(f)).length, 1);
++});
++await scenario("R6 (QA A4) response lost, owner told, then a verified delivered callback: corrected to delivered, request resolved, one text", async () => {
++  const f = await fixture("rv-a4"); mode.lostResponse = 1; await text(f, "Do you install water softeners?"); mode.lostResponse = 0;
++  await advance(f, 40); let [job] = await replies(f); assert.equal(job.replyRecovery?.state, "done"); assert.equal((await leadsFor(f))[0].outcome, "needs_action");
++  const sid = sends(f).find(m => m.to === caller).sid; Object.assign(messages.get(sid), { status: "delivered", num_segments: "1" });
++  const fields = { AccountSid: account, MessageSid: sid, From: job.from, To: job.to, MessageStatus: "delivered" };
++  assert.equal((await httpHandler(signed(fields, { path: "/api/managed-sms/status?job=" + encodeURIComponent(job.id) }))).status, 204);
++  await advance(f, 60); [job] = await replies(f); assert.equal(job.state, "delivered"); assert.equal(job.providerId, sid); assert.ok(job.replyRecovery.deliveredLaterAt);
++  const [lead] = await leadsFor(f); assert.equal(lead.outcome, "resolved"); assert.deepEqual(lead.undeliveredReplies, {}); assert.equal((await ownerAlerts(f)).length, 1, "a second owner email");
++  oneTextPerReply(f, 1); const m = await lastAssistant(f); assert.ok(!m.processing, "portal still shows " + m.processing);
++});
++await scenario("R6b response lost, owner told, callback binds the message as sent, the scheduled receipt read sees delivered: request resolved", async () => {
++  const f = await fixture("rv-poll"); mode.lostResponse = 1; await text(f, "Can you look at my water heater?"); mode.lostResponse = 0;
++  await advance(f, 40); let [job] = await replies(f); assert.equal(job.replyRecovery?.state, "done");
++  const sid = sends(f).find(m => m.to === caller).sid; Object.assign(messages.get(sid), { status: "sent" });
++  assert.equal((await httpHandler(signed({ AccountSid: account, MessageSid: sid, From: job.from, To: job.to, MessageStatus: "sent" }, { path: "/api/managed-sms/status?job=" + encodeURIComponent(job.id) }))).status, 204);
++  [job] = await replies(f); assert.equal(job.state, "accepted"); assert.equal((await leadsFor(f))[0].outcome, "needs_action");
++  Object.assign(messages.get(sid), { status: "delivered", num_segments: "1" }); await advance(f, 20);
++  [job] = await replies(f); assert.equal(job.state, "delivered"); assert.equal((await leadsFor(f))[0].outcome, "resolved"); oneTextPerReply(f, 1);
++});
++await scenario("R7 failed receipt, then a verified delivered callback for the same message: status corrected, request resolved", async () => {
++  const f = await fixture("rv-late"); await text(f, "Quote for a new toilet?"); let [job] = await replies(f); assert.ok(job.providerId);
++  await receipt(f, job, "undelivered", "1"); await advance(f, 10); [job] = await replies(f); assert.equal(job.state, "failed"); assert.equal(job.replyRecovery?.state, "done");
++  await receipt(f, job, "delivered", "1"); [job] = await replies(f); assert.equal(job.state, "delivered");
++  assert.equal((await leadsFor(f))[0].outcome, "resolved"); oneTextPerReply(f, 1); assert.ok(!(job.id in await failuresIndex()), "failure index not cleared");
++});
++await scenario("R8 documented 4xx rejection: failed at once, no text, owner told", async () => {
++  const f = await fixture("rv-4xx"); mode.reject4xx = 1; await text(f, "Is anyone there?"); await advance(f, 60);
++  oneTextPerReply(f, 0); const [job] = await replies(f); assert.equal(job.state, "failed"); assert.equal(job.reasonCode, "provider_rejected"); assert.equal(job.providerErrorCode, 21610);
++  assert.equal((await leadsFor(f)).length, 1); assert.equal((await ownerAlerts(f)).length, 1);
++});
++await scenario("R9 dedupe: two undelivered replies to one customer the same Houston day give one request and one email", async () => {
++  const f = await fixture("rv-dedupe"); const prev = sendStatus; sendStatus = "failed";
++  await text(f, "First question"); await advance(f, 20); await text(f, "Second question"); await advance(f, 20); sendStatus = prev;
++  oneTextPerReply(f, 2); const leads = await leadsFor(f); assert.equal(leads.length, 1); assert.equal(Object.keys(leads[0].undeliveredReplies).length, 2); assert.equal((await ownerAlerts(f)).length, 1);
++});
++await scenario("R10 status callback marks a reply failed: the durable sweep alerts the owner, no text", async () => {
++  const f = await fixture("rv-callback"); await text(f, "Do you do drain cleaning?"); const [job] = await replies(f);
++  await receipt(f, job, "undelivered", "1"); assert.equal((await leadsFor(f)).length, 0); await wave(f, 1);
++  assert.equal((await leadsFor(f)).length, 1); oneTextPerReply(f, 1);
++});
++await scenario("R11 (QA S1) failures from deleted or changed workspaces are marked handled and cannot starve the sweep", async () => {
++  const dead = []; const prev = sendStatus; sendStatus = "failed";
++  for (let i = 0; i < 27; i++) { const f = await fixture("rv-dead-" + i); await text(f, "Dead " + i); dead.push(f); }
++  sendStatus = prev;
++  // Make each failure fresh again (no follow-up yet) and remove or change its workspace.
++  for (const [i, f] of dead.entries()) { const [job] = await replies(f); const { replyRecovery, ...bare } = job; await store.put("managed_deliveries", job.id, bare);
++    await store.atomicUpdate("managed_delivery_pending", "active", v => ({ value: { ...v, failures: { ...v.failures, [job.id]: { state: "failed", at: stamp() } } } }));
++    if (i % 2) await store.del("clients", f.c.slug); else await store.put("clients", f.c.slug, { ...(await strictRead("clients", f.c.slug)), onboarding: { version: 1, tenantIdentity: "changed-" + i } }); }
++  const live = await fixture("rv-zz-live"); const before = Object.keys(await failuresIndex()); sendStatus = "failed"; await text(live, "Real failure"); sendStatus = prev;
++  const [job] = await replies(live); const { replyRecovery, ...bare } = job; await store.put("managed_deliveries", job.id, bare);
++  await store.atomicUpdate("managed_delivery_pending", "active", v => ({ value: { ...v, failures: { ...v.failures, [job.id]: { state: "failed", at: stamp() } } } }));
++  for (let i = 0; i < 3; i++) await delivery.runManagedDelivery({ limit: 1, discoveryLimit: 0 });
++  assert.equal((await strictRead("managed_deliveries", job.id)).replyRecovery?.state, "done", "real failure starved");
++  const idx = await failuresIndex(); const open = dead.map(f => Object.keys(idx).find(k => k.startsWith(f.c.slug + "/"))).filter(k => k && !idx[k].followedUp);
++  assert.equal(open.length, 0, "dead entries not marked handled: " + open.length); return `index entries before=${before.length}`;
++});
++await scenario("R12 unverified number: text saved and shown, owner request and email queued, nothing sent, duplicates collapse", async () => {
++  const f = await fixture("rv-unverified", { state: "awaiting_test" }); const probe = await sms.pendingMessagingProbe(f.c), toCustomer = () => [...messages.values()].filter(m => m.direction === "outbound-api" && m.from === f.number && !(probe && m.to === probe.to && m.body === probe.body)).length, before = toCustomer();
++  const r = await text(f, "Can someone come look at my AC?"); assert.equal(r.status, 200); assert.doesNotMatch(r.twiml, /<Message>/);
++  assert.equal(r.row?.state, "held"); assert.equal(r.row.reasonCode, "sender_not_ready");
++  assert.equal((await httpHandler(signed(r.fields))).status, 200, "webhook retry"); await text(f, "Hello?"); await wave(f, 2);
++  assert.equal(toCustomer(), before, "texted from an unverified sender");
++  const rows = (await store.listJSON("managed_sms_inbound", `${f.c.slug}/${f.tenant}/`)).filter(row => row.from === caller); assert.equal(rows.length, 2); assert.ok(rows.every(row => row.state === "held"));
++  const leads = await leadsFor(f); assert.equal(leads.length, 1); assert.match(leads[0].issue, /look at my AC/); assert.equal((await ownerAlerts(f)).length, 1);
++  const conv = (await managedSMSConversations(f.c)).find(c => c.contact === caller); assert.equal(conv.messages.length, 2); assert.ok(conv.messages.every(m => m.role === "user" && m.processing === "not_answered" && /Saved in your requests/.test(m.processingDetail)));
++  assert.deepEqual(await processManagedSMS(r.id), { ok: true, skipped: true }); assert.equal(await historyLen(f), 0);
++});
++await scenario("R13 gates: with service delivery switched off, nothing is planned or alerted", async () => {
++  const f = await fixture("rv-gate"); const prev = sendStatus; sendStatus = "failed"; await text(f, "Can you fix a faucet?"); sendStatus = prev; await advance(f, 10);
++  const [job] = await replies(f); assert.equal(job.state, "failed"); const { replyRecovery, ...bare } = job; await store.put("managed_deliveries", job.id, bare);
++  for (const l of await leadsFor(f)) await store.del("leads", `${f.c.slug}/${l.id}`);
++  process.env.SERVICE_DELIVERY_ENABLED = "false"; try { const out = await delivery.recoverManagedReply(f.c, bare); assert.equal(out.replyRecovery, undefined); assert.equal((await leadsFor(f)).length, 0); } finally { process.env.SERVICE_DELIVERY_ENABLED = "true"; }
++  const on = await delivery.recoverManagedReply(f.c, bare); assert.equal(on.replyRecovery?.state, "done", "positive control");
++});
++await scenario("R14 healthy path unchanged: one text, no recovery field, no alert, index clean", async () => {
++  const f = await fixture("rv-healthy"); await text(f, "What are your hours?"); await advance(f, 60); const [job] = await replies(f);
++  oneTextPerReply(f, 1); assert.equal(job.replyRecovery, undefined); assert.equal((await ownerAlerts(f)).length, 0); assert.ok(!(job.id in await failuresIndex()));
++});
++await scenario("R15 paid capacity: 4xx rejection releases the text hold; one model request; no resend", async () => {
++  const f = await fixture("rv-paid"); await fundCapacity(f, { voiceMinutes: 3, smsSegments: 4, aiAnswers: 2 }); const fields = inbound(f, "When do you close today?");
++  process.env.MC_FAKE_MODEL = "0"; process.env.ANTHROPIC_API_KEY = "offline-capacity-model";
++  try {
++    assert.equal((await httpHandler(signed(fields))).status, 200); const before = paidModelRequests.length; mode.reject4xx = 1;
++    const processed = await processManagedSMS(inboundKey(f, fields)); assert.equal(processed.ok, true, JSON.stringify(processed)); await advance(f, 60);
++    assert.equal(paidModelRequests.length, before + 1, "model requests " + JSON.stringify(processed) + " " + JSON.stringify(await strictRead("managed_sms_inbound", inboundKey(f, fields))).slice(0, 400)); oneTextPerReply(f, 0);
++    const usage = await capacityUsage.paidUsageStatus(f.c), [job] = await replies(f); assert.equal(job.state, "failed");
++    assert.equal(usage.units.smsSegments.held, 0, "sms hold"); assert.equal(usage.units.smsSegments.used, 0); assert.equal(usage.units.aiAnswers.held, 0, "answer hold");
++    return `aiAnswers used=${usage.units.aiAnswers.used}`;
++  } finally { process.env.MC_FAKE_MODEL = "1"; delete process.env.ANTHROPIC_API_KEY; mode.reject4xx = 0; }
++});
++await scenario("R17 (QA B9) the undelivered first reply carried the automated intro: the next delivered reply discloses; history marks the turn", async () => {
++  const f = await fixture("rv-b9"); const prev = sendStatus; sendStatus = "failed"; const one = await text(f, "Hi, do you fix garage doors?"); sendStatus = prev; await advance(f, 10);
++  assert.match(one.row.reply, /^Automated assistant/); const [job] = await replies(f); assert.equal(job.state, "failed"); assert.equal(job.replyRecovery?.state, "done");
++  const h = await strictRead("managed_sms_history", `${f.c.slug}/${f.tenant}/${caller}`); assert.ok(!h.disclosedAt, "disclosedAt kept from an undelivered reply");
++  assert.ok(h.messages.some(m => m.role === "assistant" && m.content === one.row.reply + "\n[Not delivered: the customer never received this message.]"), "history turn not marked");
++  const two = await text(f, "Hello? Are you there?"); await advance(f, 10);
++  const b = sentTo(f); oneTextPerReply(f, 2); assert.match(b[1], /^Automated assistant/, "delivered reply lacks the disclosure: " + b[1].slice(0, 60)); assert.equal(b[1], two.row.reply);
++  assert.ok((await strictRead("managed_sms_history", `${f.c.slug}/${f.tenant}/${caller}`)).disclosedAt, "disclosedAt not restored by the delivered intro");
++});
++await scenario("R18 (QA B6) a request resolved by a late delivery reopens when a new reply fails the same day", async () => {
++  const f = await fixture("rv-b6"); await text(f, "Quote for a water heater?"); let [job] = await replies(f);
++  await receipt(f, job, "undelivered", "1"); await advance(f, 10); await receipt(f, job, "delivered", "1");
++  let [lead] = await leadsFor(f); assert.equal(lead.outcome, "resolved"); assert.ok(lead.resolvedAt);
++  const h0 = await strictRead("managed_sms_history", `${f.c.slug}/${f.tenant}/${caller}`); assert.ok(!h0.messages.some(m => /\[Not delivered/.test(m.content)), "marker kept after a verified delivery");
++  const prev = sendStatus; sendStatus = "failed"; await text(f, "Also, can you come Monday?"); sendStatus = prev; await advance(f, 10);
++  [lead] = await leadsFor(f); assert.equal(lead.outcome, "needs_action", "request still shows resolved"); assert.equal(lead.resolvedAt, null); assert.equal(lead.resolution, null);
++  assert.equal(Object.keys(lead.undeliveredReplies).length, 1); assert.equal((await leadsFor(f)).length, 1); assert.equal((await ownerAlerts(f)).length, 1, "owner emails"); oneTextPerReply(f, 2);
++});
++await scenario("R16 global: every customer reply was attempted at most once; every SMS job with a provider id has a provider message", async () => {
++  const sms = (await store.listJSON("managed_deliveries", "", 2000)).filter(d => d.channel === "sms");
++  for (const d of sms) { if (["reply", "consent_ask"].includes(d.purpose)) assert.ok((d.attempts || 0) <= 1, "reply attempted twice " + d.id); if (d.providerId) assert.ok(messages.has(d.providerId)); }
++  assert.ok(!sms.some(d => d.retry), "resend job exists"); return `sms jobs=${sms.length}`;
++});
++const failed = results.filter(r => !r.pass);
++const out = { at: new NativeDate().toISOString(), blocked: report.blocked, results, providerSends: report.providerSends, lists: mode.lists };
++console.log(JSON.stringify(out, null, 1)); console.log(`managed-reply-recovery-check: ${results.length - failed.length}/${results.length}`);
++if (outPath) writeFileSync(outPath, JSON.stringify(out, null, 1));
++process.exitCode = failed.length || report.blocked.length ? 1 : 0; // no process.exit: the composing wrapper removes its temp module
++*/

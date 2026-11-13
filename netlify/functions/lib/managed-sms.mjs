@@ -92,12 +92,27 @@ export async function handleManagedSMS(req) {
     if (consent.suppressed || !managedDeliveryEnabled()) return twiml();
     const probe = await pendingMessagingProbe(c);
     const kind = probe && probe.to===fields.From && String(fields.Body).trim()===probe.nonce ? "probe" : "conversation";
-    if (kind !== "probe" && (!["testing","live"].includes(c.status) || !await messagingSender(c))) return twiml();
+    // managed-sms-gaps: in a testing/live workspace whose number is not yet verified for texting, a customer
+    // text is kept (never answered from this number) and the owner gets one saved request per customer per
+    // Houston day, with its normal email under the usual delivery gates. Paused or closed workspaces keep the
+    // existing behaviour (nothing stored), which is a separate owner decision.
+    if (kind !== "probe" && !["testing","live"].includes(c.status)) return twiml();
+    if (kind !== "probe" && !await messagingSender(c)) { await holdManagedInbound(c,fields,verified); return twiml(); }
     const key = `${c.slug}/${deliveryTenant(c)}/${fields.MessageSid}`;
     await atomicUpdate("managed_sms_inbound",key,row=>row ? {} : {value:{id:key,slug:c.slug,tenant:deliveryTenant(c),kind,from:fields.From,messageSid:fields.MessageSid,body:String(fields.Body).slice(0,1500),providerDate:verified.date_created,state:"queued",attempts:0,createdAt:stamp(),updatedAt:stamp()}});
     try { await dispatchServiceWorker("managed-sms-background",{id:key}); } catch { /* Durable scheduled dispatch is the fallback. */ }
     return twiml();
   } catch { return new Response("Message handling unavailable",{status:503}); }
+}
+async function holdManagedInbound(c, fields, verified) {
+  if (!["testing","live"].includes(c.status)) return;
+  const tenant=deliveryTenant(c), key=`${c.slug}/${tenant}/${fields.MessageSid}`, reasonCode="sender_not_ready";
+  const body=String(fields.Body).slice(0,1500);
+  await atomicUpdate("managed_sms_inbound",key,row=>row ? {} : {value:{id:key,slug:c.slug,tenant,kind:"conversation",from:fields.From,messageSid:fields.MessageSid,body,providerDate:verified.date_created,state:"held",reasonCode,attempts:0,createdAt:stamp(),updatedAt:stamp()}});
+  try {
+    const { flagLead } = await import("./desk.mjs"), received=Date.parse(verified.date_created), day=houstonToday(Number.isFinite(received)?new Date(received):new Date());
+    await flagLead(c,{customer_name:"",phone:fields.From,address:"",issue:`A customer texted your business number while texting from it was not switched on. No automatic reply was sent, and no text can be sent from this number yet. Please contact them yourself. First message: "${body.slice(0,300)}".`,reason:"handoff",urgency:"today",wanted:"",language:c.business?.spanish&&looksSpanish(body)?"es":"en",nobook_reason:"none",unsure:""},{channel:"sms",contact:fields.From,managedActionId:hash(`sms_held:${tenant}:${fields.From}:${day}`)});
+  } catch { /* The text itself is saved and shown in the conversation; the request is advisory. */ }
 }
 async function updateInbound(id, updater) { return atomicUpdate("managed_sms_inbound",id,row=>{const next=updater(row);return next?{value:{...next,updatedAt:stamp()},result:next}:{result:row};}); }
 async function releaseUnusedAnswer(c, job) {
@@ -131,7 +146,7 @@ async function appendHistoryOnce(key,job,reply) {
 export async function processManagedSMS(id) {
   if (!managedDeliveryEnabled() || typeof id!=="string" || id.length>220) return {ok:false,reasonCode:"sms_unavailable"};
   if (await managedDeliveryProofScope()) return {ok:true,skipped:true,reasonCode:'delivery_proof_scope'};
-  let job = await strictRead("managed_sms_inbound",id); if (!job || ["completed","suppressed","failed"].includes(job.state)) return {ok:true,skipped:true};
+  let job = await strictRead("managed_sms_inbound",id); if (!job || ["completed","suppressed","failed","held"].includes(job.state)) return {ok:true,skipped:true};
   const c = await strictRead("clients",job.slug);
   if (!c || deliveryTenant(c)!==job.tenant) return {ok:false,reasonCode:"workspace_changed"};
   if (job.kind==="probe") {

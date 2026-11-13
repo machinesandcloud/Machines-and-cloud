@@ -19,7 +19,7 @@ function safeText(value, c) {
     .replace(/\b[a-f0-9]{64}\b/gi, "[private reference removed]")
     .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, "").slice(0, 1800);
 }
-const progress = state => ({ queued: "queued", running: "running", failed: "failed", suppressed: "suppressed", waiting_platform: "awaiting_delivery", waiting_consent: "awaiting_delivery", waiting_hours: "awaiting_delivery", sending: "awaiting_delivery", accepted: "awaiting_delivery", uncertain: "uncertain", superseded: "superseded", expired: "expired" })[state] || null;
+const progress = state => ({ held: "not_answered", queued: "queued", running: "running", failed: "failed", suppressed: "suppressed", waiting_platform: "awaiting_delivery", waiting_consent: "awaiting_delivery", waiting_hours: "awaiting_delivery", sending: "awaiting_delivery", accepted: "awaiting_delivery", uncertain: "uncertain", superseded: "superseded", expired: "expired" })[state] || null;
 function capacityProgress(reason, unit) {
   if(reason==='paid_capacity_exhausted')return {processingDetail:`Your included ${unit} are used or reserved for this billing period. This message stays saved. Review usage in Account.`,processingAction:'account'};
   if(reason==='paid_capacity_previous_answer_unconfirmed')return {processingDetail:'The earlier answer needs checking. It has not been repeated; renewing does not resend it automatically.'};
@@ -27,6 +27,9 @@ function capacityProgress(reason, unit) {
   if(typeof reason==='string'&&reason.startsWith('paid_capacity_'))return {processingDetail:'The saved usage for this reply needs checking. This message stays saved.',processingAction:'account'};
   return {};
 }
+const heldProgress = () => ({ processingDetail: "Not answered: texting from your business number is not switched on yet. Saved in your requests." });
+// managed-sms-gaps rev 2: a failed reply, or one still unconfirmed after the owner was told, is shown as not delivered.
+const undelivered = delivery => delivery.state === "failed" || delivery.state === "uncertain" && delivery.replyRecovery?.state === "done";
 export async function managedSMSConversations(c, { limit = 60 } = {}) {
   if (!Number.isInteger(limit) || limit < 1 || limit > 100) throw new Error("Choose from 1 to 100 conversation contacts");
   const current = c?.slug ? await strictRead("clients", c.slug) : null;
@@ -54,12 +57,12 @@ export async function managedSMSConversations(c, { limit = 60 } = {}) {
       const jobs = [...target.inbound.values()].sort((a, b) => (date(a.providerDate) || date(a.createdAt) || "").localeCompare(date(b.providerDate) || date(b.createdAt) || "") || (date(a.createdAt) || "").localeCompare(date(b.createdAt) || "") || a.messageSid.localeCompare(b.messageSid)).slice(-20);
       for (const row of jobs) {
         const content = safeText(row.body, current), at = date(row.providerDate) || date(row.createdAt), processing = progress(row.state);
-        if (content) messages.push({ role: "user", content, ...(at ? { at } : {}), ...(processing ? { processing, ...capacityProgress(row.reasonCode,'AI text replies') } : {}) });
+        if (content) messages.push({ role: "user", content, ...(at ? { at } : {}), ...(processing ? { processing, ...(row.state === "held" ? heldProgress() : capacityProgress(row.reasonCode,'AI text replies')) } : {}) });
         if (typeof row.reply === "string" && row.reply.trim()) {
           const replyId = `${current.slug}/${hash(`${tenant}:sms:sms_reply:${row.messageSid}`)}`, delivery = await strictRead("managed_deliveries", replyId);
           if (!delivery || delivery.slug !== current.slug || delivery.tenant !== tenant || delivery.channel !== "sms" || delivery.to !== contact || !["reply", "consent_ask"].includes(delivery.purpose)) continue;
           const reply = safeText(row.reply, current), state = progress(delivery.state) || (delivery.state === "delivered" ? null : "awaiting_delivery"), at = date(delivery.deliveredAt) || date(delivery.acceptedAt) || date(row.updatedAt);
-          if (reply) messages.push({ role: "assistant", content: reply, ...(at ? { at } : {}), ...(state ? { processing: state, ...capacityProgress(delivery.reasonCode,'text segments') } : {}) });
+          if (reply) messages.push({ role: "assistant", content: reply, ...(at ? { at } : {}), ...(undelivered(delivery) ? { processing: "not_delivered", processingDetail: "Reply not delivered: call or text the customer." } : state ? { processing: state, ...capacityProgress(delivery.reasonCode,'text segments') } : {}) });
         }
       }
     } else messages = target.history.messages.filter(message => ["user", "assistant"].includes(message?.role) && typeof message.content === "string").slice(-40).map(message => ({ role: message.role, content: safeText(message.content, current), ...(date(message.at) ? { at: message.at } : {}) })).filter(message => message.content);

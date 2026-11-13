@@ -105,7 +105,7 @@ async function indexPending(job) {
     const entries={...(value?.entries || {})},failures={...(value?.failures || {})};
     if (terminal(job.state) && !paidDeliveryPending(job)) delete entries[job.id];
     else { if (!entries[job.id] && Object.keys(entries).length>=500) throw new Error("Delivery queue is full"); entries[job.id]={dueAt:job.dueAt,createdAt:job.createdAt,snapshot:entries[job.id]?.snapshot || job}; }
-    if(["failed","uncertain"].includes(job.state) || job.receiptCheckFailedAt && Date.now()-(Date.parse(job.lastCheckedAt || job.acceptedAt || job.attemptStartedAt || job.createdAt) || 0)>25*60000)failures[job.id]={state:job.receiptCheckFailedAt?"receipt_unavailable":job.state,at:job.receiptCheckFailedAt || job.updatedAt};
+    if(["failed","uncertain"].includes(job.state) || job.receiptCheckFailedAt && Date.now()-(Date.parse(job.lastCheckedAt || job.acceptedAt || job.attemptStartedAt || job.createdAt) || 0)>25*60000)failures[job.id]={state:job.receiptCheckFailedAt?"receipt_unavailable":job.state,at:job.receiptCheckFailedAt || job.updatedAt,...(job.state!=="failed" || !isCustomerReply(job) || job.replyRecovery?.state==="done"?{followedUp:true}:{})};
     else if(["delivered","superseded","expired"].includes(job.state) || job.state==="suppressed" && !job.attemptStartedAt || job.receiptVerifiedAt && Date.parse(job.receiptVerifiedAt)>=Date.parse(failures[job.id]?.at || ""))delete failures[job.id];
     return {value:{version:1,entries,failures,cursor:value?.cursor || ""}};
   });
@@ -276,6 +276,83 @@ async function stopPaidBeforeSend(job, c, reason, state = 'suppressed') {
   const stopped = await change(job.id, row => row.providerId ? null : { ...row, state, reasonCode: reason, ...(row.paidSMSCapacity || row.paidAnswerCapacity ? { paidNotDispatched: true } : {}) });
   return reconcilePaidDelivery(stopped, c);
 }
+// ---- Managed customer-reply failure (managed-sms-gaps rev 2) ----
+// No automatic resend: a second customer text is never sent from this path. A reply whose delivery
+// failed (verified failed/undelivered/canceled receipt, or a documented provider rejection) or stayed
+// unconfirmed for 30 minutes is shown as not delivered, and the owner gets one saved request (with its
+// normal email) per customer per Houston day. A later verified "delivered" receipt corrects the status
+// and marks the request resolved.
+const REPLY_PURPOSES = new Set(["reply", "consent_ask"]);
+export const REPLY_RECOVERY = Object.freeze({ unconfirmedMs: 30 * 60000, maxAgeMs: 24 * 3600000, resend: false });
+class ProviderRejectedError extends Error { constructor(code) { super("SMS rejected by provider"); this.code = code; } }
+const isCustomerReply = job => job?.channel === "sms" && REPLY_PURPOSES.has(job.purpose);
+const houstonDay = (at = new Date()) => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Chicago", year: "numeric", month: "2-digit", day: "2-digit" }).format(at);
+const leadKey = (slug, id) => `${slug}/${id}`;
+async function replyOrigin(c, job) {
+  // Keys only (no reads) until the one matching inbound row: key = slug/tenant/SID, job id = hash of that SID.
+  const prefix = `${c.slug}/${job.tenant}/`;
+  for (const key of await list("managed_sms_inbound", prefix)) {
+    const sid = key.slice(prefix.length);
+    if (!/^SM[a-f0-9]{32}$/i.test(sid) || messageId(c, "sms", `sms_reply:${sid}`) !== job.id) continue;
+    const inbound = await strictRead("managed_sms_inbound", key);
+    return inbound && inbound.slug === c.slug && inbound.tenant === job.tenant && inbound.from === job.to ? inbound : null;
+  }
+  return null;
+}
+async function markHandled(job, reason) { return change(job.id, row => row.replyRecovery ? null : { ...row, replyRecovery: { state: "done", action: "none", reason, at: stamp() } }); }
+async function followUpFailedReply(job) {
+  const c = await strictRead("clients", job.slug);
+  if (!c || !isSupportedSelfServiceClient(c) || deliveryTenant(c) !== job.tenant) return markHandled(job, "workspace_changed");
+  return recoverManagedReply(c, job);
+}
+export async function recoverManagedReply(c, job) {
+  if (!c || !managedDeliveryEnabled() || await managedDeliveryProofScope()) return job;
+  if (!isCustomerReply(job) || job.replyRecovery?.state === "done") return job;
+  if (!isSupportedSelfServiceClient(c) || deliveryTenant(c) !== job.tenant) return markHandled(job, "workspace_changed");
+  const unconfirmed = job.state === "uncertain" && !job.providerId;
+  if (job.state !== "failed" && !unconfirmed) return job;
+  if (!(Date.now() - Date.parse(job.createdAt) < REPLY_RECOVERY.maxAgeMs)) return markHandled(job, "too_old");
+  // Plan first (durable), then act idempotently: a crash replays the same stable owner request.
+  job = await change(job.id, row => row.replyRecovery || row.providerId !== job.providerId || row.state !== job.state ? null : { ...row, replyRecovery: { state: "pending", action: "owner_alert", reason: unconfirmed ? "unconfirmed" : "undelivered", at: stamp() } });
+  const plan = job.replyRecovery; if (!plan || plan.state === "done") return job;
+  await markHistoryUndelivered(c, job, true);
+  const inbound = await replyOrigin(c, job), { flagLead } = await import("./desk.mjs"), { looksSpanish } = await import("./automated-disclosure.mjs");
+  const wrote = String(inbound?.body || "").slice(0, 300), reply = String(job.body || "").slice(0, 300);
+  const what = plan.reason === "unconfirmed" ? "We could not confirm that the automatic text reply reached this customer. It was not sent again." : "The automatic text reply to this customer was not delivered. It was not sent again.";
+  const lead = await flagLead(c, { customer_name: "", phone: job.to, address: "", issue: `${what} Please call or text them yourself.${wrote ? ` They wrote: "${wrote}".` : ""} Reply that was not delivered: "${reply}".`, reason: "handoff", urgency: "today", wanted: "", language: c.business?.spanish && looksSpanish(wrote) ? "es" : "en", nobook_reason: "none", unsure: "" }, { channel: "sms", contact: job.to, managedActionId: hash(`reply_undelivered:${job.tenant}:${job.to}:${houstonDay()}`) });
+  // rev 3 (QA B6): a new undelivered reply reopens a request that a late delivery had resolved.
+  if (lead?.id) await atomicUpdate("leads", leadKey(c.slug, lead.id), row => row ? { value: { ...row, undeliveredReplies: { ...(row.undeliveredReplies || {}), [job.id]: stamp() }, ...(row.outcome === "resolved" ? { outcome: "needs_action", resolvedAt: null, resolution: null } : {}) } } : {});
+  const done = await change(job.id, row => row.replyRecovery?.state === "pending" ? { ...row, replyRecovery: { ...row.replyRecovery, state: "done", leadId: lead?.id || null, doneAt: stamp() } } : null);
+  // The receipt may have turned delivered while the request was being saved.
+  if (done.state === "delivered" && done.replyRecovery?.leadId) await resolveDeliveredLater(c, done);
+  return done;
+}
+// A verified delivered receipt after the owner was told: record it, and once every undelivered reply on
+// that request is delivered, mark the request resolved (no field in its revision changes: no new email).
+// rev 3 (QA B9): the AI history marks an undelivered reply (like the [Done: ...] markers), and when that reply
+// carried the automated-assistant intro, disclosedAt is cleared so the next delivered reply discloses again.
+// A later verified delivery removes the marker (the intro then simply appears once more, which is harmless).
+const UNDELIVERED_MARK = "\n[Not delivered: the customer never received this message.]";
+const INTRO = /^(?:Automated assistant|Asistente automatizado)\b/;
+async function markHistoryUndelivered(c, job, undelivered) {
+  await atomicUpdate("managed_sms_history", `${c.slug}/${job.tenant}/${job.to}`, row => {
+    if (!row || row.tenant !== job.tenant || !Array.isArray(row.messages)) return {};
+    const from = undelivered ? job.body : job.body + UNDELIVERED_MARK, to = undelivered ? job.body + UNDELIVERED_MARK : job.body;
+    if (!row.messages.some(m => m.role === "assistant" && m.content === from) && !(undelivered && INTRO.test(job.body) && row.disclosedAt)) return {};
+    const messages = row.messages.map(m => m.role === "assistant" && m.content === from ? { ...m, content: to } : m);
+    return { value: { ...row, messages, ...(undelivered && INTRO.test(job.body) ? { disclosedAt: null } : {}), updatedAt: stamp() } };
+  });
+}
+async function resolveDeliveredLater(c, job) {
+  const leadId = job.replyRecovery?.leadId; if (!leadId) return;
+  await markHistoryUndelivered(c, job, false);
+  await change(job.id, row => row.replyRecovery && !row.replyRecovery.deliveredLaterAt ? { ...row, replyRecovery: { ...row.replyRecovery, deliveredLaterAt: stamp() } } : null);
+  await atomicUpdate("leads", leadKey(c.slug, leadId), row => {
+    if (!row || row.slug !== c.slug || !row.undeliveredReplies?.[job.id]) return {};
+    const { [job.id]: _done, ...rest } = row.undeliveredReplies, deliveredLater = { ...(row.deliveredLater || {}), [job.id]: stamp() };
+    return { value: { ...row, undeliveredReplies: rest, deliveredLater, ...(Object.keys(rest).length ? {} : { outcome: "resolved", resolvedAt: stamp(), resolution: "The text reply was delivered after all." }) } };
+  });
+}
 function inQuietHours(at = new Date()) {
   const parts = new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", weekday: "short", hour: "numeric", hourCycle: "h23" }).formatToParts(at);
   const hour = Number(parts.find(x => x.type === "hour").value), sunday = parts.find(x => x.type === "weekday").value === "Sun";
@@ -374,6 +451,8 @@ function providerAdapter(deadlineAt=Date.now()+10000) {
       await assertPaidSMS(c,job);
       smsWireStarted = true;
       const { response, data } = await request(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`, { method: "POST", headers: { Authorization: "Basic " + Buffer.from(`${sid}:${secret}`).toString("base64"), "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ To: job.to, From: sender.number, MessagingServiceSid: sender.serviceSid, Body: job.body, StatusCallback: url.href }) });
+      // A documented Twilio 4xx error (other than timeout/rate limit) means no message was created.
+      if (!response.ok && response.status >= 400 && response.status < 500 && ![408, 409, 429].includes(response.status) && Number.isSafeInteger(data?.code)) throw new ProviderRejectedError(data.code);
       if (!response.ok || !/^SM[a-f0-9]{32}$/i.test(data.sid || "")) throw new Error("SMS result unconfirmed");
       return { id: data.sid, status: data.status, from: sender.number, serviceSid: sender.serviceSid,sentAt:data.date_created };
       } catch (error) {
@@ -428,13 +507,16 @@ function engine({ provider = null, gate = managedDeliveryEnabled, sender = sende
         await saveManagedConsentAsk(c, job.to, { wording: job.body, messageSid: receipt.id, sentAt: receipt.sentAt, senderNumber: job.from, messagingServiceSid: job.serviceSid });
       }
       const saved = await change(id, row => terminal(row.state) || row.providerId !== receipt.id ? null : ({ ...row, state: receipt.status === "delivered" ? "delivered" : ["failed", "undelivered", "canceled"].includes(receipt.status) ? "failed" : "accepted", lastCheckedAt: stamp(),receiptCheckFailedAt:null,receiptVerifiedAt:stamp(),reasonCode:null, ...(receipt.status === "delivered" ? { deliveredAt: stamp() } : {}) }));
+      if (saved.state === "delivered" && saved.replyRecovery?.leadId) await resolveDeliveredLater(c, saved);
       return retainPaidReceipt(saved, receipt, c);
     }
     if (job.attemptStartedAt) {
       // The same SMS POST is never repeated after an unknown result. Email's real provider
       // idempotency lasts 24h; this implementation conservatively keeps unknown sends for review.
       if (job.state === "sending" && Date.parse(job.claim?.until) > Date.now()) return job;
-      return change(id, row => ({ ...row, state: "uncertain", reasonCode: "provider_receipt_missing" }));
+      const unconfirmed = await change(id, row => row.providerId ? null : ({ ...row, state: "uncertain", reasonCode: "provider_receipt_missing" }));
+      if (!scope && isCustomerReply(unconfirmed) && !unconfirmed.providerId && unconfirmed.state === "uncertain" && !unconfirmed.replyRecovery && Date.now() - Date.parse(unconfirmed.attemptStartedAt) >= REPLY_RECOVERY.unconfirmedMs) return recoverManagedReply(c, unconfirmed);
+      return unconfirmed;
     }
     if (!gate() || (c.status !== "live" && !await testingDeliveryAuthorized(c,job))) return change(id, row => ({ ...row, state: "waiting_platform", reasonCode: c.status !== "live" ? "workspace_not_live" : "delivery_gate_closed" }));
     if (job.postVisit && !(Date.parse(job.postVisit.expiresAt) > Date.now())) return stopPaidBeforeSend(job,c,'post_visit_expired','expired');
@@ -532,6 +614,10 @@ function engine({ provider = null, gate = managedDeliveryEnabled, sender = sende
         }
         return change(id,row=>!row.providerId&&row.claim?.token===token?{...row,state:'waiting_platform',claim:null,attemptStartedAt:null,attempts:Math.max(0,row.attempts-1),reasonCode:error.code,detail:error.message}:null);
       }
+      if (error instanceof ProviderRejectedError && job.channel === "sms") {
+        const rejected = await change(id,row=>!row.providerId&&row.claim?.token===token?{...row,state:'failed',claim:null,reasonCode:'provider_rejected',providerErrorCode:error.code,...(row.paidSMSCapacity||row.paidAnswerCapacity?{paidNotDispatched:true}:{})}:null);
+        return reconcilePaidDelivery(rejected,latest);
+      }
       if (job.paidSMSCapacity && (!providerInvoked || undispatchedSMS.get(error) === paidDispatchIdentity(job))) {
         const blocked = await change(id,row=>!row.providerId&&row.claim?.token===token?{...row,state:'waiting_platform',claim:null,paidNotDispatched:true,reasonCode:'sms_preflight_unavailable'}:null);
         return reconcilePaidDelivery(blocked,latest);
@@ -559,7 +645,11 @@ export async function recordManagedSMSReceipt(id, fields) {
   if(sender.number!==job.from || sender.serviceSid!==job.serviceSid)return false;
   const receipt = await providerAdapter().status({ ...job, providerId: fields.MessageSid });
   if (!receipt || receipt.id !== fields.MessageSid) return false;
-  const saved = await change(id, row => terminal(row.state) || (row.providerId && row.providerId !== receipt.id) ? null : ({ ...row, providerId: receipt.id, from: sender.number, state: receipt.status === "delivered" ? "delivered" : ["failed", "undelivered", "canceled"].includes(receipt.status) ? "failed" : "accepted", reasonCode: null, receiptCheckFailedAt:null,receiptVerifiedAt:stamp(),lastCheckedAt: stamp(), ...(receipt.status === "delivered" ? { deliveredAt: stamp() } : {}) }));
+  // managed-sms-gaps rev 2: a reply already marked undelivered (failed, owner told) is corrected by a verified
+  // "delivered" receipt for the same message. Nothing is ever resent from this path.
+  const correction = receipt.status === "delivered" && isCustomerReply(job) && job.state === "failed" && job.reasonCode !== "provider_rejected";
+  const saved = await change(id, row => (terminal(row.state) && !(correction && row.state === "failed")) || (row.providerId && row.providerId !== receipt.id) ? null : ({ ...row, providerId: receipt.id, from: sender.number, state: receipt.status === "delivered" ? "delivered" : ["failed", "undelivered", "canceled"].includes(receipt.status) ? "failed" : "accepted", reasonCode: null, receiptCheckFailedAt:null,receiptVerifiedAt:stamp(),lastCheckedAt: stamp(), ...(receipt.status === "delivered" ? { deliveredAt: stamp() } : {}) }));
+  if (saved.state === "delivered" && saved.replyRecovery?.leadId) await resolveDeliveredLater(c, saved);
   await retainPaidReceipt(saved, receipt, c);
   if(job.purpose==='followup_consent_ask'){const {saveRequestFollowupAsk}=await import('./request-followup.mjs');await saveRequestFollowupAsk(c,job,{...receipt,from:job.from,serviceSid:job.serviceSid});}
   if(job.consentAsk && !["failed","undelivered","canceled"].includes(receipt.status)){const {saveManagedConsentAsk}=await import("./managed-consent.mjs");await saveManagedConsentAsk(c,job.to,{wording:job.body,messageSid:receipt.id,sentAt:receipt.sentAt,senderNumber:job.from,messagingServiceSid:job.serviceSid});}
@@ -639,7 +729,18 @@ export async function runManagedDelivery({ limit = 3, discoveryLimit = 15, budge
       const result = await engine({deadlineAt:deadline}).run(key);
       if (result?.attempts>before.attempts || result?.lastCheckedAt!==before.lastCheckedAt) processed++;
       if (result?.state === "uncertain") errors.push("delivery_needs_review");
+      if (!scope && result?.state === "failed" && isCustomerReply(result) && result.replyRecovery?.state !== "done") { try { await followUpFailedReply(result); } catch { errors.push("reply_alert_failed"); } }
     } catch { errors.push("delivery_unavailable"); }
+  }
+  // Durable owner alert for failed customer replies (status callbacks and crashes included). Entries that
+  // are handled, or cannot be handled (workspace gone or changed), are flagged so they never fill the window.
+  if (!scope && managedDeliveryEnabled()) {
+    const failed = await strictRead(INDEX, "active");
+    for (const key of Object.keys(failed?.failures || {}).filter(key => !failed.failures[key].followedUp).sort().slice(0, 25)) {
+      if (Date.now() >= deadline) break;
+      try { const row = await strictRead(STORE, key); if (row?.state === "failed" && isCustomerReply(row) && row.replyRecovery?.state !== "done") await followUpFailedReply(row); else if (row) await indexPending(row); }
+      catch { errors.push("reply_alert_failed"); }
+    }
   }
   if(last) { if(scope)await atomicUpdate('managed_delivery_cursors',cursorKey('pending'),()=>({value:{key:last,at:stamp()}}));else await atomicUpdate(INDEX,"active",value=>({value:{...value,cursor:last}})); }
   const index=await strictRead(INDEX,"active"),openFailures=Object.keys(index?.failures || {}).filter(key=>!scope || key.startsWith(prefix)).length;
