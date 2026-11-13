@@ -73,7 +73,7 @@
     $('customersIntro').textContent = SCOPE + (incomplete ? ' Older history is not searched, so earlier customers may be missing.' : '');
   }
   document.addEventListener('mc:desk', function (event) { data = event.detail || null; if (!data) return; customers = build(data); render(); });
-  document.addEventListener('mc:session-expired', function () { data = null; customers = []; list.replaceChildren(); $('customerSearch').value = ''; $('customerSearchStatus').textContent = ''; });
+  document.addEventListener('mc:session-expired', function () { data = null; customers = []; list.replaceChildren(); var search = $('customerSearch'), status = $('customerSearchStatus'); if (search) search.value = ''; if (status) status.textContent = ''; }); // desk.js clears #portalContent on expiry first, so these may already be gone (RC2-D1)
   $('customerSearch').addEventListener('input', render);
   list.addEventListener('click', function (event) { var button = event.target.closest('[data-customer-visit]'); if (button) document.dispatchEvent(new CustomEvent('mc:schedule-open-visit', { detail: { id: button.dataset.customerVisit } })); });
 })();
