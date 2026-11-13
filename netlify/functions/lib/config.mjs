@@ -28,7 +28,7 @@ export const consentLine = (c, lang = "en") => (lang === "es" ? CONSENT_LINE_ES 
 // "cut_off*" carry a generic danger line because the withheld text may have held safety guidance;
 // "*_after_action" are used once a tool saved something, so the customer is not asked to start over.
 // "cut_off_plain" is the sales desk's cut-off (no 911 line on a B2B chat).
-// SMS cost: GSM-7 lines are 1 segment up to 160 characters. "ó", "á", "í" (not in GSM 03.38) make a line
+// SMS cost: GSM-7 lines are 1 segment up to 160 characters. "ó", "á", "í", "ú" (not in GSM 03.38) make a line
 // UCS-2: 1 segment up to 70 characters, then 67 per segment. Per-string counts are in PROPOSALS.md, revision 3.
 export const AGENT_FALLBACKS = {
   en: {
@@ -39,22 +39,22 @@ export const AGENT_FALLBACKS = {
     cut_off_plain: "Sorry, my reply was cut off. Please send your message again.",
   },
   es: {
-    refusal: "No puedo ayudar con eso. Si necesita otra cosa, pregunte.",
-    cut_off: "Perdón, mi respuesta se cortó. Si alguien está en peligro, llame al 911 ahora. Si no, envíe su mensaje otra vez.",
-    cut_off_after_action: "Recibimos sus datos, pero mi respuesta se cortó. Si alguien está en peligro, llame al 911 ahora. Si no, responda aquí con cualquier pregunta.",
-    refusal_after_action: "Gracias, recibimos sus datos. Responda aquí con cualquier pregunta.",
-    cut_off_plain: "Perdón, mi respuesta se cortó. Envíe su mensaje otra vez.",
+    refusal: "No puedo ayudarle con eso. Si necesita otra cosa, con gusto le ayudo.",
+    cut_off: "Disculpe, mi respuesta se cortó. Si alguien está en peligro, llame al 911 ahora. Si no, envíe su mensaje de nuevo.",
+    cut_off_after_action: "Recibimos sus datos, pero mi respuesta se cortó. Si alguien está en peligro, llame al 911 ahora. Si tiene alguna pregunta, responda a este mensaje.",
+    refusal_after_action: "Gracias, recibimos sus datos. Si tiene alguna pregunta, responda a este mensaje.",
+    cut_off_plain: "Disculpe, mi respuesta se cortó. Envíe su mensaje de nuevo.",
   },
   // A Spanish-enabled shop with no known language: English, " / ", then Spanish (the bilingualGreeting
   // order), shortened so every line is at most 134 characters, which is 2 SMS segments even as UCS-2.
   // Owner decision (PO): the alternative is the full English and Spanish lines joined with " / "
   // (112 to 277 characters, up to 5 UCS-2 segments); see PROPOSALS.md, revision 3.
   bilingual: {
-    refusal: "I can't help with that one. Anything else, ask away. / No puedo ayudar con eso. Si necesita otra cosa, pregunte.",
-    cut_off: "Reply cut off. If anyone is in danger, call 911; else resend. / Respuesta cortada. Si hay peligro, llame al 911; si no, reenvíe.",
+    refusal: "I can't help with that one. Anything else, ask away. / No puedo ayudarle con eso. ¿Necesita otra cosa?",
+    cut_off: "Reply cut off. If anyone is in danger, call 911; else resend. / Se cortó la respuesta. Si hay peligro, llame al 911; si no, reenvíe.",
     cut_off_after_action: "Details received; reply cut off. If anyone is in danger, call 911. / Datos recibidos; respuesta cortada. Si hay peligro, llame al 911.",
-    refusal_after_action: "Thanks, your details were received. Reply with any questions. / Gracias, recibimos sus datos. Responda con cualquier pregunta.",
-    cut_off_plain: "Sorry, my reply was cut off. Please send your message again. / Perdón, mi respuesta se cortó. Envíe su mensaje otra vez.",
+    refusal_after_action: "Thanks, your details were received. Reply with any questions. / Gracias, recibimos sus datos. Responda si tiene preguntas.",
+    cut_off_plain: "Sorry, my reply was cut off. Please send your message again. / Disculpe, mi respuesta se cortó. Envíe su mensaje de nuevo.",
   },
 };
 // language: "en", "es" (a record's language, as lang() in desk.mjs reads it) or "bilingual" (a

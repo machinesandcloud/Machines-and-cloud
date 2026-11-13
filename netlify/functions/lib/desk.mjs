@@ -167,14 +167,14 @@ STRINGS.en.managed_cancelled = (c, b) => `${c.business.name}: visit ${b.id} has 
 STRINGS.en.managed_help = (c, contact) => `${c.business.name}: for help contact ${contact}. Reply STOP, ALTO or PARAR to stop texts.`;
 // needs Spanish reviewer
 STRINGS.es.managed_confirmation = (c, b) => oneDot(managedVisitMoved(b)
-  ? `${c.business.name}: su visita ahora es ${visitWhenEs(b)}. El negocio le confirma la hora de llegada. Responda STOP o ALTO para terminar.`
-  : `${c.business.name}: su visita queda guardada para ${visitWhenEs(b)}. El negocio le confirma la hora de llegada. Responda STOP o ALTO para terminar.`);
+  ? `${c.business.name}: su visita ahora es para ${visitWhenEs(b)}. El negocio le confirma la hora de llegada. Responda STOP o ALTO para dejar de recibir mensajes.`
+  : `${c.business.name}: su visita queda registrada para ${visitWhenEs(b)}. El negocio le confirma la hora de llegada. Responda STOP o ALTO para dejar de recibir mensajes.`);
 // needs Spanish reviewer
-STRINGS.es.managed_reminder = (c, b, requested) => oneDot(`${c.business.name}: recordatorio de su visita${requested ? " solicitada" : ""} para ${visitWhenEs(b)}.${requested ? " El negocio le confirma la hora de llegada." : ""} Si algo cambia, responda a este mensaje. Responda STOP o ALTO para terminar.`);
+STRINGS.es.managed_reminder = (c, b, requested) => oneDot(`${c.business.name}: recordatorio de su visita${requested ? " solicitada" : ""} para ${visitWhenEs(b)}.${requested ? " El negocio le confirma la hora de llegada." : ""} Si algo cambia, responda a este mensaje. Responda STOP o ALTO para dejar de recibir mensajes.`);
 // needs Spanish reviewer
 STRINGS.es.managed_cancelled = (c, b) => `${c.business.name}: su visita${visitWhenEs(b) ? " " + visitWhenEs(b).replace(/^el /, "del ") + "," : ""} fue cancelada.`;
 // needs Spanish reviewer
-STRINGS.es.managed_help = (c, contact) => `${c.business.name}: para ayuda, llame o escriba a ${contact}. Responda STOP, ALTO o PARAR para terminar los mensajes.`;
+STRINGS.es.managed_help = (c, contact) => `${c.business.name}: para recibir ayuda, llame o escriba ${/@/.test(contact) ? "a" : "al"} ${contact}. Responda STOP, ALTO o PARAR para dejar de recibir mensajes.`;
 STRINGS.es.consent_yes = (c) => `${c.business.name}: gracias, le escribiremos cuando toque su siguiente mantenimiento. Responda STOP o ALTO para dejar de recibir mensajes.`;
 TEMPLATES.maintenance_reminder = (c, j) => `${c.business.name}: it has been about six months since your last visit${j.issue ? " (" + j.issue + ")" : ""}. A tune-up keeps the system running through the season. Reply here with a day and we will fit you in. Reply STOP to end these.`;
 TEMPLATES_ES.maintenance_reminder = (c, j) => `${c.business.name}: ya pasaron unos seis meses desde su visita anterior${j.issue ? " (" + j.issue + ")" : ""}. Un mantenimiento mantiene el sistema funcionando toda la temporada. Responda con la fecha que le convenga y lo agendamos. Responda STOP o ALTO para dejar de recibir mensajes.`;

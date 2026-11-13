@@ -69,7 +69,7 @@ export async function handleManagedSMS(req) {
     if (consent.keyword === "stop" && isCancelWord(fields.Body)) { try { await cancelKeywordNotice(c, { phone: fields.From, word: fields.Body }); } catch {} }
     if (consent.duplicate && consent.keyword !== "message") return twiml();
     // One confirmation per opt-out, in the customer's language; a repeat or a Twilio-handled keyword gets none.
-    if (consent.keyword === "stop") return consent.alreadySuppressed || fields.OptOutType === "STOP" ? twiml() : twiml(SPANISH_STOP.test(String(fields.Body || "")) ? `${c.business.name}: ya no recibirá más mensajes de este número. Responda EMPEZAR para volver a recibirlos.` : `${c.business.name}: texts stopped. Reply START or EMPEZAR to remove the block.`);
+    if (consent.keyword === "stop") return consent.alreadySuppressed || fields.OptOutType === "STOP" ? twiml() : twiml(SPANISH_STOP.test(String(fields.Body || "")) ? `${c.business.name}: ya no recibirá más mensajes de este número. Responda EMPEZAR o START para volver a recibirlos.` : `${c.business.name}: texts stopped. Reply START or EMPEZAR to remove the block.`);
     if (consent.keyword === "start") return fields.OptOutType === "START" ? twiml() : twiml(c.serviceFollowupProgram?.version==='requested_service_followups_v1'?`${String(c.business.name).trim().slice(0,100)}: your texting block is removed. Each text program needs its own new permission. Use the full instruction for your visit or request. HELP for help; STOP/ALTO/PARAR to end.`:`${c.business.name}: your texting block is removed. Appointment updates need a separate YES. Reply STOP or ALTO to stop.`);
     // AYUDA gets the Spanish reply (needs Spanish reviewer); HELP and INFO keep the English one. The
     // contact choice is unchanged here (PRA-HOMEOWNER-07 owns it).
@@ -153,8 +153,8 @@ export async function processManagedSMS(id) {
     if(!job.reply&&(REVIEW_KEYWORD.test(job.body.trim())||REVIEW_YES.test(job.body.trim()))&&c.postVisit?.reviewRequest===true&&reviewRequestsAvailable()){
       const text=job.body.trim(),es=/RESE/i.test(text),name=c.business.name,latest=await managedSMSConsent(c,job.from);
       const reply=REVIEW_KEYWORD.test(text)?managedReviewConsentQuestion(c,es?'es':'en'):latest?.reviewProof?.messageSid===job.messageSid
-        ?(es?`${name}: listo. Le escribiremos una vez después de cada visita terminada para pedirle una reseña. Pueden aplicarse tarifas de mensajes y datos. HELP para ayuda; STOP/ALTO/PARAR para terminar.`:`${name}: you're set. We'll text once after each completed visit to ask for a review. Message and data rates may apply. HELP for help; STOP/ALTO/PARAR to end.`)
-        :(es?`${name}: los mensajes de reseña no están activados. Envíe RESEÑAS para recibir la pregunta y luego responda SÍ RESEÑAS. HELP para ayuda; STOP/ALTO/PARAR para terminar.`:`${name}: review texts are not set up. Text REVIEWS for the question, then reply YES REVIEWS. HELP for help; STOP/ALTO/PARAR to end.`);
+        ?(es?`${name}: listo. Le escribiremos una vez después de cada visita completada para pedirle una reseña. Pueden aplicarse tarifas de mensajes y datos. AYUDA para ayuda; STOP/ALTO/PARAR para terminar.`:`${name}: you're set. We'll text once after each completed visit to ask for a review. Message and data rates may apply. HELP for help; STOP/ALTO/PARAR to end.`)
+        :(es?`${name}: los mensajes para pedir reseñas no están activados. Envíe RESEÑAS para recibir la pregunta y luego responda SÍ RESEÑAS. AYUDA para ayuda; STOP/ALTO/PARAR para terminar.`:`${name}: review texts are not set up. Text REVIEWS for the question, then reply YES REVIEWS. HELP for help; STOP/ALTO/PARAR to end.`);
       if (!await freshAuthority()) return {ok:true,suppressed:true};
       job=await updateInbound(id,row=>row.claim?.token===token&&!row.reply?{...row,reply,replyPurpose:'reply'}:null);
     }

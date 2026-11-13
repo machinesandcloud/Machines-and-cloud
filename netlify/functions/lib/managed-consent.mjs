@@ -17,7 +17,7 @@ export function managedAppointmentConsentQuestion(c, language = 'en') {
 export const REVIEW_CONSENT_VERSION = "post_visit_review_v1";
 export const REVIEW_KEYWORD = /^(REVIEWS?|RESE[ÑN]AS?)$/i, REVIEW_YES = /^(?:YES|S[IÍ])\s+(REVIEWS?|RESE[ÑN]AS?)$/i;
 export function managedReviewConsentQuestion(c, language = 'en') {
-  if (language === 'es') return `${c.business.name}: ¿quiere un mensaje automatizado después de cada visita terminada con nosotros pidiendo una reseña? Un mensaje por visita. Responda SÍ RESEÑAS para aceptar. Aceptar no es condición de ninguna compra ni servicio. Pueden aplicarse tarifas de mensajes y datos. HELP para ayuda; STOP/ALTO/PARAR para terminar.`;
+  if (language === 'es') return `${c.business.name}: ¿quiere recibir un mensaje automatizado después de cada visita completada para pedirle una reseña? Un mensaje por visita. Responda SÍ RESEÑAS para aceptar. Aceptar no es condición para ninguna compra ni servicio. Pueden aplicarse tarifas de mensajes y datos. AYUDA para ayuda; STOP/ALTO/PARAR para terminar.`;
   return `${c.business.name}: want one automated text after each completed visit with us asking for a review? One text per visit. Reply YES REVIEWS to agree. Agreeing is not a condition of any purchase or service. Message and data rates may apply. HELP for help; STOP/ALTO/PARAR to end.`;
 }
 const currentReviewProof = row => !row?.suppressed && row?.reviewProof?.wordingVersion === REVIEW_CONSENT_VERSION && Date.parse(row.reviewProof.providerDate) > (Number(row.directiveDate) || 0);

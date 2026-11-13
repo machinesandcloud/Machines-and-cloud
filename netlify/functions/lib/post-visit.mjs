@@ -71,7 +71,7 @@ export function ownerVisitCheckIntent(c, b, revision) {
     body: `${c.business.name}: did the visit for ${b.customer_name || 'your customer'} (${b.date}, ${b.window}, ref ${b.id}) happen?\nOpen Schedule in your workspace and choose Mark job done or No-show. Until then the visit stays booked and no follow-up is sent.` };
 }
 
-const STOP_LINE = { en: ' Reply STOP to end texts.', es: ' Responda STOP o ALTO para no recibir más mensajes.' };
+const STOP_LINE = { en: ' Reply STOP to end texts.', es: ' Responda STOP o ALTO para dejar de recibir mensajes.' };
 function customerBody(c, b, kind) {
   const set = spanish(b) ? TEMPLATES_ES : TEMPLATES, l = spanish(b) ? 'es' : 'en';
   const record = kind === 'payment_reminder' ? { ...b, amount: b.postVisit?.invoice?.amount } : b;
