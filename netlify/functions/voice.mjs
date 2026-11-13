@@ -105,7 +105,7 @@ export default async (req) => {
     else if (recent && Date.now() - new Date(recent.at).getTime() < 24 * 3600 * 1000) { textBack = "skipped"; skipReason = "recent"; await logEvent(c, "text_back_skipped", { from, reason: "recent" }); }
     else {
       const text = c.business?.spanish
-        ? `Hi, this is ${name}. Sorry we missed your call. What can we help with, and is it urgent? / Hola, le saluda ${name}. ¿En qué le podemos ayudar? Reply STOP to opt out. / Responda STOP o ALTO para no recibir mensajes.`
+        ? `Hi, this is ${name}. Sorry we missed your call. What can we help with, and is it urgent? Reply STOP to opt out. / Hola, le saluda ${name}. Disculpe que no contestamos. ¿En qué le podemos ayudar? ¿Es urgente? Responda STOP o ALTO para no recibir mensajes.`
         : `Hi, this is ${name}. Sorry we missed your call. What can we help with, and is it urgent? Reply here and we will get you scheduled. Reply STOP to opt out.`;
       // A network error counts as not sent, so the caller still gets a spoken reply (TwiML) instead of an error (rev 5).
       const r = await sendSMS({ to: from, client: c, type: "text_back", body: text }).catch((err) => { console.error("text-back send failed", err); return { ok: false, error: "network error" }; });

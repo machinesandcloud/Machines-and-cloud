@@ -99,21 +99,23 @@ const DAYS_ES = { monday: "lunes", tuesday: "martes", wednesday: "miércoles", t
 // 1 to 11:59 am "de la mañana". "8 a.m." with dots is read like "8 am". Unqualified times stay as written.
 const periodEs = (h, ap) => { const n = Number(h) % 12, pm = /^p/i.test(ap); return !pm ? (n === 0 ? "de la noche" : "de la mañana") : n === 0 ? "del mediodía" : n < 7 ? "de la tarde" : "de la noche"; };
 export const winEs = (w) => String(w || "").replace(/\s+to\s+/gi, " a ").replace(/\b(\d{1,2})(:\d{2})?\s*([ap])\.?\s?m\b\.?/gi, (_, h, min, ap) => `${h}${min || ""} ${periodEs(h, ap)}`);
-export const dateEs = (d) => { const t = String(d || "").toLowerCase().trim(); if (!t || t === "today") return "hoy"; if (t === "tomorrow") return "mañana"; if (/^\d{4}-\d{2}-\d{2}$/.test(t)) return friendlyDate(t, "es"); for (const [en, es] of Object.entries(DAYS_ES)) if (t.startsWith(en.slice(0, 3))) return "el " + es; return t; };
+// "de 8 a 12": a window reads as a range only with "de" in front.
+const deWinEs = (w) => { const t = winEs(w); return /^\d/.test(t) ? "de " + t : t; };
+export const dateEs = (d) => { const t = String(d || "").toLowerCase().trim(); if (!t || t === "today") return "hoy"; if (t === "tomorrow") return "mañana"; if (/^\d{4}-\d{2}-\d{2}$/.test(t)) { const f = friendlyDate(t, "es"); return /^(hoy|mañana)$/.test(f) || !/^[a-záéíóúñ]+, /.test(f) ? f : "el " + f.replace(", ", " "); } for (const [en, es] of Object.entries(DAYS_ES)) if (t.startsWith(en.slice(0, 3))) return "el " + es; return t; };
 export const when = (b) => `${b.date ? friendlyDate(b.date) + ", " : ""}${b.window}`;
 export const TEMPLATES_ES = {
-  reminder_24h: (c, b) => `Recordatorio de ${c.business.name}: su visita es mañana, ${winEs(b.window)}. Responda C para confirmar o R para cambiar la hora.`,
-  reminder_1h: (c, b) => `${c.business.name}: su ventana de llegada (${winEs(b.window)}) empieza pronto. Responda aquí si algo cambió.`,
-  on_my_way: (c, b) => `${c.business.name}: el técnico va en camino a ${b.address}. Por favor asegure a sus mascotas y despeje el área.${b.notes ? " Nota: " + b.notes : ""}`,
-  review_request: (c, j) => `Gracias por elegir ${c.business.name}${j.customer_name ? ", " + j.customer_name.split(" ")[0] : ""}. ¿Cómo lo hicimos? Una reseña rápida en Google ayuda mucho a un negocio pequeño: ${reviewLink(c) || "(enlace de reseña)"}. Responda aquí si algo no estuvo bien.`,
-  review_nudge: (c, j) => `${c.business.name}: si tiene 30 segundos, nos encantaría una reseña: ${reviewLink(c) || "(enlace de reseña)"}. Gracias.`,
-  quote_check: (c, j) => `${c.business.name}: le escribimos sobre la cotización que le enviamos${j.issue ? " para " + j.issue : ""}. ¿Quiere que la cerremos o la dejamos abierta? Responda y nos encargamos.`,
-  payment_reminder: (c, j) => `${c.business.name}: un recordatorio amable de que la factura${j.amount ? " por " + j.amount : ""} sigue pendiente. ${c.business.payLink ? "Pague aquí: " + c.business.payLink : "Responda aquí con cualquier pregunta."}`,
-  referral_ask: (c, j) => `${c.business.name}: gracias de nuevo. Si un vecino necesita ayuda, le agradeceríamos la recomendación. Solo pídale que escriba a este número.`,
+  reminder_24h: (c, b) => `Recordatorio de ${c.business.name}: su visita es mañana, ${deWinEs(b.window)}. Responda C para confirmar o R para cambiar el horario.`,
+  reminder_1h: (c, b) => `${c.business.name}: su horario de llegada (${deWinEs(b.window)}) empieza pronto. Si algo cambia, responda a este mensaje.`,
+  on_my_way: (c, b) => `${c.business.name}: el técnico va en camino a ${b.address}. Por favor, encierre a sus mascotas y despeje la zona.${b.notes ? " Nota: " + b.notes : ""}`,
+  review_request: (c, j) => `Gracias por elegir ${c.business.name}${j.customer_name ? ", " + j.customer_name.split(" ")[0] : ""}. ¿Qué tal estuvo el servicio? Una reseña breve en Google ayuda mucho a un negocio pequeño: ${reviewLink(c) || "(enlace de reseña)"}. Si algo no estuvo bien, responda a este mensaje.`,
+  review_nudge: (c, j) => `${c.business.name}: si tiene 30 segundos, ¿nos deja una reseña? ${reviewLink(c) || "(enlace de reseña)"}. Gracias.`,
+  quote_check: (c, j) => `${c.business.name}: le escribimos sobre el presupuesto que le enviamos${j.issue ? " para " + j.issue : ""}. ¿Prefiere que lo demos por cerrado o que lo dejemos abierto? Responda y nos encargamos.`,
+  payment_reminder: (c, j) => `${c.business.name}: un recordatorio amable de que la factura${j.amount ? " por " + j.amount : ""} sigue pendiente. ${c.business.payLink ? "Puede pagar en este enlace: " + c.business.payLink : "Si tiene alguna pregunta, responda a este mensaje."}`,
+  referral_ask: (c, j) => `${c.business.name}: gracias de nuevo. Si algún vecino necesita ayuda, le agradeceríamos que nos recomendara. Solo pídale que nos escriba a este número.`,
   lead_chase: (c, l, n) => n === 1
-    ? `Hola${l.customer_name ? " " + l.customer_name.split(" ")[0] : ""}, le escribe ${c.business.name}. Vimos su solicitud${l.issue ? " sobre " + l.issue : ""}. ¿Todavía necesita ayuda? Responda con una hora que le convenga y lo agendamos.`
-    : n === 2 ? `${c.business.name}: tenemos espacio ${(c.windows || [])[0] ? "(" + c.windows.map(winEs).join(" o ") + ")" : "esta semana"}. ¿Le interesa?`
-    : `${c.business.name}: última nota de nuestra parte. Si todavía necesita ayuda, responda cuando quiera y lo atendemos.`,
+    ? `Hola${l.customer_name ? " " + l.customer_name.split(" ")[0] : ""}, le escribe ${c.business.name}. Vimos su solicitud${l.issue ? " sobre " + l.issue : ""}. ¿Sigue necesitando ayuda? Responda con el horario que le convenga y le agendamos una cita.`
+    : n === 2 ? `${c.business.name}: tenemos horarios disponibles ${(c.windows || [])[0] ? "(" + c.windows.map(deWinEs).join(" o ") + ")" : "esta semana"}. ¿Le interesa alguno?`
+    : `${c.business.name}: no volveremos a escribirle. Si sigue necesitando ayuda, responda cuando quiera y con gusto le atendemos.`,
 };
 export const STRINGS = {
   en: {
@@ -123,15 +125,15 @@ export const STRINGS = {
     cancelled: (c, b) => `${c.business.name}: your visit (${when(b)}) is cancelled as requested. Text us any time to rebook.`,
   },
   es: {
-    confirmation: (c, b) => `${c.business.name}: su visita queda agendada para ${dateEs(b.date)}, ${winEs(b.window)}. Le enviaremos un recordatorio y otro mensaje cuando el técnico vaya en camino. Responda R para cambiar la hora. Responda STOP o ALTO para no recibir más mensajes.`,
-    fallback_window: (c, owner) => `${c.business.name}: recibimos su solicitud; ${owner} tiene sus datos y le dará seguimiento.`,
-    cancelled: (c, b) => `${c.business.name}: su visita (${dateEs(b.date)}, ${winEs(b.window)}) queda cancelada como pidió. Escríbanos cuando quiera para agendar de nuevo.`,
+    confirmation: (c, b) => `${c.business.name}: su visita queda agendada para ${dateEs(b.date)}, ${deWinEs(b.window)}. Le enviaremos un recordatorio y otro mensaje cuando el técnico vaya en camino. Responda R para cambiar el horario. Responda STOP o ALTO para dejar de recibir mensajes.`,
+    fallback_window: (c, owner) => `${c.business.name}: recibimos su solicitud; ${owner} tiene sus datos y le va a dar seguimiento.`,
+    cancelled: (c, b) => `${c.business.name}: cancelamos su visita (${dateEs(b.date)}, ${deWinEs(b.window)}) a solicitud suya. Para volver a agendar, responda a este mensaje.`,
   },
 };
 // Marketing texts (the maintenance reminder) need a separate written yes; the ask goes once, after a
 // positive review reply, only when the owner has switched it on.
 STRINGS.en.consent_ask = (c) => `${c.business.name}: want a text when your next tune-up is due? Reply YES. Nothing else changes.`;
-STRINGS.es.consent_ask = (c) => `${c.business.name}: ¿quiere un mensaje cuando toque su próximo mantenimiento? Responda SÍ. Nada más cambia.`;
+STRINGS.es.consent_ask = (c) => `${c.business.name}: ¿quiere que le avisemos por mensaje cuando toque su siguiente mantenimiento? Responda SÍ. Lo demás no cambia.`;
 STRINGS.en.consent_yes = (c) => `${c.business.name}: thanks, we will text you when your next tune-up is due. Reply STOP any time.`;
 // Managed (self-service) appointment texts, chosen by the booking's saved language with str().
 // English bodies are the existing managed wording, unchanged byte for byte. The Spanish set needs the
@@ -173,9 +175,9 @@ STRINGS.es.managed_reminder = (c, b, requested) => oneDot(`${c.business.name}: r
 STRINGS.es.managed_cancelled = (c, b) => `${c.business.name}: su visita${visitWhenEs(b) ? " " + visitWhenEs(b).replace(/^el /, "del ") + "," : ""} fue cancelada.`;
 // needs Spanish reviewer
 STRINGS.es.managed_help = (c, contact) => `${c.business.name}: para ayuda, llame o escriba a ${contact}. Responda STOP, ALTO o PARAR para terminar los mensajes.`;
-STRINGS.es.consent_yes = (c) => `${c.business.name}: gracias, le escribiremos cuando toque su próximo mantenimiento. Responda STOP o ALTO cuando quiera.`;
+STRINGS.es.consent_yes = (c) => `${c.business.name}: gracias, le escribiremos cuando toque su siguiente mantenimiento. Responda STOP o ALTO para dejar de recibir mensajes.`;
 TEMPLATES.maintenance_reminder = (c, j) => `${c.business.name}: it has been about six months since your last visit${j.issue ? " (" + j.issue + ")" : ""}. A tune-up keeps the system running through the season. Reply here with a day and we will fit you in. Reply STOP to end these.`;
-TEMPLATES_ES.maintenance_reminder = (c, j) => `${c.business.name}: ya pasaron unos seis meses desde su última visita${j.issue ? " (" + j.issue + ")" : ""}. Un mantenimiento mantiene el sistema funcionando toda la temporada. Responda con un día y lo agendamos. Responda STOP o ALTO para no recibir más.`;
+TEMPLATES_ES.maintenance_reminder = (c, j) => `${c.business.name}: ya pasaron unos seis meses desde su visita anterior${j.issue ? " (" + j.issue + ")" : ""}. Un mantenimiento mantiene el sistema funcionando toda la temporada. Responda con la fecha que le convenga y lo agendamos. Responda STOP o ALTO para dejar de recibir mensajes.`;
 export const customerKey = (slug, phone) => `${slug}/${phone}`;
 export const getCustomer = async (slug, phone) => (await get("customers", customerKey(slug, phone))) || { slug, phone };
 export const saveCustomer = (rec) => put("customers", customerKey(rec.slug, rec.phone), { ...rec, updatedAt: new Date().toISOString() });

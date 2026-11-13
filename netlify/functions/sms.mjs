@@ -73,11 +73,11 @@ export default async (req) => {
     if (params.OptOutType) return twiml(""); // Twilio already sent the carrier-standard confirmation
     // Not stored and not a keyword Twilio enforces (a phrase, ALTO...): do not claim it is done; ask for STOP.
     if (!stored && !TWILIO_STOP.test(body)) return twiml(SPANISH_STOP.test(body) ? `${name}: no pudimos completar su solicitud ahora. Responda STOP para no recibir más mensajes.` : `${name}: we could not complete your request right now. Please reply STOP to stop all texts from this number.`);
-    if (SPANISH_STOP.test(body)) return twiml(`${name}: ya no recibirá más mensajes de este número.${told ? ` Le avisamos a ${c.owner?.name || "el dueño"} sobre su visita.` : ""} Responda EMPEZAR para volver a recibirlos.`);
+    if (SPANISH_STOP.test(body)) return twiml(`${name}: ya no recibirá más mensajes de este número.${told ? ` Ya le avisamos ${c.owner?.name ? "a " + c.owner.name : "al negocio"} sobre su visita.` : ""} Responda EMPEZAR para volver a recibirlos.`);
     return twiml(`${name}: you're unsubscribed and will get no more texts from this number.${told} Reply START to resume.`);
   }
   const optState = await optOutStatus(from), isOptedOut = optState !== false, unknownState = optState === null;
-  if (isOptedOut && ((unknownState ? START_KEYWORD.test(body) : START_RE.test(body)) || keyword === "start")) { await clearOptOut(from); await logEvent(c, "opt_in", { from }); return twiml(/^\s*(empezar|iniciar|s[ií])/i.test(body) ? `${name}: volverá a recibir nuestros mensajes. Responda STOP o ALTO cuando quiera.` : `${name}: you're subscribed again. Reply STOP any time.`); }
+  if (isOptedOut && ((unknownState ? START_KEYWORD.test(body) : START_RE.test(body)) || keyword === "start")) { await clearOptOut(from); await logEvent(c, "opt_in", { from }); return twiml(/^\s*(empezar|iniciar|s[ií])/i.test(body) ? `${name}: volverá a recibir nuestros mensajes. Responda STOP o ALTO cuando quiera para dejar de recibirlos.` : `${name}: you're subscribed again. Reply STOP any time.`); }
 
   // Owner commands. An opted-out owner's command still runs, but no text is sent back.
   if (isOwner) {
@@ -139,13 +139,13 @@ export default async (req) => {
     const b = bookings[0];
     if (/^\s*(c|confirm|confirmed|yes)\s*[.!]*\s*$/i.test(body)) {
       await confirmVisit(c, b);
-      const msg = b.language === "es" ? `${name}: confirmada para ${dateEs(b.date)}, ${winEs(b.window)}. Nos vemos.` : `${name}: confirmed for ${when(b)}. See you then.`;
+      const msg = b.language === "es" ? `${name}: su visita queda confirmada para ${dateEs(b.date)}, ${winEs(b.window).replace(/^(\d)/, "de $1")}. ¡Nos vemos!` : `${name}: confirmed for ${when(b)}. See you then.`;
       conv.messages.push({ role: "user", content: body, at: new Date().toISOString() }, { role: "assistant", content: msg + `\n[Done: visit confirmed, ref ${b.id}]`, at: new Date().toISOString() });
       await saveConversation(conv);
       return twiml(msg);
     }
     if (/^\s*(r|reschedule)\s*[.!]*\s*$/i.test(body)) {
-      const msg = b.language === "es" ? `${name}: sin problema. ¿Qué día y ventana le conviene? Ofrecemos ${(c.windows || []).map((w) => w.replace(/\s+to\s+/, " a ")).join(" o ")}.` : `${name}: no problem. Which day and window works? We offer ${(c.windows || []).join(" or ")}.`;
+      const msg = b.language === "es" ? `${name}: con gusto. ¿Qué día y horario le conviene? Tenemos ${(c.windows || []).map((w) => winEs(w).replace(/^(\d)/, "de $1")).join(" o ")}.` : `${name}: no problem. Which day and window works? We offer ${(c.windows || []).join(" or ")}.`;
       conv.messages.push({ role: "user", content: body, at: new Date().toISOString() }, { role: "assistant", content: msg, at: new Date().toISOString() });
       await saveConversation(conv);
       return twiml(msg);

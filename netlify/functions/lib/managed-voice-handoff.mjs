@@ -26,7 +26,7 @@ function destinations(c,row,call) {
 }
 function speech(call) {
   const es = call.handoff?.language === 'es';
-  return `<Say${es?' language="es-MX"':''}>${es?'No pudimos confirmar la conexión con una persona. Su solicitud está guardada para que el negocio la revise. No hay una hora de devolución de llamada confirmada. Si existe peligro inmediato, llame al 911.':'We could not confirm a connection with a person. Your request is saved for the shop to review. A callback time has not been confirmed. If there is immediate danger, call 911.'}</Say><Hangup/>`;
+  return `<Say${es?' language="es-MX"':''}>${es?'No pudimos confirmar la conexión con una persona. Su solicitud quedó guardada para que el negocio la revise. No hay una hora confirmada para devolverle la llamada. Si hay un peligro inmediato, llame al 911.':'We could not confirm a connection with a person. Your request is saved for the shop to review. A callback time has not been confirmed. If there is immediate danger, call 911.'}</Say><Hangup/>`;
 }
 const details = value => Object.fromEntries(['customer_name','phone','issue','address','wanted','language','urgency'].map(key=>[key,typeof value[key]==='string'?value[key].trim():key==='language'?'en':'']));
 function result(handoff,input) {
@@ -168,7 +168,7 @@ export async function handleManagedHumanCallback({row,params,url,site,current,re
       if(paid){try{await paid.noEmission(index);}catch{}}return recover();
     }
     const es=h.language==='es';
-    return xml(`<Say${es?' language="es-MX"':''}>${es?'Intentaremos conectarle con una persona. Si nadie acepta, su solicitud quedará guardada.':'We will try to connect you with a person. If nobody accepts, your request stays saved.'}</Say><Dial callerId="${escape(row.number.number)}" answerOnBridge="true" timeout="25" timeLimit="${remaining}" action="${escape(urlFor(site,row,parent,'handoff-status',index))}" method="POST"><Number url="${escape(urlFor(site,row,parent,'handoff-screen',index))}" method="POST">${escape(h.destinations[index])}</Number></Dial>`);
+    return xml(`<Say${es?' language="es-MX"':''}>${es?'Vamos a intentar comunicarle con una persona. Si nadie contesta, su solicitud quedará guardada.':'We will try to connect you with a person. If nobody accepts, your request stays saved.'}</Say><Dial callerId="${escape(row.number.number)}" answerOnBridge="true" timeout="25" timeLimit="${remaining}" action="${escape(urlFor(site,row,parent,'handoff-status',index))}" method="POST"><Number url="${escape(urlFor(site,row,parent,'handoff-screen',index))}" method="POST">${escape(h.destinations[index])}</Number></Dial>`);
   }
 }
 
