@@ -132,8 +132,14 @@
   function visitStatusLabel(visit) { return customerVisitRequest(visit) ? 'Visit requested' : visit && ({done:'Job done',no_show:'No-show'})[visit.status] || visit && ownerWord(visit.status) || ''; }
   function visitRef(id) { id=String(id||''); return id.length>12?id.slice(0,8).toUpperCase():id; }
   // A plain receipt: what was saved and when, and Calendar delivery only when the owner chose Calendar (PRA-DESK-13).
-  function visitReceipt(input,result) { var v=result.visit||{},calendar=(data&&data.client&&data.client.onboarding&&data.client.onboarding.desiredChannels||[]).indexOf('calendar')>=0||!!(data&&data.client&&data.client.calendar&&data.client.calendar.connected),when=visitDateLabel(v.date)+(v.window?', '+v.window:''),head=({create_visit:'Visit added in your workspace for '+when+'.',reschedule_visit:'Visit rescheduled in your workspace to '+when+'.',cancel_visit:'Visit cancelled in your workspace.'})[input&&input.action]||result.message; return head+(calendar?(result.calendar?' Calendar: '+result.calendar.detail:' Calendar delivery is not confirmed.'):''); }
+  function visitReceipt(input,result) { var v=result.visit||{},calendar=(data&&data.client&&data.client.onboarding&&data.client.onboarding.desiredChannels||[]).indexOf('calendar')>=0||!!(data&&data.client&&data.client.calendar&&data.client.calendar.connected),when=visitDateLabel(v.date)+(v.window?', '+v.window:''),head=({create_visit:'Visit added in your workspace for '+when+'.',reschedule_visit:'Visit rescheduled in your workspace to '+when+'.',cancel_visit:'Visit cancelled in your workspace.'})[input&&input.action]||result.message; var connected=!!(data&&data.client&&data.client.calendar&&data.client.calendar.connected); return head+(calendar?(result.calendar?' Calendar: '+result.calendar.detail:connected?' Calendar delivery is not confirmed.':' Google Calendar is not connected, so this change is only in your workspace.'):''); }
+  // PRA-FC-06: say plainly whether the customer heard about the change. Only a live texting connection can notify them, and even then delivery is unconfirmed here.
+  function visitCustomerNote(visit) { var p=String(visit&&visit.phone||''),ok=visitPhoneOk(p),texting=!!(data&&data.connections&&data.connections.messaging&&data.connections.messaging.active===true); return texting?' An appointment text goes only if the customer agreed to texts, and its delivery is not confirmed yet. To be sure they know, '+(ok?'call or text them at '+ownerPhone(p)+'.':'contact them directly.'):' The customer was not notified. '+(ok?'Call or text them at '+ownerPhone(p)+'.':'No phone is saved for this customer.'); }
   function visitDetailsText(visit) { return 'Ref '+visitRef(visit.id)+' · '+visitStatusLabel(visit)+' · '+visitDateLabel(visit.date)+' · '+visit.window+'\n'+(visit.issue || '')+' · '+(visit.address || 'Address not saved')+(customerVisitRequest(visit)?'\nContact the customer to confirm the arrival window.':''); }
+  // PRA-FC-01: whenever the visit asks the owner to contact the customer, the name and a tap-to-call/text number sit beside it.
+  function visitPhoneOk(phone) { return /^\+\d{10,15}$/.test(String(phone||'')); }
+  function visitContactHtml(visit) { var p=String(visit.phone||''); return '<span class="visit-contact" data-visit-contact>Customer: '+esc(visit.customer_name||'Name not given')+(visitPhoneOk(p)?'<br><a href="tel:'+esc(p)+'" data-visit-call>Call '+esc(ownerPhone(p))+'</a> <a href="sms:'+esc(p)+'" data-visit-text>Text '+esc(ownerPhone(p))+'</a>':' · No phone saved')+'</span>'; }
+  function setVisitDetails(visit) { var lines=visitDetailsText(visit).split('\n'),ask=customerVisitRequest(visit),html=esc(lines[0])+'<br>'+esc(lines[1])+'<br>'+visitContactHtml(visit); if(ask)html+='<br>'+(visitPhoneOk(visit.phone)?'Contact the customer to confirm the arrival window.':'Add a phone number with Edit details so you can confirm the arrival window with the customer.'); $('visitDetails').innerHTML=html; }
   var VISIT_EDIT_FIELDS=[['visitEditName','customer_name'],['visitEditPhone','phone'],['visitEditAddress','address'],['visitEditIssue','issue']];
   function visitFieldsDisabled(disabled) { ['visitName','visitPhone','visitAddress','visitIssue','visitDate','visitWindow','visitCancelConfirm','saveVisit','cancelVisit','visitCompleteRequest','visitEditName','visitEditPhone','visitEditAddress','visitEditIssue','saveVisitDetails','discardVisitDetails','editVisitDetails'].forEach(function(id){$(id).disabled=disabled;}); }
   function visitErrorsClear() { ['visitName','visitPhone','visitAddress','visitIssue','visitDate','visitWindow','visitEditName','visitEditPhone','visitEditAddress','visitEditIssue'].forEach(function(id){$(id).removeAttribute('aria-invalid');$(id+'Error').textContent='';}); }
@@ -164,7 +170,7 @@
     var editValues=visitEditing ? visitPending : visitSelected; VISIT_EDIT_FIELDS.forEach(function(pair){$(pair[0]).value=!creating && editValues[pair[1]] || '';});
     $('visitEditForm').hidden=!visitEditing; $('editVisitDetails').hidden=creating || visitEditing || !!visitPending || !visitSelected.canChange; $('editVisitDetails').setAttribute('aria-expanded',visitEditing?'true':'false');
     $('visitTitle').textContent=creating?'Add a customer visit':visitSelected.customer_name || 'Customer visit';
-    $('visitDetails').textContent=creating?'Save the agreed visit details. Availability is checked before the visit is created.':visitDetailsText(Object.assign({},row,visitSelected));
+    if(creating)$('visitDetails').textContent='Save the agreed visit details. Availability is checked before the visit is created.';else setVisitDetails(Object.assign({},row,visitSelected));
     var pending=visitPending, date=pending && pending.date || visitSelected.date || (!id&&/^\d{4}-\d{2}-\d{2}$/.test(selectedDate||'')?selectedDate:''), windowValue=pending && pending.window || visitSelected.window || visitPrefill && visitPrefill.window;
     visitCalendarReturn=visitOpener?.closest('#scheduleCalendar')?{calendar:true,id:id||null,date:date||null}:null;
     $('visitDate').value=date || ''; var windows=(data.client.windows || []).slice(); if(windowValue && windows.indexOf(windowValue)<0)windows.push(windowValue);
@@ -227,8 +233,8 @@
       var result=await apiRequest('POST',visitPending); if(leaving || generation!==portalGeneration)return; visitSelected=result.visit;
       var source=scheduleRows.find(function(row){return row.id===result.visit.id;})||(data.bookings||[]).find(function(row){return row.id===result.visit.id;})||{};
       $('visitTitle').textContent=result.visit.customer_name||'Customer visit';
-      $('visitDetails').textContent=visitDetailsText(Object.assign({},source,result.visit));
-      $('visitMessage').textContent=visitReceipt(visitPending,result)+' Customer notification delivery is not confirmed.'+visitDetailsNote(result)+visitRequestNote(result);
+      setVisitDetails(Object.assign({},source,result.visit));
+      $('visitMessage').textContent=visitReceipt(visitPending,result)+visitCustomerNote(result.visit)+visitDetailsNote(result)+visitRequestNote(result);
       if(result.complete){visitPending=null;await storeVisitInput(null);if(leaving || generation!==portalGeneration)return; $('visitChangeForm').hidden=true; $('visitEditForm').hidden=true; $('visitFromRequest').hidden=true; $('retryVisit').hidden=true; visitEditing=false; visitPrefill=null;}else{$('retryVisit').hidden=false; $('visitMessage').textContent+=' Retry the saved change to finish preparing its delivery.';}
       $('visitMessage').focus(); await load();
     } catch(error) {
@@ -278,7 +284,7 @@
       var result=await apiRequest('POST',postVisitPending);if(leaving||generation!==portalGeneration)return;
       postVisitPending=null;target.textContent=result.message;
       await load();if(leaving||generation!==portalGeneration)return;
-      if(type!=='settings'&&$('visitDialog').open){var fresh=(data.bookings||[]).find(function(item){return item.id===postVisitId;});if(fresh){visitSelected=Object.assign({},fresh.ownerVisit);$('visitDetails').textContent=visitDetailsText(Object.assign({},fresh,fresh.ownerVisit));$('visitChangeForm').hidden=!fresh.ownerVisit.canChange;}}
+      if(type!=='settings'&&$('visitDialog').open){var fresh=(data.bookings||[]).find(function(item){return item.id===postVisitId;});if(fresh){visitSelected=Object.assign({},fresh.ownerVisit);setVisitDetails(Object.assign({},fresh,fresh.ownerVisit));$('visitChangeForm').hidden=!fresh.ownerVisit.canChange;}}
       target.focus();
     }catch(error){
       if(leaving||generation!==portalGeneration)return;
@@ -1852,6 +1858,11 @@
   function greet() { clearPracticePending(); practiceStatus(''); msgs.innerHTML = ''; add('a', (data && data.client.widget.greeting) || 'Hi, what can we help with today?'); }
   $('newChat').addEventListener('click', function () { if (chatBusy || leaving) return; contact = 't' + Math.random().toString(36).slice(2, 10); transcript = []; greet(); $('testPreview').textContent = 'Send a practice message to see the result here.'; });
   $('chatIn').addEventListener('keydown', function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('chatForm').requestSubmit(); } });
+  // PRA-FC-04: name the real reason a practice reply did not count, and say whether an earlier check of the same answers still does.
+  function practiceNotSavedText(test) {
+    var why = ({ booking_details: 'the practice visit was not saved because the name, phone, address, problem or a listed future arrival window was missing. Practice again and give all of them.', emergency_booking: 'it was treated as an emergency, and emergencies are never booked. Practice an ordinary repair request to complete the check.', handoff_reason: 'the practice handoff was refused. Send the question again.', tool_unavailable: 'the front desk tried an action that practice does not support. Send the question again.', reply_incomplete: 'the reply did not finish. Send the question again.', rules_changed: 'your business details changed while it ran. Practice again with the saved details.', workspace_changed: 'your workspace changed while it ran. Reload the page and practice again.' })[test && test.notRecordedReason];
+    return (why ? 'This reply did not count as a check: ' + why : 'This reply did not count as a check. Send the question again.') + (test && test.earlierCheckCurrent ? ' Your earlier check of these same answers still counts.' : '');
+  }
   var chatBusy = false;
   window.addEventListener('pagehide', cancelPracticeReply);
   $('chatForm').addEventListener('submit', async function (event) {
@@ -1875,7 +1886,7 @@
         transcript.push({ role: 'assistant', content: out.reply });
         var previews = (out.events || []).filter(function (item) { return item.type === 'test_booking' || item.type === 'test_lead'; });
         $('testPreview').textContent = previews.length ? previews.map(function (item) { var values = item.data || {}; return (item.type === 'test_booking' ? 'Practice visit preview' : 'Practice handoff preview') + '\n' + Object.keys(values).map(function (key) { return key.replace(/_/g, ' ') + ': ' + values[key]; }).join('\n'); }).join('\n\n') + '\n\nNo real visit, message or calendar event was created.' : 'Practice reply completed. No real visit, message or calendar event was created.';
-        if (out.test && !out.test.proofRecorded) $('testPreview').textContent += '\nThis check was not saved. Retry with the current business details before continuing.';
+        if (out.test && !out.test.proofRecorded) $('testPreview').textContent += '\n' + practiceNotSavedText(out.test);
       }
     }
     try {

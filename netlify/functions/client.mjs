@@ -351,7 +351,12 @@ async function handle(req, context) {
     if(b?.action==='request_followup'){if(!selfService||!accessOriginAllowed(origin))return json({error:'forbidden'},403);const {updateRequestAutomation}=await import('./lib/request-followup.mjs');return json(await updateRequestAutomation(c,session,b),200,{'Cache-Control':'no-store'});}
     if(b?.action==='request_followthrough'){
       if(!selfService || !accessOriginAllowed(origin))return json({error:'forbidden'},403);
-      return json(await updateRequestFollowthrough(c,session,b),200,{'Cache-Control':'no-store'});
+      const saved=await updateRequestFollowthrough(c,session,b);
+      // PRA-FC-02: completing follow-up is the owner's answer to the request, so it also acknowledges its
+      // waiting alert (as a booking already does) and the request moves to Done in one step. The journal
+      // entry is saved first; if this acknowledgment cannot be confirmed the Acknowledge button stays.
+      if(b.type==='complete'&&saved?.request?.state?.completedAt){let acknowledged=null;try{acknowledged=await ackAlertsFor(c,b.requestId,'followthrough_complete');}catch{}saved.request.alertAcknowledged=acknowledged;}
+      return json(saved,200,{'Cache-Control':'no-store'});
     }
     if (b?.action === 'start_website_check') {
       if (!selfService || !accessOriginAllowed(origin)) return json({ error: 'forbidden' }, 403);

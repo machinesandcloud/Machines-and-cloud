@@ -203,6 +203,8 @@ export function ndjsonResponse(run, extraHeaders = {}) {
         if (out.simulation === true && typeof out.test?.proofRecorded === "boolean") {
           simulation.test = { proofRecorded: out.test.proofRecorded };
           if (typeof out.test.revision === "string" && /^[a-f0-9]{64}$/.test(out.test.revision)) simulation.test.revision = out.test.revision;
+          // Only a fixed set of practice reasons reaches the browser (PRA-FC-04).
+          if (out.test.proofRecorded === false && ["booking_details","emergency_booking","handoff_reason","tool_unavailable","reply_incomplete","rules_changed","workspace_changed"].includes(out.test.notRecordedReason)) { simulation.test.notRecordedReason = out.test.notRecordedReason; simulation.test.earlierCheckCurrent = out.test.earlierCheckCurrent === true; }
         }
         send({ t: "done", reply: out.reply, events: out.events, ...simulation });
       } catch (err) {

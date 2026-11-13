@@ -43,15 +43,15 @@ export function ownerTestTool(client, name, input) {
         notes: clean(input?.notes), unsure: clean(input?.unsure),
       };
       if (!data.customer_name || !data.phone || !data.address || !data.issue || !window || isElapsedWindow(date, window)) {
-        return { content: "Nothing was booked, including in this test. Ask for the missing contact, address, issue or a valid listed future window.", is_error: true };
+        return { content: "Nothing was booked, including in this test. Ask for the missing contact, address, issue or a valid listed future window.", is_error: true, refusal: "booking_details" };
       }
-      if (data.urgency === "emergency") return { content: "Nothing was booked. Give the safety instructions first and preview a human handoff; never book a safety emergency.", is_error: true };
+      if (data.urgency === "emergency") return { content: "Nothing was booked. Give the safety instructions first and preview a human handoff; never book a safety emergency.", is_error: true, refusal: "emergency_booking" };
       const event = { type: "test_booking", id: `test-${id(5)}`, simulation: true, data };
       return { content: `TEST ONLY: visit preview saved, ref ${event.id}. No actual appointment, capacity reservation, calendar event, reminder, text or owner notification was created. Describe what would happen in the test, not an action that really happened.`, event };
     }
     if (name === "notify_owner") {
       const reasons = ["lead", "handoff", "emergency", "question", "status_check", "wants_call", "spam"];
-      if (!reasons.includes(input?.reason)) return { content: "Choose a valid test handoff reason.", is_error: true };
+      if (!reasons.includes(input?.reason)) return { content: "Choose a valid test handoff reason.", is_error: true, refusal: "handoff_reason" };
       const data = {
         customer_name: clean(input?.customer_name, 120), phone: previewPhone(input?.phone),
         address: clean(input?.address), issue: clean(input?.issue),
@@ -61,9 +61,9 @@ export function ownerTestTool(client, name, input) {
       const event = { type: "test_lead", id: `test-${id(5)}`, simulation: true, data };
       return { content: `TEST ONLY: ${data.reason === "spam" ? "spam" : "owner request"} preview saved, ref ${event.id}. No one was contacted, no actual lead was changed and no callback, alert, reminder or escalation was scheduled. Safety guidance must still lead the final test reply.`, event };
     }
-    return { content: "That tool is not available in the private test.", is_error: true };
+    return { content: "That tool is not available in the private test.", is_error: true, refusal: "tool_unavailable" };
   } catch {
-    return { content: "Nothing was booked or sent. Check the test input and use a real future date and a listed window.", is_error: true };
+    return { content: "Nothing was booked or sent. Check the test input and use a real future date and a listed window.", is_error: true, refusal: "booking_details" };
   }
 }
 
@@ -86,15 +86,16 @@ export async function runOwnerTest({ client, contact, messages, onText, aiProof 
   }));
   // A rehearsal whose final turn was withheld (cut off or refused) did not show a complete answer,
   // so it must not certify the revision.
-  let toolFailed = false, turnWithheld = false;
+  let toolFailed = false, turnWithheld = false, refusal = null;
   const testMode = process.env.MC_FAKE_MODEL === "1" ? "fake" : "live";
   await assertCurrentWorkspace(client);
   const modelFetch = await selfServiceAIModelFetch(client, aiProof);
   const out = await runAgent({ system, tools, messages: toApiMessages(currentMessages), onText: forward,
     execTool: async (name, input) => {
       await assertCurrentWorkspace(client);
-      const result = ownerTestTool(client, name, input);
-      if (result.is_error) toolFailed = true;
+      // PRA-FC-04: keep why a practice action was refused so the owner sees the real cause, not a generic one.
+      const { refusal: reason, ...result } = ownerTestTool(client, name, input);
+      if (result.is_error) { toolFailed = true; refusal = reason || "tool_unavailable"; }
       return result;
     }, maxTokens: 1500, dropToolPreamble: true, modelFetch, logSlug: client.slug, fallbackLanguage: agentFallbackLanguage(client), onWithheld: () => { turnWithheld = true; } });
   await assertCurrentWorkspace(client);
@@ -107,10 +108,14 @@ export async function runOwnerTest({ client, contact, messages, onText, aiProof 
   };
   await atomicUpdate("owner_tests", key, () => ({ value: test }));
   // A stale test must not certify newer owner rules. Preserve every unrelated client field.
+  let notRecordedReason = null, earlierCheckCurrent = false;
   const proofRecorded = await atomicUpdate("clients", client.slug, (current) => {
-    if (toolFailed || turnWithheld || !current || current.ownerKey !== client.ownerKey || supportedWorkspace(client) && (!supportedWorkspace(current) || workspaceTenant(current) !== workspaceTenant(client)) || configurationRevision(current) !== revision) return { result: false };
+    const sameWorkspace = !!current && current.ownerKey === client.ownerKey && !(supportedWorkspace(client) && (!supportedWorkspace(current) || workspaceTenant(current) !== workspaceTenant(client)));
+    notRecordedReason = !sameWorkspace ? "workspace_changed" : configurationRevision(current) !== revision ? "rules_changed" : turnWithheld ? "reply_incomplete" : toolFailed ? refusal : null;
+    earlierCheckCurrent = sameWorkspace && configurationRevision(current) === revision && current.setupProof?.testedRevision === revision;
+    if (notRecordedReason) return { result: false };
     return { value: { ...current, setupProof: { ...current.setupProof, testedRevision: revision, testedAt: completedAt, testMode } }, result: true };
   });
   await assertCurrentWorkspace(client);
-  return { reply, events: out.events, simulation: true, test: { revision, completedAt, proofRecorded, testMode } };
+  return { reply, events: out.events, simulation: true, test: { revision, completedAt, proofRecorded, testMode, ...(proofRecorded ? {} : { notRecordedReason, earlierCheckCurrent }) } };
 }
