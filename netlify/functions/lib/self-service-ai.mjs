@@ -18,6 +18,9 @@ function globalLimit() {
   if (!/^\d+$/.test(raw) || Number(raw) > GLOBAL_MAX) throw new Error('Invalid self-service AI limit');
   return Number(raw); // Zero is the operator kill switch; invalid configuration fails closed.
 }
+export const AI_GLOBAL_MAX = GLOBAL_MAX;
+// True when the configured shared limit is already the code maximum, so operator advice must not say "raise".
+export function aiGlobalLimitAtMax() { try { return globalLimit() >= GLOBAL_MAX; } catch { return false; } }
 // Owner practice has its own share carved out of the global daily limit (PRA-DESK-11), so practice never lowers
 // customer chat capacity and MC_SELF_SERVICE_AI_GLOBAL_DAILY_LIMIT still bounds every turn (practice + customer <= global).
 // Recommended default share: one fifth of the global limit, at least two shops' 20 (one shop's full practice still

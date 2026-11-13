@@ -50,6 +50,8 @@ await check('OPS-06: operator issue names the platform limit, and a shop-only li
   await budget({ 'zz-other:t1': { private: 0, web: 25 } });
   let issue = (await operator.customerView(await store.get('clients', shop.slug), true)).issues.find(i => i.id === 'allowance');
   assert.equal(issue?.title, 'Platform AI limit reached'); assert.match(issue.detail, /shared platform daily limit/);
+  // Release 4 follow-up (QA-REVIEW-R2 residual): below the maximum the issue may advise raising, with the cap.
+  assert.match(issue.detail, /Raise MC_SELF_SERVICE_AI_GLOBAL_DAILY_LIMIT \(up to 500\)/);
   // Global 500 (practice 100, customer 400): the shop's own 50 binds first, so the shop wording stays.
   process.env.MC_SELF_SERVICE_AI_GLOBAL_DAILY_LIMIT = '500';
   try {
@@ -57,6 +59,11 @@ await check('OPS-06: operator issue names the platform limit, and a shop-only li
     const a = await ai.getAIAllowance(shop.c); assert.equal(a.web.remaining, 0); assert.notEqual(a.web.platformLimited, true);
     issue = (await operator.customerView(await store.get('clients', shop.slug), true)).issues.find(i => i.id === 'allowance');
     assert.equal(issue?.title, 'Daily AI allowance reached');
+    // Release 4 follow-up: at the 500 maximum the platform-limit issue must not advise raising the limit.
+    await budget(Object.fromEntries(Array.from({ length: 8 }, (_, i) => [`zz-full${i}:t`, { private: 0, web: 50 }])));
+    issue = (await operator.customerView(await store.get('clients', shop.slug), true)).issues.find(i => i.id === 'allowance');
+    assert.equal(issue?.title, 'Platform AI limit reached', 'customer pool 400/400 at global 500');
+    assert.doesNotMatch(issue.detail, /Raise/); assert.match(issue.detail, /already at its 500 maximum; more daily capacity is an owner\/PO decision/);
   } finally { delete process.env.MC_SELF_SERVICE_AI_GLOBAL_DAILY_LIMIT; }
 });
 
