@@ -1,0 +1,673 @@
+{
+ "at": "2026-11-13T15:20:44.477Z",
+ "root": "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/r4/r4-gate-a11y",
+ "mode": "offline: memory store, fake model, in-process handlers, browser non-loopback aborted, Node sockets denied",
+ "sources": {
+  "desk.html": "73714ce3dbe1f0f5f3a1600844d531715c3c37feab83ebda5f29bd9537d81238",
+  "desk.js": "68613d2f3fdb1417f20df67502a3a9fb508990a878906409b5e43df9058608cb",
+  "desk-visits.js": "086aa3c91421d94c12f13e5041443332fb2b5d78007a8dfcde9e4f48fe5a78c0",
+  "desk-customers.js": "e102e165879c3705280688f264a10c22551c2511dce5e021a567cb30a7750fbe",
+  "desk-requests.js": "868b5d85b6d79a73272414518b0e13631e8d9763b6405708daae12f56672624d",
+  "desk.css": "ef1d4be85518fb43441b1d669317864bf40e3f356f77cd3cd57c05d49afe0305",
+  "product-ui.css": "679676c850fa83baa37b435fe6debe5ce173d2b530a9cb46e184eaec3211e744",
+  "design-system.css": "21af095225934f2575423bd4f2b478d493cc73a2300f8ce66ee551b90cdb79bd",
+  "desk-calendar.css": "5563d559cd82438d51e532c803e6a04e6ed881460d49dc7d0101fddc71845d2b",
+  "onboard.css": "8fc499deeed754f7a9d39e8597474edd11342bff908531ab3ec98ff0c1375102",
+  "onboard.html": "af59ee46e6c25be1deef4dcbd5ca5ad66cea8daeed594b32025f9a6fedaf09a6"
+ },
+ "checks": [
+  {
+   "name": "A01-request-Escape-1440: saved visit from a request returns focus to that request's View request",
+   "pass": true,
+   "ms": 932,
+   "detail": {
+    "findFocus": {
+     "tag": "button",
+     "id": "visitFindTimes",
+     "data": {},
+     "text": "Find available times",
+     "inDialog": true
+    },
+    "next": {
+     "tag": "button",
+     "id": "",
+     "data": {},
+     "text": "8 to 12",
+     "inDialog": true
+    },
+    "after": {
+     "tag": "button",
+     "id": "",
+     "data": {
+      "requestOpen": "afd1bd7261"
+     },
+     "text": "View request",
+     "inDialog": false
+    },
+    "ring": {
+     "style": "solid",
+     "width": 3,
+     "color": "rgb(71, 118, 228)",
+     "vsWhite": 4.22,
+     "vsPage": 3.9,
+     "vsBg": 4.22,
+     "focusVisible": true
+    }
+   }
+  },
+  {
+   "name": "A01-request-Close-1440: saved visit from a request returns focus to that request's View request",
+   "pass": true,
+   "ms": 834,
+   "detail": {
+    "findFocus": {
+     "tag": "button",
+     "id": "visitFindTimes",
+     "data": {},
+     "text": "Find available times",
+     "inDialog": true
+    },
+    "next": {
+     "tag": "button",
+     "id": "",
+     "data": {},
+     "text": "8 to 12",
+     "inDialog": true
+    },
+    "after": {
+     "tag": "button",
+     "id": "",
+     "data": {
+      "requestOpen": "2e8cd8f33f"
+     },
+     "text": "View request",
+     "inDialog": false
+    },
+    "ring": {
+     "style": "solid",
+     "width": 3,
+     "color": "rgb(71, 118, 228)",
+     "vsWhite": 4.22,
+     "vsPage": 3.9,
+     "vsBg": 4.22,
+     "focusVisible": true
+    }
+   }
+  },
+  {
+   "name": "A04-customer-Escape-1440: saved edit from Customers returns focus to the same View visit",
+   "pass": true,
+   "ms": 754,
+   "detail": {
+    "after": {
+     "tag": "button",
+     "id": "",
+     "data": {
+      "customerVisit": "629a38418d"
+     },
+     "text": "View visit",
+     "inDialog": false
+    },
+    "buttonPresentAfterSave": true
+   }
+  },
+  {
+   "name": "A04-customer-Close-1440: saved edit from Customers returns focus to the same View visit",
+   "pass": true,
+   "ms": 631,
+   "detail": {
+    "after": {
+     "tag": "button",
+     "id": "",
+     "data": {
+      "customerVisit": "b79dc303e3"
+     },
+     "text": "View visit",
+     "inDialog": false
+    },
+    "buttonPresentAfterSave": true
+   }
+  },
+  {
+   "name": "A01-unsaved-Escape-1440: Escape without a save still returns to View visit",
+   "pass": true,
+   "ms": 438
+  },
+  {
+   "name": "A03-addvisit-1440: Find available times keeps focus in the Add visit dialog",
+   "pass": true,
+   "ms": 374,
+   "detail": {
+    "after": {
+     "tag": "button",
+     "id": "visitFindTimes",
+     "data": {},
+     "text": "Find available times",
+     "inDialog": true
+    },
+    "nextTab": "visit-available-time"
+   }
+  },
+  {
+   "name": "A02-hours-one-day-1440: one wrong day marks only that day and names it",
+   "pass": true,
+   "ms": 337,
+   "detail": {
+    "invalid": [
+     "mon.close",
+     "mon.open"
+    ],
+    "error": "Monday: add a closing time later than the opening time.",
+    "focus": "mon.close",
+    "border": "rgb(220, 226, 233)",
+    "monBorder": "rgb(170, 36, 56)"
+   }
+  },
+  {
+   "name": "A02-hours-two-days-1440: two wrong days mark both and name both",
+   "pass": true,
+   "ms": 381,
+   "detail": {
+    "invalid": [
+     "thu.close",
+     "thu.open",
+     "tue.close",
+     "tue.open"
+    ],
+    "error": "Tuesday: add an opening time. Thursday: add a closing time later than the opening time.",
+    "focus": "tue.open"
+   }
+  },
+  {
+   "name": "A02-hours-server-generic-1440: server generic hours error marks the right rows",
+   "pass": true,
+   "ms": 371,
+   "detail": {
+    "invalid": [
+     "fri.close",
+     "fri.open",
+     "mon.close",
+     "mon.open",
+     "sat.close",
+     "sat.open",
+     "sun.close",
+     "sun.open",
+     "thu.close",
+     "thu.open",
+     "tue.close",
+     "tue.open",
+     "wed.close",
+     "wed.open"
+    ],
+    "err": "Add your business hours.",
+    "focus": "mon.open"
+   }
+  },
+  {
+   "name": "A02-hours-server-day-1440: server day hours error marks the right rows",
+   "pass": true,
+   "ms": 358,
+   "detail": {
+    "invalid": [
+     "sat.close",
+     "sat.open"
+    ],
+    "err": "Saturday closing time is not valid.",
+    "focus": "sat.close"
+   }
+  },
+  {
+   "name": "A06-hours-names-1440: grids are labelled groups with full day names and the linked hint",
+   "pass": true,
+   "ms": 275,
+   "detail": {
+    "first": {
+     "label": "Monday opening time",
+     "describedby": [
+      "hoursNote",
+      "cfgHoursError"
+     ]
+    },
+    "firstAppt": {
+     "label": "Monday appointment opening time",
+     "describedby": [
+      "hoursNote",
+      "cfgAppointmentHoursError"
+     ]
+    },
+    "note": "Leave both times blank for a closed day. A midnight closing time ends that day."
+   }
+  },
+  {
+   "name": "A07-filter-1440: filter switch is announced once and the choice persists across routes and reload",
+   "pass": true,
+   "ms": 1520,
+   "detail": {
+    "t1": "0 done requests shown",
+    "t2": "2 open requests shown",
+    "afterRoutes": "true",
+    "afterReload": "true"
+   }
+  },
+  {
+   "name": "A07-autoswitch-1440: scheduling from a request does not persist Done; key is scoped to the workspace",
+   "pass": true,
+   "ms": 1188,
+   "detail": {
+    "autoDone": "true",
+    "keys": [],
+    "afterReload": "true",
+    "keysAfterClick": {
+     "mc-desk-request-filter-v1:a11y-fix-13": "done"
+    }
+   }
+  },
+  {
+   "name": "A05-contrast-1440: Customers phone links, Connections website link >=4.5:1; focus ring >=3:1 on white and page",
+   "pass": true,
+   "ms": 876,
+   "detail": {
+    "phones": [
+     {
+      "text": "(713) 555-0197",
+      "color": "rgb(35, 89, 223)",
+      "ratio": 5.89
+     },
+     {
+      "text": "(713) 555-0142",
+      "color": "rgb(35, 89, 223)",
+      "ratio": 5.89
+     },
+     {
+      "text": "(713) 555-0143",
+      "color": "rgb(35, 89, 223)",
+      "ratio": 5.89
+     }
+    ],
+    "ring": {
+     "style": "solid",
+     "width": 3,
+     "color": "rgb(71, 118, 228)",
+     "vsWhite": 4.22,
+     "vsPage": 3.9,
+     "vsBg": 4.22,
+     "focusVisible": true
+    },
+    "dRing": {
+     "style": "solid",
+     "width": 3,
+     "color": "rgb(71, 118, 228)",
+     "vsWhite": 4.22,
+     "vsPage": 3.9,
+     "vsBg": 4.22,
+     "focusVisible": true
+    },
+    "site": [
+     {
+      "text": "https://fixture.example.test/",
+      "cls": "",
+      "color": "rgb(35, 89, 223)",
+      "ratio": 5.73
+     }
+    ]
+   }
+  },
+  {
+   "name": "A05-onboard-ring-1440: sign-in \"Keep me signed in\" ring >=3:1",
+   "pass": true,
+   "ms": 241,
+   "detail": {
+    "keepVisible": true,
+    "ring": {
+     "style": "solid",
+     "width": 3,
+     "color": "rgb(71, 118, 228)",
+     "vsWhite": 4.22,
+     "vsPage": 3.9,
+     "vsBg": 4.22,
+     "focusVisible": true
+    },
+    "rule": {
+     "color": "rgb(71, 118, 228)",
+     "vsWhite": 4.22,
+     "vsPage": 3.9
+    }
+   }
+  },
+  {
+   "name": "A01-request-Escape-390: saved visit from a request returns focus to that request's View request",
+   "pass": true,
+   "ms": 744,
+   "detail": {
+    "findFocus": {
+     "tag": "button",
+     "id": "visitFindTimes",
+     "data": {},
+     "text": "Find available times",
+     "inDialog": true
+    },
+    "next": {
+     "tag": "button",
+     "id": "",
+     "data": {},
+     "text": "8 to 12",
+     "inDialog": true
+    },
+    "after": {
+     "tag": "button",
+     "id": "",
+     "data": {
+      "requestOpen": "d2fea4f5c0"
+     },
+     "text": "View request",
+     "inDialog": false
+    },
+    "ring": {
+     "style": "solid",
+     "width": 3,
+     "color": "rgb(71, 118, 228)",
+     "vsWhite": 4.22,
+     "vsPage": 3.9,
+     "vsBg": 4.22,
+     "focusVisible": true
+    }
+   }
+  },
+  {
+   "name": "A01-request-Close-390: saved visit from a request returns focus to that request's View request",
+   "pass": true,
+   "ms": 766,
+   "detail": {
+    "findFocus": {
+     "tag": "button",
+     "id": "visitFindTimes",
+     "data": {},
+     "text": "Find available times",
+     "inDialog": true
+    },
+    "next": {
+     "tag": "button",
+     "id": "",
+     "data": {},
+     "text": "8 to 12",
+     "inDialog": true
+    },
+    "after": {
+     "tag": "button",
+     "id": "",
+     "data": {
+      "requestOpen": "7b769b0397"
+     },
+     "text": "View request",
+     "inDialog": false
+    },
+    "ring": {
+     "style": "solid",
+     "width": 3,
+     "color": "rgb(71, 118, 228)",
+     "vsWhite": 4.22,
+     "vsPage": 3.9,
+     "vsBg": 4.22,
+     "focusVisible": true
+    }
+   }
+  },
+  {
+   "name": "A04-customer-Escape-390: saved edit from Customers returns focus to the same View visit",
+   "pass": true,
+   "ms": 624,
+   "detail": {
+    "after": {
+     "tag": "button",
+     "id": "",
+     "data": {
+      "customerVisit": "419212eed2"
+     },
+     "text": "View visit",
+     "inDialog": false
+    },
+    "buttonPresentAfterSave": true
+   }
+  },
+  {
+   "name": "A04-customer-Close-390: saved edit from Customers returns focus to the same View visit",
+   "pass": true,
+   "ms": 586,
+   "detail": {
+    "after": {
+     "tag": "button",
+     "id": "",
+     "data": {
+      "customerVisit": "fdb60218de"
+     },
+     "text": "View visit",
+     "inDialog": false
+    },
+    "buttonPresentAfterSave": true
+   }
+  },
+  {
+   "name": "A01-unsaved-Escape-390: Escape without a save still returns to View visit",
+   "pass": true,
+   "ms": 428
+  },
+  {
+   "name": "A03-addvisit-390: Find available times keeps focus in the Add visit dialog",
+   "pass": true,
+   "ms": 447,
+   "detail": {
+    "after": {
+     "tag": "button",
+     "id": "visitFindTimes",
+     "data": {},
+     "text": "Find available times",
+     "inDialog": true
+    },
+    "nextTab": "visit-available-time"
+   }
+  },
+  {
+   "name": "A02-hours-one-day-390: one wrong day marks only that day and names it",
+   "pass": true,
+   "ms": 391,
+   "detail": {
+    "invalid": [
+     "mon.close",
+     "mon.open"
+    ],
+    "error": "Monday: add a closing time later than the opening time.",
+    "focus": "mon.close",
+    "border": "rgb(220, 226, 233)",
+    "monBorder": "rgb(170, 36, 56)"
+   }
+  },
+  {
+   "name": "A02-hours-two-days-390: two wrong days mark both and name both",
+   "pass": true,
+   "ms": 315,
+   "detail": {
+    "invalid": [
+     "thu.close",
+     "thu.open",
+     "tue.close",
+     "tue.open"
+    ],
+    "error": "Tuesday: add an opening time. Thursday: add a closing time later than the opening time.",
+    "focus": "tue.open"
+   }
+  },
+  {
+   "name": "A02-hours-server-generic-390: server generic hours error marks the right rows",
+   "pass": true,
+   "ms": 398,
+   "detail": {
+    "invalid": [
+     "fri.close",
+     "fri.open",
+     "mon.close",
+     "mon.open",
+     "sat.close",
+     "sat.open",
+     "sun.close",
+     "sun.open",
+     "thu.close",
+     "thu.open",
+     "tue.close",
+     "tue.open",
+     "wed.close",
+     "wed.open"
+    ],
+    "err": "Add your business hours.",
+    "focus": "mon.open"
+   }
+  },
+  {
+   "name": "A02-hours-server-day-390: server day hours error marks the right rows",
+   "pass": true,
+   "ms": 392,
+   "detail": {
+    "invalid": [
+     "sat.close",
+     "sat.open"
+    ],
+    "err": "Saturday closing time is not valid.",
+    "focus": "sat.close"
+   }
+  },
+  {
+   "name": "A06-hours-names-390: grids are labelled groups with full day names and the linked hint",
+   "pass": true,
+   "ms": 287,
+   "detail": {
+    "first": {
+     "label": "Monday opening time",
+     "describedby": [
+      "hoursNote",
+      "cfgHoursError"
+     ]
+    },
+    "firstAppt": {
+     "label": "Monday appointment opening time",
+     "describedby": [
+      "hoursNote",
+      "cfgAppointmentHoursError"
+     ]
+    },
+    "note": "Leave both times blank for a closed day. A midnight closing time ends that day."
+   }
+  },
+  {
+   "name": "A07-filter-390: filter switch is announced once and the choice persists across routes and reload",
+   "pass": true,
+   "ms": 1537,
+   "detail": {
+    "t1": "0 done requests shown",
+    "t2": "2 open requests shown",
+    "afterRoutes": "true",
+    "afterReload": "true"
+   }
+  },
+  {
+   "name": "A07-autoswitch-390: scheduling from a request does not persist Done; key is scoped to the workspace",
+   "pass": true,
+   "ms": 1136,
+   "detail": {
+    "autoDone": "true",
+    "keys": [],
+    "afterReload": "true",
+    "keysAfterClick": {
+     "mc-desk-request-filter-v1:a11y-fix-27": "done"
+    }
+   }
+  },
+  {
+   "name": "A05-contrast-390: Customers phone links, Connections website link >=4.5:1; focus ring >=3:1 on white and page",
+   "pass": true,
+   "ms": 992,
+   "detail": {
+    "phones": [
+     {
+      "text": "(713) 555-0142",
+      "color": "rgb(35, 89, 223)",
+      "ratio": 5.89
+     },
+     {
+      "text": "(713) 555-0143",
+      "color": "rgb(35, 89, 223)",
+      "ratio": 5.89
+     },
+     {
+      "text": "(713) 555-0197",
+      "color": "rgb(35, 89, 223)",
+      "ratio": 5.89
+     }
+    ],
+    "ring": {
+     "style": "solid",
+     "width": 3,
+     "color": "rgb(71, 118, 228)",
+     "vsWhite": 4.22,
+     "vsPage": 3.9,
+     "vsBg": 4.22,
+     "focusVisible": true
+    },
+    "dRing": {
+     "style": "solid",
+     "width": 3,
+     "color": "rgb(71, 118, 228)",
+     "vsWhite": 4.22,
+     "vsPage": 3.9,
+     "vsBg": 4.22,
+     "focusVisible": true
+    },
+    "site": [
+     {
+      "text": "https://fixture.example.test/",
+      "cls": "",
+      "color": "rgb(35, 89, 223)",
+      "ratio": 5.73
+     }
+    ]
+   }
+  },
+  {
+   "name": "A05-onboard-ring-390: sign-in \"Keep me signed in\" ring >=3:1",
+   "pass": true,
+   "ms": 289,
+   "detail": {
+    "keepVisible": true,
+    "ring": {
+     "style": "solid",
+     "width": 3,
+     "color": "rgb(71, 118, 228)",
+     "vsWhite": 4.22,
+     "vsPage": 3.9,
+     "vsBg": 4.22,
+     "focusVisible": true
+    },
+    "rule": {
+     "color": "rgb(71, 118, 228)",
+     "vsWhite": 4.22,
+     "vsPage": 3.9
+    }
+   }
+  }
+ ],
+ "pageErrors": [],
+ "forbidden": [],
+ "physicalNetwork": 0,
+ "screenshots": [
+  "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/r4/out-ui-a11y/a11y/A01-request-Escape-1440.png",
+  "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/r4/out-ui-a11y/a11y/A01-request-Close-1440.png",
+  "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/r4/out-ui-a11y/a11y/A04-customer-Escape-1440.png",
+  "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/r4/out-ui-a11y/a11y/A04-customer-Close-1440.png",
+  "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/r4/out-ui-a11y/a11y/A03-addvisit-390.png",
+  "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/r4/out-ui-a11y/a11y/A02-hours-one-day-390.png",
+  "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/r4/out-ui-a11y/a11y/A07-filter-390.png",
+  "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/r4/out-ui-a11y/a11y/A05-customers-390.png",
+  "/private/tmp/claude-501/-Users-stevengoumnai-Desktop-Repositories-machines-and-cloud/b8f297e8-6922-4164-b68d-d14c4c0f074f/scratchpad/r4/out-ui-a11y/a11y/A05-signin-390.png"
+ ],
+ "pass": 30,
+ "total": 30,
+ "ok": true
+}
