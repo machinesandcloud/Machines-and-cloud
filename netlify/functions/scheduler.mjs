@@ -3,7 +3,7 @@
 // 6 pm Houston daily digest to every live shop.
 import { dueTasks, del, getRecord, getClient, saveRecord, saveClient, logEvent, list, getConversation, saveConversation, get, put, listRecords, lastInbound, atomicUpdate, id, recordsFor } from "./lib/store.mjs";
 import { fanout, claimFanout } from "./lib/fanout.mjs";
-import { sendSMS, sendEmail, notifyOwner, notifySteve, optOutStatus, REGISTERED_ONLY_TYPES, ownSenderApproved } from "./lib/send.mjs";
+import { sendSMS, sendEmail, notifyOwner, notifySteve, optOutStatus, REGISTERED_ONLY_TYPES, ownSenderApproved, textOwner } from "./lib/send.mjs";
 import { template, runEscalation, runCallbackCheck, runVisitCheck, runConsentAsk, getCustomer, day7Draft, nextOpenTime, FOLLOW_UP_TYPES, bookingDay } from "./lib/desk.mjs";
 import { houstonISO, windowHours } from "./lib/calendar.mjs";
 import { forwardingInstructions } from "./lib/forwarding.mjs";
@@ -172,7 +172,7 @@ async function runTask(t, mark = async () => true, ctx = {}) {
 const ownerHours = () => { const h = Number(new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", hour: "numeric", hourCycle: "h23" }).format(new Date())); return h >= 9 && h < 20; };
 async function tellOwnerTenDlcApproved(c) {
   await sendEmail({ to: c.owner.email, subject: `${c.business.name}: texting is live from your number`, text: `Carriers approved your business for texting. Your front desk now texts customers from ${c.phone.twilioNumber}: missed calls, confirmations, reminders, and follow-ups.` });
-  if (c.owner.phone) await sendSMS({ to: c.owner.phone, client: c, force: true, type: "owner_note", body: `${c.business.name}: texting is approved. Your front desk now texts customers from your own number.` });
+  if (c.owner.phone) await sendSMS({ to: c.owner.phone, client: c, type: "owner_note", body: `${c.business.name}: texting is approved. Your front desk now texts customers from your own number.` });
 }
 // Registration news found at night waits on the client record for the next owner-hours run.
 async function tellOwnerTenDlc(c, kind) {
@@ -182,8 +182,8 @@ async function tellOwnerTenDlc(c, kind) {
 }
 async function tellOwnerTenDlcFailed(c) {
   const portal = `${process.env.URL || ""}/desk?c=${c.slug}&k=${c.ownerKey}#setup`;
-  const text = `${c.business.name}: carriers did not accept the texting registration. Usually the legal business name or EIN does not match the IRS letter, or the address differs. Check them on your portal (Setup, Texting registration) and save to refile: ${portal}. Until it clears, reminders and follow-up texts to your customers are on hold; they are not sent from any other number.`;
-  if (c.owner?.phone) await sendSMS({ to: c.owner.phone, client: c, force: true, type: "owner_note", body: text });
+  const text = `${c.business.name}: carriers did not accept the texting registration. Usually the legal business name or EIN does not match the IRS letter, or the address differs. Check them on your portal (Setup, Texting registration) and save to refile: ${portal}. Until it clears, your front desk does not text customers; calls and email alerts keep working.`;
+  if (c.owner?.phone) await sendSMS({ to: c.owner.phone, client: c, type: "owner_note", body: text });
   await sendEmail({ to: c.owner.email, subject: `${c.business.name}: texting registration needs a fix`, text });
   await logEvent(c, "tendlc_owner_told", {});
 }
@@ -204,7 +204,7 @@ async function lifecycle(c) {
   // (b) Stuck in testing for three days.
   if (c.status === "testing" && c.build?.builtAt && !stamps.testingNudge && Date.now() - new Date(c.build.builtAt).getTime() >= 3 * D) {
     const text = `${c.business.name}: your front desk has been ready to test for three days. Open ${portal} and try the hard ones on the Test it tab: ask for a price you did not publish, an exact arrival time, a gas smell, Spanish. Fix anything under What it knows, then press Go live. Reply to this email if something is in the way.`;
-    if (c.owner?.phone) await sendSMS({ to: c.owner.phone, client: c, force: true, type: "owner_note", body: `${c.business.name}: your front desk is ready to test. Open your portal, try it as a customer, then press Go live. Stuck? Reply here.` });
+    if (c.owner?.phone) await sendSMS({ to: c.owner.phone, client: c, type: "owner_note", body: `${c.business.name}: your front desk is ready to test. Open your portal, try it as a customer, then press Go live. Stuck? Reply here.` });
     await sendEmail({ to: c.owner.email, subject: `${c.business.name}: ready to test, waiting on you`, text });
     await mark("testingNudge", "testing_nudge");
   }
@@ -212,7 +212,7 @@ async function lifecycle(c) {
   if (["testing", "live"].includes(c.status) && c.phone?.twilioNumber && c.phone?.forwarding !== "none" && !c.phone?.forwardingVerified && !stamps.forwardingNudge && c.provision?.startedAt && businessDaysSince(c.provision.startedAt) >= 2) {
     const fw = forwardingInstructions(c);
     const text = `${c.business.name}: no forwarded call has reached your front desk yet. ${fw.short || "Turn on forwarding to " + c.phone.twilioNumber + " in your carrier app."} iPhone: turn off Live Voicemail first (Settings, Phone, Live Voicemail). Then call your own number from another phone and let it ring.`;
-    if (c.owner?.phone) await sendSMS({ to: c.owner.phone, client: c, force: true, type: "owner_note", body: text });
+    await textOwner(c, text, { type: "owner_note", subject: `${c.business.name}: call forwarding is not on yet` });
     await mark("forwardingNudge", "forwarding_nudge");
   }
   // (e) Day 7: draft the "what I changed" email into Steve's inbox.
@@ -249,7 +249,7 @@ async function healthAlerts(c) {
   const voice = since(15 * 60 * 1000).filter((e) => ["vapi_tool_failed", "assistant_request_failed", "voice_attach_failed", "voice_detach_failed", "voice_failed"].includes(e.type) || (e.type === "twilio_error" && e.data?.kind === "voice"));
   if (voice.length && (await alertOnce(c, "voice_failures", 1, `Voice failing: ${c.business.name}`, `${voice.length} voice failure(s) in the last 15 minutes: ${voice.map((e) => e.type + " " + (e.data?.error || e.data?.reason || e.data?.code || e.data?.name || "")).join("; ").slice(0, 400)}.`))) n++;
   const cal = since(24 * 3600 * 1000).filter((e) => e.type === "calendar_failed");
-  if (cal.length && (await alertOnce(c, "calendar", 24, `Calendar failing: ${c.business.name}`, `${cal.length} booking(s) did not reach the owner's Google Calendar in the last 24 hours (${cal[cal.length - 1].data?.error || "error"}). Usually the Google connection expired: ask the owner to press Connect Google Calendar on the portal again. Bookings still reach the owner by text.`))) n++;
+  if (cal.length && (await alertOnce(c, "calendar", 24, `Calendar failing: ${c.business.name}`, `${cal.length} booking(s) did not reach the owner's Google Calendar in the last 24 hours (${cal[cal.length - 1].data?.error || "error"}). Usually the Google connection expired: ask the owner to press Connect Google Calendar on the portal again. ${ownSenderApproved(c) ? "Bookings still reach the owner by text and email." : "Bookings still reach the owner by email (texting waits for carrier approval)."}`))) n++;
   if (c.status === "live" && c.phone?.forwardingVerified && c.phone?.forwarding !== "none") {
     const inbound = (await lastInbound(c))?.at || events.filter((e) => ["missed_call", "call_ended", "call_started", "call_forwarded", "sms_inbound"].includes(e.type)).map((e) => e.at).sort().pop() || c.liveAt || c.phone.firstCallAt;
     if (inbound && businessDaysSince(inbound) >= 5 && (await alertOnce(c, "no_inbound", 5 * 24, `Line silent: ${c.business.name}`, `No call or text has reached the front desk for ${businessDaysSince(inbound)} business days (last at ${inbound}). Forwarding may have dropped: ask the owner to dial *#61# and check Live Voicemail, then call the business number from another phone.`))) n++;

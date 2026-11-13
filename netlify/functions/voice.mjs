@@ -2,18 +2,55 @@
 // connected there. Otherwise the caller hears a short message, the call ends, and the front desk texts
 // them back within seconds (missed-call text-back). The owner gets a missed-call alert either way.
 // Paused or cancelled shops: the call rings the owner's cell (never the forwarded line) or hears a short message.
-// Numbers on the owner's always-ring-through list ring the cell, then record a voicemail that is texted to the owner.
+// Numbers on the owner's always-ring-through list ring the cell. Nothing is ever recorded: when the owner does
+// not answer, the caller is texted back from the shop's own number, an open hand-off lead is saved and the
+// owner is alerted (legal precondition P3).
 import { clientByNumber, getConversation, saveConversation, logEvent, saveClient, noteInbound, addRecord, addToIndex } from "./lib/store.mjs";
-import { sendSMS, notifyOwner, twilioSignatureValid, e164, optOutStatus } from "./lib/send.mjs";
+import { sendSMS, notifyOwner, twilioSignatureValid, e164, optOutStatus, optedOut } from "./lib/send.mjs";
 import { ACTIVE } from "./lib/config.mjs";
 import { auditedAdminKey } from "./lib/admin-key-audit.mjs";
 import { cellIsForwardedLine } from "./lib/desk.mjs";
 
-// /api/voice answers the call; /api/voice/recorded receives a VIP voicemail from <Record>.
-export const config = { path: ["/api/voice", "/api/voice/recorded"] };
+// /api/voice answers the call; /api/voice/vip-missed is the <Dial action> after a VIP call to the owner's cell.
+export const config = { path: ["/api/voice", "/api/voice/vip-missed"] };
 
 const xml = (inner) => new Response(`<?xml version="1.0" encoding="UTF-8"?><Response>${inner}</Response>`, { status: 200, headers: { "Content-Type": "text/xml" } });
 const esc = (s) => String(s).replace(/[<>&]/g, (ch) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" }[ch]));
+
+// A VIP caller the owner could not take. No voicemail is recorded. The caller is offered the normal
+// text path (a reply to a VIP text is relayed to the owner by sms.mjs), an open hand-off lead is saved
+// so the call is in the portal even if no alert goes out, and every spoken line matches what happened.
+async function vipMissed(c, from) {
+  const ownerName = c.owner?.name || "the owner", owner = esc(ownerName);
+  let textBack = "not_attempted";
+  if (from && c.phone?.textBack !== false && ACTIVE.includes(c.status)) {
+    try {
+      if (await optedOut(from)) textBack = "opted_out";
+      else {
+        // Spanish review r4: a Spanish-enabled shop adds the reviewer's Spanish line (the caller's language is unknown on a call).
+        const en = `${c.business?.name || "Hi"}: ${ownerName} could not take your call. Reply here with your message and it will be passed to ${ownerName}. Reply STOP to opt out.`;
+        const es = `${c.business?.name || "Hola"}: ${c.owner?.name || "El dueño"} no pudo contestar su llamada. Responda a este mensaje y se lo pasamos a ${c.owner?.name || "el dueño"}. Responda STOP o ALTO para dejar de recibir mensajes.`;
+        const r = await sendSMS({ to: from, client: c, type: "text_back", body: c.business?.spanish ? en + "\n" + es : en });
+        textBack = r.ok ? "sent" : r.logged ? "logged" : r.reason || "failed";
+      }
+    } catch (err) { console.error("vip text-back", err); textBack = "failed"; }
+  }
+  const texted = textBack === "sent" || textBack === "logged";
+  // Rev 2 (QA Q5): only an owner channel counts; an operator fallback email does not mean the owner "has been told".
+  let alerted = false;
+  try { alerted = (await notifyOwner(c, `VIP call from ${from || "unknown"} was not answered. No voicemail is recorded. ${texted ? "They were texted so they can reply with a message." : "They were not texted."}`, { type: "owner_note", settle: true })).some((r) => r?.ok && r.channel !== "operator"); } catch (err) { console.error("vip missed alert", err); }
+  let leadId = "";
+  try {
+    const l = await addRecord("leads", c.slug, { customer_name: "", phone: from || "", address: "", issue: `VIP call not answered${texted ? " (texted back)" : ""}`, reason: "handoff", urgency: "today", wanted: "", language: "en", unsure: "", nobook_reason: "none", channel: "call", contact: from || "", status: "open", outcome: "needs_action", ownerAlerted: alerted });
+    leadId = l.id; if (from) await addToIndex("leads", c, from, l.id);
+  } catch (err) { console.error("vip missed lead", err); }
+  await logEvent(c, "vip_missed", { from, textBack, alerted, leadId });
+  const said = texted ? `${owner} could not take your call. We just sent you a text. Reply to it with your message for ${owner}.`
+    : alerted ? `${owner} could not take your call and has been told that you called.`
+    : leadId ? `${owner} could not take your call. Your call has been noted for ${owner}.`
+    : `${owner} could not take your call. Please try again later.`;
+  return `<Say voice="Polly.Joanna">${said} Goodbye.</Say><Hangup/>`;
+}
 
 function fallbackTwiml(c) {
   const name = esc(c.business?.name || "the office");
@@ -43,37 +80,26 @@ export default async (req) => {
   if (c?.phone?.twilioNumber) ours.push(c.phone.twilioNumber);
   if (from && ours.includes(from)) return xml(`<Hangup/>`);
   if (!c) {
-    // A customer calling back the shared texting number: ring the shop that texted them.
+    // The shared M&C number no longer texts for shops (legal precondition P1), so a call to it is
+    // never routed to a shop. It points the caller to M&C's own support instead.
     const mc = e164(process.env.MC_TWILIO_NUMBER || "");
-    if (mc && to === mc && from) { const { get, getClient } = await import("./lib/store.mjs"); const slug = await get("index", "bridge:" + from); const shop = slug ? await getClient(slug) : null; if (shop) { await logEvent(shop, "bridge_callback", { from }); return xml(fallbackTwiml(shop)); } }
+    if (mc && to === mc) return xml(`<Say voice="Polly.Joanna">Thanks for calling Machines and Cloud. This number does not take calls. For help, email support at machines and cloud dot com.</Say><Hangup/>`);
     return xml(`<Say>Sorry, this number is not in service.</Say><Hangup/>`);
   }
   const name = c.business?.name || "the office";
 
-  // A VIP voicemail just recorded: text the owner the link, and keep it as an open request in the portal
-  // so it is not only an event when the alert does not go out (voice review V4).
-  if (path.endsWith("/recorded")) {
-    const link = String(params.RecordingUrl || "");
-    const seconds = Number(params.RecordingDuration) || null;
-    let alerted = false;
-    try { alerted = (await notifyOwner(c, `VIP voicemail from ${from || "unknown"}: ${link ? link + ".mp3" : "(no recording)"}${seconds ? ` (${seconds} s)` : ""}`, { type: "owner_note", settle: true })).some((r) => r?.ok); } catch (err) { console.error("vip voicemail alert", err); }
-    let leadId = "";
-    try {
-      const l = await addRecord("leads", c.slug, { customer_name: "", phone: from || "", address: "", issue: `VIP voicemail${seconds ? ` (${seconds} s)` : ""}${link ? ": " + link + ".mp3" : " (no recording)"}`.slice(0, 300), reason: "handoff", urgency: "today", wanted: "", language: "en", unsure: "", nobook_reason: "none", channel: "call", contact: from || "", status: "open", outcome: "needs_action", ownerAlerted: alerted });
-      leadId = l.id; if (from) await addToIndex("leads", c, from, l.id);
-    } catch (err) { console.error("vip voicemail lead", err); }
-    await logEvent(c, "vip_voicemail", { from, url: link, sid: params.RecordingSid || "", seconds, alerted, leadId });
-    return xml(`<Say voice="Polly.Joanna">Thank you. Goodbye.</Say><Hangup/>`);
+  // The owner's cell did not take a VIP call (Twilio <Dial action>). An answered call just ends.
+  if (path.endsWith("/vip-missed")) {
+    if (params.DialCallStatus === "completed") return xml(`<Hangup/>`);
+    return xml(await vipMissed(c, from));
   }
 
-  // Always-ring-through list: ring the owner's cell (unless it is the forwarded line), then record.
+  // Always-ring-through list: ring the owner's cell (unless it is the forwarded line). Nothing is recorded.
   if (from && (c.rules?.bypass || []).includes(from)) {
-    const owner = esc(c.owner?.name || "the owner");
     const direct = !cellIsForwardedLine(c) && c.owner?.phone;
-    const intro = direct ? `${owner} could not pick up.` : `This is ${esc(name)}.`;
-    const record = `<Say voice="Polly.Joanna">${intro} Please leave a message for ${owner} after the tone.</Say><Record maxLength="120" playBeep="true" action="${esc(sigUrl.replace(/\/api\/voice.*$/, "/api/voice/recorded"))}" method="POST"/><Say voice="Polly.Joanna">Thank you. Goodbye.</Say><Hangup/>`;
-    await logEvent(c, "vip_call", { from, rang: direct ? "cell" : "voicemail" });
-    return xml(direct ? `<Dial timeout="25">${esc(c.owner.phone)}</Dial>${record}` : record);
+    await logEvent(c, "vip_call", { from, rang: direct ? "cell" : "message" });
+    if (direct) return xml(`<Dial timeout="25" action="${esc(sigUrl.replace(/\/api\/voice.*$/, "/api/voice/vip-missed"))}" method="POST">${esc(c.owner.phone)}</Dial>`);
+    return xml(await vipMissed(c, from));
   }
 
   if (!ACTIVE.includes(c.status)) {
@@ -129,7 +155,9 @@ export default async (req) => {
   let alerts = null;
   try { alerts = await notifyOwner(c, `${name} front desk: missed call from ${from || "unknown"}. ${ownerLine}`, { type: "owner_note", settle: true }); }
   catch (err) { console.error("missed-call owner alert failed", err); }
-  if (!alerts || (alerts.length && !alerts.some((r) => r?.ok || r?.logged))) await logEvent(c, "owner_alert_failed", { from, kind: "missed_call" });
+  // Legal P1 rev 2: the operator fallback result is not an owner channel; it is left out so the rule above is unchanged.
+  const ownerAlerts = alerts && alerts.filter((r) => r?.channel !== "operator");
+  if (!ownerAlerts || (ownerAlerts.length && !ownerAlerts.some((r) => r?.ok || r?.logged))) await logEvent(c, "owner_alert_failed", { from, kind: "missed_call" });
   const say = textBack === "sent"
     ? (c.business?.spanish
       ? `<Say voice="Polly.Joanna">Thanks for calling ${esc(name)}. We are on a job right now. We are texting you this second so we can get you scheduled.</Say><Say voice="Polly.Lupe" language="es-US">Gracias por llamar. Le enviamos un mensaje de texto ahora mismo.</Say>`

@@ -282,7 +282,9 @@ for (const simulation of [true,false,undefined]) {
  if(simulation===true){assert.equal(done.simulation,true);assert.deepEqual(done.test,{proofRecorded:true,revision:'a'.repeat(64)});}else{assert.equal(done.simulation,undefined);assert.equal(done.test,undefined);}groups++;
 }
 process.env.MC_MEMORY_STORE='1';providerFixture=true;const legacy=fresh('unmarked-legacy');delete legacy.onboarding;
-assert.equal((await sendSMS({client:legacy,to:'+17135550141',body:'Legacy fixture only',force:true})).ok,true);
+// Legal P1: a legacy shop texts only from its own carrier-approved number (no shared sender, no force).
+legacy.phone={...legacy.phone,twilioNumber:'+17135550199',tenDlc:'approved'};
+assert.equal((await sendSMS({client:legacy,to:'+17135550141',body:'Legacy fixture only'})).ok,true);
 assert.equal((await placeCall({client:legacy,to:'+17135550141',say:'Legacy fixture only'})).ok,true);
 providerFixture=false;assert.equal(stubbedLegacyRequests.length,2);groups++;
 await store.put('clients',legacy.slug,legacy);const legacyResponse=await clientAPI(request(`/api/client?c=${legacy.slug}&k=${legacy.ownerKey}`,null,null,'GET'));assert.equal(legacyResponse.status,200);assert.equal((await legacyResponse.json()).client.ownerKey,legacy.ownerKey);groups++;

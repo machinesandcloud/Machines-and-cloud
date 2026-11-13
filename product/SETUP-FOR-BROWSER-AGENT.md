@@ -172,7 +172,7 @@ Site: https://console.cloud.google.com
 - App name: `Machines & Cloud front desk`. Support email: support@machinesandcloud.com.
 - App home page: https://www.machinesandcloud.com. Privacy policy: https://www.machinesandcloud.com/privacy-policy.html. Terms: https://www.machinesandcloud.com/terms-of-service.html.
 - Authorized domain: `machinesandcloud.com`.
-- Scopes: add `https://www.googleapis.com/auth/calendar.events` and `https://www.googleapis.com/auth/calendar.readonly`.
+- Scopes: add `https://www.googleapis.com/auth/calendar.events.owned` and `https://www.googleapis.com/auth/calendar.calendars.readonly` (the only scopes `lib/calendar-connection.mjs` requests). Do not add the retired `calendar.events` or `calendar.readonly` scopes.
 - Save, then **Publishing status: Publish app** (to Production). This matters: in Testing mode, owners' calendar access expires after 7 days. If Google asks for verification because of the calendar scopes, start it and record that it is pending.
 
 **4.4** APIs and services, Credentials, Create credentials, OAuth client ID:

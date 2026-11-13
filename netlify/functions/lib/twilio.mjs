@@ -127,8 +127,14 @@ export async function brandStatus(brandSid) {
   return d.status; // PENDING, APPROVED, FAILED, IN_REVIEW
 }
 
+// Rev 5 (PO decision a): the legacy HELP reply is the campaign's registered HelpMessage. New filings register this
+// text and store it on the client (phone.campaignHelpMessage); sms.mjs replies with the stored text, else this builder.
+export const legacyHelpMessage = (client) => `${client.business?.name || "Front desk"}: for help contact ${client.phone?.businessNumber || client.owner?.email || "the shop"}. Reply STOP to opt out. Msg and data rates may apply.`;
+// AYUDA: the Spanish translation of the same registered content (Spanish review r4: "al" before a number, "escriba a"
+// before an email, no English placeholder, "dejar de recibir mensajes").
+export const legacyHelpMessageEs = (client) => { const contact = String(client.phone?.businessNumber || client.owner?.email || ""); return `${client.business?.name || "Front desk"}: para ayuda, ${/@/.test(contact) ? "escriba a " + contact : /\d/.test(contact) ? "llame o escriba al " + contact : "contacte al negocio"}. Responda STOP para dejar de recibir mensajes. Pueden aplicar tarifas de mensajes y datos.`; };
 export async function createCampaign(client, serviceSid, brandSid) {
-  const name = client.business.name;
+  const name = client.business.name, helpMessage = legacyHelpMessage(client);
   const c = await tw(msg(`Services/${serviceSid}/Compliance/Usa2p`), {
     BrandRegistrationSid: brandSid,
     Description: `${name} is a ${client.business.trade || "home service"} company. This number texts customers who contacted the business about service: replies to their questions, appointment confirmations and reminders, on-the-way notices, follow-up on open estimates, and review requests after a completed job. One-to-one conversational messaging; no marketing blasts.`,
@@ -142,13 +148,14 @@ export async function createCampaign(client, serviceSid, brandSid) {
     PrivacyPolicyUrl: policyUrls(client.slug).privacy,
     TermsAndConditionsUrl: policyUrls(client.slug).terms,
     OptInMessage: `${name}: you're booked. We'll text appointment reminders to this number. Reply STOP to opt out, HELP for help.`,
+    HelpMessage: helpMessage,
     HasEmbeddedLinks: "true",
     HasEmbeddedPhone: "true",
     SubscriberOptIn: "true",
     AgeGated: "false",
     DirectLending: "false",
   });
-  return { campaignSid: c.sid, campaignStatus: c.campaign_status };
+  return { campaignSid: c.sid, campaignStatus: c.campaign_status, campaignHelpMessage: c.help_message || helpMessage };
 }
 
 export async function campaignStatus(serviceSid, campaignSid) {

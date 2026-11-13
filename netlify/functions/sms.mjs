@@ -1,12 +1,12 @@
-// Twilio inbound SMS webhook. The "To" number identifies the client (or, on the shared bridge number,
-// the "From" number is looked up in the bridge index). Texts from the owner's phone are commands
+// Twilio inbound SMS webhook. The "To" number identifies the client; the shared M&C number is not a
+// shop line (its inbound goes to /api/platform-sms). Texts from the owner's phone are commands
 // (ok/otw/done/quote/paid/cancel/help); everything else is a customer talking to the front desk.
-import { clientByNumber, getClient, get, getConversation, saveConversation, logEvent, cancelTasksForNumber, noteInbound } from "./lib/store.mjs";
+import { clientByNumber, getConversation, saveConversation, logEvent, cancelTasksForNumber, noteInbound, atomicUpdate } from "./lib/store.mjs";
 import { runAgent, toApiMessages } from "./lib/agent.mjs";
 import { auditedAdminKey } from "./lib/admin-key-audit.mjs";
 import { buildSystemPrompt, BOOK_VISIT, NOTIFY_OWNER, UPDATE_VISIT, ACTIVE } from "./lib/config.mjs";
 import { bookVisit, flagLead, ownerCommand, upcomingBookings, confirmVisit, rescheduleVisit, cancelRequest, noteReviewReply, noteConsentReply, when, dateEs, winEs } from "./lib/desk.mjs";
-import { sendSMS, twilioSignatureValid, e164, recordOptOut, clearOptOut, notifyOwner, optOutStatus } from "./lib/send.mjs";
+import { sendSMS, twilioSignatureValid, e164, recordOptOut, clearOptOut, notifyOwner, optOutStatus, smsEnabled, ownSenderApproved } from "./lib/send.mjs";
 import { classifySMSKeyword } from "./lib/sms-keywords.mjs";
 
 export const config = { path: "/api/sms" };
@@ -24,13 +24,9 @@ const TWILIO_STOP = /^\s*(stop|stopall|unsubscribe|end|quit|cancel|revoke|optout
 // While the opt-out state is unknown only an explicit opt-in keyword re-subscribes: "yes"/"sí" can answer a question.
 const START_KEYWORD = /^\s*(start|unstop|empezar|iniciar)\s*[.!]*\s*$/i;
 
-async function resolveClient(to, from) {
-  let c = await clientByNumber(to);
-  if (c) return c;
-  const mcNumber = e164(process.env.MC_TWILIO_NUMBER || "");
-  if (mcNumber && to === mcNumber) { const slug = await get("index", "bridge:" + from); if (slug) c = await getClient(slug); }
-  return c;
-}
+// Only a shop's own number identifies it. The retired shared-sender bridge ("bridge:<from>") is
+// never consulted, so a text to the M&C number can never reach a shop (legal precondition P1).
+const resolveClient = (to) => clientByNumber(to);
 
 export default async (req) => {
   if (req.method !== "POST") return new Response("method", { status: 405 });
@@ -45,7 +41,7 @@ export default async (req) => {
   if (!adminOk && !twilioSignatureValid(sigUrl, params, req.headers.get("x-twilio-signature") || "")) return new Response("bad signature", { status: 403 });
 
   const to = e164(params.To), from = e164(params.From), body = String(params.Body || "").trim();
-  const c = await resolveClient(to, from);
+  const c = await resolveClient(to);
   if (!c || !body) return twiml("");
   const name = c.business?.name || "We";
 
@@ -55,6 +51,8 @@ export default async (req) => {
   // from the owner's phone and from always-ring-through numbers. The owner's phone uses only the
   // whole-message keywords, so a command or free-text reply is never read as an opt-out.
   // The shared classifier (proposal 01) adds normalized keywords; the legacy phrases stay for customers.
+  // P9 rev 4: these opt-out decisions are exactly production's (43ee2f2c). The plain-language detector only flags a
+  // possible opt-out for review below; it never suppresses and never vetoes this list.
   const keyword = classifySMSKeyword(body);
   if (STOP_RE.test(body) || keyword === "stop" || !isOwner && STOP_PHRASE.test(body)) {
     // Already out: one confirmation is all CTIA allows, so repeats are silent. An unreadable store (null) confirms again.
@@ -94,6 +92,35 @@ export default async (req) => {
     return twiml("");
   }
 
+  // P9 rev 4: a possible plain-language opt-out that the rules above did not treat as STOP. Nothing is suppressed:
+  // the text is queued for operator review and the owner gets one "please review" notice per customer (deduped).
+  if (optState === false) { try { const { flagPossibleOptOut } = await import("./lib/optout-requests.mjs"); await flagPossibleOptOut({ line: "legacy", c, phone: from, text: body, messageSid: params.MessageSid || "" }); } catch (err) { console.error("opt-out flag", err?.message); } }
+
+  // Legal P1 rev 3/4: without its own approved sender the shop cannot text. A customer's message is kept (held), and the
+  // owner is told by email (or the operator), at most once per customer every 4 hours (heldNotice).
+  const unapproved = smsEnabled() && !ownSenderApproved(c);
+  const holdInbound = async (reason, what) => {
+    const conv = await getConversation(c, "sms", from);
+    conv.messages.push({ role: "user", content: body.slice(0, 1600), at: new Date().toISOString(), held: reason });
+    await saveConversation(conv).catch((e) => console.error("held inbound not saved", e?.message));
+    await logEvent(c, "inbound_held", { from, reason }).catch(() => {});
+    await heldNotice(c, from, `${name} front desk: ${what} from ${from} was not answered by text, because texting from your number is waiting for carrier approval. Please reply yourself: "${body.slice(0, 300)}"`);
+  };
+
+  // Rev 4 (QA r3 B4): a customer's whole-message HELP/AYUDA/INFO, below the VIP relay, gets the fixed help reply as TwiML
+  // (the registered HelpMessage), never through sendSMS. On a shop without an approved sender the HELP is also held and the
+  // owner is told. An opted-out number, or a HELP Twilio already answered, gets no reply.
+  if (/^\s*(help|info|ayuda)\s*[.!?]*\s*$/i.test(body) || keyword === "help") {
+    await logEvent(c, "sms_help", { from }).catch(() => {});
+    if (unapproved && optState !== true) await holdInbound("help_no_registered_sender", "a request for help");
+    if (optState === true || params.OptOutType === "HELP") return twiml("");
+    // Rev 5 (PO decision a): HELP/INFO return the campaign's registered HelpMessage exactly; AYUDA its Spanish version.
+    const { legacyHelpMessage, legacyHelpMessageEs } = await import("./lib/twilio.mjs");
+    const msg = /^\s*ayuda/i.test(body) ? legacyHelpMessageEs(c) : (c.phone?.campaignHelpMessage || legacyHelpMessage(c));
+    if (!unapproved) { try { const conv = await getConversation(c, "sms", from); conv.messages.push({ role: "user", content: body.slice(0, 200), at: new Date().toISOString() }, { role: "assistant", content: msg, at: new Date().toISOString(), system: "help-reply" }); await saveConversation(conv); } catch (e) { console.error("help not saved", e?.message); } }
+    return twiml(msg);
+  }
+
   if (unknownState) {
     // Rev 4 (QA-12 r3 F4): no reply and no model while the opt-out state is unknown, but keep the message and tell the
     // owner. notifyOwner emails even when the owner text is held (settle: 04's flag; without 04 it always does).
@@ -105,6 +132,10 @@ export default async (req) => {
     return twiml("");
   }
   if (isOptedOut) return twiml(""); // opted out: no replies, no model
+
+  // Legal P1 rev 3 (QA r2 B2): a shop without its own approved sender cannot text, so no reply is generated. The
+  // message is kept (held), the owner is alerted (email, or the operator), and nothing is shown as answered.
+  if (unapproved) { await holdInbound("no_registered_sender", "a text"); return twiml(""); }
 
   // Paused or cancelled: one reply per number per 24 hours pointing at the main line, no model.
   if (!ACTIVE.includes(c.status)) {
@@ -127,7 +158,7 @@ export default async (req) => {
   try {
     const consentReply = await noteConsentReply(c, from, body, conv);
     if (consentReply) {
-      conv.messages.push({ role: "user", content: body, at: new Date().toISOString() }, { role: "assistant", content: consentReply + "\n[Done: marketing consent recorded]", at: new Date().toISOString() });
+      conv.messages.push({ role: "user", content: body, at: new Date().toISOString() }, { role: "assistant", content: consentReply + "\n[Done: marketing consent recorded]", at: new Date().toISOString(), system: "consent-reply" });
       await saveConversation(conv);
       return twiml(consentReply);
     }
@@ -135,18 +166,19 @@ export default async (req) => {
   const bookings = await upcomingBookings(c, from);
 
   // Fast paths with no model: C confirms, R starts a reschedule, when exactly one visit is upcoming.
+  // P6 rev 3: these templated replies are tagged system:<kind>, so they do not count as the disclosed AI reply.
   if (bookings.length === 1) {
     const b = bookings[0];
     if (/^\s*(c|confirm|confirmed|yes)\s*[.!]*\s*$/i.test(body)) {
       await confirmVisit(c, b);
       const msg = b.language === "es" ? `${name}: su visita queda confirmada para ${dateEs(b.date)}, ${winEs(b.window).replace(/^(\d)/, "de $1")}. ¡Nos vemos!` : `${name}: confirmed for ${when(b)}. See you then.`;
-      conv.messages.push({ role: "user", content: body, at: new Date().toISOString() }, { role: "assistant", content: msg + `\n[Done: visit confirmed, ref ${b.id}]`, at: new Date().toISOString() });
+      conv.messages.push({ role: "user", content: body, at: new Date().toISOString() }, { role: "assistant", content: msg + `\n[Done: visit confirmed, ref ${b.id}]`, at: new Date().toISOString(), system: "fast-confirm" });
       await saveConversation(conv);
       return twiml(msg);
     }
     if (/^\s*(r|reschedule)\s*[.!]*\s*$/i.test(body)) {
       const msg = b.language === "es" ? `${name}: con gusto. ¿Qué día y horario le conviene? Tenemos ${(c.windows || []).map((w) => winEs(w).replace(/^(\d)/, "de $1")).join(" o ")}.` : `${name}: no problem. Which day and window works? We offer ${(c.windows || []).join(" or ")}.`;
-      conv.messages.push({ role: "user", content: body, at: new Date().toISOString() }, { role: "assistant", content: msg, at: new Date().toISOString() });
+      conv.messages.push({ role: "user", content: body, at: new Date().toISOString() }, { role: "assistant", content: msg, at: new Date().toISOString(), system: "fast-reschedule" });
       await saveConversation(conv);
       return twiml(msg);
     }
@@ -161,5 +193,22 @@ export default async (req) => {
   } catch (err) { console.error("could not start sms agent", err); await logEvent(c, "sms_agent_failed", { from, error: "background start failed" }); }
   return twiml("");
 };
+
+// Rev 4 (QA r3): one owner notice per (shop, customer) every 4 hours while their texts are held. Later texts are still
+// saved; the next notice says how many came in since. A counter failure sends the notice (never silently lost).
+export const HELD_NOTICE_MS = 4 * 3600 * 1000;
+async function heldNotice(c, from, text) {
+  let decision = { send: true, earlier: 0 };
+  try {
+    decision = await atomicUpdate("held_notices", `${c.slug}/${from}`, (cur) => {
+      const now = Date.now();
+      if (cur && now - Date.parse(cur.at) < HELD_NOTICE_MS) return { value: { ...cur, pending: (cur.pending || 0) + 1 }, result: { send: false } };
+      return { value: { at: new Date(now).toISOString(), pending: 0 }, result: { send: true, earlier: cur?.pending || 0 } };
+    });
+  } catch { decision = { send: true, earlier: 0 }; }
+  if (!decision.send) { await logEvent(c, "held_notice_deduped", { from }).catch(() => {}); return; }
+  const more = decision.earlier ? ` ${decision.earlier} more text(s) from them since the last notice are also waiting in your portal.` : "";
+  await notifyOwner(c, text + more + " Further texts from them in the next 4 hours are saved in your portal without another email.", { type: "owner_alert", settle: true }).catch(() => {});
+}
 
 export { sendSMS };

@@ -338,7 +338,7 @@ export function buildSystemPrompt(c, channel = "web", extra = {}) {
   const callback = c.onboarding?.version === 1 ? "the callback request can be saved for the shop, but whether or when a person will respond is not confirmed" : `${owner} will get their details and follow up${open ? "" : later ? ` (the shop is closed and opens at ${later.label} this morning)` : " (the shop is closed right now)"}`;
   const e247 = r.emergency247 || emergency247(b.hours);
   const structured = hoursText(c);
-  return `You are the front desk for ${b.name || "this company"}, a ${b.trade || "home service"} company in ${b.city || "Houston"}, run by ${owner}. You are an AI and you say so if asked; you never claim to be a person. Your job is to answer the customer, find out what they need, and book or request the visit on the owner's rules, then make sure ${owner} gets the details.
+  return `You are the front desk for ${b.name || "this company"}, a ${b.trade || "home service"} company in ${b.city || "Houston"}, run by ${owner}. You are an AI and you say so if asked; you never claim to be a person. If a customer asks whether you are real, a person or a machine, say you are the shop's automated front desk assistant (in Spanish: "Soy el asistente automatizado de recepción"). Your job is to answer the customer, find out what they need, and book or request the visit on the owner's rules, then make sure ${owner} gets the details.
 
 ${channelNote}
 ${deliveryContract}

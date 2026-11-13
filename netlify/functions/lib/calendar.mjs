@@ -1,27 +1,10 @@
-// Google Calendar through OAuth. Needs GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET; the redirect URI is
-// <site>/api/google/callback. Tokens live on the client record under calendar.google.
+// Date helpers for visits, plus the retired legacy Calendar sync. New Calendar connections use
+// lib/calendar-connection.mjs (calendar.events.owned + calendar.calendars.readonly, encrypted tokens).
+// The legacy consent URL and code exchange (calendar.events + calendar.readonly) were removed: no route
+// has called them since /api/google/auth returns 410 (legal precondition P7, Google verification).
 const CID = process.env.GOOGLE_CLIENT_ID;
 const CSECRET = process.env.GOOGLE_CLIENT_SECRET;
 export const googleEnabled = () => Boolean(CID && CSECRET);
-
-export function authUrl(site, state) {
-  const p = new URLSearchParams({
-    client_id: CID, redirect_uri: site + "/api/google/callback", response_type: "code",
-    scope: "https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/calendar.readonly",
-    access_type: "offline", prompt: "consent", state,
-  });
-  return "https://accounts.google.com/o/oauth2/v2/auth?" + p.toString();
-}
-
-export async function exchangeCode(site, code) {
-  const res = await fetch("https://oauth2.googleapis.com/token", {
-    method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({ code, client_id: CID, client_secret: CSECRET, redirect_uri: site + "/api/google/callback", grant_type: "authorization_code" }).toString(),
-  });
-  const d = await res.json();
-  if (!res.ok || !d.refresh_token) throw new Error("google token exchange failed: " + JSON.stringify(d));
-  return d;
-}
 
 async function accessToken(refreshToken) {
   const res = await fetch("https://oauth2.googleapis.com/token", {

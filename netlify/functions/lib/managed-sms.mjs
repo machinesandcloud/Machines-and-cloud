@@ -16,6 +16,7 @@ import { reservePaidUsage, assertPaidUsage, attemptPaidUsage, settlePaidUsage, P
 import { paidUsageDigest, paidAnswerExpected } from './managed-paid-usage.mjs';
 import { houstonToday, normalizeBookingDate } from './availability.mjs';
 import { CHANGE_VISIT, customerContext, customerContextPrompt, cancelKeywordNotice, isCancelWord } from './customer-visits.mjs';
+import { withAutomatedIntro, looksSpanish } from './automated-disclosure.mjs';
 const hash = value => createHash("sha256").update(value).digest("hex");
 const stamp = () => new Date().toISOString();
 export function serviceWorkerAuthorized(req) {
@@ -74,6 +75,9 @@ export async function handleManagedSMS(req) {
     // AYUDA gets the Spanish reply (needs Spanish reviewer); HELP and INFO keep the English one. The
     // contact choice is unchanged here (PRA-HOMEOWNER-07 owns it).
     if (consent.keyword === "help") { if (consent.suppressed || fields.OptOutType === "HELP") return twiml(); const { str } = await import("./desk.mjs"); return twiml(str("managed_help", { language: /^\s*AYUDA\s*$/i.test(String(fields.Body || "")) ? "es" : "en" })(c, c.phone?.businessNumber || c.owner.email)); }
+    // P9 rev 4: the detector never suppresses. A possible opt-out that the keyword rules did not treat as STOP is
+    // queued for review and the owner gets one "please review" email per customer (flagPossibleOptOut dedupes).
+    if (consent.keyword === "message" && !consent.duplicate) { try { const { flagPossibleOptOut } = await import("./optout-requests.mjs"); await flagPossibleOptOut({ line: "managed", c, phone: fields.From, text: fields.Body, messageSid: fields.MessageSid }); } catch { /* advisory; the message continues as a conversation */ } }
     if (consent.suppressed || !managedDeliveryEnabled()) return twiml();
     const probe = await pendingMessagingProbe(c);
     const kind = probe && probe.to===fields.From && String(fields.Body).trim()===probe.nonce ? "probe" : "conversation";
@@ -107,7 +111,10 @@ async function appendHistoryOnce(key,job,reply) {
     if(row?.seen?.[job.messageSid])return {};
     if(row && row.tenant!==job.tenant)throw new Error("Conversation identity mismatch");
     const messages=(row?.messages || []).concat([{role:"user",content:job.body},{role:"assistant",content:reply}]).slice(-20);
-    return {value:{tenant:job.tenant,messages,seen:{...row?.seen,[job.messageSid]:stamp()},updatedAt:stamp()}};
+    // Rev 2 (QA): the first saved reply that carries the automated intro stamps disclosedAt, so the next AI reply
+    // knows the disclosure was made (a first CITAS/YES/QUOTE/HELP keyword reply does not use it up).
+    const disclosedAt=row?.disclosedAt||(/^(?:Automated assistant|Asistente automatizado)\b/.test(String(reply||''))?stamp():undefined);
+    return {value:{tenant:job.tenant,messages,seen:{...row?.seen,[job.messageSid]:stamp()},...(disclosedAt?{disclosedAt}:{}),updatedAt:stamp()}};
   });
 }
 export async function processManagedSMS(id) {
@@ -144,6 +151,10 @@ export async function processManagedSMS(id) {
     };
     const historyKey=`${c.slug}/${job.tenant}/${job.from}`, history=await strictRead("managed_sms_history",historyKey);
     const messages=(history?.messages || []).slice(-12).concat([{role:"user",content:job.body}]);
+    // P6: the first front-desk (AI) reply in a conversation says it is automated. "First" means no saved reply
+    // in this conversation carried the intro yet (history.disclosedAt, rev 2), so a retry decides the same way. The intro is part
+    // of the saved reply, so a paid answer's delivery still matches its source (inbound.reply === body).
+    const firstReply=!history?.disclosedAt, disclose=text=>withAutomatedIntro(c,text,{first:firstReply,language:looksSpanish(job.body)?'es':'en'});
     // These recipient-initiated controls are deterministic and do not spend AI
     // allowance. A website/call invitation starts this exchange; only the later
     // provider-verified YES after the sent question grants its stated permission.
@@ -195,7 +206,7 @@ export async function processManagedSMS(id) {
     }
     const allowance=await reserveAIRequest(c,"web",{service:"sms"}); if (!allowance.allowed) {
       job=await releaseUnusedAnswer(c,job);
-      const reply=`${c.business.name}: I cannot complete this reply right now. Please contact ${c.phone?.businessNumber || c.owner.email}. The shop can review your message in its workspace.`;
+      const reply=disclose(`${c.business.name}: I cannot complete this reply right now. Please contact ${c.phone?.businessNumber || c.owner.email}. The shop can review your message in its workspace.`);
       if(!await freshAuthority())return {ok:true,suppressed:true};
       await updateInbound(id,row=>row.claim?.token===token?{...row,reply,replyPurpose:"reply",reasonCode:"ai_daily_limit"}:null);
       await queueManagedMessage(c,{eventId:`sms_reply:${job.messageSid}`,channel:"sms",purpose:"reply",to:job.from,body:reply});
@@ -255,7 +266,7 @@ export async function processManagedSMS(id) {
       return {content,...(availabilityError?{is_error:true}:{}),...(savedActionCount>savedBefore?{event:{type:"saved",...(name==="notify_owner"&&input?.reason==="spam"?{reason:"spam"}:{})}}:{})};
     }});
     if (!await freshAuthority()) { await updateInbound(id,row=>({...row,state:"suppressed",claim:null,reasonCode:"authority_changed"})); return {ok:true,suppressed:true}; }
-    const ask=booked && !consent.transactional && !consent.pendingAsk, reply=String(terminalCheckReply || out.reply || "Please contact the shop directly for help with your request.").slice(0,1200)+(ask?"\n"+managedAppointmentConsentQuestion(c,savedBookingLanguage||'en'):"");
+    const ask=booked && !consent.transactional && !consent.pendingAsk, reply=disclose(String(terminalCheckReply || out.reply || "Please contact the shop directly for help with your request.").slice(0,1200))+(ask?"\n"+managedAppointmentConsentQuestion(c,savedBookingLanguage||'en'):"");
     const planned=await updateInbound(id,row=>row.claim?.token===token&&!row.reply?{...row,reply,replyPurpose:ask?"consent_ask":"reply",...(capacity?{paidAnswerGenerated:true}:{} )}:null);
     if (planned.claim?.token!==token || !planned.reply) return {ok:true,busy:true};
     await queueManagedMessage(c,{eventId:`sms_reply:${job.messageSid}`,channel:"sms",purpose:planned.replyPurpose,to:job.from,body:planned.reply,consentAsk:planned.replyPurpose==="consent_ask"});

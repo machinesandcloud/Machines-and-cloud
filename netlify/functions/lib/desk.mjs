@@ -3,7 +3,7 @@
 // reschedule by reply, the follow-up timers that match the plan, the daily digest, line health.
 import { addRecord, createRecordOnce, finishStableBookingWindow, saveRecord, getRecord, scheduleTask, cancelTasks, logEvent, listRecords, list, get, del, put, getConversation, saveConversation, addToIndex, recordsFor, id, bookingWindowTaken, reserveBookingWindow, finishBookingWindow, canonicalWindow, getAvailability, assertCurrentWorkspace, listWorkspaceRecords } from "./store.mjs";
 import { AvailabilityInputError, appointmentWindowRange } from "./availability.mjs";
-import { notifyOwner, sendSMS, sendEmail, notifySteve, e164, optOutStatus, placeCall, STEVE_PHONE } from "./send.mjs";
+import { notifyOwner, sendSMS, sendEmail, notifySteve, e164, optOutStatus, placeCall, textOwner } from "./send.mjs";
 import { createEvent, updateEvent, visitDate, windowHours, houstonISO, normalizeDate, friendlyDate } from "./calendar.mjs";
 import { PLANS, isBusinessHours, houstonNow, normalizeHours, NOBOOK_REASONS, opensLaterToday, tradeKey } from "./config.mjs";
 import { getUsage, usageView } from "./usage.mjs";
@@ -33,11 +33,13 @@ export function deliveryNote(c, record) {
   const parts = [];
   if (o.merged) parts.push(`This matched an open request from the last 30 minutes (ref ${record.id}) and nothing changed, so no new alert was sent. Do not say a new text was sent.`);
   else {
-    const sent = (o.ownerAlert || []).filter((r) => r?.ok).map((r) => r.channel === "email" ? "an email" : "a text");
+    // Legal P1 rev 2: an operator fallback email is not an owner alert, so it is never reported as "a text" or "an email" to the owner.
+    const ownerChannels = (o.ownerAlert || []).filter((r) => r?.channel !== "operator");
+    const sent = ownerChannels.filter((r) => r?.ok).map((r) => r.channel === "email" ? "an email" : "a text");
     // QA4: with one channel accepted and the other failed (or thrown), say exactly which one did not go out.
-    const missed = sent.length ? (o.ownerAlert || []).filter((r) => r && !r.ok && r.channel).map((r) => r.channel === "email" ? "The email" : "The text") : [];
+    const missed = sent.length ? ownerChannels.filter((r) => r && !r.ok && r.channel).map((r) => r.channel === "email" ? "The email" : "The text") : [];
     parts.push(sent.length ? `${Owner} was sent ${sent.join(" and ")} with the details (accepted by the provider; delivery and reading are not confirmed).${missed.length ? ` ${missed.join(" and ")} to ${owner} did not go out; mention only what was sent.` : ""}`
-      : `It is saved, but ${owner} could not be alerted yet (${(o.ownerAlert || []).length ? "the alert did not go out" : "no owner phone or email is on file"}). ${noClaim}`);
+      : `It is saved, but ${owner} could not be alerted yet (${ownerChannels.length ? "the alert did not go out" : "no owner phone or email is on file"}). ${noClaim}`);
   }
   if ("customerText" in o) {
     const r = o.reminders || [];
@@ -174,7 +176,9 @@ STRINGS.es.managed_reminder = (c, b, requested) => oneDot(`${c.business.name}: r
 // needs Spanish reviewer
 STRINGS.es.managed_cancelled = (c, b) => `${c.business.name}: su visita${visitWhenEs(b) ? " " + visitWhenEs(b).replace(/^el /, "del ") + "," : ""} fue cancelada.`;
 // needs Spanish reviewer
-STRINGS.es.managed_help = (c, contact) => `${c.business.name}: para recibir ayuda, llame o escriba ${/@/.test(contact) ? "a" : "al"} ${contact}. Responda STOP, ALTO o PARAR para dejar de recibir mensajes.`;
+// Spanish review r4: "al" before a phone number, "escriba a" (no "llame") before an email address, and no English
+// placeholder ("the shop") inside the Spanish reply. "dejar de recibir mensajes" says what STOP ends.
+STRINGS.es.managed_help = (c, contact) => `${c.business.name}: para ayuda, ${/@/.test(String(contact)) ? "escriba a " + contact : /\d/.test(String(contact)) ? "llame o escriba al " + contact : "contacte al negocio"}. Responda STOP, ALTO o PARAR para dejar de recibir mensajes.`;
 STRINGS.es.consent_yes = (c) => `${c.business.name}: gracias, le escribiremos cuando toque su siguiente mantenimiento. Responda STOP o ALTO para dejar de recibir mensajes.`;
 TEMPLATES.maintenance_reminder = (c, j) => `${c.business.name}: it has been about six months since your last visit${j.issue ? " (" + j.issue + ")" : ""}. A tune-up keeps the system running through the season. Reply here with a day and we will fit you in. Reply STOP to end these.`;
 TEMPLATES_ES.maintenance_reminder = (c, j) => `${c.business.name}: ya pasaron unos seis meses desde su visita anterior${j.issue ? " (" + j.issue + ")" : ""}. Un mantenimiento mantiene el sistema funcionando toda la temporada. Responda con la fecha que le convenga y lo agendamos. Responda STOP o ALTO para dejar de recibir mensajes.`;
@@ -206,7 +210,7 @@ export async function noteConsentReply(c, phone, text, conv) {
   const cust = await getCustomer(c.slug, phone);
   if (!cust.consentAskedAt || cust.marketingConsent) return null;
   if (Date.now() - new Date(cust.consentAskedAt).getTime() > 7 * D) return null;
-  cust.marketingConsent = { at: new Date().toISOString(), channel: "sms", wording: cust.consentWording, reply: text.trim().slice(0, 40), number: c.phone?.twilioNumber || process.env.MC_TWILIO_NUMBER || "" };
+  cust.marketingConsent = { at: new Date().toISOString(), channel: "sms", wording: cust.consentWording, reply: text.trim().slice(0, 40), number: c.phone?.twilioNumber || "" };
   await saveCustomer(cust);
   await logEvent(c, "marketing_consent", { phone });
   return str("consent_yes", { language: cust.language })(c);
@@ -723,7 +727,7 @@ export async function runEscalation(c, task) {
   let how = "";
   const backupText = async () => {
     if (!c.owner?.backupPhone) return "backup skipped";
-    const r = await sendSMS({ to: c.owner.backupPhone, client: c, type: "escalation", force: true, body: `${owner} has not acknowledged this in ${mins} min:\n${summary}` });
+    const r = await sendSMS({ to: c.owner.backupPhone, client: c, type: "escalation", body: `${owner} has not acknowledged this in ${mins} min:\n${summary}` });
     return r.ok ? "backup texted" : r.logged ? "backup texted (logged)" : "backup skipped";
   };
   const tellCustomer = async () => {
@@ -739,7 +743,7 @@ export async function runEscalation(c, task) {
   } else if (a.step === 2) {
     if (cellIsForwardedLine(c)) {
       // A call to the forwarded line would come straight back to the front desk: text again instead.
-      await sendSMS({ to: c.owner?.phone, client: c, type: "owner_alert", force: true, body: `Second notice: not acknowledged in ${mins * 2} min.\n${summary}` });
+      await textOwner(c, `Second notice: not acknowledged in ${mins * 2} min.\n${summary}`, { type: "owner_alert" });
       how = "call replaced by text (forwarded line)";
     } else {
       const r = await placeCall({ client: c, to: c.owner?.phone, say: `Urgent lead from your ${c.business.name} front desk. Please check your texts. Urgent lead from your ${c.business.name} front desk. Please check your texts.` });
@@ -747,7 +751,6 @@ export async function runEscalation(c, task) {
     }
   } else {
     await tellCustomer();
-    if (STEVE_PHONE) await sendSMS({ to: STEVE_PHONE, from: process.env.MC_TWILIO_NUMBER, body: `Unacknowledged ${a.kind} at ${c.business.name}:\n${summary}`.slice(0, 1200), force: true });
     await notifySteve(`Unacknowledged ${a.kind}: ${c.business.name}`, `${summary}\n\n${process.env.URL || ""}/desk?c=${c.slug}&k=${c.ownerKey}`);
     how = "customer told window, Steve notified";
     a.status = "exhausted";
@@ -955,8 +958,7 @@ export function lineHealth(c, events = [], pointer = null) {
   const latest = (types, kind) => { const e = events.filter((x) => types.includes(x.type)).map((x) => x.at).sort().pop(); const p = pointer?.[kind] || null; return [e, p].filter(Boolean).sort().pop() || null; };
   const since = Date.now() - D;
   const errors24h = events.filter((x) => ["sms_failed", "sms_agent_failed", "vapi_tool_failed", "task_error", "build_failed", "voice_failed", "twilio_error", "assistant_request_failed", "calendar_failed"].includes(x.type) && new Date(x.at).getTime() > since).length;
-  const own = c.phone?.twilioNumber && c.phone?.tenDlc === "approved";
-  const sender = own ? "own" : (process.env.MC_MESSAGING_SERVICE_SID || process.env.MC_TWILIO_NUMBER) ? "bridge" : "none";
+  const sender = c.phone?.twilioNumber && c.phone?.tenDlc === "approved" ? "own" : "none";
   return {
     lastInboundCall: latest(["missed_call", "call_forwarded", "call_ended", "call_while_paused", "call_passthrough"], "call"),
     lastInboundText: latest(["sms_inbound", "sms_reply"], "text"),

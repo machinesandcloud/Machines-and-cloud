@@ -54,6 +54,8 @@ export const ERASURE_REGISTRY = Object.freeze({
   phone_activation_intents: { scope: 'prefix', provider: true, contact: false }, voice_activation_intents: { scope: 'prefix', provider: true, contact: false },
   messaging_activation: { scope: 'prefix', provider: true, contact: false }, service_onboarding_intents: { scope: 'prefix', provider: true, contact: false },
   service_reconciliations: { scope: 'prefix', contact: false }, workspace_operations: { scope: 'prefix', contact: false },
+  held_notices: { scope: 'prefix' }, // rev 4: `${slug}/<phone>` held-text notice dedupe
+  owner_fallback: { scope: 'prefix', contact: false }, // legal P1 rev 2: `${slug}/<Houston hour>` operator-fallback counters; no contact data
   workspace_billing: { scope: 'prefix', keep: 'legal_hold', contact: false }, workspace_billing_events: { scope: 'prefix', keep: 'legal_hold', contact: false },
   workspace_billing_reviews: { scope: 'prefix', keep: 'legal_hold', contact: false },
   contact_erasures: { scope: 'prefix', contact: false, provider: true },
@@ -62,6 +64,8 @@ export const ERASURE_REGISTRY = Object.freeze({
   calendar_oauth: { scope: 'slugField', contact: false }, lead_oauth_states: { scope: 'slugField', contact: false },
   workspace_billing_customers: { scope: 'slugField', keep: 'legal_hold', contact: false }, workspace_billing_subscriptions: { scope: 'slugField', keep: 'legal_hold', contact: false },
   optouts: { scope: 'slugField', keep: 'suppression' },
+  optout_flags: { scope: 'prefix' }, // rev 4: `${slug}/<phone>` possible-opt-out notice dedupe
+  optout_review: { scope: 'slugField' }, // legal P9: review queue rows hold slug, phone and up to 300 characters of the text
   calendar_execution_budgets: { scope: 'tenantKey', contact: false },
   index: { scope: 'index' }, health: { scope: 'health', contact: false },
   accounts: { scope: 'emailKey', contact: false }, onboarding_drafts: { scope: 'emailKey', contact: false }, prospects: { scope: 'emailKey', contact: false },
@@ -81,6 +85,7 @@ export const ERASURE_REGISTRY = Object.freeze({
   managed_resource_admission: { scope: 'none', note: 'paid-resource accounting ledger; entries are provider accounting, not customer content' },
   platform_sms_receipts: { scope: 'none', note: "M&C's own support number (owner decision O5)" }, platform_sms_messages: { scope: 'none', note: "M&C's own support number (owner decision O5)" },
   workspace_erasures: { scope: 'none', note: 'this audit' },
+  optout_requests: { scope: 'none', keep: 'suppression', note: 'legal P9 operator opt-out audit: contact digest and last-4/domain hint only, no raw contact' },
   // Conditional: these stores exist only if Proposal 09 (conversation tokens) or Proposal 15
   // (public chat budget) ships. Listing an absent store costs one empty list and changes nothing.
   // Key shapes are taken from those patches: conversation_access/conversation_forks use convKey

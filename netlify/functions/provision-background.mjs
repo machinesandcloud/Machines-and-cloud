@@ -5,7 +5,7 @@ import { isSelfServiceClient } from "./lib/setup.mjs";
 import { getClient, saveClient, indexClient, put, logEvent } from "./lib/store.mjs";
 import { twilioEnabled, a2pEnabled, buyLocalNumber, createMessagingService, addNumberToService, registerA2P, setVoiceFallback, voiceFallbackFor } from "./lib/twilio.mjs";
 import { vapiEnabled, provisionVoice } from "./lib/vapi.mjs";
-import { notifySteve, sendEmail, sendSMS } from "./lib/send.mjs";
+import { notifySteve, sendEmail, sendSMS, ownSenderApproved } from "./lib/send.mjs";
 import { forwardingInstructions } from "./lib/forwarding.mjs";
 
 export default async (req) => {
@@ -74,8 +74,8 @@ export default async (req) => {
   const fw = forwardingInstructions(c);
   if (c.phone.twilioNumber) {
     const text = `${c.business.name}: your front desk number is ${c.phone.twilioNumber}. ${fw.short} Portal: ${portal}`;
-    if (c.owner.phone) await sendSMS({ to: c.owner.phone, client: c, force: true, type: "number_assigned", body: text });
-    await sendEmail({ to: c.owner.email, subject: `Your front desk number: ${c.phone.twilioNumber}`, text: `Your front desk now has its own number: ${c.phone.twilioNumber}.\n\nOne step is yours, and it takes a minute: turn on call forwarding from your phone.\n\n${fw.long}\n\nTexting from this number starts as soon as the carriers approve the business registration (one to six weeks; we filed it). Until then your front desk texts from our registered number with your business name on every message. Website chat works now: the one-line snippet is on your portal.\n\n${portal}` });
+    if (c.owner.phone) await sendSMS({ to: c.owner.phone, client: c, type: "number_assigned", body: text });
+    await sendEmail({ to: c.owner.email, subject: `Your front desk number: ${c.phone.twilioNumber}`, text: `Your front desk now has its own number: ${c.phone.twilioNumber}.\n\nOne step is yours, and it takes a minute: turn on call forwarding from your phone.\n\n${fw.long}\n\n${ownSenderApproved(c) ? "Texting from this number is approved." : "Texting from this number starts as soon as the carriers approve the business registration (one to six weeks; we filed it). Until then your front desk does not text customers, and your alerts come by email."} Website chat works now: the one-line snippet is on your portal.\n\n${portal}` });
   }
   await notifySteve(`Provisioned: ${c.business.name} (${c.provision.status})`, `${JSON.stringify(c.provision.steps, null, 1)}\n${notes.join("\n")}\n${portal}`);
   return new Response("ok");

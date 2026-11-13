@@ -165,12 +165,13 @@ await check('S09e', 'operators see shared-key use in the System payload; an owne
 });
 
 // ---------- PRA-OPS-10: founder alerts carry no owner key ----------
-await check('S10a', 'scheduler health alert email and text contain no owner key and point to the admin portal', async () => {
+await check('S10a', 'scheduler health alert email contains no owner key, points to the admin portal, and no founder text is sent (legal P1: operator alerts are email-only)', async () => {
   mail.length = 0; sms.length = 0;
   for (let i = 0; i < 3; i++) await store.logEvent(legacy, 'sms_failed', { message: 'synthetic failure ' + i });
   await scheduler.run({ all: true });
   const founderMail = mail.filter(m => [].concat(m.to).includes('founder-alerts@example.test')), founderSMS = sms.filter(m => m.To === '+17135550100');
-  assert.ok(founderMail.length >= 1 && founderSMS.length >= 1, 'alert not captured: mail ' + founderMail.length + ' sms ' + founderSMS.length);
+  assert.ok(founderMail.length >= 1, 'alert not captured: mail ' + founderMail.length);
+  assert.equal(founderSMS.length, 0, 'founder alert texted from the shared M&C number: ' + founderSMS.length);
   const text = JSON.stringify([founderMail, founderSMS]);
   assert.ok(!text.includes(legacy.ownerKey), 'owner key in founder alert'); assert.ok(!/[?&]k=(?!\[redacted\])/.test(text), 'k= credential in founder alert');
   assert.ok(text.includes('admin.html') && text.includes(legacy.slug));

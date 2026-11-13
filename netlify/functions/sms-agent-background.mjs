@@ -7,7 +7,8 @@ import { getClient, getConversation, saveConversation, logEvent } from "./lib/st
 import { runAgent, toApiMessages } from "./lib/agent.mjs";
 import { buildSystemPrompt, BOOK_VISIT, NOTIFY_OWNER, UPDATE_VISIT, GET_AVAILABILITY } from "./lib/config.mjs";
 import { bookVisit, flagLead, upcomingBookings, confirmVisit, rescheduleVisit, cancelRequest, availabilityToolResult, deliveryNote } from "./lib/desk.mjs";
-import { sendSMS, e164, optOutStatus } from "./lib/send.mjs";
+import { sendSMS, e164, optOutStatus, notifyOwner } from "./lib/send.mjs";
+import { withAutomatedIntro, looksSpanish } from "./lib/automated-disclosure.mjs";
 
 export default async (req) => {
   const key = process.env.ADMIN_KEY;
@@ -17,6 +18,10 @@ export default async (req) => {
   const from = e164(body?.from || "");
   if (!c || !from) return new Response("ok");
   const conv = await getConversation(c, "sms", from);
+  // Rev 5 (QA r4 B1): a Netlify retry after a send error resends the SAVED reply. The model is not run again, so
+  // there is no second booking and no "window filled". After the last failed try the owner is told once.
+  const pending = conv.messages.at(-1);
+  if (pending?.role === "assistant" && pending.undelivered === "send_error") return resendSaved(c, from, conv, pending);
   const bookings = await upcomingBookings(c, from);
   // A withheld (cut-off or refused) reply falls back in this number's upcoming-visit language, else
   // bilingual on a Spanish-enabled shop (agentFallbackLanguage); the call below is otherwise unchanged.
@@ -50,13 +55,50 @@ export default async (req) => {
     reply = `Sorry, I had trouble with that. Please call ${c.phone?.businessNumber || "us"} and a person will help.`;
   }
   const fresh = await getConversation(c, "sms", from);
-  fresh.messages.push({ role: "assistant", content: done ? reply + "\n" + done : reply, at: new Date().toISOString() });
-  await saveConversation(fresh);
+  // P6: the first front-desk reply in this conversation says it is automated. Templated system texts
+  // (a missed-call text-back) do not count as a reply.
+  // Rev 3 (QA r2 B6): "first" = no delivered reply in this conversation carried the intro yet (m.disclosed), so a
+  // templated fast-path answer ("C" confirmed) or an undelivered reply does not use the disclosure up. Conversations
+  // from before this change have no flag and get the intro once more (a repeat, never a miss).
+  const lastUser = [...fresh.messages].reverse().find((m) => m.role === "user")?.content || "";
+  const first = !fresh.messages.some((m) => m.role === "assistant" && m.disclosed);
+  reply = withAutomatedIntro(c, reply, { first, language: looksSpanish(lastUser) ? "es" : "en" });
   // Only a confirmed opt-out skips the reply here; an unreadable store is held and logged by sendSMS.
-  if ((await optOutStatus(from)) !== true) await sendSMS({ to: from, client: c, type: "reply", body: reply.slice(0, 1200) });
-  await logEvent(c, "sms_reply", { from });
+  // Rev 3 (QA r2 B2): the reply is saved with what happened to it. A refused or held reply is marked undelivered
+  // and logged as sms_reply_undelivered, never as sms_reply.
+  // Rev 4 (QA r3 B3): a throwing send (network error) must not lose the reply or its [Done: ...] marker, or a retry
+  // would book again or say the window just filled. The reply is saved whatever the send does.
+  let r;
+  try { r = (await optOutStatus(from)) === true ? { ok: false, reason: "opted_out" } : await sendSMS({ to: from, client: c, type: "reply", body: reply.slice(0, 1200) }); }
+  catch (err) { console.error("sms reply send failed", err?.message); r = { ok: false, reason: "send_error" }; }
+  const delivered = !!(r?.ok || r?.logged);
+  fresh.messages.push({ role: "assistant", content: done ? reply + "\n" + done : reply, at: new Date().toISOString(), ...(delivered ? (first ? { disclosed: true } : {}) : { undelivered: r?.reason || "not_sent", ...(r?.reason === "send_error" ? { outbound: reply.slice(0, 1200), intro: first, attempts: 1 } : {}) }) });
+  await saveConversation(fresh);
+  await logEvent(c, delivered ? "sms_reply" : "sms_reply_undelivered", { from, ...(delivered ? {} : { reason: r?.reason || "not_sent" }) });
+  // Saved first, then rethrown so Netlify retries the function (as on 43ee2f2c); the retry takes resendSaved().
+  if (r?.reason === "send_error") throw new Error("sms reply send_error (saved; retry resends it)");
   return new Response("ok");
 };
+
+// Netlify retries a failed background function twice (3 tries in all).
+export const SEND_TRIES = 3;
+async function resendSaved(c, from, conv, pending) {
+  let r;
+  try { r = (await optOutStatus(from)) === true ? { ok: false, reason: "opted_out" } : await sendSMS({ to: from, client: c, type: "reply", body: pending.outbound || String(pending.content).replace(/\n\[Done:[^\n]*\]\s*$/g, "").slice(0, 1200) }); }
+  catch (err) { console.error("sms reply resend failed", err?.message); r = { ok: false, reason: "send_error" }; }
+  const delivered = !!(r?.ok || r?.logged), attempts = (pending.attempts || 1) + 1;
+  if (delivered) { delete pending.undelivered; delete pending.outbound; delete pending.attempts; if (pending.intro) pending.disclosed = true; delete pending.intro; pending.deliveredAt = new Date().toISOString(); }
+  else if (r?.reason === "send_error" && attempts < SEND_TRIES) pending.attempts = attempts;
+  else { pending.undelivered = r?.reason === "send_error" ? "send_error_final" : r?.reason || "not_sent"; pending.attempts = attempts; }
+  await saveConversation(conv);
+  await logEvent(c, delivered ? "sms_reply" : "sms_reply_undelivered", { from, resend: true, attempts, ...(delivered ? {} : { reason: pending.undelivered }) });
+  if (!delivered && pending.undelivered === "send_error") throw new Error("sms reply resend send_error (retry resends it)");
+  if (!delivered && pending.undelivered === "send_error_final") {
+    const lastUser = [...conv.messages].reverse().find((m) => m.role === "user")?.content || "";
+    await notifyOwner(c, `${c.business?.name || "Front desk"} front desk: the reply to ${from} could not be sent after ${attempts} tries. Please reply yourself. They wrote: "${String(lastUser).slice(0, 300)}"`, { type: "owner_alert", settle: true }).catch(() => {});
+  }
+  return new Response("ok");
+}
 
 // Last-resort filter for exact planning notes at the start of a completed SMS reply.
 // runAgent withholds tool-use, truncated and refused text. Here, an internal tool name somewhere

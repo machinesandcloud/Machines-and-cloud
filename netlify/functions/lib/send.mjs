@@ -49,20 +49,22 @@ export async function recordOptOut(to, slug, words) {
 export async function clearOptOut(to) { await del("optouts", e164(to)); }
 
 /**
- * sendSMS({ to, from, body, client, messagingServiceSid, force })
- * - Refuses opted-out numbers, including owner alerts and owner test texts. `force` no longer
- *   bypasses this: the STOP confirmation is a TwiML reply and never goes through sendSMS.
+ * sendSMS({ to, from, body, client, messagingServiceSid })
+ * - Refuses opted-out numbers (and holds the text when the opt-out state is unreadable). There is no override: an owner's STOP blocks owner texts too
+ *   (they fall back to email through notifyOwner/textOwner).
  *   A send from the shared platform sender also honors a STOP recorded by /api/platform-sms.
  * - Sends through a Messaging Service when one is given (carrier opt-out handling applies).
- * - Picks the sender for a client: its own number once 10DLC is approved, otherwise the
- *   Machines & Cloud registered sender (MC_MESSAGING_SERVICE_SID or MC_TWILIO_NUMBER) with the
- *   business name prefixed, so day-one texts are legal and deliverable.
+ * - A shop texts only from its own carrier-approved number. The shared Machines & Cloud number
+ *   (MC_TWILIO_NUMBER / MC_MESSAGING_SERVICE_SID) belongs to M&C's own Customer Care campaign and is
+ *   never used for a shop's texts (legal precondition P1, owner decision B8 a). Without an approved
+ *   sender the text is refused with reason "no_registered_sender" when Twilio is configured.
  */
 // Scheduled customer texts (reminders and follow-ups) leave only from the shop's own approved registration.
 // Until then they are held, never sent through the platform campaign or an unregistered number (legal-audit G1).
 export const REGISTERED_ONLY_TYPES = ["reminder_24h", "reminder_1h", "review_request", "review_nudge", "quote_check", "lead_chase", "referral_ask", "payment_reminder", "consent_ask", "maintenance_reminder"];
 export const ownSenderApproved = (client) => Boolean(client?.phone?.twilioNumber && client.phone.tenDlc === "approved");
-export async function sendSMS({ to, from, body, client, messagingServiceSid, force, type = "sms" }) {
+export const hasRegisteredSender = ownSenderApproved;
+export async function sendSMS({ to, from, body, client, messagingServiceSid, type = "sms" }) {
   if (isSelfServiceClient(client)) return { ok: false, reason: "channel_not_active" };
   to = e164(to);
   if (!to || !body) return { ok: false, reason: "missing" };
@@ -70,7 +72,7 @@ export async function sendSMS({ to, from, body, client, messagingServiceSid, for
   // Unknown opt-out state: hold the text (not sent, not thrown) so owner alerts still fall through to email.
   if (optOut === null) { if (client) await logEvent(client, "sms_held", { to, type, reason: "optout_unreadable" }).catch(() => {}); return { ok: false, reason: "sms_unconfirmed", held: true }; }
   if (optOut) { if (client) await logEvent(client, "sms_blocked", { to, type }); return { ok: false, reason: "opted_out" }; }
-  if (client && !force && REGISTERED_ONLY_TYPES.includes(type)) {
+  if (client && REGISTERED_ONLY_TYPES.includes(type)) {
     // With 12-03: a scheduled text may have been held (or its series started) on the shared sender; a STOP recorded
     // there ends it, also when the shop's own number was approved in the meantime (QA r2 N4). Approved shops keep
     // their old behaviour if the ledger is unreadable; a held text stays held.
@@ -83,24 +85,19 @@ export async function sendSMS({ to, from, body, client, messagingServiceSid, for
       return { ok: false, reason: "sender_not_registered" };
     }
   }
-  let text = body.slice(0, 1500);
+  const text = body.slice(0, 1500);
   let service = messagingServiceSid;
   if (client) {
-    const own = client.phone?.twilioNumber && client.phone?.tenDlc === "approved";
-    if (own) { from = client.phone.twilioNumber; service = client.phone.messagingServiceSid || service; }
-    else if (process.env.MC_MESSAGING_SERVICE_SID || process.env.MC_TWILIO_NUMBER) {
-      service = process.env.MC_MESSAGING_SERVICE_SID || service; from = process.env.MC_TWILIO_NUMBER || from;
-      const name = client.business?.name || "";
-      if (name && !text.startsWith(name)) text = `${name}: ${text}`.slice(0, 1500);
-    } else { from = client.phone?.twilioNumber || from; }
+    if (hasRegisteredSender(client)) { from = client.phone.twilioNumber; service = client.phone.messagingServiceSid || service; }
+    else if (smsEnabled()) { await logEvent(client, "sms_blocked", { to, type, reason: "no_registered_sender" }); return { ok: false, reason: "no_registered_sender" }; }
+    else { from = client.phone?.twilioNumber || ""; service = ""; }
   }
-  const mode = client ? (client.phone?.twilioNumber && client.phone?.tenDlc === "approved" ? "own" : service || from ? "bridge" : "none") : "mc";
+  const mode = client ? (hasRegisteredSender(client) ? "own" : "none") : "mc";
   const platformNumber = e164(process.env.MC_TWILIO_NUMBER || ""), platformService = process.env.MC_MESSAGING_SERVICE_SID || "";
   if (platformNumber && e164(from || "") === platformNumber || platformService && service === platformService) {
     const { platformSMSSuppressed } = await import("./platform-sms.mjs");
     if (await platformSMSSuppressed(to)) { if (client) await logEvent(client, "sms_blocked", { to, type, store: "platform" }); return { ok: false, reason: "opted_out" }; }
   }
-  if (client && mode === "bridge") { try { await put("index", "bridge:" + to, client.slug); } catch { /* ignore */ } }
   if (!smsEnabled() || (!from && !service)) {
     console.log(`[sms:disabled] to=${to} from=${from || service || "-"} :: ${text}`);
     if (client) await logEvent(client, "sms_sent", { to, type, sender: mode, ok: false, logged: true, preview: text.slice(0, 300) });
@@ -142,7 +139,51 @@ export async function sendEmail({ to, subject, text, html }) {
   return { ok: res.ok, id: data?.id };
 }
 
-// Owner alert: SMS to the owner's phone from the client's number when both exist, else email.
+// An owner message that could not reach the owner by text or email goes to the operator, so an
+// alert is never silently dropped (legal precondition P1). Rev 2 (QA Q1/Q2): this runs whenever no
+// owner channel succeeded, also when the owner's email send failed. Rev 2 (QA Q3):
+// - data minimization: the operator gets the shop, the alert kind and a redacted first line (phone
+//   numbers cut to their last 4 digits, email addresses to their domain, Where/Address/Customer lines
+//   dropped). The full details stay in the shop's own records (portal leads and visits).
+// - rate limit: at most OWNER_FALLBACK_HOURLY operator emails per shop per Houston hour; the next one
+//   says further alerts are held this hour, and each held alert is still logged (owner_alert_fallback,
+//   operator:"rate_limited"). A counter store failure fails open (the email is sent).
+export const OWNER_FALLBACK_HOURLY = 3;
+export function redactForOperator(text) {
+  const lines = String(text || "").split("\n").filter((l) => !/^\s*(?:where|address|customer|phone|email|contact|notes?)\s*:/i.test(l));
+  // Rev 3 (QA r2): street addresses anywhere ("lives on 1402 Mason Rd", "address 900 W Main St"), gate/door codes,
+  // and phone numbers matched on their own (10-11 digits) so a following house number is not merged into them.
+  const PH = "\u0001";
+  return lines.join(" ").replace(/[\w.+-]+@([\w-]+(?:\.[\w-]+)+)/g, "…@$1")
+    .replace(/(?:\+?1[\s.-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}\b/g, (m) => PH + m.replace(/\D/g, "").slice(-4) + PH)
+    .replace(/(?<![\d\u0001])\b\d{1,6}\s+(?:[NSEW]\.?\s+)?(?:[A-Za-z0-9'.-]+\s+){0,4}?(?:st|street|rd|road|ave|avenue|dr|drive|ln|lane|blvd|boulevard|way|ct|court|pkwy|parkway|hwy|highway|cir|circle|pl|place|trl|trail|fwy|freeway)\b\.?(?:\s*(?:apt|unit|ste|suite|#)\s*\w+)?(?:,?\s+[A-Z][a-z]+)?/gi, "[address withheld]")
+    .replace(/\b(?:gate|door|lock|alarm|access)\s*(?:code)?\s*:?\s*[\w#*]{2,}/gi, "[code withheld]")
+    .replace(/\b(?:at|to|a)\s+\d+\s+[^,.()\n]{2,60}/gi, "at [address withheld] ")
+    .replace(/\u0001(\d{4})\u0001/g, "…$1").slice(0, 200);
+}
+const fallbackHour = () => new Date().toLocaleString("sv-SE", { timeZone: "America/Chicago" }).slice(0, 13).replace(" ", "T");
+async function ownerFallback(client, text, reason) {
+  const name = client.business?.name || client.slug || "A shop";
+  let n = 0;
+  try { n = await atomicUpdate("owner_fallback", `${client.slug || "unknown"}/${fallbackHour()}`, (cur) => { const count = (cur?.count || 0) + 1; return { value: { count, at: new Date().toISOString() }, result: count }; }); }
+  catch { n = 0; /* counter unavailable: send rather than lose the alert */ }
+  if (n > OWNER_FALLBACK_HOURLY + 1) {
+    try { await logEvent(client, "owner_alert_fallback", { reason, operator: "rate_limited", count: n }); } catch { /* logged best effort */ }
+    return { ok: false, reason: "operator_rate_limited", count: n };
+  }
+  const subject = n === OWNER_FALLBACK_HOURLY + 1 ? `Owner alerts held this hour: ${name}` : `Owner alert not delivered: ${name}`;
+  const body = n === OWNER_FALLBACK_HOURLY + 1
+    ? `${OWNER_FALLBACK_HOURLY} owner alerts for ${client.slug || name} already came here this hour because none could reach the owner (${reason}). Further alerts this hour are not emailed; each one is logged as owner_alert_fallback on the shop and its details are in the shop's records. Please reach the owner.`
+    : `An owner message for ${client.slug || name} could not reach the owner by text or email (${reason}), so it came here instead. Please tell the owner to check the portal.\n\nAlert (customer details withheld): ${redactForOperator(text)}`;
+  const r = await sendEmail({ to: STEVE_EMAIL, subject, text: body });
+  try { await logEvent(client, "owner_alert_fallback", { reason, operator: r.ok ? "sent" : r.logged ? "logged" : "failed", count: n }); } catch { /* the operator email is the record */ }
+  return r;
+}
+
+// Owner alert: SMS from the shop's own approved number when it has one, and email whenever the owner
+// has an address. No shared-sender text and no opt-out override. When no owner channel succeeded
+// (no contact, text refused, or the email send failed) the operator fallback runs; its result is tagged
+// channel:"operator" so callers can tell the owner was not reached.
 export async function notifyOwner(client, text, opts = {}) {
   const results = [];
   // opts.settle: a channel that throws (network error) is recorded as not sent and the next channel is still tried.
@@ -150,10 +191,18 @@ export async function notifyOwner(client, text, opts = {}) {
   // A suppression read failure (or Twilio error) withholds the text but must not skip the email fallback.
   // With opts.settle, `one` already records the throw as send_error; this catch covers callers without it.
   if (client.owner?.phone) {
-    try { results.push(await one("text", () => sendSMS({ to: client.owner.phone, client, body: text, force: true, type: opts.type || "owner_alert" }))); }
+    try { results.push(await one("text", () => sendSMS({ to: client.owner.phone, client, body: text, type: opts.type || "owner_alert" }))); }
     catch (error) { console.error("owner sms withheld", error?.message); results.push({ channel: "text", ok: false, reason: "sms_unconfirmed" }); }
   }
-  if (client.owner?.email) results.push(await one("email", () => sendEmail({ to: client.owner.email, subject: `${client.business?.name || "Front desk"}: ${text.split("\n")[0].slice(0, 60)}`, text })));
+  if (client.owner?.email) {
+    try { results.push(await one("email", () => sendEmail({ to: client.owner.email, subject: `${client.business?.name || "Front desk"}: ${text.split("\n")[0].slice(0, 60)}`, text }))); }
+    catch (error) { console.error("owner email failed", error?.message); results.push({ channel: "email", ok: false, reason: "send_error" }); }
+  }
+  if (!results.some((r) => r.ok || r.logged)) {
+    const reason = !client.owner?.phone && !client.owner?.email ? "no_owner_contact" : client.owner?.email ? "owner_email_failed" : results[0]?.reason || "not_sent";
+    let r; try { r = await ownerFallback(client, text, reason); } catch (e) { r = { ok: false, reason: "send_error" }; }
+    results.push({ ...r, channel: "operator" });
+  }
   return results;
 }
 
@@ -162,12 +211,26 @@ export async function notifyOwner(client, text, opts = {}) {
 export function redactOwnerCredentials(value) {
   return String(value ?? "").replace(/\/desk(?:\.html)?\?c=([a-z0-9-]+)&k=[^\s#]*(?:#[\w-]*)?/gi, "/admin.html (customer $1)").replace(/([?&])k=[^\s&#]+/g, "$1k=[redacted]");
 }
+// A text meant for the owner (welcome, status, digest). Uses the shop's own approved number; when it
+// cannot be texted it is emailed to the owner; when there is no owner email or that email failed, the
+// operator fallback runs (rev 2, QA Q2).
+export async function textOwner(client, body, { type = "owner_note", subject, to } = {}) {
+  const phone = to || client.owner?.phone;
+  const r = phone ? await sendSMS({ to: phone, client, body, type }) : { ok: false, reason: "missing" };
+  if (r.ok || r.logged) return r;
+  const email = client.owner?.email;
+  let e = null;
+  if (email) { try { e = await sendEmail({ to: email, subject: subject || `${client.business?.name || "Front desk"}: ${body.split("\n")[0].slice(0, 60)}`, text: body }); } catch { e = { ok: false }; } }
+  if (e && (e.ok || e.logged)) return { ...r, emailed: e.ok ? "sent" : "logged" };
+  await ownerFallback(client, body, email ? "owner_email_failed" : r.reason || "not_sent").catch(() => {});
+  return { ...r, emailed: email ? "failed_operator" : "operator" };
+}
+
+// Operator alerts go by email only. The M&C number is reserved for its Customer Care campaign.
+// Founder alerts still never carry an owner credential (release 2 ops P2).
 export async function notifySteve(subject, text) {
   subject = redactOwnerCredentials(subject); text = redactOwnerCredentials(text);
-  const r = [];
-  r.push(await sendEmail({ to: STEVE_EMAIL, subject, text }));
-  if (STEVE_PHONE && process.env.MC_TWILIO_NUMBER) r.push(await sendSMS({ to: STEVE_PHONE, from: process.env.MC_TWILIO_NUMBER, body: `${subject}\n${text}`.slice(0, 600) }));
-  return r;
+  return [await sendEmail({ to: STEVE_EMAIL, subject, text })];
 }
 
 // Twilio request signature (X-Twilio-Signature) over the full URL plus sorted POST params.
