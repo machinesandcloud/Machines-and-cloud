@@ -15,12 +15,14 @@ if (existsSync(output)) throw new Error('Refusing to overwrite retained QA evide
 const prefix = output.slice(0, -5);
 process.env.MC_MEMORY_STORE = '1'; process.env.MC_FAKE_MODEL = '1'; process.env.URL = base;
 for (const key of Object.keys(process.env)) if (/^(ANTHROPIC_|TWILIO_|MC_TWILIO_|MC_MESSAGING_|VAPI_|RESEND_|GOOGLE_|STRIPE_)/.test(key)) delete process.env[key];
-const report = { at: new Date().toISOString(), mode: 'actual onboarding source + access/onboard handlers in memory; fake mailbox and model; no network', checks: [], scenarios: [], requests: [], blockedBrowser: [], forbiddenApi: [], blockedServer: [], pageErrors: [], screenshots: [], servedOnboardJs: [] };
+const report = { at: new Date().toISOString(), mode: 'actual onboarding source + access/onboard handlers in memory; fake mailbox and model; no network', checks: [], scenarios: [], requests: [], blockedBrowser: [], forbiddenApi: [], availability: [], onboardLoads: 0, blockedServer: [], pageErrors: [], screenshots: [], servedOnboardJs: [] };
 globalThis.fetch = async input => { const url = new URL(String(input?.url || input)); report.blockedServer.push({ origin: url.origin, pathname: url.pathname }); throw new Error('QA physical transport denied'); };
 const store = await import('../../netlify/functions/lib/store.mjs');
 const { accessHash } = await import('../../netlify/functions/lib/access.mjs');
-const handlers = { '/api/access': (await import('../../netlify/functions/access.mjs')).default, '/api/onboard': (await import('../../netlify/functions/onboard.mjs')).default };
-const sources = ['onboard.html', 'onboard.js', 'onboard.css', 'product-ui.css', 'netlify/functions/access.mjs', 'netlify/functions/onboard.mjs', 'netlify/functions/lib/access.mjs', 'netlify/functions/lib/config.mjs', 'netlify/functions/lib/store.mjs'];
+const handlers = { '/api/access': (await import('../../netlify/functions/access.mjs')).default, '/api/onboard': (await import('../../netlify/functions/onboard.mjs')).default,
+  // Release 1 (channel-availability-fix PRA-ACQ-01/02, ONB-02): onboarding reads the public, tenant-free availability projection.
+  '/api/channel-availability': (await import('../../netlify/functions/channel-availability.mjs')).default };
+const sources = ['onboard.html', 'onboard.js', 'onboard.css', 'product-ui.css', 'netlify/functions/access.mjs', 'netlify/functions/onboard.mjs', 'netlify/functions/lib/access.mjs', 'netlify/functions/lib/config.mjs', 'netlify/functions/lib/store.mjs', 'channel-availability.js', 'netlify/functions/channel-availability.mjs', 'netlify/functions/lib/channel-availability.mjs'];
 const hashes = () => Object.fromEntries(sources.map(file => [file, createHash('sha256').update(readFileSync(resolve(root, file))).digest('hex')]));
 report.sourceBefore = hashes();
 const check = (name, pass, detail) => report.checks.push({ name, pass: !!pass, ...(detail === undefined ? {} : { detail }) });
@@ -47,12 +49,14 @@ async function newContext(width, session) {
       const response = await handlers[url.pathname](req, { ip: clientIp });
       const body = ['GET', 'HEAD'].includes(incoming.method()) ? null : incoming.postDataJSON();
       report.requests.push({ method: incoming.method(), path: url.pathname, action: body?.action, status: response.status });
+      if (url.pathname === '/api/channel-availability') { const h = incoming.headers(), text = await response.clone().text(); let keys = null; try { keys = Object.keys(JSON.parse(text)).sort().join(','); } catch {} report.availability.push({ method: incoming.method(), search: url.search, authorization: 'authorization' in h, cookie: 'cookie' in h, status: response.status, keys, leaksSession: /mc-|session|@/i.test(url.search + text) }); }
       return route.fulfill({ status: response.status, headers: Object.fromEntries(response.headers), body: Buffer.from(await response.arrayBuffer()) });
     }
     const relative = decodeURIComponent(url.pathname === '/' ? '/index.html' : url.pathname).replace(/^\/+/, '');
     if (relative.split(/[\\/]/).some(part => part.startsWith('.'))) return route.fulfill({ status: 404, body: 'blocked' });
     const path = resolve(root, relative);
     if (!path.startsWith(root + '/') || !existsSync(path) || statSync(path).isDirectory()) return route.fulfill({ status: 404, body: 'not found' });
+    if (relative === 'onboard.html' && incoming.resourceType() === 'document') report.onboardLoads++;
     if (relative === 'onboard.js') { const served = createHash('sha256').update(readFileSync(path)).digest('hex'); if (!report.servedOnboardJs.includes(served)) report.servedOnboardJs.push(served); }
     return route.fulfill({ status: 200, contentType: ({ '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.svg': 'image/svg+xml', '.jpg': 'image/jpeg', '.woff2': 'font/woff2' })[extname(path)] || 'application/octet-stream', body: readFileSync(path) });
   });
@@ -197,6 +201,7 @@ for (const [kind, width] of scenarios) {
 await browser.close();
 check('No browser request left the fixture origin', report.blockedBrowser.length === 0, report.blockedBrowser);
 check('No forbidden API route was requested', report.forbiddenApi.length === 0, report.forbiddenApi);
+check('The channel-availability read is a credential-free, tenant-free GET, at most once per onboarding page load', report.availability.length > 0 && report.availability.length <= report.onboardLoads && report.availability.every(r => r.method === 'GET' && !r.search && !r.authorization && !r.cookie && r.status === 200 && r.keys === 'channels,version' && !r.leaksSession), { reads: report.availability.length, onboardLoads: report.onboardLoads, bad: report.availability.filter(r => !(r.method === 'GET' && !r.search && !r.authorization && !r.cookie && r.status === 200 && r.keys === 'channels,version' && !r.leaksSession)) });
 check('No physical server transport was attempted', report.blockedServer.length === 0, report.blockedServer);
 check('Every sign-in link went to the fake mailbox only', report.requests.filter(r => r.action === 'request_link').every(r => r.status < 300));
 report.sourceAfter = hashes();

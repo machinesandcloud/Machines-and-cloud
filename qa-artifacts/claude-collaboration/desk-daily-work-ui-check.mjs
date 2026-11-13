@@ -159,7 +159,12 @@ try {
       await route(x, 'today'); const homeReached = await homeRows(x);
       assert.match(homeReached, /Jordan Needs/, 'still open, still listed'); assert.doesNotMatch(homeReached, /needs action/i, 'Home label is the fixed outcome: ' + homeReached); assert.match(homeReached, /Customer reached/);
       await followUp(x, 'complete', { requestResolution: 'resolved', requestNote: 'Cleared the drain' });
-      await route(x, 'leads'); const done = await card(x).innerText();
+      // Release 1 (desk-inbox-fix PRA-DESK-02): Inbox opens on Open; a completed request leaves Open and is listed under Done.
+      await route(x, 'leads'); await x.page.locator('[data-request-filter="open"][aria-pressed="true"]').waitFor();
+      await x.page.waitForFunction(() => Number(document.getElementById('requestDoneCount').textContent) >= 1);
+      await card(x).waitFor({ state: 'detached', timeout: 10000 }).catch(() => { throw new Error('completed request is still listed under Open'); });
+      await x.page.locator('[data-request-filter="done"]').click(); await x.page.locator('[data-request-filter="done"][aria-pressed="true"]').waitFor();
+      const done = await card(x).innerText();
       assert.doesNotMatch(done, /needs action/i, 'completed request card still says needs action: ' + done); assert.match(done, /Follow-up complete/);
       await noHorizontalScroll(x.page); await card(x).scrollIntoViewIfNeeded(); await shot(x.page, 'request-complete-card-' + w);
       await route(x, 'today'); assert.doesNotMatch(await homeRows(x), /Jordan Needs/, 'completed request listed under Needs your attention');
