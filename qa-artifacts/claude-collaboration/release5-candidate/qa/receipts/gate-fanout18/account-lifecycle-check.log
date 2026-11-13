@@ -1,0 +1,25 @@
+PASS operator pause matches owner pause: channels, snapshot, tasks, billing
+PASS operator resume matches owner resume (no channel auto-enabled without readiness)
+PASS operator cancel matches owner cancel: channels off, tasks removed, billing stop queued
+PASS operator cancel never exposes the internal reason as the owner-visible cancelReason
+PASS support pause, resume and cancel each notify the owner in the desk and by email, with no internal reason
+PASS owner-initiated pause sends no support notice and clears an earlier one
+PASS unknown reason category and oversized customer message are refused without a change
+PASS operator reopen restores access and data, returns to testing with channels off and fresh review
+PASS reopened workspace can pause again and owner Go-live still needs review and live test
+PASS re-signup on a stopped workspace offers reopen and creates nothing
+PASS after a policy-review cancellation the owner is told to contact support and cannot self-reopen
+PASS owner reopen with a stale revision is refused
+PASS concurrent re-signups and reopen keep exactly one workspace and one account row
+PASS owner pause racing operator cancel: one winner, final state fully consistent
+PASS owner cancel racing operator pause: cancel always ends with tasks and billing stop handled
+PASS an erasure record blocks every reopen, even before the client row is gone
+PASS erased workspace cannot be reopened and its email signs up fresh (proposal 18 stacked)
+PASS QA: a support cancellation is support-reopen only unless the operator allows owner reopen
+PASS QA: another signed-in person cannot reopen, and the owner cannot reopen an open workspace
+PASS QA: repeating the owner Cancel on a support-cancelled workspace sends no more support email
+PASS QA: reopen waits until phone and texting work has observed the cancellation
+PASS QA: an erasure marker on the client row blocks both reopens
+PASS R2: owner and operator both see that shutdown is still finishing, and the refused reopen changes nothing
+PASS R2: Resume refuses to restore website chat while the AI allowance is exhausted (owner and operator)
+{"check":"account-lifecycle-check","passed":24,"failed":0,"total":24,"emailsCaptured":25,"blockedRequests":[],"erasureStacked":true}

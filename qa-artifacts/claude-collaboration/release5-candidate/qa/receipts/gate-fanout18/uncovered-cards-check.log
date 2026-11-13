@@ -1,0 +1,15 @@
+PASS H07 in-app HELP and AYUDA name exactly the registered campaign HELP contact (with and without a business number)
+PASS H07 AI-limit without a business number first saves an owner request (with the owner alert), then says the shop will reply
+PASS H07 AI-limit: 5 texts from one customer give 1 request and 1 owner email; another customer gets its own; a closed request gets no promise
+PASS H07 AI-limit: if saving the request fails, the reply promises nothing
+PASS H07 AI-limit language: saved customer language wins; else Spanish only when the shop serves Spanish; Spanish stays GSM-7, 1 segment
+PASS H07 AI-limit reply with a published business number names that number only
+PASS H05 confirmation and reminders: no 32-hex ID, absolute date
+PASS H05 owner reschedule says moved, from and to; cancel says how to rebook
+PASS H05 cancellation with a published number names it (English, and Spanish needing its reviewer); dates are absolute
+PASS H06 exact moved times: same-morning send when 30+ minutes before the window, else 8:30 pm the evening before (DST, Sunday, late night)
+PASS H06 a moved reminder less than 2 hours after queueing is skipped; 2 hours or more is kept
+PASS H06 Monday 8 to 12 booked by text: the 1h reminder is actually sent before the window
+PASS H06 Sunday 8 to 12: the 24h reminder still goes out, then the moved 1h reminder
+PASS H07 AI-limit + P6: the first reply carries the automated disclosure in the reply language, above the AI-limit body; later replies do not
+uncovered-cards-check: 14/14

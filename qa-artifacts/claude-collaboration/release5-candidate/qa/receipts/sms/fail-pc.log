@@ -1,0 +1,161 @@
+[
+ [
+  "F1 failed receipt: exactly one customer text, never resent o",
+  true,
+  {
+   "attempts": 1
+  }
+ ],
+ [
+  "F2 network throw before provider: zero texts reach provider,",
+  true,
+  null
+ ],
+ [
+  "F3 401 auth (code 20003): no text, never retried, state",
+  true,
+  {
+   "state": "failed",
+   "reason": "provider_rejected",
+   "leads": 1
+  }
+ ],
+ [
+  "F3 400 unsubscribed (21610): no text, never retried, state",
+  true,
+  {
+   "state": "failed",
+   "reason": "provider_rejected",
+   "leads": 1
+  }
+ ],
+ [
+  "F3 429 rate limit: no text, never retried, state",
+  true,
+  {
+   "state": "uncertain",
+   "reason": "provider_receipt_missing",
+   "leads": 1
+  }
+ ],
+ [
+  "F4 5xx with code: no retry, uncertain",
+  true,
+  {
+   "recovery": "done"
+  }
+ ],
+ [
+  "E1 owner email cap: 8 customers fail same day with tenantLim",
+  true,
+  {
+   "alerts": 8,
+   "states": [
+    "waiting_platform:email_budget_exhausted",
+    "waiting_platform:email_budget_exhausted",
+    "waiting_platform:email_budget_exhausted",
+    "waiting_platform:email_budget_exhausted",
+    "delivered:",
+    "delivered:",
+    "waiting_platform:email_budget_exhausted",
+    "delivered:"
+   ]
+  }
+ ],
+ [
+  "E2 same customer, 5 failed replies same day = 1 email; next ",
+  true,
+  {
+   "sends": 6,
+   "replyJobs": [
+    "failed:",
+    "failed:",
+    "failed:",
+    "failed:",
+    "failed:",
+    "failed:"
+   ],
+   "inbound": [
+    "completed:",
+    "completed:",
+    "completed:",
+    "completed:",
+    "completed:",
+    "completed:"
+   ]
+  }
+ ],
+ [
+  "L1 sweep under load: 60 callback-failed replies over 3 shops",
+  true,
+  {
+   "perRun": [
+    25,
+    25,
+    10,
+    0,
+    0,
+    0
+   ]
+  }
+ ],
+ [
+  "L2 25 stale failure-index keys whose delivery rows were dele",
+  true,
+  {
+   "realAlerted": true,
+   "staleStillOpen": 0
+  }
+ ],
+ [
+  "S1 STOP after a failed reply: no confirmation suppressed inc",
+  true,
+  {
+   "stopTwiml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response><Message>Fixture Service: texts stopped. Reply START or EMPEZAR to remove the block.</Message></Response>",
+   "afterStopState": null,
+   "customerTextsViaApi": 1
+  }
+ ],
+ [
+  "H1 unverified sender: STOP/HELP/START and a normal text; not",
+  true,
+  {
+   "tw": [
+    {
+     "b": "Is anyone there?",
+     "twiml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response></Response>",
+     "state": "held"
+    },
+    {
+     "b": "HELP",
+     "twiml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response><Message>Fixture Service: for help contact sms-qa-h1-196@example.test. Reply STOP, ALTO or PARAR to stop texts.<",
+     "state": null
+    },
+    {
+     "b": "STOP",
+     "twiml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response><Message>Fixture Service: texts stopped. Reply START or EMPEZAR to remove the block.</Message></Response>",
+     "state": null
+    },
+    {
+     "b": "START",
+     "twiml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response><Message>Fixture Service: your texting block is removed. Appointment updates need a separate YES. Reply STOP or ",
+     "state": null
+    },
+    {
+     "b": "Still need help",
+     "twiml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response></Response>",
+     "state": "held"
+    }
+   ],
+   "leads": 1
+  }
+ ],
+ [
+  "G1 global: no customer reply attempted twice; no reply job d",
+  true,
+  {
+   "replyJobs": 82
+  }
+ ]
+]
+blocked: 0

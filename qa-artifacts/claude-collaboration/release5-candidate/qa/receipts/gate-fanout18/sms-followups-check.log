@@ -1,0 +1,65 @@
+{
+ "at": "2026-11-14T00:05:07.784Z",
+ "blocked": [],
+ "results": [
+  {
+   "name": "F1 orphaned failure-index entries: 30 orphans plus 1 real failure, the real failure is alerted within 2 runs",
+   "pass": true
+  },
+  {
+   "name": "F2 an orphan whose pending entry still carries a snapshot is left for snapshot restore, not dropped",
+   "pass": true
+  },
+  {
+   "name": "F2b (rev 2, QA N1) an orphan whose failure entry changes after the sweep read it is kept",
+   "pass": true
+  },
+  {
+   "name": "F3 classification: account-level by HTTP 401 or Twilio code 10001/20003/20005 only",
+   "pass": true
+  },
+  {
+   "name": "F4 account-wide 401 across 3 shops x 4 customers: 1 operator email, 1 owner email per shop, 12 requests, every reply not delivered",
+   "pass": true
+  },
+  {
+   "name": "F5 later the same Houston day (+3 h): more failures add requests, but no second operator or owner email",
+   "pass": true
+  },
+  {
+   "name": "F6 next Houston day: one new operator email and one new owner email per shop",
+   "pass": true
+  },
+  {
+   "name": "F7 the operator email itself fails: no retry within 15 minutes, retried after, then deduped",
+   "pass": true
+  },
+  {
+   "name": "F7b (rev 2, QA R1) hanging operator mailbox: the run returns promptly, another shop's reply is delivered, the timeout is retried",
+   "pass": true,
+   "note": "run 5015 ms"
+  },
+  {
+   "name": "F7c (rev 2, QA R1) the send cap also respects a run with less than 5 s left",
+   "pass": true,
+   "note": "run 2013 ms"
+  },
+  {
+   "name": "F8 control: a per-message 400 (21610) is not account-wide: per-customer owner email, no operator email",
+   "pass": true
+  },
+  {
+   "name": "F9 control: healthy path after the outage: one text, no recovery, no alert",
+   "pass": true
+  },
+  {
+   "name": "F10 global: no customer reply attempted twice",
+   "pass": true,
+   "note": "reply jobs=35"
+  }
+ ],
+ "providerSends": 3,
+ "emailPosts": 7,
+ "operatorEmails": 7
+}
+sms-followups-check: 13/13

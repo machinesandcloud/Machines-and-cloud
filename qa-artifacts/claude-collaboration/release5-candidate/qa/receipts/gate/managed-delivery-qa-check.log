@@ -1,0 +1,102 @@
+{
+  "sourceBefore": {
+    "netlify/functions/lib/managed-actions.mjs": "db98d45691c829e2d2484be4f4ffddc414310ec2219ebaf998ab98ccaae80ab5",
+    "netlify/functions/lib/managed-delivery.mjs": "9dbfe509c165b49836978a5477dd97c13d1fb20cf5a975de0805b3a0af2bca3b",
+    "netlify/functions/lib/managed-consent.mjs": "47ca07d9aa5c4c6e2bd2dcfd4d33ccb369d4e758e0c9d5b0741d29d927e00144",
+    "netlify/functions/lib/desk.mjs": "e70b1d81d16423fcb57f5d67d6d7b844bef795f17d00b315354ab3e8b21183ad",
+    "netlify/functions/lib/store.mjs": "c1dfd84ca68d4d7f96a3991af13c7d7f021c89eeb6e1eb975d17b5ab59fcdee2",
+    "netlify/functions/client.mjs": "d889de3f079dfd01e9c25d31313a50dd18fc93ae4b835050ab108fdd61effb58"
+  },
+  "sourceAfter": {
+    "netlify/functions/lib/managed-actions.mjs": "db98d45691c829e2d2484be4f4ffddc414310ec2219ebaf998ab98ccaae80ab5",
+    "netlify/functions/lib/managed-delivery.mjs": "9dbfe509c165b49836978a5477dd97c13d1fb20cf5a975de0805b3a0af2bca3b",
+    "netlify/functions/lib/managed-consent.mjs": "47ca07d9aa5c4c6e2bd2dcfd4d33ccb369d4e758e0c9d5b0741d29d927e00144",
+    "netlify/functions/lib/desk.mjs": "e70b1d81d16423fcb57f5d67d6d7b844bef795f17d00b315354ab3e8b21183ad",
+    "netlify/functions/lib/store.mjs": "c1dfd84ca68d4d7f96a3991af13c7d7f021c89eeb6e1eb975d17b5ab59fcdee2",
+    "netlify/functions/client.mjs": "d889de3f079dfd01e9c25d31313a50dd18fc93ae4b835050ab108fdd61effb58"
+  },
+  "sourceStable": true,
+  "check": "managed-delivery-independent-negative-paths",
+  "at": "2026-11-13T17:13:44.997Z",
+  "passed": 19,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "Repeated old START cannot reverse a newer STOP",
+      "ok": true
+    },
+    {
+      "name": "Changed source ownership suppresses send even when booking facts are identical",
+      "ok": true
+    },
+    {
+      "name": "Execution gate closed prevents provider status requests",
+      "ok": true
+    },
+    {
+      "name": "Late accepted status cannot downgrade a confirmed delivered receipt",
+      "ok": true
+    },
+    {
+      "name": "Unknown POST outcome never re-sends the same outbox intent",
+      "ok": true
+    },
+    {
+      "name": "Re-queueing identical semantic intent is stable across object key order",
+      "ok": true
+    },
+    {
+      "name": "A persistent uncertain job keeps worker health failing after the cursor advances",
+      "ok": true
+    },
+    {
+      "name": "Same managed booking action replay has one record and releases its capacity mutation",
+      "ok": true
+    },
+    {
+      "name": "Two independent managed actions cannot overbook one arrival slot",
+      "ok": true
+    },
+    {
+      "name": "A business rename does not permanently break recovery of an existing intent",
+      "ok": true
+    },
+    {
+      "name": "A new self-service request does not adopt an older unowned open lead",
+      "ok": true
+    },
+    {
+      "name": "Fractional-hour arrival windows schedule reminders at the actual minute",
+      "ok": true
+    },
+    {
+      "name": "An early verified delivery callback cannot be downgraded by its delayed POST response",
+      "ok": true
+    },
+    {
+      "name": "A timed-out POST cannot erase an early callback's verified provider receipt",
+      "ok": true
+    },
+    {
+      "name": "A signed YES arriving before a delayed consent-ask receipt keeps its exact proof",
+      "ok": true
+    },
+    {
+      "name": "STOP defeats a delayed ask receipt and unrelated inbound clears its pending ask",
+      "ok": true
+    },
+    {
+      "name": "A repeated ask-delivery callback cannot revive consent after an unrelated reply",
+      "ok": true
+    },
+    {
+      "name": "A first delayed ask receipt cannot recreate a prompt after unrelated conversation",
+      "ok": true
+    },
+    {
+      "name": "PRA-COPY-10: owner visit email subjects show 'Sat, Nov 14' in Central time, never the stored ISO date or a relative word",
+      "ok": true
+    }
+  ],
+  "physicalExternalRequests": 0
+}

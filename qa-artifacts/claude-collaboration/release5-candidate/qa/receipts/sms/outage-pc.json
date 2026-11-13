@@ -1,0 +1,118 @@
+{
+ "phase": "outage",
+ "results": [
+  {
+   "name": "O1 account-wide 401/20003: 3 shops x 4 customers -> 1 operator email, 1 owner outage email per shop, 12 requests, 1 POST per reply, nothing resent over 26h",
+   "pass": true,
+   "note": {
+    "posts": [
+     4,
+     4,
+     4
+    ],
+    "operator": [
+     {
+      "to": [
+       "ngoumnaisteve@gmail.com"
+      ],
+      "subject": "Texting is down for every shop: Twilio account-level rejection",
+      "text": "Twilio rejected a managed customer text with an account-level error (HTTP 401, code 20003) at 2026-10-22T18:00:02.000Z.\nThis usually means the Twilio account is suspended or its credentials no longer work, so every shop's texts will fail until it is fixed.\nNothing is resent. Each failed customer reply is marked not delivered and saved as a request in that shop's workspace; each shop's owner gets at most one email per Houston day saying texting is temporarily unavailable.\nThis is the only alert email for today (2026-10-22). Check Twilio, then the admin portal: https://sms-integration.example.test/admin.html"
+     }
+    ],
+    "ownerOutageEmail": {
+     "kind": "email",
+     "to": [
+      "sms-qa-oa-1@example.test"
+     ],
+     "subject": "Texting is temporarily unavailable: customers did not get replies",
+     "text": "Texting is temporarily unavailable: customers did not get replies\nFixture Service: automatic text replies are not reaching your customers right now because of a problem on our side with our texting provider. We are working on it.\nReplies that could not be sent were not sent again. Each customer who did not get a reply is saved as a request in your workspace, with what they wrote. Please call or text them yourself.\nThis is the only email about this for 2026-10-22. Customers affected later that day are added to your workspace without another email.\nOpen your workspace to review and respond.",
+     "html": null,
+     "at": 1792692004000
+    },
+    "otherOwnerMails": [],
+    "health": {
+     "version": 1,
+     "day": "2026-10-22",
+     "firstAt": "2026-10-22T18:00:02.000Z",
+     "lastAt": "2026-10-22T18:00:24.000Z",
+     "count": 12,
+     "status": 401,
+     "code": 20003,
+     "emailedAt": "2026-10-22T18:00:02.000Z",
+     "attemptAt": "2026-10-22T18:00:02.000Z"
+    },
+    "sampleLeadIssue": "Texting is temporarily unavailable on our side, so the automatic text reply to this customer was not delivered. It was not sent again. We are working on it. Please call or text them yourself. They wrote: \"Need help with my AC 6\". Reply that was not delivered: \"Automated assistant for Fixture Service.\nSorry to hear that. To get you scheduled I need your best phone number, address, window (8 to 12 or 12 to 5).\"."
+   }
+  },
+  {
+   "name": "O2 next Houston day: one more operator email and one more owner email per affected shop",
+   "pass": true,
+   "note": {
+    "day2Health": {
+     "version": 1,
+     "day": "2026-10-23",
+     "firstAt": "2026-10-23T22:00:26.000Z",
+     "lastAt": "2026-10-23T22:00:30.000Z",
+     "count": 3,
+     "status": 401,
+     "code": 20003,
+     "emailedAt": "2026-10-23T22:00:26.000Z",
+     "attemptAt": "2026-10-23T22:00:26.000Z"
+    }
+   }
+  },
+  {
+   "name": "O3 operator email hangs: aborted within ~5 s, run continues, recorded as timeout; no retry inside 15 min; retried after 15 min",
+   "pass": true,
+   "note": {
+    "textCallMs": 5014,
+    "abortedAfterMs": 5000,
+    "h1": {
+     "version": 1,
+     "day": "2026-10-24",
+     "firstAt": "2026-10-24T23:00:32.000Z",
+     "lastAt": "2026-10-24T23:00:32.000Z",
+     "count": 1,
+     "status": 401,
+     "code": 20003,
+     "emailedAt": null,
+     "attemptAt": "2026-10-24T23:00:32.000Z",
+     "lastError": "timeout"
+    },
+    "h2": {
+     "version": 1,
+     "day": "2026-10-24",
+     "firstAt": "2026-10-24T23:00:32.000Z",
+     "lastAt": "2026-10-24T23:46:38.000Z",
+     "count": 4,
+     "status": 401,
+     "code": 20003,
+     "emailedAt": "2026-10-24T23:16:36.000Z",
+     "attemptAt": "2026-10-24T23:16:36.000Z"
+    }
+   }
+  },
+  {
+   "name": "O4 non-account rejection (400/21610) keeps the per-customer path: no outage email, no providerScope, no operator email",
+   "pass": true,
+   "note": {
+    "issue": "The automatic text reply to this customer was not delivered. It was not sent again. Please call or text them yourself. They wrote: \"price check\". Reply that was not delivered: \"Automated assistant for Fixture Service.\nOur published prices: no published prices; every price is confirmed on site. Want a window this week?\".",
+    "ownerSubjects": [
+     "Needs action: The automatic text reply to this customer..."
+    ]
+   }
+  },
+  {
+   "name": "O5 classifier table (401 by status; 10001/20003/20005 by code)",
+   "pass": true,
+   "note": {
+    "401/null": true,
+    "400/20005": true,
+    "403/20003": true,
+    "400/21610": false,
+    "429/20429": false
+   }
+  }
+ ],
+ "blocked": []
+}

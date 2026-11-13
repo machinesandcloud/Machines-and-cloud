@@ -1,0 +1,92 @@
+{
+ "at": "2026-11-14T00:05:05.209Z",
+ "blocked": [],
+ "results": [
+  {
+   "name": "R0 policy: no automatic resend; unconfirmed alert after 30 minutes",
+   "pass": true
+  },
+  {
+   "name": "R1 failed receipt: one text only, shown not delivered, one owner request and email",
+   "pass": true
+  },
+  {
+   "name": "R2 network error before the provider: no text ever, owner told after 30 minutes, no list lookups",
+   "pass": true
+  },
+  {
+   "name": "R3 (QA A1) failure, then the customer texts again: the old reply is never sent after the new one",
+   "pass": true
+  },
+  {
+   "name": "R4 (QA A2) failure, workspace paused, resumed 3 hours later: no further text",
+   "pass": true
+  },
+  {
+   "name": "R5 (QA A3) response lost, provider stored a normalised body, no callback: one text, owner told, never resent",
+   "pass": true
+  },
+  {
+   "name": "R6 (QA A4) response lost, owner told, then a verified delivered callback: corrected to delivered, request resolved, one text",
+   "pass": true
+  },
+  {
+   "name": "R6b response lost, owner told, callback binds the message as sent, the scheduled receipt read sees delivered: request resolved",
+   "pass": true
+  },
+  {
+   "name": "R7 failed receipt, then a verified delivered callback for the same message: status corrected, request resolved",
+   "pass": true
+  },
+  {
+   "name": "R8 documented 4xx rejection: failed at once, no text, owner told",
+   "pass": true
+  },
+  {
+   "name": "R9 dedupe: two undelivered replies to one customer the same Houston day give one request and one email",
+   "pass": true
+  },
+  {
+   "name": "R10 status callback marks a reply failed: the durable sweep alerts the owner, no text",
+   "pass": true
+  },
+  {
+   "name": "R11 (QA S1) failures from deleted or changed workspaces are marked handled and cannot starve the sweep",
+   "pass": true,
+   "note": "index entries before=36"
+  },
+  {
+   "name": "R12 unverified number: text saved and shown, owner request and email queued, nothing sent, duplicates collapse",
+   "pass": true
+  },
+  {
+   "name": "R13 gates: with service delivery switched off, nothing is planned or alerted",
+   "pass": true
+  },
+  {
+   "name": "R14 healthy path unchanged: one text, no recovery field, no alert, index clean",
+   "pass": true
+  },
+  {
+   "name": "R15 paid capacity: 4xx rejection releases the text hold; one model request; no resend",
+   "pass": true,
+   "note": "aiAnswers used=0"
+  },
+  {
+   "name": "R17 (QA B9) the undelivered first reply carried the automated intro: the next delivered reply discloses; history marks the turn",
+   "pass": true
+  },
+  {
+   "name": "R18 (QA B6) a request resolved by a late delivery reopens when a new reply fails the same day",
+   "pass": true
+  },
+  {
+   "name": "R16 global: every customer reply was attempted at most once; every SMS job with a provider id has a provider message",
+   "pass": true,
+   "note": "sms jobs=49"
+  }
+ ],
+ "providerSends": 46,
+ "lists": 0
+}
+managed-reply-recovery-check: 20/20

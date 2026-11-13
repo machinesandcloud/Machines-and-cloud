@@ -1,0 +1,15 @@
+QA PASS Q09-1 audit is not evadable by a non-string slug (legacy records read must name the shop)
+QA PASS Q09-2 storage failure on the audit write fails closed for GET, reads, and state-changing POSTs (brake/delete/update)
+QA PASS Q09-3 audit rows carry no key, email, phone, raw IP or free text :: ["prompt:legacy-qa","unrecognised:null","update:legacy-qa","records:legacy-qa"]
+QA PASS Q09-4 self-service: every POST action via the shared key is refused 409, nothing mutated
+QA PASS Q09-5 shared key GET list/full exposes no self-service owner, phone, plan, portal, events
+QA PASS Q09-6 documented legacy CLI flows still work and are audited (list, run_scheduler, fanout, brake, last_run, ratelimit_reset, records, prompt, tasks, log_event, schedule_task, nudge_task, update, delete) :: {"list":200,"run_scheduler":200,"fanout":200,"brake":200,"last_run":200,"ratelimit_reset":200,"records":200,"prompt":200,"tasks":200,"log_event":200,"schedule_task":200,"nudge_task":200,"update":200,"delete":200}
+QA PASS Q09-7 other ADMIN_KEY surfaces: /api/intake GET export with the shared key is audited (claim: every ADMIN_KEY request audited)
+QA PASS QP-1 paging while customers are added/removed: no duplicates, no skipped pre-existing survivors, new keys after cursor appear :: {"pages":3,"seen":132,"insertedBeforeCursorSeen":false,"removedSeen":["pg-0002"]}
+QA PASS QP-2 each page request is authenticated: no token / owner token / malformed cursor
+QA PASS QP-3 list row of the operator page carries no setup/services/rules/notes/records/supportReports :: {"bytes":72389,"keys":16}
+QA PASS QS-1 operator vs non-operator: identical status, body and headers (test inbox and real-mail modes) :: {"status":202,"headers":["cache-control","content-type","netlify-cdn-cache-control","referrer-policy","vary","x-robots-tag"]}
+QA PASS QS-2 timing: median handler latency operator vs non-operator (Resend stub 0 ms and 150 ms) :: {"resend0ms":{"opMedianMs":0.12,"otherMedianMs":0.09,"opMinMs":0.09,"otherMaxMs":0.2},"resend150ms":{"opMedianMs":151.29,"otherMedianMs":0.19,"opMinMs":150.38,"otherMaxMs":0.59}}
+QA PASS QA-1 no owner key in any founder email/SMS or log across alert kinds (health x3, unacknowledged alert, legacy flag, legacy cancel, provision, digest/weekly fanout, statement) :: {"founderMail":8,"founderSMS":0,"subjects":["Texts failing: Legacy QA Plumbing","Voice failing: Legacy QA Plumbing","Flagged by Legacy QA Plumbing: sms +17135557777","Cancelled: Legacy QA Plumbing","Provisioned: Legacy QA Plumbing (done)","Unacknowledged emergency: Legacy QA Plumbing","Built: legacy
+QA PASS N0 no physical/unexpected outbound request
+QA probe: 14 passed, 0 failed
