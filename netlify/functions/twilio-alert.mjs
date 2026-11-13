@@ -4,6 +4,7 @@
 // appears in the failing request, which feeds the voice and SMS health alerts.
 import { clientByNumber, logEvent } from "./lib/store.mjs";
 import { twilioSignatureValid, e164 } from "./lib/send.mjs";
+import { auditedAdminKey } from "./lib/admin-key-audit.mjs";
 
 export const config = { path: "/api/twilio-alert" };
 
@@ -11,7 +12,9 @@ export default async (req) => {
   if (req.method !== "POST") return new Response("method", { status: 405 });
   const raw = await req.text();
   const params = Object.fromEntries(new URLSearchParams(raw));
-  const adminOk = process.env.ADMIN_KEY && req.headers.get("x-admin-key") === process.env.ADMIN_KEY;
+  // The shared ADMIN_KEY skips the Twilio signature; each use is audited first and refused if it cannot be recorded.
+  const adminOk = await auditedAdminKey(req, "twilio_alert");
+  if (adminOk === null) return new Response("audit unavailable", { status: 503 });
   const sigUrl = (process.env.URL || new URL(req.url).origin) + "/api/twilio-alert";
   // Fail closed: without a configured token no unsigned request is accepted (previews share production data).
   if (!adminOk && !process.env.TWILIO_AUTH_TOKEN) return new Response("webhook not configured", { status: 503 });

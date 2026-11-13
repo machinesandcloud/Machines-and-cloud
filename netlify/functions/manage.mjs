@@ -1,4 +1,5 @@
 import { AccessError, accessOriginAllowed, requestAccessLink, exchangeAccessToken, getAccessSession, revokeAccessSession } from './lib/access.mjs';
+import { adminKeyAuditView } from './lib/admin-key-audit.mjs';
 import { normalizeAccountEmail, strictRead } from './lib/accounts.mjs';
 import { OperatorError, operatorEmails, requireOperator, requireCurrentOperator, customerPage, customerView, supportAction, operatorProviderStates } from './lib/operator.mjs';
 import { prospectAudience, prospectsCSV } from './lib/intake.mjs';
@@ -26,8 +27,10 @@ export default async (req, context) => {
         if (Object.keys(body).some(k => !['action','email'].includes(k))) return reply({ error: 'invalid_request' }, 400);
         const allowed = operatorEmails(), email = normalizeAccountEmail(body.email);
         if (!email) return reply({ error: 'invalid_email', message: 'Enter your work email.' }, 400);
-        if (!allowed.has(email)) return reply({ ok: true, message: 'If this email has operator access, a sign-in link will arrive shortly.' }, 202);
-        return reply(await requestAccessLink(email, context?.ip || req.headers.get('x-nf-client-connection-ip'), undefined, undefined, 'operator'), 202);
+        // One status and body for every address, so the allowlist is never disclosed. Both paths spend the same sign-in limits.
+        // On Netlify (context.waitUntil) the operator link is sent after the response, so response time is the same too.
+        await requestAccessLink(email, context?.ip || req.headers.get('x-nf-client-connection-ip'), undefined, undefined, 'operator', { issue: allowed.has(email), defer: typeof context?.waitUntil === 'function' ? work => context.waitUntil(work) : undefined });
+        return reply({ ok: true, message: 'If this email has operator access, a sign-in link will arrive shortly.' }, 202);
       }
       if (body.action === 'exchange') {
         if (Object.keys(body).some(k => !['action','token'].includes(k))) return reply({ error: 'invalid_request' }, 400);
@@ -64,11 +67,14 @@ export default async (req, context) => {
       return customer ? reply({ ok: true, customer }) : reply({ error: 'not_found' }, 404);
     }
     const page = await customerPage(url.searchParams.get('cursor') || '');
+    // Later pages carry customers only: the first page already delivered inquiries, platform texting and System.
+    if (url.searchParams.has('cursor')) { await requireCurrentOperator(session); return reply({ ok: true, ...page }); }
     // PRA-OPS-02: an unreadable health record must render as unknown, not fail the whole overview or look healthy.
     const health = await readPlatformHealth();
     let scheduler = null; try { scheduler = await strictRead('health', 'scheduler:lastRun'); } catch { scheduler = null; }
     const {healthy,minutesAgo:age,blocks}=schedulerHealthState(scheduler);
     const result = { ok: true, operator: { email: session.email, expiresAt: session.expiresAt }, ...page, inquiries: await prospectAudience('all'), providerCleanupPending: await pendingProviderCleanup(), platformSMS: await platformSMSView(), system: { health, scheduler: { readable: health.state !== 'unknown', at: scheduler?.at || null, healthy, minutesAgo: age, blocks: blocks.map(([name, saved]) => { const row=saved && typeof saved === 'object' ? saved : {}; return ({ name, ok: row.ok === true, queued: row.queued, failed: row.failed, uncertain: row.uncertain, openFailures: row.openFailures, pending: row.pending, unresolved: row.unresolved, cleanupPending: row.cleanupPending, inspected: row.inspected, ...(row.ok !== true && row.error ? { error: String(row.error).slice(0, 300) } : {}), reasonCode: name === 'serviceDeliveryRecovery' ? serviceHealthFailureFacts(row)[0]?.reasonCode || (row.ok === true ? null : 'service_delivery_unresolved') : row.reasonCode, ...(name === 'serviceDeliveryRecovery' ? { failingComponents: serviceHealthFailureFacts(row) } : {}) }); }) }, providerStates: operatorProviderStates() } };
+    try { result.system.legacyKeyAudit = await adminKeyAuditView(); } catch { result.system.legacyKeyAudit = { unavailable: true }; }
     await requireCurrentOperator(session);
     return reply(result);
   } catch (error) {

@@ -1,6 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
 import { accessOriginAllowed } from "./lib/access.mjs";
 import { IntakeError, captureIntake, prospectAudience, prospectsCSV } from "./lib/intake.mjs";
+import { recordAdminKeyAccess } from "./lib/admin-key-audit.mjs";
 export const config = { path: "/api/intake" };
 const headers = { "Cache-Control": "no-store", "Referrer-Policy": "no-referrer", "X-Robots-Tag": "noindex" };
 const reply = (body, status = 200) => Response.json(body, { status, headers });
@@ -15,6 +16,8 @@ export default async (req, context) => {
     if (!admin(req)) return reply({ error: "forbidden" }, 403);
     const audience = url.searchParams.get("audience") || "eligible", format = url.searchParams.get("format") || "json";
     if (!["all", "eligible"].includes(audience) || !["json", "csv"].includes(format) || [...url.searchParams.keys()].some(key => !["audience", "format"].includes(key))) return reply({ error: "invalid_request" }, 400);
+    // The shared key reads inquiry contact data: audit it first, and refuse if the audit cannot be written.
+    if (!(await recordAdminKeyAccess(req, { method: "GET", action: "intake_export", kind: audience }))) return reply({ error: "audit_unavailable" }, 503);
     try {
       const prospects = await prospectAudience(audience);
       if (format === "csv") return new Response(prospectsCSV(prospects), { headers: { ...headers, "Content-Type": "text/csv; charset=utf-8", "Content-Disposition": `attachment; filename="prospects-${audience}.csv"` } });

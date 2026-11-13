@@ -4,6 +4,7 @@
 // run_scheduler, digest, nudge_task.
 import { getClient, saveClient, indexClient, list, get, del, put, listJSON, logEvent, assertCurrentWorkspace, listWorkspaceRecords } from "./lib/store.mjs";
 import { json } from "./lib/agent.mjs";
+import { recordAdminKeyAccess, adminKeyPresented } from "./lib/admin-key-audit.mjs";
 import { e164, notifyOwner, sendEmail, notifySteve } from "./lib/send.mjs";
 import { buildSystemPrompt, STATUSES } from "./lib/config.mjs";
 import { voicePrompt, releaseVoice } from "./lib/vapi.mjs";
@@ -26,14 +27,17 @@ const erasureReply = async (work) => {
 export default async (req) => {
   const key = process.env.ADMIN_KEY;
   if (!key) return json({ error: "admin_not_configured" }, 503);
-  if (req.headers.get("x-admin-key") !== key) return json({ error: "forbidden" }, 403);
+  if (!adminKeyPresented(req)) return json({ error: "forbidden" }, 403);
   if (req.method === "GET") {
     const url = new URL(req.url);
     const full = url.searchParams.get("full") === "1";
+    if (!(await recordAdminKeyAccess(req, { method: "GET", action: full ? "list_full" : "list" }))) return json({ error: "audit_unavailable", message: "The admin key audit could not be recorded. Nothing was read." }, 503);
     const slugs = await list("clients", "");
     const out = []; const stream = [];
     for (const sl of slugs) {
       const c = await getClient(sl); if (!c) continue;
+      // Self-service customer data is read only through named, audited operator sessions (/api/manage).
+      if (isSelfServiceClient(c)) { await assertCurrentWorkspace(c); out.push({ slug: c.slug, name: c.business?.name, status: c.status, selfService: true, managedBy: "operator_portal", createdAt: c.createdAt }); continue; }
       const row = { slug: c.slug, name: c.business?.name, status: c.status, plan: c.plan, selfService: isSelfServiceClient(c), owner: c.owner, phone: c.phone, build: c.build?.status, provision: c.provision?.status, createdAt: c.createdAt, liveAt: c.liveAt || null, portal: `${process.env.URL}/desk?c=${encodeURIComponent(c.slug)}`, policy: `${process.env.URL}/policy?c=${encodeURIComponent(c.slug)}` };
       if (full) {
         const prefix=isSelfServiceClient(c)?`${c.slug}/${workspaceTenant(c)}/`:c.slug+"/";
@@ -69,6 +73,10 @@ export default async (req) => {
   }
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
   let b; try { b = await req.json(); } catch { return json({ error: "bad_json" }, 400); }
+  if (!b || typeof b !== "object" || Array.isArray(b)) return json({ error: "bad_json" }, 400);
+  // A non-string slug is coerced to a store key; refuse it so the audit always names the shop that is read.
+  if (b.slug !== undefined && typeof b.slug !== "string") return json({ error: "invalid_slug" }, 400);
+  if (!(await recordAdminKeyAccess(req, { method: "POST", action: b.action, slug: b.slug, kind: b.kind, channel: b.channel }))) return json({ error: "audit_unavailable", message: "The admin key audit could not be recorded. Nothing was changed or read." }, 503);
   if (b.action === "run_scheduler") return json(await runScheduler({ forceHour: b.force_hour !== undefined ? Number(b.force_hour) : undefined, forceDay: b.force_day ? String(b.force_day) : undefined, all: !!b.all }));
   if (b.action === "fanout") { const { fanout, KINDS } = await import("./lib/fanout.mjs"); if (!KINDS.includes(String(b.kind))) return json({ error: "unknown_kind" }, 400); return json({ ok: true, ...(await fanout(String(b.kind))) }); }
   if (b.action === "brake") { const on = !!b.on; await put("health", "brake", { on, at: new Date().toISOString(), by: "admin" }); return json({ ok: true, brake: on }); }
@@ -82,7 +90,7 @@ export default async (req) => {
   if (!c) return json({ error: "not_found" }, 404);
   // New customer support uses scoped, revisioned, audited managed actions.
   // The legacy console must not bypass readiness, identity or lifecycle gates.
-  if (isSelfServiceClient(c) && !["prompt", "tasks", "records"].includes(b.action)) return json({ error: "managed_action_required", message: "Use the operator portal for this customer." }, 409);
+  if (isSelfServiceClient(c)) return json({ error: "managed_action_required", message: "Use the operator portal for this customer." }, 409);
 
   if (b.action === "prompt") {
     const channel = ["web", "sms", "voice", "test"].includes(b.channel) ? b.channel : "web";

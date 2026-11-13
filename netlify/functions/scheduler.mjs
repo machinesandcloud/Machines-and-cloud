@@ -236,7 +236,7 @@ async function alertOnce(c, reason, hours, subject, text) {
   const last = await get("health", k);
   if (last && Date.now() - new Date(last.at).getTime() < hours * 3600 * 1000) return false;
   await put("health", k, { at: new Date().toISOString() });
-  await notifySteve(subject, `${text}\n${process.env.URL || ""}/desk?c=${c.slug}&k=${c.ownerKey}`);
+  await notifySteve(subject, `${text}\nCustomer: ${c.slug}\n${process.env.URL || ""}/admin.html`);
   await logEvent(c, "health_alert", { reason });
   return true;
 }

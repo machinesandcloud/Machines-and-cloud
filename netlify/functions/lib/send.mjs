@@ -157,7 +157,13 @@ export async function notifyOwner(client, text, opts = {}) {
   return results;
 }
 
+// Founder alerts never carry an owner credential. A legacy owner-portal link becomes the operations
+// portal plus the customer slug; any other k= query value is redacted.
+export function redactOwnerCredentials(value) {
+  return String(value ?? "").replace(/\/desk(?:\.html)?\?c=([a-z0-9-]+)&k=[^\s#]*(?:#[\w-]*)?/gi, "/admin.html (customer $1)").replace(/([?&])k=[^\s&#]+/g, "$1k=[redacted]");
+}
 export async function notifySteve(subject, text) {
+  subject = redactOwnerCredentials(subject); text = redactOwnerCredentials(text);
   const r = [];
   r.push(await sendEmail({ to: STEVE_EMAIL, subject, text }));
   if (STEVE_PHONE && process.env.MC_TWILIO_NUMBER) r.push(await sendSMS({ to: STEVE_PHONE, from: process.env.MC_TWILIO_NUMBER, body: `${subject}\n${text}`.slice(0, 600) }));

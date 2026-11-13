@@ -325,7 +325,7 @@ export async function createHostedOnboardingGuard({manifest,persistence,mode='of
     if(r.action==='start_website_check'){const c=b?.check;if(!c||!/^([a-f0-9]{32})$/.test(c.id)||!hex(c.challenge)||c.contact!=='websitecheck_'+c.id||c.origin!==T.externalOrigin||c.url!==externalURL()+'#mc-website-check='+c.id+'.'+c.challenge||Date.parse(c.expiresAt)<=now())fail('website_check_response_not_bound');checkBinding=c;}
     if(r.action==='read_request'&&b?.request?.source?.id!==r.url.searchParams.get('requestId'))fail('request_record_changed');
     if(r.action==='chat'){if(b?.t!=='done'||typeof b.reply!=='string'||!b.reply.trim()||!Array.isArray(b.events))fail('chat_completion_unconfirmed');for(const e of b.events)if(['lead','booking'].includes(e.type)&&/^[a-f0-9]{12,64}$/.test(e.id||''))recordIDs.add(e.id);}
-    if(r.action==='request_link'){if(status!==202||b?.delivery!=='email')fail('mail_not_confirmed');return;}
+    if(r.action==='request_link'){if(status!==202||(r.role==='operator'?b?.ok!==true||b?.delivery!==undefined&&b?.delivery!=='email':b?.delivery!=='email'))fail('mail_not_confirmed');return;}
     if(r.action==='exchange'){
       const link=links.get(r.body.token),email=r.role==='owner'?T.ownerEmail:T.operatorEmail;
       if(b?.email!==email||!hex(b.session)||!Number.isFinite(Date.parse(b.expiresAt))||sessions.has(b.session))fail('session_identity_not_verified');

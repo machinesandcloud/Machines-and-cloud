@@ -6,6 +6,7 @@
 import { clientByNumber, getConversation, saveConversation, logEvent, saveClient, noteInbound, addRecord, addToIndex } from "./lib/store.mjs";
 import { sendSMS, notifyOwner, twilioSignatureValid, e164, optOutStatus } from "./lib/send.mjs";
 import { ACTIVE } from "./lib/config.mjs";
+import { auditedAdminKey } from "./lib/admin-key-audit.mjs";
 import { cellIsForwardedLine } from "./lib/desk.mjs";
 
 // /api/voice answers the call; /api/voice/recorded receives a VIP voicemail from <Record>.
@@ -26,7 +27,9 @@ export default async (req) => {
   if (req.method !== "POST") return new Response("method", { status: 405 });
   const raw = await req.text();
   const params = Object.fromEntries(new URLSearchParams(raw));
-  const adminOk = process.env.ADMIN_KEY && req.headers.get("x-admin-key") === process.env.ADMIN_KEY;
+  // The shared ADMIN_KEY skips the Twilio signature; each use is audited first and refused if it cannot be recorded.
+  const adminOk = await auditedAdminKey(req, "voice_webhook");
+  if (adminOk === null) return new Response("audit unavailable", { status: 503 });
   const path = new URL(req.url).pathname.replace(/\/$/, "");
   const sigUrl = (process.env.URL || new URL(req.url).origin) + path;
   // Fail closed: without a configured token no unsigned request is accepted (previews share production data).

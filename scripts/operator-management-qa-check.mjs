@@ -16,7 +16,7 @@ const base='http://127.0.0.1:8899';Object.assign(process.env,{MC_MEMORY_STORE:'1
 const data=new Map();let revision=0,serial=0,fault=null,hold=null;
 globalThis.fetch=async(input,init={})=>{
  const url=new URL(String(input)),method=String(init.method||'GET').toUpperCase();
- if(url.origin==='https://api.resend.com'&&url.pathname==='/emails'&&method==='POST'){const body=JSON.parse(init.body);assert.equal(body.subject,'Your Machines & Cloud sign-in link');report.mail.push(body);return Response.json({id:'intercepted-not-sent'});}
+ if(url.origin==='https://api.resend.com'&&url.pathname==='/emails'&&method==='POST'){const body=JSON.parse(init.body);assert.ok(['Your Machines & Cloud sign-in link','Sign in to Machines & Cloud operations'].includes(body.subject),body.subject);report.mail.push(body);return Response.json({id:'intercepted-not-sent'});}
  if(url.origin!=='https://operator-qa-blobs.invalid'){report.blocked.push({origin:url.origin,path:url.pathname,method});return deny();}
  const[,site,kind,...parts]=url.pathname.split('/').map(decodeURIComponent),key=parts.join('/'),name=kind+'/'+key;assert.equal(site,'operator-qa-site');
  let hit=fault&&fault.kind===kind&&fault.key===key&&fault.method===method?fault:null;if(hit?.skip){hit.skip--;hit=null;}

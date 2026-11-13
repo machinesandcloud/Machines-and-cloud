@@ -3,6 +3,7 @@
 // (ok/otw/done/quote/paid/cancel/help); everything else is a customer talking to the front desk.
 import { clientByNumber, getClient, get, getConversation, saveConversation, logEvent, cancelTasksForNumber, noteInbound } from "./lib/store.mjs";
 import { runAgent, toApiMessages } from "./lib/agent.mjs";
+import { auditedAdminKey } from "./lib/admin-key-audit.mjs";
 import { buildSystemPrompt, BOOK_VISIT, NOTIFY_OWNER, UPDATE_VISIT, ACTIVE } from "./lib/config.mjs";
 import { bookVisit, flagLead, ownerCommand, upcomingBookings, confirmVisit, rescheduleVisit, cancelRequest, noteReviewReply, noteConsentReply, when, dateEs, winEs } from "./lib/desk.mjs";
 import { sendSMS, twilioSignatureValid, e164, recordOptOut, clearOptOut, notifyOwner, optOutStatus } from "./lib/send.mjs";
@@ -35,7 +36,9 @@ export default async (req) => {
   if (req.method !== "POST") return new Response("method", { status: 405 });
   const raw = await req.text();
   const params = Object.fromEntries(new URLSearchParams(raw));
-  const adminOk = process.env.ADMIN_KEY && req.headers.get("x-admin-key") === process.env.ADMIN_KEY;
+  // The shared ADMIN_KEY skips the Twilio signature; each use is audited first and refused if it cannot be recorded.
+  const adminOk = await auditedAdminKey(req, "sms_webhook");
+  if (adminOk === null) return new Response("audit unavailable", { status: 503 });
   const sigUrl = (process.env.URL || new URL(req.url).origin) + "/api/sms";
   // Fail closed: without a configured token no unsigned request is accepted (previews share production data).
   if (!adminOk && !process.env.TWILIO_AUTH_TOKEN) return new Response("webhook not configured", { status: 503 });

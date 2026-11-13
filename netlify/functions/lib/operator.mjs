@@ -137,11 +137,17 @@ export async function customerView(c, detail = false) {
   } else row.metrics.scope = 'Open setup issues; records load with customer details';
   await assertCurrentWorkspace(c);return row;
 }
+// List rows keep identity, status, issues and connection status; full setup, services and records load
+// with the customer detail (?c=). This keeps a 50-customer page small enough to load every page.
+export function customerListRow(view) {
+  const { setup, services, leadSources, operations, phoneActivation, serviceChecks, supportReports, notes, voiceRejectionReview, records, rules, ...row } = view;
+  return { ...row, connections: (view.connections || []).map(({ id, label, status, requested, retained, active }) => ({ id, label, status, requested, retained, active })), activity: (view.activity || []).slice(0, 20), summaryOnly: true };
+}
 export async function customerPage(cursor = '') {
   if (cursor && !/^[a-z0-9-]{1,40}$/.test(cursor)) throw new OperatorError('invalid_cursor', 'Reload the customer list.');
   const keys = (await list('clients', '')).sort(), page = keys.filter(key => key > cursor).slice(0, 50);
   const customers = [];
-  for (const key of page) { const c = await strictRead('clients', key); if (c) customers.push(await customerView(c)); }
+  for (const key of page) { const c = await strictRead('clients', key); if (c) customers.push(customerListRow(await customerView(c))); }
   return { customers, total: keys.length, nextCursor: keys.some(key => key > (page.at(-1) || cursor)) ? page.at(-1) : null, summary: { customers: customers.length, active: customers.filter(c => c.status === 'live').length, needsAttention: customers.filter(c => actionableIssues(c.issues).length).length, waitingOnly: customers.filter(c => c.issues.length && !actionableIssues(c.issues).length).length, setupPending: customers.filter(c => c.selfService && !closedStatus(c.status) && c.connections.some(x => x.requested && !['active','connected'].includes(x.status))).length, scope: 'Current page' } };
 }
 function validatedPatch(patch) {

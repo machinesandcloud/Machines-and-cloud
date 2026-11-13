@@ -64,7 +64,7 @@ async function spendRate(key, limit, duration) {
   if (allowed !== true) throw new AccessError("rate_limited", "Please wait before requesting another sign-in email.", 429, allowed?.retryAfter || 0);
 }
 
-export async function requestAccessLink(emailValue, ip, planValue, intakeToken, purpose = "onboarding") {
+export async function requestAccessLink(emailValue, ip, planValue, intakeToken, purpose = "onboarding", { issue = true, defer } = {}) {
   if (!["onboarding", "operator"].includes(purpose)) throw new AccessError("invalid_request", "Invalid sign-in destination.");
   const email = normalizeAccountEmail(emailValue);
   if (!email) throw new AccessError("invalid_email", "Enter a valid email address.");
@@ -97,29 +97,45 @@ export async function requestAccessLink(emailValue, ip, planValue, intakeToken, 
   const token = randomBytes(32).toString("hex"), key = accessHash(token);
   const createdAt = stamp(), expiresAt = new Date(Date.now() + 20 * 60000).toISOString();
   const intakeHash = await intakeBindingForEmail(intakeToken, email);
-  await atomicUpdate("access_tokens", key, current => {
-    if (current) throw new Error("Access token collision");
-    return { value: { email, status: "pending", createdAt, expiresAt, ...(purpose === "operator" ? { purpose } : {}), ...(intakeHash ? { intakeHash } : {}) } };
-  });
-  // A plan hint is a fixed enum, never a caller-supplied destination or authority.
-  const plan = ["starter", "growth", "pro"].includes(planValue) ? planValue : "";
-  const link = purpose === "operator" ? `${accessSite()}/admin.html#verify=${token}` : `${accessSite()}/onboard.html${plan ? `?plan=${plan}` : ""}#verify=${token}`;
-  let delivered = false;
-  try {
-    if (testInbox) {
-      // Private, loopback-only test store. Never exposed through any HTTP endpoint.
-      await put("access_outbox", accessHash(email), { email, link, token, createdAt, expiresAt });
-      delivered = true;
-    } else {
-      const result = await sendEmail({ to: email, subject: "Your Machines & Cloud sign-in link", text: `Continue setting up or open your front desk:\n${link}\n\nThis link expires in 20 minutes and works once. It does not subscribe you to marketing. If you did not request it, you can ignore this email.` });
-      delivered = result.ok === true;
+  // issue:false (an address without operator access) spends exactly the same limits above, then stops:
+  // no token, no email. The caller returns one response for both cases.
+  if (!issue) return { ok: true };
+  // Operator links with defer (Netlify context.waitUntil): the token is created and the email sent after the
+  // response, so an operator request returns as quickly as a non-operator one and its timing does not reveal
+  // the allowlist. A deferred delivery failure is logged (no address) and the link is marked delivery_failed;
+  // the operator asks again. Without defer (local server, owner links) delivery is awaited as before.
+  const deliver = async () => {
+    await atomicUpdate("access_tokens", key, current => {
+      if (current) throw new Error("Access token collision");
+      return { value: { email, status: "pending", createdAt, expiresAt, ...(purpose === "operator" ? { purpose } : {}), ...(intakeHash ? { intakeHash } : {}) } };
+    });
+    // A plan hint is a fixed enum, never a caller-supplied destination or authority.
+    const plan = ["starter", "growth", "pro"].includes(planValue) ? planValue : "";
+    const link = purpose === "operator" ? `${accessSite()}/admin.html#verify=${token}` : `${accessSite()}/onboard.html${plan ? `?plan=${plan}` : ""}#verify=${token}`;
+    let delivered = false;
+    try {
+      if (testInbox) {
+        // Private, loopback-only test store. Never exposed through any HTTP endpoint.
+        await put("access_outbox", accessHash(email), { email, link, token, createdAt, expiresAt });
+        delivered = true;
+      } else {
+        const result = await sendEmail(purpose === "operator"
+          ? { to: email, subject: "Sign in to Machines & Cloud operations", text: `Sign in to the Machines & Cloud operations portal:\n${link}\n\nThis link was requested for operator access. It expires in 20 minutes and works once. If you did not request it, you can ignore this email; no access is granted without the link.` }
+          : { to: email, subject: "Your Machines & Cloud sign-in link", text: `Continue setting up or open your front desk:\n${link}\n\nThis link expires in 20 minutes and works once. It does not subscribe you to marketing. If you did not request it, you can ignore this email.` });
+        delivered = result.ok === true;
+      }
+    } catch { /* The response below is deliberately independent of account existence. */ }
+    if (!delivered) {
+      await atomicUpdate("access_tokens", key, row => ({ value: { ...row, status: "delivery_failed" } }));
+      throw new AccessError("email_unavailable", "We could not send the sign-in email. Please try again shortly.", 503);
     }
-  } catch { /* The response below is deliberately independent of account existence. */ }
-  if (!delivered) {
-    await atomicUpdate("access_tokens", key, row => ({ value: { ...row, status: "delivery_failed" } }));
-    throw new AccessError("email_unavailable", "We could not send the sign-in email. Please try again shortly.", 503);
+    return { ok: true, delivery: testInbox ? "test_outbox" : "email", message: testInbox ? "A link was saved in the local test inbox. No email was sent." : "Check your inbox for a link to continue. It expires in 20 minutes." };
+  };
+  if (typeof defer === "function" && purpose === "operator") {
+    defer(deliver().catch(error => console.error("Operator sign-in link was not delivered:", error?.code || "error")));
+    return { ok: true };
   }
-  return { ok: true, delivery: testInbox ? "test_outbox" : "email", message: testInbox ? "A link was saved in the local test inbox. No email was sent." : "Check your inbox for a link to continue. It expires in 20 minutes." };
+  return deliver();
 }
 
 export async function exchangeAccessToken(token, ip, purpose = "onboarding") {

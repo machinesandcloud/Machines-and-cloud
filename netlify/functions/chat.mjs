@@ -11,6 +11,7 @@ import { runOwnerTest } from "./lib/owner-test.mjs";
 import { reserveAIRequest, selfServiceAIModelFetch, reserveAIProofMutation, PUBLIC_WEB_DAILY_CLOSED } from "./lib/self-service-ai.mjs";
 import { getAccessSession, accessOriginAllowed } from "./lib/access.mjs";
 import { strictRead, normalizeAccountEmail } from "./lib/accounts.mjs";
+import { auditedAdminKey } from "./lib/admin-key-audit.mjs";
 import { isSelfServiceClient, setupReadiness } from "./lib/setup.mjs";
 import { salesSystem, SALES_TOOLS, sanitizeSalesMessages, executeSalesTool, currentChannelAvailability } from "./lib/sales-desk.mjs";
 import { getSalesAllowance, reserveSalesTurn } from "./lib/sales-budget.mjs";
@@ -104,7 +105,9 @@ export default async (req, context) => {
   if (requestedPersona !== undefined && body?.client) return json({ error: "invalid_mode" }, 400);
   const wantStream = body?.stream === true;
   const salesMode = !persona && !(typeof body?.client === "string" && body.client);
-  const adminOk = process.env.ADMIN_KEY && req.headers.get("x-admin-key") === process.env.ADMIN_KEY;
+  // The shared ADMIN_KEY exempts the legacy rate limit (sales mode has no exemption, so it is not audited there); each use is audited first and refused if it cannot be recorded.
+  const adminOk = !salesMode && await auditedAdminKey(req, "chat_rate_exempt");
+  if (adminOk === null) return json({ error: "audit_unavailable" }, 503, cors(origin));
   let requestedClient = null, session = null, ownerExempt = false;
   if (typeof body?.client === "string" && body.client) {
     try {
