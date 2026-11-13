@@ -1,6 +1,6 @@
 // Supplied fields only: omission preserves, explicit blank clears, malformed input rejects.
 // This parser has no storage or provider effects and is shared by owner and operator edits.
-import { ACK_MINUTES, normalizeHours, normalizeEmergencies, emergency247 } from './config.mjs';
+import { ACK_MINUTES, normalizeHours, normalizeEmergencies, emergency247, hoursSentence } from './config.mjs';
 import { parseHours } from './config.mjs';
 import { createHash } from 'node:crypto';
 import { normalizeAppointmentHours, validateAppointmentConfiguration } from './availability.mjs';
@@ -142,13 +142,29 @@ export function parseWorkspacePatch(input, { operator = false } = {}) {
   return patch;
 }
 
+// The hours line in the form hoursSentence writes ("Mon-Fri 7am-6pm", optionally ", 24/7 emergency service"), or blank.
+// Only such a line may be regenerated from the grid; anything else is the owner's own text.
+const generatedHoursLineFor = (hours, previous) => [hoursSentence(hours), emergency247(previous) ? '24/7 emergency service' : ''].filter(Boolean).join(', ');
+function generatedHoursLine(text) { const line = String(text || '').trim(); return !line || generatedHoursLineFor(parseHours(line), line) === line; }
+
 // Keep unrelated account, lifecycle, provider and review metadata from the latest row.
 export function applyWorkspacePatch(current, patch) {
   const value = structuredClone(current);
   const nested = new Set(['business', 'owner', 'phone', 'widget', 'digest', 'rules']);
   for (const [field, item] of Object.entries(patch)) value[field] = nested.has(field) ? { ...(value[field] || {}), ...structuredClone(item) } : structuredClone(item);
-  if (own(patch.rules, 'hours')) value.rules.hours = patch.rules.hours === null ? null : normalizeHours({ ...(current.rules?.hours || {}), ...patch.rules.hours });
-  else if (own(patch.business, 'hours')) value.rules = { ...value.rules, hours: parseHours(value.business.hours) };
+  if (own(patch.rules, 'hours')) {
+    value.rules.hours = patch.rules.hours === null ? null : normalizeHours({ ...(current.rules?.hours || {}), ...patch.rules.hours });
+    // An hours-grid edit without a typed hours line regenerates the line only when the saved line is our own generated
+    // form, so it cannot keep stale days (PRA-DESK-09). A line the owner wrote by hand (holiday or appointment notes,
+    // Spanish, any other wording) is kept word for word; the desk asks the owner to check it.
+    // A line that promised 24/7 emergency service keeps that clause; emergency247 itself is only recomputed from typed text.
+    // The grid still wins when both are supplied in one save (a54 precedence).
+    if (!own(patch.business, 'hours') && generatedHoursLine(current.business?.hours) && JSON.stringify(normalizeHours(parseHours(current.business?.hours || '')) || null) !== JSON.stringify(value.rules.hours || null)) {
+      value.business = { ...value.business, hours: generatedHoursLineFor(value.rules.hours, current.business?.hours) };
+    }
+  }
+  // A typed line that does not read as days and times never erases the saved grid.
+  else if (own(patch.business, 'hours')) { const parsed = parseHours(value.business.hours); if (parsed || !normalizeHours(current.rules?.hours)) value.rules = { ...value.rules, hours: parsed }; }
   if (own(patch.rules, 'emergencies')) value.rules.emergencies = normalizeEmergencies({ ...normalizeEmergencies(current.rules?.emergencies, value.business?.trade), ...patch.rules.emergencies }, value.business?.trade);
   if (own(patch.business, 'hours') && !own(patch.rules, 'emergency247')) value.rules = { ...value.rules, emergency247: emergency247(value.business.hours) };
   if (own(value.rules, 'appointmentHours') && (own(patch.rules, 'appointmentHours') || own(patch.rules, 'hours') || own(patch.business, 'hours') || own(patch, 'windows'))) {

@@ -161,6 +161,18 @@ export function isBusinessHours(c, at) {
   const toMin = (t) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3));
   return minutes >= toMin(h.open) && minutes < toMin(h.close);
 }
+// The readable business hours line, regenerated from the structured hours after an hours-grid edit (PRA-DESK-09).
+// "Mon-Fri 7am-6pm, Sat 8am-12pm" round-trips through parseHours; closed days are omitted (parseHours reads them as closed)
+// and a midnight close is written "24:00", which parseHours reads back exactly.
+export function hoursSentence(value) {
+  const hours = normalizeHours(value);
+  if (!hours || !DAYS.some((d) => hours[d])) return "";
+  const fmt = (t) => { const h = Number(t.slice(0, 2)), m = t.slice(3); const ap = h >= 12 && h < 24 ? "pm" : "am"; const hh = h % 12 || 12; return m === "00" ? `${hh}${ap}` : `${hh}:${m}${ap}`; };
+  const name = (d) => d[0].toUpperCase() + d.slice(1);
+  const groups = [];
+  DAYS.forEach((d, i) => { const h = hours[d]; const span = h ? `${fmt(h.open)}-${h.close === "24:00" ? "24:00" : fmt(h.close)}` : ""; const last = groups.at(-1); if (span && last && last.span === span && last.end === i - 1) last.end = i; else if (span) groups.push({ start: i, end: i, span }); });
+  return groups.map((g) => `${name(DAYS[g.start])}${g.end > g.start ? "-" + name(DAYS[g.end]) : ""} ${g.span}`).join(", ");
+}
 export function hoursText(c) {
   const hours = normalizeHours(c.rules?.hours);
   if (!hours) return "";

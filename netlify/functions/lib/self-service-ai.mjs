@@ -1,5 +1,5 @@
 // New-workspace AI allowance. Counts accepted logical turns, including failed/ambiguous attempts.
-// One CAS document arbitrates the shared ceiling across tenants and both chat modes.
+// One CAS document arbitrates both global pools across tenants: customer chat (web) and owner practice (private).
 import { atomicUpdate } from './store.mjs';
 import { assertPaidServiceAuthority } from './paid-service-authority.mjs';
 import { workspaceTenant, supportedWorkspace } from './workspace-identity.mjs';
@@ -18,10 +18,27 @@ function globalLimit() {
   if (!/^\d+$/.test(raw) || Number(raw) > 500) throw new Error('Invalid self-service AI limit');
   return Number(raw); // Zero is the operator kill switch; invalid configuration fails closed.
 }
+// Owner practice has its own share carved out of the global daily limit (PRA-DESK-11), so practice never lowers
+// customer chat capacity and MC_SELF_SERVICE_AI_GLOBAL_DAILY_LIMIT still bounds every turn (practice + customer <= global).
+// Recommended default share: one fifth of the global limit, at least two shops' 20 (one shop's full practice still
+// leaves a second shop its activation test), never more than half: 25 practice / 25 customer at the default 50,
+// 100 practice / 400 customer at the production 500 (five shops' full practice).
+// MC_SELF_SERVICE_AI_PRACTICE_DAILY_LIMIT (0..500) overrides the share and is capped at half the global limit, so a
+// practice setting can never close customer chat. An invalid value closes practice only. Zero global stops both kinds of turn.
+function practiceLimit(global) {
+  const raw = process.env.MC_SELF_SERVICE_AI_PRACTICE_DAILY_LIMIT, half = Math.floor(global / 2);
+  if (global === 0) return 0;
+  if (raw === undefined || raw === '') return Math.min(half, Math.max(2 * PRIVATE_LIMIT, Math.floor(global / 5)));
+  if (!/^\d+$/.test(raw) || Number(raw) > 500) return 0;
+  return Math.min(Number(raw), half);
+}
+// The customer (web) pool after the practice carve-out; proposal 15's public reserve and per-network share are taken from it.
+const customerLimit = global => global - practiceLimit(global);
 // Anonymous public website turns are additionally bounded per caller network (IPv4 address or
-// IPv6 /64), and together they may not use the last PRIVATE_RESERVE turns of the shared global
-// pool, so one public source cannot close website chat for every tenant and anonymous traffic
-// cannot take owner practice offline. The reserve is at most half the global pool, so lowering the
+// IPv6 /64), and together they may not use the last PRIVATE_RESERVE turns of the customer chat
+// pool (the global limit less the practice share), so one public source cannot close website chat for every
+// tenant and anonymous traffic cannot take signed-in or managed voice/SMS turns offline. Owner practice has its
+// own share (practiceLimit) and is never reached by public traffic. The reserve is at most half the global pool, so lowering the
 // global limit as a throttle never silently closes public chat. Owner-private, managed voice/SMS and per-tenant limits are unchanged.
 function boundedEnv(name, fallback, maximum) {
   const raw = process.env[name];
@@ -38,7 +55,8 @@ const privateReserve = global => Math.min(Math.floor(global / 2), boundedEnv('MC
 function publicIpLimit(global) {
   const absolute = boundedEnv('MC_SELF_SERVICE_AI_PUBLIC_IP_DAILY_LIMIT', 150, 500), percent = boundedEnv('MC_SELF_SERVICE_AI_PUBLIC_IP_POOL_PERCENT', 75, 90);
   if (!absolute || !percent) return 0;
-  return Math.min(absolute, Math.max(1, Math.floor((global - privateReserve(global)) * percent / 100)));
+  const pool = customerLimit(global);
+  return Math.min(absolute, Math.max(1, Math.floor((pool - privateReserve(pool)) * percent / 100)));
 }
 const publicKey = ip => createHash('sha256').update('mc-self-service-public-v1\0' + networkBucket(ip)).digest('hex');
 function tenantSlug(client) {
@@ -82,8 +100,10 @@ function currentDay(previous, day) {
 function allowance(state, slug, key, global) {
   const own = Object.hasOwn(state.tenants, key) ? state.tenants[key] : { private: 0, web: 0 };
   const legacy = Object.hasOwn(state.tenants, slug) ? state.tenants[slug] : { private: 0, web: 0 };
-  const shared = Math.max(0, global - state.used);
-  const privateRemaining = Math.min(Math.max(0, PRIVATE_LIMIT - own.private - legacy.private), shared), webRemaining = Math.min(Math.max(0, WEB_LIMIT - own.web - legacy.web), shared);
+  let privateUsed = 0, webUsed = 0;
+  for (const row of Object.values(state.tenants)) { privateUsed += row.private; webUsed += row.web; }
+  const practice = practiceLimit(global), practicePool = Math.max(0, practice - privateUsed), customerPool = Math.max(0, global - practice - webUsed);
+  const privateRemaining = Math.min(Math.max(0, PRIVATE_LIMIT - own.private - legacy.private), practicePool), webRemaining = Math.min(Math.max(0, WEB_LIMIT - own.web - legacy.web), customerPool);
   return { private: { limit: PRIVATE_LIMIT, used: own.private, remaining: privateRemaining }, web: { limit: WEB_LIMIT, used: own.web, remaining: webRemaining }, available: webRemaining > 0, resetAt: resetAt(state.day), timezone: zone, ...((legacy.private || legacy.web) ? { reconciliation: 'A prior unverified allowance reservation is retained until the daily reset. Remaining availability already includes this safety hold.' } : {}) };
 }
 export async function getAIAllowance(client) {
@@ -95,10 +115,10 @@ export async function getAIAllowance(client) {
   return projectProofAllowance(client, current);
 }
 // The anonymous public pool is closed for this caller when its own network has used its daily share,
-// or when all anonymous turns together have reached the global pool less the owner-practice reserve.
+// or when all anonymous turns together have reached the customer chat pool less the reserve.
 function publicClosed(state, network, global) {
   const publicIps = state.publicIps || {};
-  return (Object.hasOwn(publicIps, network) ? publicIps[network] : 0) >= publicIpLimit(global) || Object.values(publicIps).reduce((n, v) => n + v, 0) >= global - privateReserve(global);
+  return (Object.hasOwn(publicIps, network) ? publicIps[network] : 0) >= publicIpLimit(global) || Object.values(publicIps).reduce((n, v) => n + v, 0) >= customerLimit(global) - privateReserve(customerLimit(global));
 }
 // True when a fresh Houston day would admit this caller under the current configuration, i.e. the closure
 // is only today's counters. A zero kill switch (global or per-network) does not reopen at midnight.
