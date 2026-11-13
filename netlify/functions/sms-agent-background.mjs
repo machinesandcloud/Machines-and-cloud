@@ -8,7 +8,6 @@ import { runAgent, toApiMessages } from "./lib/agent.mjs";
 import { buildSystemPrompt, BOOK_VISIT, NOTIFY_OWNER, UPDATE_VISIT, GET_AVAILABILITY } from "./lib/config.mjs";
 import { bookVisit, flagLead, upcomingBookings, confirmVisit, rescheduleVisit, cancelRequest, availabilityToolResult, deliveryNote } from "./lib/desk.mjs";
 import { sendSMS, e164, optOutStatus } from "./lib/send.mjs";
-import { withAutomatedIntro, looksSpanish } from "./lib/automated-disclosure.mjs";
 
 export default async (req) => {
   const key = process.env.ADMIN_KEY;
@@ -51,10 +50,6 @@ export default async (req) => {
     reply = `Sorry, I had trouble with that. Please call ${c.phone?.businessNumber || "us"} and a person will help.`;
   }
   const fresh = await getConversation(c, "sms", from);
-  // P6: the first front-desk reply in this conversation says it is automated. Templated system texts
-  // (a missed-call text-back) do not count as a reply.
-  const lastUser = [...fresh.messages].reverse().find((m) => m.role === "user")?.content || "";
-  reply = withAutomatedIntro(c, reply, { first: !fresh.messages.some((m) => m.role === "assistant" && !m.system), language: looksSpanish(lastUser) ? "es" : "en" });
   fresh.messages.push({ role: "assistant", content: done ? reply + "\n" + done : reply, at: new Date().toISOString() });
   await saveConversation(fresh);
   // Only a confirmed opt-out skips the reply here; an unreadable store is held and logged by sendSMS.

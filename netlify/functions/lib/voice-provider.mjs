@@ -5,7 +5,6 @@
 import { buildSystemPrompt, BOOK_VISIT, NOTIFY_OWNER, GET_AVAILABILITY } from "./config.mjs";
 import { CHANGE_VISIT, customerContextPrompt } from './customer-visits.mjs';
 import { REQUEST_HUMAN } from "./managed-voice-handoff.mjs";
-import { voiceGreeting } from "./automated-disclosure.mjs";
 import { createHmac } from "node:crypto";
 
 const uuid = value => typeof value === "string" && /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(value);
@@ -67,7 +66,7 @@ export function managedAssistantBody(c, { correlationId, inputRevision, policy, 
   const definitions = [GET_AVAILABILITY, BOOK_VISIT, NOTIFY_OWNER, REQUEST_HUMAN, ...(customer?.visits?.length ? [CHANGE_VISIT] : [])].map(def => ({ type: "function", async: false,
     function: { name: def.name, description: def.name === "book_visit" ? "Reserve an available listed visit after the caller explicitly agrees. Report only the returned status; do not claim an email, text or calendar delivery unless confirmed in the result." : def.name === "notify_owner" ? "Save the caller's request in the owner's workspace. Report only the returned delivery status, without promising a callback deadline." : def.description,
       parameters: managedVoiceToolParameters(def.input_schema) }, server }));
-  return { name: label("voice", correlationId), firstMessage: voiceGreeting(c, "How can I help?"), firstMessageMode: "assistant-speaks-first",
+  return { name: label("voice", correlationId), firstMessage: `Thanks for calling ${c.business.name}. This is the front desk assistant.${c.business.spanish ? " Hablamos español." : ""} How can I help?`, firstMessageMode: "assistant-speaks-first",
     model: { provider: "anthropic", model: policy.model, temperature: 0.3, maxTokens: 350, messages: [{ role: "system", content: buildSystemPrompt(c, "voice") + "\nPhone delivery contract: Speak one short natural sentence at a time. Confirm the name, callback phone, address and selected date/window, and ask for agreement before booking. Tool results are authoritative. A workspace record is not proof of a text, email, calendar sync or human callback. Never invent successful delivery or a callback time. For a caller asking for a person, or a saved handoff rule, confirm the callback details and ask whether they want a live connection attempt or just a callback request. Use request_human only after their agreement. A callback request must never start a transfer. Never say a phone is ringing, someone accepted, help was dispatched, or a callback is scheduled without the corresponding authoritative result. Life-safety instructions come first; a transfer is not emergency dispatch. If a tool fails, say the request could not be confirmed and ask the caller to contact the shop directly. If asked, say you are an AI front desk assistant."+(customer ? customerContextPrompt(customer, "call") : "") }], tools: definitions },
     transcriber: { provider: "deepgram", model: "nova-3", language: c.business.spanish ? "multi" : "en" },
     ...(policy.voiceProvider && policy.voiceId ? { voice: { provider: policy.voiceProvider, voiceId: policy.voiceId } } : {}),

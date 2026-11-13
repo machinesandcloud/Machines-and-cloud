@@ -6,7 +6,6 @@
 import { buildSystemPrompt, BOOK_VISIT, NOTIFY_OWNER, GET_AVAILABILITY, loopCheck } from "./config.mjs";
 import { getNumber, setNumberWebhooks, setVoiceFallback, twilioEnabled, voiceFallbackFor } from "./twilio.mjs";
 import { logEvent } from "./store.mjs";
-import { voiceGreeting } from "./automated-disclosure.mjs";
 
 const KEY = process.env.VAPI_API_KEY;
 export const vapiEnabled = () => Boolean(KEY && process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN);
@@ -39,9 +38,10 @@ function transferDef(client) {
   };
 }
 
-// The first words of every legacy call say the caller is talking to an automated assistant (P6).
 export function standardGreeting(client) {
-  return voiceGreeting(client);
+  return client.business?.spanish
+    ? `Thanks for calling ${client.business.name}. Hablamos español. This is the front desk assistant. How can I help you today?`
+    : `Thanks for calling ${client.business.name}. This is the front desk assistant. How can I help you today?`;
 }
 
 export function voicePrompt(client) {

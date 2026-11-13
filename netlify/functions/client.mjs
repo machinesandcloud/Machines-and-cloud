@@ -509,7 +509,7 @@ async function handle(req, context) {
       if (wasPaused) { try { await attachVoice(c, site); await saveClient(c); } catch (e) { console.error("attach voice", e); } }
       else {
         const welcome = `${name}: you're live. Every lead and booking comes to this number as a job ticket, and each one names the single reply it needs (ok, called, otw, or done). A 6 pm summary comes on any day it handled something, and a report every Monday. Flag anything that reads wrong on your portal and Steve sees it the same day.`;
-        if (c.owner.phone) await sendSMS({ to: c.owner.phone, client: c, type: "welcome", body: welcome });
+        if (c.owner.phone) await sendSMS({ to: c.owner.phone, client: c, force: true, type: "welcome", body: welcome });
         await sendEmail({ to: c.owner.email, subject: `${name}: you're live`, text: `${welcome}
 
 Your portal: ${site}/desk?c=${c.slug}&k=${c.ownerKey}
@@ -534,7 +534,7 @@ Texts to customers go out from ${c.phone?.twilioNumber && c.phone?.tenDlc === "a
       try { await detachVoice(c, site); await saveClient(c); } catch (e) { console.error("detach voice", e); }
       const off = fw.off?.length ? `To stop forwarding entirely, dial ${fw.off.join(" or ")} from your cell.` : "To stop forwarding entirely, turn it off in your carrier app.";
       const text = `${name}: your front desk is paused. Calls to ${c.phone.twilioNumber || "the front desk number"} ring your cell; texts get one reply pointing to your main line. ${off} Resume from your portal any time.`;
-      if (c.owner.phone) await sendSMS({ to: c.owner.phone, client: c, type: "owner_note", body: text });
+      if (c.owner.phone) await sendSMS({ to: c.owner.phone, client: c, force: true, type: "owner_note", body: text });
       await sendEmail({ to: c.owner.email, subject: `${name}: paused`, text });
       return json({ ok: true, status: c.status, off: fw.off });
     }
@@ -545,7 +545,7 @@ Texts to customers go out from ${c.phone?.twilioNumber && c.phone?.tenDlc === "a
       try { await detachVoice(c, site); await saveClient(c); } catch (e) { console.error("detach voice", e); }
       const last = c.cancelledAt.slice(0, 10), ends = c.serviceEndsAt.slice(0, 10);
       const off = fw.off?.length ? `To stop forwarding, dial ${fw.off.join(" or ")} from your cell now.` : "To stop forwarding, turn it off in your carrier app now.";
-      if (c.owner.phone) await sendSMS({ to: c.owner.phone, client: c, type: "owner_note", body: `${name}: your front desk is cancelled as of today. ${off} Until ${ends} any call that still reaches ${c.phone.twilioNumber || "the front desk number"} rings your cell. Reply here if you did not mean to.` });
+      if (c.owner.phone) await sendSMS({ to: c.owner.phone, client: c, force: true, type: "owner_note", body: `${name}: your front desk is cancelled as of today. ${off} Until ${ends} any call that still reaches ${c.phone.twilioNumber || "the front desk number"} rings your cell. Reply here if you did not mean to.` });
       await sendEmail({ to: c.owner.email, subject: `${name}: cancellation confirmed`, text: `Your front desk was cancelled on ${last}. Nothing is invoiced for any day after ${last}.\n\n${off} iPhone users: also check Settings, Phone, Live Voicemail.\n\nUntil ${ends}, calls to ${c.phone.twilioNumber || "the front desk number"} ring straight through to your cell and no text or AI answers. After that the number is released.\n\n${DATA_POLICY}\n\nTo come back, reply to this email.` });
       await notifySteve(`Cancelled: ${name}`, `Reason: ${c.cancelReason || "-"}\nVerify forwarding is off (call ${c.phone.businessNumber || "their line"}), close the invoice as of ${last}, release the number on ${ends}.\n${site}/desk?c=${c.slug}&k=${c.ownerKey}`);
       return json({ ok: true, status: c.status, serviceEndsAt: c.serviceEndsAt, off: fw.off });
@@ -572,7 +572,7 @@ Texts to customers go out from ${c.phone?.twilioNumber && c.phone?.tenDlc === "a
     if (b.action === "monthly") { const mth = await monthlyReport(c, s(b.month, 7) || undefined); const { invoice, ...rest } = mth; return json({ ok: true, ...rest }); }
     if (b.action === "test_sms") {
       if (!c.owner.phone) return json({ error: "no_owner_phone" }, 400);
-      const r = await sendSMS({ to: c.owner.phone, client: c, type: "test", body: `${name}: test text from your front desk. Reply "help" any time to see the commands.` });
+      const r = await sendSMS({ to: c.owner.phone, client: c, force: true, type: "test", body: `${name}: test text from your front desk. Reply "help" any time to see the commands.` });
       return json({ ok: r.ok, logged: !!r.logged, error: r.error || r.reason });
     }
     if (b.action === "provision") {

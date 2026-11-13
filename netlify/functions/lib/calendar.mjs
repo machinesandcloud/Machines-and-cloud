@@ -1,11 +1,37 @@
-// Date helpers for visits, plus the retired legacy Calendar sync. New Calendar connections use
-// lib/calendar-connection.mjs (calendar.events.owned + calendar.calendars.readonly, encrypted tokens).
-// The legacy consent URL, code exchange and plaintext refresh-token sync (calendar.events +
-// calendar.readonly, token on client.calendar.google.refreshToken) were removed (legal precondition P7,
-// Google verification). Run the P7 census and revoke/purge stored legacy tokens before deploying this.
+// Google Calendar through OAuth. Needs GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET; the redirect URI is
+// <site>/api/google/callback. Tokens live on the client record under calendar.google.
 const CID = process.env.GOOGLE_CLIENT_ID;
 const CSECRET = process.env.GOOGLE_CLIENT_SECRET;
 export const googleEnabled = () => Boolean(CID && CSECRET);
+
+export function authUrl(site, state) {
+  const p = new URLSearchParams({
+    client_id: CID, redirect_uri: site + "/api/google/callback", response_type: "code",
+    scope: "https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/calendar.readonly",
+    access_type: "offline", prompt: "consent", state,
+  });
+  return "https://accounts.google.com/o/oauth2/v2/auth?" + p.toString();
+}
+
+export async function exchangeCode(site, code) {
+  const res = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ code, client_id: CID, client_secret: CSECRET, redirect_uri: site + "/api/google/callback", grant_type: "authorization_code" }).toString(),
+  });
+  const d = await res.json();
+  if (!res.ok || !d.refresh_token) throw new Error("google token exchange failed: " + JSON.stringify(d));
+  return d;
+}
+
+async function accessToken(refreshToken) {
+  const res = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ refresh_token: refreshToken, client_id: CID, client_secret: CSECRET, grant_type: "refresh_token" }).toString(),
+  });
+  const d = await res.json();
+  if (!res.ok) throw new Error("google refresh failed");
+  return d.access_token;
+}
 
 // Parses "8 to 12" or "12 to 5" into start/end hours (24h, Houston assumed).
 export function windowHours(win) {
@@ -54,4 +80,41 @@ export function houstonISO(date, hour) {
   const tzName = new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", timeZoneName: "short" }).formatToParts(probe).find((p) => p.type === "timeZoneName")?.value || "CST";
   const off = tzName === "CDT" ? "-05:00" : "-06:00";
   return `${y}-${mo}-${da}T${String(hour).padStart(2, "0")}:00:00${off}`;
+}
+
+export async function createEvent(client, booking) {
+  const g = client.calendar?.google;
+  if (!googleEnabled() || !g?.refreshToken) return null;
+  const token = await accessToken(g.refreshToken);
+  const date = visitDate(booking.date);
+  const { start, end } = windowHours(booking.window);
+  const body = {
+    summary: `${booking.issue} - ${booking.customer_name}`,
+    description: `Booked by the front desk.\nCustomer: ${booking.customer_name}\nPhone: ${booking.phone}\nAddress: ${booking.address}\nIssue: ${booking.issue}\nUrgency: ${booking.urgency}\nNotes: ${booking.notes || "-"}`,
+    location: booking.address,
+    start: { dateTime: houstonISO(date, start), timeZone: "America/Chicago" },
+    end: { dateTime: houstonISO(date, end), timeZone: "America/Chicago" },
+  };
+  const calId = encodeURIComponent(g.calendarId || "primary");
+  const res = await fetch(`https://www.googleapis.com/calendar/v3/calendars/${calId}/events`, {
+    method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, body: JSON.stringify(body),
+  });
+  const d = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(`calendar insert failed ${res.status}: ${(d && d.error && d.error.message) || ""}`.trim());
+  return { id: d.id, link: d.htmlLink };
+}
+
+export async function updateEvent(client, booking) {
+  const g = client.calendar?.google;
+  if (!googleEnabled() || !g?.refreshToken || !booking.calendarEventId) return null;
+  const token = await accessToken(g.refreshToken);
+  const date = visitDate(booking.date);
+  const { start, end } = windowHours(booking.window);
+  const calId = encodeURIComponent(g.calendarId || "primary");
+  const res = await fetch(`https://www.googleapis.com/calendar/v3/calendars/${calId}/events/${encodeURIComponent(booking.calendarEventId)}`, {
+    method: "PATCH", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ start: { dateTime: houstonISO(date, start), timeZone: "America/Chicago" }, end: { dateTime: houstonISO(date, end), timeZone: "America/Chicago" } }),
+  });
+  if (!res.ok) throw new Error(`calendar update failed ${res.status}`);
+  return await res.json();
 }

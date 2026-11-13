@@ -214,18 +214,6 @@ await check('CITAS and signed SÍ use the full Spanish question without AI and r
   assert.deepEqual(await strictRead('self_service_ai','daily'),before);await delivery.runManagedDelivery({limit:25,discoveryLimit:0});const pending=(await consent.managedSMSConsent(f.c,caller)).pendingAsk;assert.equal(pending.wording,consent.managedAppointmentConsentQuestion(f.c,'es'));assert.match(pending.wording,/visitas futuras/);assert.match(pending.wording,/Puede reservar sin mensajes/);assert.equal(await consent.mayDeliverManagedSMS(f.c,caller,'reminder_1h'),false);
   clock+=2000;const yes=inbound(f,'SÍ');await httpHandler(signed(yes));assert.equal(await consent.mayDeliverManagedSMS(f.c,caller,'reminder_1h'),true);assert.equal((await consent.managedSMSConsent(f.c,caller)).proof.wording,pending.wording);assert.equal(await consent.mayDeliverManagedSMS(f.c,caller,'marketing'),false);
 });
-// Legal precondition P6 rev 2 (QA): a deterministic first keyword reply (CITAS) must not use up the automated
-// disclosure; the first AI reply after it carries the intro exactly once, and the next AI reply does not repeat it.
-await check('P6 rev 2: a first CITAS keyword reply does not skip the automated disclosure on the next AI reply',async()=>{
-  const f=await fixture('citas-first-disclosure'),intro='Automated assistant for '+f.c.business.name+'.\n',historyKey=`${f.c.slug}/${f.tenant}/${caller}`;
-  const first=inbound(f,'CITAS');await httpHandler(signed(first));process.env.MC_SELF_SERVICE_AI_GLOBAL_DAILY_LIMIT='0';try{assert.equal((await processManagedSMS(inboundKey(f,first))).ok,true);}finally{delete process.env.MC_SELF_SERVICE_AI_GLOBAL_DAILY_LIMIT;}
-  const afterKeyword=await strictRead('managed_sms_history',historyKey);assert.equal(afterKeyword?.disclosedAt,undefined,'a keyword reply recorded the disclosure');
-  clock+=2000;const ask=inbound(f,'My faucet is dripping.');await httpHandler(signed(ask));assert.equal((await processManagedSMS(inboundKey(f,ask))).ok,true);
-  const answered=await strictRead('managed_sms_inbound',inboundKey(f,ask));assert.ok(answered.reply.startsWith(intro),'first AI reply after CITAS is not disclosed: '+String(answered.reply).slice(0,60));
-  assert.ok((await strictRead('managed_sms_history',historyKey)).disclosedAt,'disclosure not recorded on the conversation');
-  clock+=2000;const next=inbound(f,'Is Tuesday ok?');await httpHandler(signed(next));assert.equal((await processManagedSMS(inboundKey(f,next))).ok,true);
-  assert.equal((await strictRead('managed_sms_inbound',inboundKey(f,next))).reply.startsWith('Automated assistant'),false,'the disclosure was repeated');
-});
 await check('an unrelated phone or tenant cannot grant a saved recipient permission or expose its visit',async()=>{
   const f=await fixture('wrong-recipient'),other=await fixture('other-tenant'),phone='+17135550188';
   const optIn=inbound(f,'APPOINTMENTS',{from:phone});await httpHandler(signed(optIn));await processManagedSMS(inboundKey(f,optIn));await delivery.runManagedDelivery({limit:25,discoveryLimit:0});clock+=2000;const yes=inbound(f,'YES',{from:phone});await httpHandler(signed(yes));assert.equal(await consent.mayDeliverManagedSMS(f.c,phone,'confirmation'),true);assert.equal(await consent.mayDeliverManagedSMS(f.c,caller,'confirmation'),false);assert.equal(await consent.mayDeliverManagedSMS(other.c,phone,'confirmation'),false);assert.equal((await store.listJSON('bookings',f.c.slug+'/')).length,0);const outbound=[...messages.values()].filter(row=>row.direction==='outbound-api'&&row.from===f.number);assert.ok(outbound.every(row=>row.to===phone&&!/123 Example|Alex/.test(row.body)));
@@ -418,7 +406,7 @@ await check('availability contract: funded SMS preserves typed Calendar failures
       if(failed){assert.deepEqual(Object.keys(typed).sort(),['error','message']);assert.equal(typed.error,'availability_unavailable');assert.match(typed.message,/Do not say there are no openings or promise a window/);assert.match(typed.message,/owner callback/);assert.equal(results[0].content.includes('PRIVATE_SYNTHETIC_PROVIDER_DETAIL'),false);}
       else{delete typed.calendar.checkedAt;delete expected.calendar.checkedAt;assert.deepEqual(typed,expected);}
       assert.equal((await store.listJSON('bookings',f.c.slug+'/')).length,0);assert.equal((await store.listJSON('managed_actions',f.c.slug+'/')).length,0);assert.equal((await store.listJSON('leads',f.c.slug+'/')).length,0);assert.equal(report.providerSends,sends);
-      const saved=await strictRead('managed_sms_inbound',id);assert.equal(saved.state,'completed');assert.equal(saved.reply,'Automated assistant for '+f.c.business.name+'.\n'+paidModelTool.reply);assert.equal((await processManagedSMS(id)).skipped,true);assert.equal(paidModelRequests.length,before+2);assert.equal(calendarProbe.reads,1);
+      const saved=await strictRead('managed_sms_inbound',id);assert.equal(saved.state,'completed');assert.equal(saved.reply,paidModelTool.reply);assert.equal((await processManagedSMS(id)).skipped,true);assert.equal(paidModelRequests.length,before+2);assert.equal(calendarProbe.reads,1);
       report.availabilityResults??=[];report.availabilityResults.push({failed,typedError:typed.error||null,is_error:results[0].is_error,reads:calendarProbe.reads,modelRequests:requests.length,bookingCount:0,replaySkipped:true});
       process.env.MC_FAKE_MODEL='1';delete process.env.ANTHROPIC_API_KEY;paidModelTool=null;calendarProbe=null;
     }
@@ -455,7 +443,7 @@ await check('canonical saved booking language selects consent footer without inf
       const job=(await store.listJSON('managed_deliveries',f.c.slug+'/')).find(row=>row.channel==='sms'&&row.purpose==='consent_ask');assert.ok(job);
       // The model prose is deliberately English for both languages: the canonical
       // saved booking, not generated prose, selects the server-authored question.
-      assert.ok(job.body.replace(/^Automated assistant for [^\n]*\n/,'').startsWith('Your visit is saved in the shop portal.'));
+      assert.ok(job.body.startsWith('Your visit is saved in the shop portal.'));
       assert.ok(job.body.endsWith(consent.managedAppointmentConsentQuestion(f.c,language)));
       if(language==='es')assert.equal(job.body.endsWith(consent.managedAppointmentConsentQuestion(f.c,'en')),false);
       const permission=await consent.managedSMSConsent(f.c,caller);assert.equal(permission.transactional,false);assert.equal(permission.pendingAsk,null);assert.equal(job.providerId,undefined);assert.equal(report.providerSends,beforeSends);

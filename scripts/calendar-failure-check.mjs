@@ -197,7 +197,7 @@ try {
     assert.equal((await calendarAlerts(c)).length, 1, "one alert for each failing shop");
     const mails = steveCalendarEmails(c);
     assert.equal(mails.length, 1);
-    assert.equal(steveCalendarTexts(c).length, 0, "operator alerts are email only; the M&C number never texts them (legal P1)");
+    assert.equal(steveCalendarTexts(c).length, 1, "Steve's health text also uses the local stub");
     assert.match(mails[0].data.text, /Connect Google Calendar/);
     assert.match(mails[0].data.text, /Bookings still reach the owner by text/);
     assert.ok(mails[0].data.text.includes("c=" + c.slug), "alert links to the affected shop");
@@ -215,7 +215,7 @@ try {
   clock += 60000;
   await scan();
   assert.equal(steveCalendarEmails(again).length, 2, "ongoing failure alerts again after 24h");
-  assert.equal(steveCalendarTexts(again).length, 0, "operator alerts are email only (legal P1)");
+  assert.equal(steveCalendarTexts(again).length, 2);
   assert.equal((await calendarAlerts(again)).length, 2);
   for (const c of failed.slice(1)) assert.equal(steveCalendarEmails(c).length, 1, "no repeat after old failures leave the 24h window");
   for (const c of [healthy, disconnected]) {
