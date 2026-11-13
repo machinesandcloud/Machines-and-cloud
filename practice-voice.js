@@ -20,7 +20,7 @@
   let active = null;
   function start(options = {}) {
     active?.destroy();
-    let alive = true, ended = false, sdk = null, mic = null, call = null, sdkStopped = false;
+    let alive = true, ended = false, sdk = null, mic = null, call = null, sdkStopped = false, started = false;
     let startTimer = null, callTimer = null;
     let resolveClosed;
     const closed = new Promise(resolve => { resolveClosed = resolve; });
@@ -90,6 +90,7 @@
         sdk.on('message', message);
         sdk.on('call-start', () => {
           if (!alive) { cleanup(); return; }
+          started = true;
           deps.clearTimeout(startTimer);
           emit('onStatus', { state: 'listening' });
           callTimer = deps.setTimeout(() => finish('duration_limit'), 90000);
@@ -97,7 +98,7 @@
         sdk.on('speech-start', () => emit('onStatus', { state: 'speaking' }));
         sdk.on('speech-end', () => emit('onStatus', { state: 'listening' }));
         sdk.on('call-end', () => finish('ended'));
-        sdk.on('error', () => { if (alive) fail('connection_failed', 'The voice connection ended. Please try again or type.'); });
+        sdk.on('error', () => { if (alive) fail(started ? 'connection_failed' : 'connect_failed', started ? 'The voice connection ended. Please try again or type.' : 'Voice could not connect. Please try again or type.'); });
         await sdk.reconnect(call);
         if (!alive) { cleanup(); return null; }
         return { callId: call.id };
@@ -105,7 +106,10 @@
         if (!alive) { cleanup(); return null; }
         if (error?.name === 'NotAllowedError' || error?.name === 'SecurityError') fail('microphone_denied', 'Microphone access was denied. Allow it in your browser or type instead.');
         else if (error?.name === 'NotFoundError' || error?.name === 'NotReadableError') fail('microphone_unavailable', 'No usable microphone was found. Check the device or type instead.');
-        else fail(error?.name === 'AbortError' ? 'timeout' : 'connection_failed', 'Voice could not connect. Please try again or type.');
+        // Before a microphone stream exists, the remaining getUserMedia errors mean this browser cannot capture audio.
+        else if (!mic && ['NotSupportedError', 'OverconstrainedError', 'TypeError'].includes(error?.name)) fail('not_supported', 'Voice is unavailable in this browser. Please type instead.');
+        else if (!mic && error?.name === 'AbortError') fail('microphone_unavailable', 'No usable microphone was found. Check the device or type instead.');
+        else fail(error?.name === 'AbortError' ? 'timeout' : started ? 'connection_failed' : 'connect_failed', 'Voice could not connect. Please try again or type.');
         return null;
       }
     });

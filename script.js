@@ -353,6 +353,24 @@
   }
 
   // ============================================
+  // PLANS DISCLOSURE (2026-11-12): a Plans link shows the prices
+  // ============================================
+  const futurePlans = document.querySelector('#plans details.site-future-plans');
+  if (futurePlans) {
+    const samePage = (path) => path.replace(/\/index(?:\.html)?$/, '/');
+    const openPlans = () => { futurePlans.open = true; };
+    // Open in the HTML so prices show without JavaScript (QA N1); with JavaScript, collapse unless the visitor followed Plans.
+    if (window.location.hash === '#plans') openPlans(); else futurePlans.open = false;
+    window.addEventListener('hashchange', () => { if (window.location.hash === '#plans') openPlans(); });
+    document.addEventListener('click', (e) => {
+      const link = e.target instanceof Element ? e.target.closest('a[href]') : null;
+      if (!link) return;
+      const url = new URL(link.href, window.location.href);
+      if (url.hash === '#plans' && url.origin === window.location.origin && samePage(url.pathname) === samePage(window.location.pathname)) openPlans();
+    }, true);
+  }
+
+  // ============================================
   // SMOOTH SCROLL FOR ANCHOR LINKS
   // ============================================
   document.querySelectorAll('a[href^="#"]').forEach((anchor) => {

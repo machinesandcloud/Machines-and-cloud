@@ -17,7 +17,7 @@ const sourceFiles=phase!=='bridge'?['index.html','stories.js','site-refresh.css'
 const sourceSnapshot=()=>Object.fromEntries(sourceFiles.map(file=>[file,hash(readFileSync(file))]));
 const report={startedAt:new Date().toISOString(),phase,base:base.origin,source:sourceSnapshot(),servedSources:[],checks:[],issues:[],cases:[],screenshots:[],browserErrors:[],blockedRequests:[],typedFixtureRequests:[],scope:'Local rendered UI/dependency fixtures, explicitly identified by phase; no actual mic, audio connection, provider request or real-model customer-semantic quality proof'};
 const check=(name,pass,detail)=>{const row={name,pass:!!pass,...(detail===undefined?{}:{detail})};report.checks.push(row);if(!pass)report.issues.push(row);};
-const browser=await chromium.launch({headless:true,channel:'chrome'});
+const browser=await chromium.launch({headless:true,...(process.env.CHROME_BIN?{executablePath:process.env.CHROME_BIN}:{channel:'chrome'})});
 async function fixture(config={}){
   const context=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:'block'});
   await context.route('**/*',async route=>{const request=route.request();if(request.isNavigationRequest()&&request.url()===base.href&&request.method()==='GET')return route.fulfill({status:200,contentType:'text/html',body:'<!doctype html><title>Local voice dependency fixture</title><main>Local fixture only</main>'});report.blockedRequests.push({method:request.method(),url:request.url()});return route.abort();});
@@ -107,7 +107,7 @@ async function uiChecks(){
     const output=async(persona,input,reply,data)=>{
       const profiles={'bayou-air':{owner:'Ray',company:'Bayou Air & Heat'},'katy-pipeworks':{owner:'Dana',company:'Katy Pipeworks'},'westheimer-maids':{owner:'Nia',company:'Westheimer Maids'}};
       await page.evaluate(({reply,event})=>window.__outcomeUI.queue.push({reply,events:[event]}),{reply,event:{type:'owner_notification',...profiles[persona],data,at:'2026-10-22T02:00:00Z'}});
-      await page.locator('#example-input').fill(input);check(`${width}px typing from Watch preserves request`,await page.locator('#example-input').inputValue()===input&&await page.locator('#demo-wrap').getAttribute('data-mode')==='live');
+      await page.locator('#example-input').fill(input);check(`${width}px typing in Try preserves request`,await page.locator('#example-input').inputValue()===input&&await page.locator('#demo-wrap').getAttribute('data-mode')==='live');
       await page.locator('#example-send').click();await page.waitForFunction(()=>document.querySelector('#example-messages').getAttribute('aria-busy')==='false');
       const request=await page.evaluate(()=>window.__outcomeUI.typed.at(-1));check(`${width}px explicit send uses selected persona`,request.persona===persona&&request.stream===true,request);
     };
@@ -126,11 +126,15 @@ async function uiChecks(){
           check(`${width}px ${id} message ${delivered} arrives in order with an owner view`,current.messageCount===delivered&&current.messages.length===delivered&&current.summary.length>40&&current.roles.every((role,index)=>role===(index%2?'agent':'customer')),current);
           watchFactChecks(width,id,current);await visibleReply(`${id} message ${delivered}`);
         }
-        const result=await state();check(`${width}px ${id} finishes all twelve messages and useful owner result`,result.messageCount===12&&!result.playVisible&&!result.counterPresent&&result.summary.length>80,result);
+        const result=await state();check(`${width}px ${id} finishes all twelve messages and useful owner result, still playing (Watch loops)`,result.messageCount===12&&result.playVisible&&result.playLabel==='Pause'&&!result.counterPresent&&result.summary.length>80,result);
         report.cases.push({name:`${width}px ${id} complete normal-motion playback`,timeline});
         if(id==='spanish')check(`${width}px Spanish Watch owner result retains language`,result.summary.includes('Spanish'),result.summary);
         await capture(`${id}-watch`);await ownerPreview(`${id}-watch`);
+        // 2026-11-12 (website P2 rev 2): Watch loops. After the complete-result hold it restarts at message one and keeps playing.
+        const looped=await page.waitForFunction(()=>document.querySelectorAll('#example-messages .site-message').length===1&&document.querySelector('#example-play').textContent==='Pause',null,{timeout:9000}).then(()=>true,()=>false);
+        check(`${width}px ${id} Watch loops back to message one after the complete result`,looped,await state());
       }
+      await page.locator('#example-mode-live').click();
       await page.locator('#example-challenges button').first().click();
       check(`${width}px challenge prepares request without spending`,await page.locator('#example-input').inputValue()!==''&&await page.evaluate(()=>window.__outcomeUI.typed.length===0&&window.__outcomeUI.voices.length===0));
       await page.locator('#example-reset').click();
@@ -160,7 +164,7 @@ async function uiChecks(){
       for(const id of['sms','call','spanish']){
         await page.locator(`[data-example="${id}"]`).click();await page.waitForTimeout(150);
         const reduced=await state();
-        check(`${width}px ${id} reduced motion shows all twelve messages without playback`,reduced.messageCount===12&&!reduced.playVisible&&!reduced.counterPresent&&reduced.summary.length>80,reduced);
+        check(`${width}px ${id} reduced motion shows all twelve messages without playback`,reduced.messageCount===12&&reduced.playLabel!=='Pause'&&!reduced.counterPresent&&reduced.summary.length>80,reduced);
         watchFactChecks(width,id,reduced);if(id==='spanish')check(`${width}px Spanish reduced motion keeps English owner language label`,reduced.summary.includes('Spanish'));
         await visibleReply(`${id} reduced-motion final answer`);await capture(`${id}-reduced-complete`);await ownerPreview(`${id}-reduced`);
         report.cases.push({name:`${width}px ${id} reduced-motion complete result`,...reduced});
@@ -205,8 +209,11 @@ async function recoveryChecks(){
     check('Pause preserves revealed facts without advancing',(await snapshot()).messageCount===paused&&await page.locator('#example-play').innerText()==='Play');
     await page.locator('#example-play').click();await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));await settle();const offscreen=(await snapshot()).messageCount;await page.waitForTimeout(2450);
     check('offscreen playback pauses without advancing',(await snapshot()).messageCount===offscreen&&await page.locator('#example-play').innerText()==='Play');
+    // 2026-11-12 (website P2 rev 2): ANIMATION-LOOPS changed this contract. Returning on screen resumes unless the visitor explicitly paused.
     await page.locator('#example-messages').scrollIntoViewIfNeeded();await page.waitForTimeout(2450);
-    check('returning on screen requires explicit Play',(await snapshot()).messageCount===offscreen&&await page.locator('#example-play').innerText()==='Play');
+    check('returning on screen resumes playback that was not explicitly paused',(await snapshot()).messageCount>offscreen&&await page.locator('#example-play').innerText()==='Pause');
+    await page.locator('#example-play').click();await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));await settle();await page.locator('#example-messages').scrollIntoViewIfNeeded();const userPaused=(await snapshot()).messageCount;await page.waitForTimeout(2450);
+    check('returning on screen after an explicit Pause stays paused',(await snapshot()).messageCount===userPaused&&await page.locator('#example-play').innerText()==='Play');
     await page.locator('#example-replay').click();check('Replay restarts ordered playback at first fact',(await snapshot()).messageCount===1&&await page.locator('#example-play').innerText()==='Pause');
     await page.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,get:()=>true});document.dispatchEvent(new Event('visibilitychange'));});
     check('hidden document pauses active playback',await page.locator('#example-play').innerText()==='Play');
@@ -214,6 +221,7 @@ async function recoveryChecks(){
     await page.locator('[data-example="spanish"]').focus();await page.keyboard.press('Enter');
     check('keyboard scenario activation starts selected conversation',await page.locator('[data-example="spanish"]').getAttribute('aria-pressed')==='true'&&await page.locator('#example-play').innerText()==='Pause');
     await page.locator('#example-play').click();await page.locator('[data-example="call"]').click();await page.locator('#example-play').click();
+    await page.locator('#example-mode-live').click(); // composer exists only in Try mode
     await page.locator('#example-input').fill('Call me');await page.locator('#example-input').press('Shift+Enter');await page.locator('#example-input').press('a');
     check('Shift+Enter creates newline without sending',(await snapshot()).input==='Call me\na'&&(await snapshot()).requests===0);
     await queue({reply:'José requested a callback — not a visit.',events:[event],fragment:true});await page.locator('#example-input').press('Enter');await idle();
@@ -238,7 +246,7 @@ async function recoveryChecks(){
     check('new scenario starts fresh request history',await page.evaluate(()=>window.__recovery.requests.at(-1).persona==='westheimer-maids'&&window.__recovery.requests.at(-1).messages.length===1));
     await send('Watch pending',{hold:true,reply:'STALE WATCH',events:[event]});await page.locator('#example-mode-watch').click();await page.evaluate(()=>window.__recovery.held.shift()());await settle();current=await snapshot();
     check('Watch switch rejects late typed completion',current.mode==='watch'&&!current.messages.includes('STALE WATCH')&&!current.summary.includes('Sam'));
-    await page.locator('[data-example="call"]').click();
+    await page.locator('[data-example="call"]').click();await page.locator('#example-mode-live').click(); // voice card exists only in Try mode
     await page.locator('#example-voice-start').click();await settle();await page.locator('#example-reset').click();
     await page.evaluate(event=>{const o=window.__recovery.voices[0].options;o.onTranscript({role:'assistant',text:'STALE VOICE RESET',isFinal:true});o.onSummary(event);},event);
     check('Start over destroys voice and rejects late transcript/summary',await page.evaluate(()=>window.__recovery.voices[0].destroyed===1)&&!(await snapshot()).messages.includes('STALE VOICE RESET')&&!(await snapshot()).summary.includes('Sam'));
@@ -260,6 +268,7 @@ async function fallbackChecks(){
   const page=await context.newPage();page.setDefaultTimeout(6000);page.on('pageerror',error=>report.browserErrors.push(error.message));
   try{
     await page.goto(base.href,{waitUntil:'domcontentloaded'});await page.locator('.site-demo-ready').waitFor();
+    await page.locator('#example-mode-live').click(); // challenges, composer and voice card exist only in Try mode
     for(const scenario of['sms','spanish','call']){
       await page.locator(`[data-example="${scenario}"]`).click();
       const discovery=await page.locator('#example-voice-card').evaluate(el=>({hidden:el.hidden,display:getComputedStyle(el).display,heading:el.querySelector('strong').textContent,rendered:el.getClientRects().length>0}));

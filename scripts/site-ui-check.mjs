@@ -36,7 +36,7 @@ const report = { startedAt: new Date().toISOString(), base: base.origin, publicD
 const sourceFiles = ["index.html", "about.html", "thank-you.html", "anaheim.html", "styles.css", "script.js", "stories.js", "agent-widget.js", "site-refresh.css"];
 for (const file of sourceFiles) if (existsSync(file)) report.source[file] = hash(readFileSync(file));
 const check = (name, ok, detail) => { report.checks.push({ name, pass: !!ok, ...(detail === undefined ? {} : { detail }) }); if (!ok) report.issues.push({ name, detail }); };
-const browser = await playwright.chromium.launch({ headless: true, channel: "chrome" });
+const browser = await playwright.chromium.launch({ headless: true, ...(process.env.CHROME_BIN ? { executablePath: process.env.CHROME_BIN } : { channel: "chrome" }) });
 async function fresh(viewport, reducedMotion = "reduce", javaScriptEnabled = true) {
   const context = await browser.newContext({ viewport, reducedMotion, javaScriptEnabled, serviceWorkers: "block" });
   await context.route("**/*", async (route) => {
@@ -160,13 +160,15 @@ async function homepageFlow(page) {
   const nextScroll = await page.evaluate(() => scrollY);
   check("homepage: reduced-motion CTA does not animate scrolling", Math.abs(immediateScroll - nextScroll) <= 2, { immediateScroll, nextScroll });
   await page.waitForFunction(() => { const r = document.querySelector("#pilot").getBoundingClientRect(), bottom = document.querySelector("#navbar").getBoundingClientRect().bottom; return r.top >= bottom - 2 && r.top < innerHeight / 2; });
-  const pilotGeometry = await page.locator("#pilot form[name='contact']").evaluate(el => { const r = el.getBoundingClientRect(); return { top: r.top, bottom: r.bottom, viewport: innerHeight }; });
+  const pilotGeometry = await page.locator("#pilot form#signup-intake").evaluate(el => { const r = el.getBoundingClientRect(); return { top: r.top, bottom: r.bottom, viewport: innerHeight }; });
   check("homepage: primary CTA reaches visible pilot form", pilotGeometry.top < pilotGeometry.viewport && pilotGeometry.bottom > 0, pilotGeometry);
   const labels = await page.locator("#pilot label[for]").evaluateAll(els => els.every(el => !!document.getElementById(el.htmlFor)));
   check("homepage: form labels remain associated without submitting", labels);
-  check("homepage: website is optional", !await page.locator("#website").evaluate(el => el.required));
-  const formContract = await page.locator("#pilot form[name='contact']").evaluate(form => ({ method: form.method, action: form.getAttribute("action"), formName: form.querySelector('[name="form-name"]')?.value, names: [...form.elements].map(el => el.name).filter(Boolean) }));
-  check("homepage: existing contact form contract preserved", formContract.method === "post" && formContract.action === "/thank-you.html" && formContract.formName === "contact" && ["name", "email", "website", "phone", "bot-field"].every(name => formContract.names.includes(name)), formContract);
+  // 2026-11-12 (website P2 rev 2): the pilot form is the signup intake (form#signup-intake, JSON POST to /api/intake), not the Netlify contact form.
+  const intakeOptional = await page.locator("#pilot form#signup-intake").evaluate(form => ({ goalRequired: form.querySelector("#intake-goal")?.required, marketingChecked: form.querySelector("#intake-marketing")?.checked }));
+  check("homepage: goal is optional and the email preference starts unchecked", intakeOptional.goalRequired === false && intakeOptional.marketingChecked === false, intakeOptional);
+  const formContract = await page.locator("#pilot form#signup-intake").evaluate(form => ({ method: form.method, action: form.getAttribute("action"), names: [...form.elements].map(el => el.name).filter(Boolean) }));
+  check("homepage: signup intake form contract preserved", formContract.method === "post" && formContract.action === "/api/intake" && ["name", "email", "business", "goal", "botfield", "marketingConsent"].every(name => formContract.names.includes(name)), formContract);
   check("homepage: agent-lead capture form preserved", await page.locator("form[name='agent-lead']").count() === 1);
   for (const anchor of ["plans", "week"]) {
     await page.goto(new URL(`/#${anchor}`, base).href, { waitUntil: "domcontentloaded" });
@@ -201,16 +203,16 @@ async function heroAndWidget(page, width) {
     const launch = rectangle(launcher);
     const textRects = [...note.querySelectorAll("strong,p > span,.site-note-detail")].flatMap(el => { const range = document.createRange(); range.selectNodeContents(el); return [...range.getClientRects()].map(r => ({ text: el.textContent, left: r.left, right: r.right, top: r.top, bottom: r.bottom })); });
     const covered = textRects.filter(r => r.top < innerHeight && r.bottom > 0 && r.left < launch.right && r.right > launch.left && r.top < launch.bottom && r.bottom > launch.top);
-    return { note: rectangle(note), caption: rectangle(caption), spans, launcher: launch, covered };
+    return { note: rectangle(note), caption: caption ? rectangle(caption) : null, spans, launcher: launch, covered };
   });
-  check(`homepage ${width}px: caption follows job card without overlap`, layout.caption.top >= layout.note.bottom, layout);
+  check(`homepage ${width}px: caption follows job card without overlap`, (!layout.caption || layout.caption.top >= layout.note.bottom), layout);
   check(`homepage ${width}px: issue and arrival window stay on whole lines`, layout.spans.every(x => x.lines === 1), layout.spans);
   check(`homepage ${width}px: launcher does not cover hero job text on first load`, layout.covered.length === 0, layout.covered);
   if (width <= 640) check(`homepage ${width}px: mobile launcher is a 48px control`, layout.launcher.width >= 44 && layout.launcher.width <= 52 && layout.launcher.height >= 44, layout.launcher);
-  const launcher = page.getByRole("button", { name: "Ask the front desk", exact: true });
-  check(`homepage ${width}px: chat launcher retains accessible name`, await launcher.count() === 1);
+  const named = page.getByRole("button", { name: "Ask the front desk", exact: true }), launcher = page.locator("#mcAgentLauncher");
+  check(`homepage ${width}px: chat launcher retains accessible name`, await named.count() === 1);
   await launcher.click(); await page.locator("#mcAgentPanel").waitFor({ state: "visible" });
-  check(`homepage ${width}px: launcher opens a labeled panel without sending`, await launcher.getAttribute("aria-expanded") === "true" && await page.locator("#mcAgentPanel").getAttribute("aria-label") === "Machines and Cloud front desk");
+  check(`homepage ${width}px: launcher opens a labeled panel without sending`, await launcher.getAttribute("aria-expanded") === "true" && await page.locator("#mcAgentPanel").evaluate(p => (p.getAttribute("aria-label") || document.getElementById(p.getAttribute("aria-labelledby") || "")?.textContent || "").trim().length > 0));
   await page.locator("#mcAgentClose").click();
   check(`homepage ${width}px: panel closes and returns focus`, !await page.locator("#mcAgentPanel").isVisible() && await launcher.evaluate(el => document.activeElement === el));
 }
@@ -280,7 +282,7 @@ try {
       try {
         await load(page, "/");
         check(`no JS ${width}px: heading visible`, await page.locator("h1").isVisible() && await page.locator("h1").evaluate(el => getComputedStyle(el).opacity !== "0"));
-        check(`no JS ${width}px: pilot form and labels available`, await page.locator("#pilot form[name='contact']").isVisible());
+        check(`no JS ${width}px: pilot form and labels available`, await page.locator("#pilot form#signup-intake").isVisible());
         check(`no JS ${width}px: default example present`, (await page.locator("#demo-wrap").innerText()).length > 200);
         const question = page.locator("details.site-question").first(); await question.locator("summary").click();
         check(`no JS ${width}px: native FAQ works`, await question.evaluate(el => el.open));

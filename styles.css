@@ -9380,3 +9380,11 @@ img.brand-mark[hidden] { display:none!important; }
  .theme-light.public-reading .email-preview { flex-wrap:wrap; align-items:flex-start; gap:8px; }
  .theme-light.public-reading :is(.email-from,.email-subject) { flex:1 1 100%; width:auto; white-space:normal; overflow:visible; text-overflow:clip; overflow-wrap:anywhere; }
 }
+
+/* 2026-11-12: industry workflow animation fits phone widths (PRA-ACQ-13) */
+@media (max-width: 480px) {
+  .workflow-animation { gap: 6px; max-width: 100%; }
+  .workflow-animation .workflow-step { padding: 8px; gap: 6px; min-width: 0; }
+  .workflow-connector { width: 12px; flex: 0 1 12px; }
+  .workflow-label { text-align: center; }
+}

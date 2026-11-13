@@ -367,7 +367,7 @@
       ],
       [
         "agent",
-        "Got it—you’re asking for an urgent callback, with no visit booked. I’ve noted your name, number and Fulshear address."
+        "Got it. You’re asking for an urgent callback, with no visit booked. I’ve noted your name, number and Fulshear address."
       ],
       [
         "customer",
@@ -1271,10 +1271,12 @@
             voice_unavailable: 'Voice is temporarily unavailable. You can use the live typed chat below.',
             offline: 'Voice is unavailable right now. The live typed chat is ready below.',
             timeout: 'The voice connection timed out. You can retry or type below.',
+            connect_failed: 'The call could not connect. You can retry or type below.',
             connection_failed: 'The voice connection ended. You can retry or type below.'
           };
           el('voice-status').textContent = labels[error.code] || 'The call could not connect. You can retry or type below.';
           el('error').textContent = el('voice-status').textContent; el('error').hidden = false; ended();
+          if (error.code === 'not_supported' || error.code === 'unsupported') input.focus();
         },
         onEnd: function () { if (!active()) return; el('voice-status').textContent = 'Call ended. Review the owner preview, start again or type below.'; ended(); }
       });
