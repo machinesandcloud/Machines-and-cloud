@@ -40,10 +40,11 @@
     $('recoveryMessage').textContent = message; if ($('liveBtns')) $('liveBtns').innerHTML = '';
     if (ownerKeyRecovery) { $('recoveryMessage').textContent = ownerKeyRecovery; ownerKeyRecovery = null; }
   }
-  document.addEventListener('mc:session-expired',function () {
+  document.addEventListener('mc:session-expired',function (event) {
     ownerKeyRecovery = key && !ownerSession ? OWNER_KEY_INVALID : null; // an owner key is fixed, so a refusal means it is wrong or was replaced
     if (leaving && !ownerSession && !key) return;
     var keptDraft = cfgKeepExpired();
+    var reason = event && event.detail && event.detail.reason, signedOutElsewhere = reason === 'signed_out';
     rememberReturnRoute(location.hash);
     leaving = true; portalGeneration++; ownerSession = null; key = null; data = null; transcript = []; cancelPracticeReply(); availabilityReset();
     websitePrivateClear();
@@ -52,7 +53,7 @@
     acctBaseline = null; acctBaseClient = null; acctRevision = null; acctEditRevision = null; acctConflict = null; acctDirty = false; acctBusy = false;
     try { sessionStorage.removeItem('mc-owner-visit-pending-v1:'+slug); sessionStorage.removeItem('mc-onboarding-session-v1'); sessionStorage.removeItem('mc-calendar-pending-v1'); sessionStorage.removeItem(ownerKeyStorage); } catch (error) { /* Private content is still cleared. */ }
     closeTour(false, false);
-    recover(keptDraft ? 'Your session expired. Your unsaved business details are kept in this browser tab. Open your email sign-in link in this tab to restore them.' : 'Your session expired. Sign in by email to reopen your workspace.', true); $('portalContent').innerHTML = ''; $('deskSignOut').hidden = true; $('retryLoad').hidden = true;
+    recover(signedOutElsewhere ? 'You signed out in another tab. Use an email sign-in link to open your workspace again.' : reason === 'replaced' ? 'This browser signed in to another account in another tab. Use an email sign-in link to open this workspace again.' : reason === 'renewed' ? 'This browser signed in again in another tab. Reload this page to continue.' : keptDraft ? 'Your session expired. Your unsaved business details are kept in this browser tab. Open your email sign-in link in this tab to restore them.' : 'Your session expired. Sign in by email to reopen your workspace.', true); $('portalContent').innerHTML = ''; $('deskSignOut').hidden = true; $('retryLoad').hidden = true;
     var focused = document.activeElement; if (!focused || focused === document.body || !focused.getClientRects().length) $('recoveryTitle').focus();
   });
   document.addEventListener('mc:desk-refresh',function(event){if(!leaving)load(null,{soft:event.detail?.soft===true,connectionProgress:event.detail?.reason==='connection-progress',connectionProgressRequest:event.detail?.requestId});});
@@ -1738,8 +1739,10 @@
     try {
       var response = await fetch(API_BASE + '/api/access', { method: 'POST', headers: ownerHeaders(), body: JSON.stringify({ action: 'sign_out' }) });
       if (!response.ok) throw new Error('Sign out could not be confirmed. Please retry.');
-      websitePrivateClear();ownerSession = null; key = null; data = null; transcript = [];
+      var signedOutHandle = ownerSession; websitePrivateClear();ownerSession = null; key = null; data = null; transcript = [];
       try { sessionStorage.removeItem('mc-owner-visit-pending-v1:'+slug); sessionStorage.removeItem('mc-onboarding-session-v1'); sessionStorage.removeItem(ownerKeyStorage); sessionStorage.removeItem(cfgExpiredKey); } catch (error) { /* Session is revoked on the server. */ }
+      // Every other tab of this browser shares the revoked session; tell them now rather than at their next request.
+      if (window.MCOwnerSession) window.MCOwnerSession.signedOut(signedOutHandle);
       button.hidden = true; $('retryLoad').hidden = true;
       history.replaceState(null, '', location.pathname);
       try { localStorage.removeItem(RETURN_ROUTE_KEY); } catch (error) { /* Nothing to return to after a chosen sign-out. */ }

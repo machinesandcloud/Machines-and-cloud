@@ -1,5 +1,5 @@
 // Verified owner access. No client is created or disclosed before mailbox proof.
-import { createHash, randomBytes } from "node:crypto";
+import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 import { atomicUpdate, put } from "./store.mjs";
 import { networkBucket } from "./network-bucket.mjs";
 import { emailEnabled, sendEmail } from "./send.mjs";
@@ -142,11 +142,89 @@ export async function exchangeAccessToken(token, ip, purpose = "onboarding") {
   return { ok: true, session, email: claim.email, expiresAt };
 }
 
+// Browser owner sessions are shared by every tab of one browser. The secret lives only in an
+// HttpOnly, SameSite=Strict cookie that page code cannot read. Pages hold a derived tab handle
+// (non-secret, kept in local storage) and send it as the Bearer value. Neither half authenticates alone: a
+// cookie without the handle (a forged cross-site request) or a handle without the cookie (an
+// exfiltrated value used elsewhere) is rejected. Operator sessions never use this path.
+const OWNER_HANDLE_PREFIX = "mc-owner-tab-handle-v1:";
+export const ownerTabHandle = secret => accessHash(OWNER_HANDLE_PREFIX + secret);
+function ownerCookieNames(req) {
+  let url; try { url = new URL(req.url); } catch { url = null; }
+  // __Host- cookies require Secure, Path=/ and no Domain, so a sibling subdomain cannot plant one.
+  // Only a plain-http loopback test server uses unprefixed, non-Secure names.
+  const loopback = url && url.protocol === "http:" && ["127.0.0.1", "localhost", "[::1]"].includes(url.hostname);
+  return loopback ? { secure: false, session: "mc_owner", probe: "mc_cookie_probe" } : { secure: true, session: "__Host-mc_owner", probe: "__Host-mc_cookie_probe" };
+}
+function readCookie(req, name) {
+  for (const part of String(req.headers.get("cookie") || "").split(";")) {
+    const index = part.indexOf("=");
+    if (index > 0 && part.slice(0, index).trim() === name) return part.slice(index + 1).trim();
+  }
+  return "";
+}
+const sameHex = (left, right) => hex(left) && hex(right) && timingSafeEqual(Buffer.from(left), Buffer.from(right));
+function ownerCookieSecret(req) { const value = readCookie(req, ownerCookieNames(req).session); return hex(value) ? value : ""; }
+export function ownerCookieSessionHash(req) { const secret = ownerCookieSecret(req); return secret ? accessHash(secret) : ""; }
+// The cookie half resolves only on the owner routes the setup and workspace pages call, so a future route that
+// reads owner sessions does not silently accept the cookie.
+const OWNER_COOKIE_ROUTES = new Set(["/api/access", "/api/client", "/api/onboard", "/api/chat", "/api/workspace-billing"]);
+function ownerCookieRoute(req) { try { return OWNER_COOKIE_ROUTES.has(new URL(req.url).pathname); } catch { return false; } }
+// Positive same-origin proof from the browser. Strict cookies still ride along from a sibling subdomain (same-site),
+// so this label, not SameSite, is what refuses evil.machinesandcloud.com. A request without the label (an old browser,
+// a non-browser client) never uses the cookie; those browsers sign in with the per-tab transport instead.
+export function sameOriginBrowserRequest(req) {
+  const site = req.headers.get("sec-fetch-site"), origin = req.headers.get("origin");
+  return site === "same-origin" && (!origin || accessOriginAllowed(origin));
+}
+function cookieAttributes(names, expiresAt, persistent) {
+  const life = persistent ? `; Max-Age=${Math.max(0, Math.floor((Date.parse(expiresAt) - Date.now()) / 1000))}` : "";
+  return `; Path=/; SameSite=Strict${names.secure ? "; Secure" : ""}${life}`;
+}
+export function ownerSessionCookies(req, session, expiresAt, persistent = false) {
+  const names = ownerCookieNames(req);
+  return [`${names.session}=${session}${cookieAttributes(names, expiresAt, persistent)}; HttpOnly`];
+}
+// Before the one-time link is spent, the page asks for a short-lived probe cookie with the same attributes as the
+// session cookie. The exchange uses the cookie transport only if that probe came back, so a browser that silently
+// drops our cookies (an extension or policy) signs in with the per-tab transport instead of losing the link.
+export function ownerProbeCookies(req, probe) {
+  const names = ownerCookieNames(req);
+  return [`${names.probe}=${probe}; Path=/; SameSite=Strict${names.secure ? "; Secure" : ""}; Max-Age=300; HttpOnly`];
+}
+export function newOwnerProbe() { return randomBytes(32).toString("hex"); }
+export function ownerProbeMatches(req, probe) { const value = readCookie(req, ownerCookieNames(req).probe); return hex(probe) && sameHex(value, probe); }
+// The owner session this browser's cookie currently holds (used only to decide whether a new sign-in replaces it).
+export async function currentOwnerCookieSession(req) {
+  const secret = ownerCookieSecret(req); if (!secret) return null;
+  const row = await strictRead("access_sessions", accessHash(secret));
+  return row?.scope === "onboarding" && row.status === "active" && Date.parse(row.expiresAt) > Date.now() ? { email: row.email, sessionHash: accessHash(secret), handle: ownerTabHandle(secret) } : null;
+}
+// Reads, without spending, which mailbox a still-valid owner link belongs to.
+export async function pendingAccessEmail(token) {
+  if (!hex(token)) return "";
+  const row = await strictRead("access_tokens", accessHash(token));
+  return row && (row.purpose || "onboarding") === "onboarding" && row.status === "pending" && Date.parse(row.expiresAt) > Date.now() ? row.email : "";
+}
+export function clearOwnerSessionCookies(req) {
+  const names = ownerCookieNames(req);
+  return [`${names.session}=; Path=/; SameSite=Strict${names.secure ? "; Secure" : ""}; Max-Age=0; HttpOnly`];
+}
 export async function getAccessSession(req, scope = "onboarding") {
   const match = /^Bearer ([a-f0-9]{64})$/.exec(req.headers.get("authorization") || "");
   if (!match) return null;
-  const row = await strictRead("access_sessions", accessHash(match[1]));
-  return row?.scope === scope && row.status === "active" && Date.parse(row.expiresAt) > Date.now() ? { ...row, sessionHash: accessHash(match[1]) } : null;
+  let secret = match[1];
+  if (scope === "onboarding") {
+    const cookie = ownerCookieSecret(req);
+    if (cookie && sameHex(ownerTabHandle(cookie), match[1])) {
+      // Load-bearing, not only defence in depth: SameSite=Strict lets a sibling subdomain's requests carry the cookie.
+      // The cookie session resolves only on an owner route, for a request the browser labels same-origin, even for a read.
+      if (!ownerCookieRoute(req) || !sameOriginBrowserRequest(req)) return null;
+      secret = cookie;
+    }
+  }
+  const row = await strictRead("access_sessions", accessHash(secret));
+  return row?.scope === scope && row.status === "active" && Date.parse(row.expiresAt) > Date.now() ? { ...row, sessionHash: accessHash(secret) } : null;
 }
 
 export async function getAccessState(session) {
@@ -197,6 +275,11 @@ export async function saveAccessDraft(session, body) {
   }
 }
 
+// A new sign-in in this browser replaces the earlier owner session it carried; revoke that one.
+export async function revokeReplacedOwnerSession(previousHash, currentSession) {
+  if (!hex(previousHash) || previousHash === accessHash(currentSession)) return;
+  await atomicUpdate("access_sessions", previousHash, current => current?.scope === "onboarding" && current.status === "active" ? { value: { ...current, status: "revoked", revokedAt: stamp(), revokedBy: "replaced" } } : {});
+}
 export async function revokeAccessSession(session) {
   await atomicUpdate("access_sessions", session.sessionHash, current => current ? { value: { ...current, status: "revoked", revokedAt: stamp() } } : {});
   return { ok: true };

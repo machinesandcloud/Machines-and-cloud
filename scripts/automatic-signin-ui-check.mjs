@@ -25,6 +25,9 @@ async function fixture(name,{width=1440,session,denyStorage=false,state,exchange
   if(url.origin!==base){report.externalBlocked.push({case:name,origin:url.origin});return route.abort('blockedbyclient');}
   if(url.pathname.startsWith('/api/')){
    let body;try{body=req.postDataJSON();}catch{}
+   // The stateless, non-secret cookie probe (sign-in across tabs) is declined here, which selects the per-tab transport this fixture
+   // models; it is kept out of the request-sequence checks. A probe must never carry an owner Authorization header.
+   if(url.pathname==='/api/access'&&body?.action==='cookie_probe'){s.probes=(s.probes||[]).concat(req.headers().authorization||null);return route.fulfill({status:200,contentType:'application/json',body:'{"ok":true}'}).catch(()=>{});}
    const r={method:req.method(),path:url.pathname,body,auth:req.headers().authorization||null};s.requests.push(r);
    const respond=(status,value)=>route.fulfill({status,contentType:'application/json',body:JSON.stringify(value)}).catch(()=>{});
    if(url.pathname!='/api/access')return respond(403,{error:'fixture_blocked'});

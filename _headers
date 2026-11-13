@@ -9,3 +9,21 @@
 
 /index.html
   Content-Security-Policy: frame-ancestors 'self'; connect-src 'self' https://*.vapi.ai wss://*.vapi.ai https://*.daily.co wss://*.daily.co; media-src 'self' blob: https://*.daily.co; frame-src 'self' blob: https://*.daily.co
+
+# Owner sign-in pages: the "Switch accounts?" prompt and the workspace must never render inside another site's
+# frame (a same-site sibling frame receives SameSite=Strict cookies). X-Frame-Options: SAMEORIGIN comes from /*;
+# do not repeat X-Frame-Options here: Netlify can join repeated values, and browsers ignore a joined X-Frame-Options.
+# The CSP below is the control that actually blocks framing: when frame-ancestors is present, browsers ignore
+# X-Frame-Options. Keep it exactly frame-ancestors 'none' (never 'self' plus subdomains, which re-opens sibling
+# framing); signin-tabs-ui-check asserts this exact value on all four paths.
+/onboard
+  Content-Security-Policy: frame-ancestors 'none'
+
+/onboard.html
+  Content-Security-Policy: frame-ancestors 'none'
+
+/desk
+  Content-Security-Policy: frame-ancestors 'none'
+
+/desk.html
+  Content-Security-Policy: frame-ancestors 'none'

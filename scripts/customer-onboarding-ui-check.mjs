@@ -39,7 +39,7 @@ try {
       if (failLoad && url.pathname === '/api/client' && incoming.method() === 'GET') { failLoad = false; return route.fulfill({ status: 503, contentType: 'application/json', body: '{"error":"fixture_load_failed","message":"Your workspace is temporarily unavailable. Please retry."}' }); }
       const req = new Request(url, { method: incoming.method(), headers: incoming.headers(), ...(['GET', 'HEAD'].includes(incoming.method()) ? {} : { body: incoming.postData() }) });
       const response = await handlers[url.pathname](req, { ip: '192.0.2.240' });
-      result.requests.push({ method: incoming.method(), path: url.pathname, status: response.status });
+      result.requests.push({ method: incoming.method(), path: url.pathname, status: response.status, action: (() => { try { return JSON.parse(incoming.postData() || '{}').action || ''; } catch { return ''; } })() });
       const bytes = Buffer.from(await response.arrayBuffer());
       if ((response.headers.get('content-type') || '').includes('application/json')) { const data = JSON.parse(bytes); if (data.key || data.client?.ownerKey || (data.existing?.portal && new URL(data.existing.portal).searchParams.has('k'))) result.leakedOwnerKey.push({ path: url.pathname }); }
       if (dropOnboardResponse && url.pathname === '/api/onboard' && incoming.method() === 'POST') { dropOnboardResponse = false; return route.abort('connectionfailed'); }
@@ -54,6 +54,8 @@ try {
     return route.fulfill({ status: 200, contentType: type, body: readFileSync(path) });
   });
   const page = await context.newPage(); page.on('pageerror', error => result.pageErrors.push(error.message));
+  // The browser session secret is the HttpOnly cookie; tab storage holds only its non-secret handle.
+  const sessionSecret = async () => (await context.cookies(base)).find(cookie => cookie.name === 'mc_owner')?.value || await page.evaluate(() => sessionStorage.getItem('mc-onboarding-session-v1'));
   const email = 'qa-browser-owner@example.test';
   await page.goto(base + '/onboard.html?plan=starter');
   check('Fresh customer sees email gate before private questionnaire', await page.locator('#access-gate').isVisible() && !await page.locator('#ob').isVisible());
@@ -65,11 +67,11 @@ try {
     const fixedLink = new URL(delivery.link);
     check('Selected Starter hint survives in the trusted fixed mailbox destination', fixedLink.origin === base && fixedLink.pathname === '/onboard.html' && fixedLink.searchParams.get('plan') === 'starter' && fixedLink.hash.startsWith('#verify='));
   }
-  const beforeExchangeCount = result.requests.filter(row => row.path === '/api/access' && row.method === 'POST').length;
+  const beforeExchangeCount = result.requests.filter(row => row.path === '/api/access' && row.method === 'POST' && row.action === 'exchange').length;
   await page.goto(delivery.link); await page.locator('#ob').waitFor({ state: 'visible' });
-  check('Opening mailbox link automatically exchanges proof once without a confirmation click', (await store.get('access_tokens', accessHash(delivery.token))).status === 'consumed' && result.requests.filter(row => row.path === '/api/access' && row.method === 'POST').length === beforeExchangeCount + 1 && !await page.locator('#access-verify').isVisible());
+  check('Opening mailbox link automatically exchanges proof once without a confirmation click', (await store.get('access_tokens', accessHash(delivery.token))).status === 'consumed' && result.requests.filter(row => row.path === '/api/access' && row.method === 'POST' && row.action === 'exchange').length === beforeExchangeCount + 1 && !await page.locator('#access-verify').isVisible());
   check('Verified new customer resumes the questionnaire with scrubbed URL and read-only email', !new URL(page.url()).hash && await page.locator('#email').inputValue() === email && await page.locator('#email').getAttribute('readonly') !== null);
-  const firstSession = await page.evaluate(() => sessionStorage.getItem('mc-onboarding-session-v1'));
+  const firstSession = await sessionSecret();
   const firstSessionRecord = await store.get('access_sessions', accessHash(firstSession));
   check('Verified browser bearer has a persisted24-hour expiry', firstSessionRecord.status === 'active' && Date.parse(firstSessionRecord.expiresAt) - Date.parse(firstSessionRecord.createdAt) === 24 * 60 * 60 * 1000);
   await page.locator('#next').click();
@@ -100,14 +102,16 @@ try {
   result.created = { slug: created.slug, status: created.status, build: created.build, channels: created.channels };
   check('Selected Starter plan survives verified signup without a billing action', created.plan === 'starter');
   await shot(page, 'created-390');
-  const sessionBeforeSignout = await page.evaluate(() => sessionStorage.getItem('mc-onboarding-session-v1'));
+  const sessionBeforeSignout = await sessionSecret();
   await page.locator('#access-sign-out').click(); await page.locator('#access-gate').waitFor({ state: 'visible' });
   check('Sign out revokes onboarding session and returns to email gate', (await store.get('access_sessions', accessHash(sessionBeforeSignout))).status === 'revoked' && !await page.locator('#ob').isVisible());
   await page.locator('#access-email').fill(email); await page.locator('#access-send').click(); await page.locator('#access-status').filter({ hasText: 'No email was sent' }).waitFor();
   const recover = await store.get('access_outbox', accessHash(email)); await page.goto(recover.link); await page.locator('#title').filter({ hasText: 'QA Browser Air' }).waitFor();
   const returningPortal = new URL(page.url()), createdPortal = new URL(portal); returningPortal.hash = ''; createdPortal.hash = '';
   check('Proven returning customer automatically opens the existing workspace without overwrite or permanent key', returningPortal.href === createdPortal.href && !returningPortal.searchParams.has('k') && (await store.get('access_tokens', accessHash(recover.token))).status === 'consumed' && JSON.stringify(created) === JSON.stringify(await store.getClient(created.slug)));
-  check('Onboarding session storage contains no questionnaire/legal draft', await page.evaluate(() => Object.keys(sessionStorage).length === 1 && Object.keys(localStorage).length === 0));
+  // When the browser holds a cookie session, its raw secret must not appear in any tab or device storage value.
+  const cookieSessionSecret = (await context.cookies(base)).find(cookie => cookie.name === 'mc_owner')?.value || '';
+  check('Onboarding session storage contains no questionnaire/legal draft', await page.evaluate(secret => { const allowedTab = ['mc-onboarding-session-v1', 'mc-owner-session-source-v1'], allowedDevice = ['mc-owner-tab-handle-v1', 'mc-keep-signed-in-v1']; return Object.keys(sessionStorage).includes('mc-onboarding-session-v1') && Object.keys(sessionStorage).every(key => allowedTab.includes(key)) && Object.keys(localStorage).every(key => allowedDevice.includes(key)) && (!secret || Object.values(localStorage).concat(Object.values(sessionStorage)).every(value => !value.includes(secret))); }, cookieSessionSecret));
   if (phase === 'plan') {
     result.planMetadata = [];
     for (const [n, plan] of ['starter', 'https://untrusted.example/steal', 'unsupported-plan'].entries()) {
@@ -207,7 +211,7 @@ try {
     const downloadPromise = page.waitForEvent('download'); await page.locator('#expBookings').click(); const download = await downloadPromise;
     const csv = readFileSync(await download.path(), 'utf8');
     check('Signed-in owner can download CSV without leaking preview as real work', download.suggestedFilename() === created.slug + '-bookings.csv' && csv.includes('customer_name') && csv.includes('issue') && !csv.includes('Alex Demo'));
-    const portalSession = await page.evaluate(() => sessionStorage.getItem('mc-onboarding-session-v1'));
+    const portalSession = await sessionSecret();
     await page.locator('#deskSignOut').click(); await page.locator('#portalRecovery').filter({ hasText: 'Signed out' }).waitFor();
     check('Visible portal sign out revokes authority and clears private DOM/address', (await store.get('access_sessions', accessHash(portalSession))).status === 'revoked' && !new URL(page.url()).search && await page.locator('#portalContent').innerText() === '' && !/QA Browser Air|Alex Demo|713.555/.test(await page.locator('body').innerText()));
     const replay = await page.evaluate(async ({ base, slug, session }) => {

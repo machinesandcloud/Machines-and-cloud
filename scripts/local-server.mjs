@@ -73,7 +73,10 @@ const server = createServer(async (req, res) => {
     if (handler) {
       const request = new Request(url.toString(), { method: req.method, headers, body: ["GET", "HEAD"].includes(req.method) ? undefined : body });
       const out = await handler(request, { ip: req.socket.remoteAddress || "127.0.0.1" });
-      res.writeHead(out.status, Object.fromEntries(out.headers.entries()));
+      // Keep each Set-Cookie header; a plain object would keep only the last one.
+      const outHeaders = []; for (const [k, v] of out.headers) if (k !== "set-cookie") outHeaders.push(k, v);
+      for (const cookie of out.headers.getSetCookie()) outHeaders.push("set-cookie", cookie);
+      res.writeHead(out.status, outHeaders);
       if (out.body) { const reader = out.body.getReader(); for (;;) { const { done, value } = await reader.read(); if (done) break; res.write(Buffer.from(value)); } }
       res.end(); return;
     }

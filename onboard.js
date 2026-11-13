@@ -102,7 +102,15 @@
   var accessResend = document.getElementById('access-resend'), accessChangeEmail = document.getElementById('access-change-email');
   var linkRequestPending = null, requestedEmail = '', emailState = '', resendNotBefore = 0, resendTimer = null;
   var draftStatus = document.getElementById('draft-status'), verifiedToken = new URLSearchParams(location.hash.slice(1)).get('verify');
-  var storageKey = 'mc-onboarding-session-v1';
+  var storageKey = 'mc-onboarding-session-v1', keepKey = 'mc-keep-signed-in-v1', keepField = document.getElementById('access-keep');
+  // A per-device preference, not a credential: it only chooses whether the next sign-in cookie outlives the browser.
+  // The choice is bound to one sign-in: it is stamped when a link is requested, lasts only as long as that link (20 minutes),
+  // and is consumed by the exchange, so a later person on a shared computer never inherits an earlier person's choice.
+  var KEEP_WINDOW_MS = 20 * 60 * 1000;
+  function keepSignedIn() { try { var until = Number(localStorage.getItem(keepKey)); if (until > Date.now() && until <= Date.now() + KEEP_WINDOW_MS) return true; localStorage.removeItem(keepKey); return false; } catch (error) { return false; } }
+  function stampKeep() { try { if (keepField && keepField.checked) localStorage.setItem(keepKey, String(Date.now() + KEEP_WINDOW_MS)); else localStorage.removeItem(keepKey); } catch (error) { /* The default applies. */ } }
+  function consumeKeep() { var keep = keepSignedIn(); try { localStorage.removeItem(keepKey); } catch (error) { /* Nothing secret is kept here. */ } return keep; }
+  if (keepField) { keepField.checked = keepSignedIn(); keepField.addEventListener('change', stampKeep); }
   var intakeStorageKey = 'mc-signup-intake-v1', intakeToken = new URLSearchParams(location.hash.slice(1)).get('intake');
   var intakeNotice = document.getElementById('intake-notice'), intakeSaved = null;
   var marketingField = document.getElementById('setup-marketing'), marketingVersion = 0, marketingSavedVersion = 0;
@@ -161,22 +169,28 @@
   // A server reply that isn't JSON (such as a gateway page) is 'unavailable', not the owner's connection.
   function connectionError(error, unavailable) { var timedOut = !unavailable && !!error && error.name === 'AbortError', lost = new Error(unavailable ? 'Machines & Cloud couldn’t answer right now. Try again in a moment.' : timedOut ? 'Machines & Cloud took too long to answer. Check your connection and try again.' : 'We couldn’t reach Machines & Cloud. Check your connection and try again.'); lost.name = timedOut ? 'AbortError' : 'ConnectionError'; lost.code = unavailable ? 'unavailable' : 'connection'; return lost; }
   async function request(path, method, body) {
-    var generation = accessGeneration;
+    var generation = accessGeneration, used = session;
     var headers = { 'Content-Type': 'application/json' }; if (session) headers.Authorization = 'Bearer ' + session;
     var controller = new AbortController(), timeout = setTimeout(function () { controller.abort(); }, 20000);
     try {
       var response; try { response = await fetch(API_BASE + path, { method: method || 'GET', headers: headers, body: body === undefined ? undefined : JSON.stringify(body), signal: controller.signal }); } catch (error) { throw connectionError(error); }
+      // A 401 for a handle this tab has since renewed (same owner, another tab) did nothing on the server; resend it once.
+      // Only for this tab's own sign-in (generation) and only once (used !== session). This includes Sign out: one pressed
+      // while the same owner signed in again elsewhere did nothing on the server, so it is resent and signs out the new
+      // sign-in too. Every tab of the browser ends up signed out, which is what Sign out promises on a shared computer.
+      if (response.status === 401 && used && session && used !== session && generation === accessGeneration) return request(path, method, body);
       if (response.status === 401) {
         var expired = new Error('Your sign-in expired. Request a new link; your saved answers are kept.'); expired.code = 'sign_in_required'; expired.status = 401;
         if (generation === accessGeneration) {
           accessGeneration++; clearTimeout(saveTimer); saveAgain = false;
+          if (window.MCOwnerSession) window.MCOwnerSession.rejected(session);
           setSession(null); signInFailure(expired);
         }
         throw expired;
       }
       var data; try { data = await response.json(); } catch (error) { if (response.ok || response.status >= 500) throw connectionError(error, !response.ok); data = {}; }
       if (!response.ok) {
-        var failure = new Error(data.message || (response.status < 500 ? 'Machines & Cloud didn’t accept that request. Check your details and try again.' : 'We could not confirm that request. Please try again.')); failure.code = data.error; failure.status = response.status; failure.data = data; failure.field = data.field; throw failure;
+        var failure = new Error(data.message || (response.status < 500 ? 'Machines & Cloud didn’t accept that request. Check your details and try again.' : 'We could not confirm that request. Please try again.')); failure.code = data.error; failure.status = response.status; failure.data = data; failure.field = data.field; if (data.error === 'replace_confirm') { failure.current = data.current; failure.next = data.next; } throw failure;
       }
       return data;
     } finally { clearTimeout(timeout); }
@@ -438,7 +452,8 @@
   function resetEmailConfirmation(restoreCopy) {
     clearInterval(resendTimer); resendTimer = null; resendNotBefore = 0; linkRequestPending = null; requestedEmail = ''; emailState = '';
     gate.removeAttribute('data-email-state'); gate.removeAttribute('aria-busy'); accessForm.removeAttribute('aria-busy');
-    accessConfirmation.hidden = true; accessForm.hidden = false; accessEmail.disabled = false; accessSend.disabled = false; accessSend.textContent = accessSendLabel;
+    accessConfirmation.hidden = true; if (document.getElementById('access-replace')) document.getElementById('access-replace').hidden = true; accessForm.hidden = false; accessEmail.disabled = false; accessSend.disabled = false; accessSend.textContent = accessSendLabel;
+    document.getElementById('access-title').removeAttribute('aria-describedby');
     document.getElementById('access-recipient').textContent = ''; gateStatus.removeAttribute('data-error'); gateStatus.classList.remove('sr-only'); updateEmailActions();
     if (restoreCopy) { document.getElementById('access-title').textContent = initialAccessTitle; document.getElementById('access-intro').textContent = initialAccessIntro; }
   }
@@ -454,6 +469,7 @@
   async function sendAccessLink(email, isResend) {
     if (linkRequestPending || gate.hidden || (isResend ? accessConfirmation.hidden || Date.now() < resendNotBefore : accessForm.hidden)) return;
     var attempt = { generation: accessGeneration, email: email }; linkRequestPending = attempt;
+    stampKeep();
     accessEmail.disabled = true; accessSend.disabled = true; accessSend.textContent = 'Sending link…';
     gate.setAttribute('aria-busy', 'true'); accessForm.setAttribute('aria-busy', 'true'); updateEmailActions(); accessMessage('Preparing your sign-in email…');
     try {
@@ -512,13 +528,41 @@
     gate.setAttribute('aria-busy', 'true');
     location.replace(destination.href);
   }
+  var accessReplace = document.getElementById('access-replace');
+  // The browser must keep a probe cookie before the one-time link is spent on the cookie transport; if it does not
+  // (cookies blocked for this site, an extension), the exchange falls back to this tab's own session.
+  async function cookieProbe() {
+    if (navigator.cookieEnabled === false || !window.MCOwnerSession) return null;
+    try { var probe = await request('/api/access', 'POST', { action: 'cookie_probe' }); return probe && /^[a-f0-9]{64}$/.test(probe.probe || '') ? probe.probe : null; } catch (error) { return null; }
+  }
+  // Login CSRF guard: a link for another mailbox would switch this whole browser and sign the current owner out, so ask.
+  function confirmReplace(attempt, error) {
+    gateOnly(''); accessMessage(''); accessForm.hidden = true; verifyButton.hidden = true; accessReplace.hidden = false;
+    document.getElementById('access-title').textContent = 'Switch accounts?';
+    document.getElementById('access-intro').textContent = 'This browser is signed in as ' + error.current + '. The link you opened signs in as ' + error.next + ' and signs ' + error.current + ' out on this browser.';
+    document.getElementById('access-replace-keep').textContent = 'Stay signed in as ' + error.current;
+    document.getElementById('access-replace-continue').textContent = 'Continue as ' + error.next;
+    // The focused heading alone says only "Switch accounts?"; tie the explanation naming both accounts to it.
+    document.getElementById('access-title').setAttribute('aria-describedby', 'access-intro');
+    document.getElementById('access-replace-continue').onclick = function () { if (attempt.generation !== accessGeneration) return; accessReplace.hidden = true; document.getElementById('access-title').removeAttribute('aria-describedby'); gate.setAttribute('aria-busy', 'true'); gateOnly('Checking your secure sign-in link…'); accessForm.hidden = true; attempt.replace = true; verificationAttempt = attempt; verifyAccess(attempt); };
+    document.getElementById('access-replace-keep').onclick = function () { accessReplace.hidden = true; verifiedToken = null; location.replace(location.pathname + location.search); };
+    document.getElementById('access-title').focus();
+  }
   async function verifyAccess(attempt) {
     try {
-      var result = await request('/api/access', 'POST', { action: 'exchange', token: attempt.token });
+      // Browsers that keep cookies share one HttpOnly session across tabs; the page keeps only its tab handle.
+      var probe = attempt.probe || (attempt.probe = await cookieProbe());
       if (attempt.generation !== accessGeneration) return;
-      setSession(result.session); verifiedToken = null; clearIntake(); intakeNotice.hidden = true;
+      if (probe && attempt.keep === undefined) attempt.keep = consumeKeep();
+      var result = await request('/api/access', 'POST', probe ? { action: 'exchange', token: attempt.token, transport: 'cookie', probe: probe, persistent: attempt.keep, replace: attempt.replace === true } : { action: 'exchange', token: attempt.token });
+      if (attempt.generation !== accessGeneration) return;
+      if (result.transport === 'cookie') { setSession(result.handle); window.MCOwnerSession.adopt(result.handle, result.replaced, result.previousHandle); } else setSession(result.session); verifiedToken = null; clearIntake(); intakeNotice.hidden = true;
       await signedIn();
-    } catch (error) { if (attempt.generation === accessGeneration) signInFailure(error); }
+    } catch (error) {
+      if (attempt.generation !== accessGeneration) return;
+      if (error.code === 'replace_confirm' && error.current && error.next && !attempt.replace) { confirmReplace(attempt, error); return; }
+      signInFailure(error);
+    }
     finally { if (verificationAttempt === attempt) { verificationAttempt = null; gate.removeAttribute('aria-busy'); } }
   }
   // This control is only a recovery path after verification; normal email links need no extra click.
@@ -540,8 +584,21 @@
       return;
     }
     if (generation !== accessGeneration) return;
+    var signedOutHandle = session;
     accessGeneration++;
-    clearTimeout(saveTimer); setSession(null); resetEmailConfirmation(true); form.reset(); appointmentSeeded = false; updateAppointmentHours(false); updateTrade(false); updatePhoneSetup(); updateConnectionPreview(); clearValidation(); revision = 0; lostSave = null; dirty = false; marketingVersion = 0; marketingSavedVersion = 0; gateOnly('Signed out. Your saved answers are kept securely.');
+    clearTimeout(saveTimer); setSession(null); if (window.MCOwnerSession) window.MCOwnerSession.signedOut(signedOutHandle); resetEmailConfirmation(true); form.reset(); appointmentSeeded = false; updateAppointmentHours(false); updateTrade(false); updatePhoneSetup(); updateConnectionPreview(); clearValidation(); revision = 0; lostSave = null; dirty = false; marketingVersion = 0; marketingSavedVersion = 0; gateOnly('Signed out. Your saved answers are kept securely.');
+  });
+  // The same owner signed in again in another tab: keep this page's answers and continue on the new handle.
+  document.addEventListener('mc:session-renewed', function (event) {
+    var detail = event.detail || {};
+    if (!session || !detail.handle || detail.previous !== session || !window.MCOwnerSession || !window.MCOwnerSession.follow(detail.handle)) return;
+    event.preventDefault(); setSession(detail.handle);
+  });
+  // Sign-out in another tab of this browser revoked the shared session; close this page's setup the same way.
+  document.addEventListener('mc:session-expired', function (event) {
+    if (!event.detail || !['signed_out', 'replaced', 'renewed'].includes(event.detail.reason) || !session) return;
+    accessGeneration++;
+    clearTimeout(saveTimer); saveAgain = false; setSession(null); resetEmailConfirmation(true); form.reset(); appointmentSeeded = false; updateAppointmentHours(false); updateTrade(false); updatePhoneSetup(); updateConnectionPreview(); clearValidation(); revision = 0; lostSave = null; dirty = false; marketingVersion = 0; marketingSavedVersion = 0; gateOnly(event.detail.reason === 'replaced' ? 'This browser signed in to another account in another tab. Your saved answers are kept securely.' : event.detail.reason === 'renewed' ? 'This browser signed in again in another tab. Reload this page to continue; your saved answers are kept securely.' : 'You signed out in another tab. Your saved answers are kept securely.');
   });
   function setErrorSummary(message) {
     err.textContent = message; err.hidden = !message; err.classList.toggle('is-error', !!message);
