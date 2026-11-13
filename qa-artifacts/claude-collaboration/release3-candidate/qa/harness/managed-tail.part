@@ -1,0 +1,115 @@
+// ================= r3 QA managed end-to-end matrix (appended to managed-sms-qa-check setup) =================
+const jsonAt = process.argv.indexOf("--json"), jsonOut = jsonAt < 0 ? null : process.argv[jsonAt + 1];
+const scripted = [];
+function sse(item) { const p=[],e=d=>p.push(`event: ${d.type}\ndata: ${JSON.stringify(d)}\n\n`);
+  e({type:'message_start',message:{id:'s',type:'message',role:'assistant',content:[],model:'s',stop_reason:null,stop_sequence:null,usage:{input_tokens:1,output_tokens:0}}});
+  if(item.tool){e({type:'content_block_start',index:0,content_block:{type:'tool_use',id:'tool_'+(++serial),name:item.tool.name,input:{}}});e({type:'content_block_delta',index:0,delta:{type:'input_json_delta',partial_json:JSON.stringify(item.tool.input)}});}
+  else{e({type:'content_block_start',index:0,content_block:{type:'text',text:''}});e({type:'content_block_delta',index:0,delta:{type:'text_delta',text:item.text}});}
+  e({type:'content_block_stop',index:0});e({type:'message_delta',delta:{stop_reason:item.tool?'tool_use':'end_turn',stop_sequence:null},usage:{output_tokens:1}});e({type:'message_stop'});
+  return new Response(p.join(''),{headers:{'content-type':'text/event-stream'}}); }
+let throwTwilioSend = 0; const prevFetch = globalThis.fetch;
+globalThis.fetch = async (input, init = {}) => { const url = new URL(String(input instanceof Request ? input.url : input));
+  if (url.origin === 'https://scripted-model.invalid') return sse(scripted.shift() || { text: 'OK.' });
+  if (throwTwilioSend > 0 && url.origin === 'https://api.twilio.com' && url.pathname.endsWith('/Messages.json') && String(init.method).toUpperCase() === 'POST') { throwTwilioSend--; throw new TypeError('fetch failed (r3 QA double)'); }
+  return prevFetch(input, init); };
+const useScript = items => { scripted.length = 0; scripted.push(...items); Object.assign(process.env, { MC_FAKE_MODEL: '0', ANTHROPIC_API_KEY: 'offline-scripted', ANTHROPIC_BASE_URL: 'https://scripted-model.invalid' }); };
+const endScript = () => { process.env.MC_FAKE_MODEL = '1'; delete process.env.ANTHROPIC_API_KEY; delete process.env.ANTHROPIC_BASE_URL; };
+const outbound = f => [...messages.values()].filter(r => r.direction === 'outbound-api' && r.from === f.number);
+const allOutbound = () => [...messages.values()].filter(r => r.direction === 'outbound-api');
+const deliveries = async f => store.listJSON('managed_deliveries', f.c.slug + '/');
+async function text(f, body, from = caller) { clock += 2000; const fields = inbound(f, body, { from }); fields.From = from; const r = await httpHandler(signed(fields)); const tw = (await r.text()).replace(/<[^>]+>/g, '').trim(); const row = await strictRead('managed_sms_inbound', inboundKey(f, fields)); let processed = null; if (row) { try { processed = await processManagedSMS(row.id); } catch (e) { processed = { error: e.message }; } } for (let i = 0; i < 3; i++) await delivery.runManagedDelivery({ limit: 50, discoveryLimit: 50 }); return { status: r.status, twiml: tw, row: row && await strictRead('managed_sms_inbound', inboundKey(f, fields)), processed }; }
+const sentTo = (f, phone = caller) => outbound(f).filter(m => m.to === phone).map(m => m.body);
+const ownerEmailsFor = async f => (await deliveries(f)).filter(d => d.channel === 'email');
+const houston = t => new Date(t).toLocaleDateString('en-CA', { timeZone: 'America/Chicago' });
+const dayPlus = n => houston(clock + n * 86400000);
+async function limited(fn) { const b = process.env.MC_SELF_SERVICE_AI_GLOBAL_DAILY_LIMIT; process.env.MC_SELF_SERVICE_AI_GLOBAL_DAILY_LIMIT = '0'; try { return await fn(); } finally { if (b === undefined) delete process.env.MC_SELF_SERVICE_AI_GLOBAL_DAILY_LIMIT; else process.env.MC_SELF_SERVICE_AI_GLOBAL_DAILY_LIMIT = b; } }
+const matrix = [];
+async function row(kind, name, fn) { try { matrix.push({ kind, name, pass: true, note: (await fn()) || '' }); } catch (e) { matrix.push({ kind, name, pass: false, err: String(e?.message || e).slice(0, 400) }); } }
+
+// (b) managed shop with an approved, verified sender
+const A = await fixture('r3-ready'); const win = A.c.windows?.[0] || '8 to 12';
+let booking;
+await row('managed-approved', 'booking by text, consent YES, confirmation once', async () => {
+  const d = dayPlus(3); useScript([{ tool: { name: 'book_visit', input: { customer_name: 'Sam Early', phone: caller, address: '9 Oak Dr, Houston', issue: 'Water heater pilot out', date: d, window: win, urgency: 'this_week', language: 'en', notes: '', unsure: '' } } }, { text: 'Your visit is saved. The shop confirms arrival details directly.' }]);
+  const r1 = await text(A, `Book ${d} ${win} please, Sam Early 9 Oak Dr`); endScript(); const r2 = await text(A, 'YES');
+  booking = (await store.listJSON('bookings', A.c.slug + '/')).find(b => b.phone === caller && b.status === 'booked'); assert.ok(booking, 'no booking saved');
+  const bodies = sentTo(A); assert.ok(bodies.length >= 2, 'texts: ' + JSON.stringify(bodies));
+  assert.match(bodies[0], /^Automated assistant for /, 'first reply lacks the automated intro: ' + bodies[0].slice(0, 80));
+  const confs = bodies.filter(b => /your visit is saved for/.test(b)); assert.equal(confs.length, 1, 'confirmation count ' + confs.length + ' ' + JSON.stringify(bodies));
+  assert.ok(!/\b[a-f0-9]{32}\b/.test(confs[0]), 'internal id in confirmation');
+  assert.ok((await ownerEmailsFor(A)).length >= 1, 'no owner email queued for the booking');
+  return bodies.map(b => b.split('\n')[0].slice(0, 60)).join(' | ');
+});
+await row('managed-approved', 'reply "C" after confirmation', async () => {
+  const before = sentTo(A).length, r = await text(A, 'C'), after = sentTo(A);
+  assert.ok(after.length - before <= 1, 'more than one reply to C'); assert.ok(after.length - before === 1 || r.twiml, 'C got no reply at all');
+  return (after.at(-1) || r.twiml).slice(0, 120);
+});
+await row('managed-approved', 'owner reschedule -> one "moved" text', async () => {
+  const { rescheduleVisit } = await import('../netlify/functions/lib/desk.mjs'); const c = await strictRead('clients', A.c.slug), b = await strictRead('bookings', `${A.c.slug}/${booking.id}`);
+  const before = sentTo(A).length, r = await rescheduleVisit(c, b, dayPlus(4), win); assert.ok(!r.full, 'refused: ' + r.message);
+  for (let i = 0; i < 3; i++) await delivery.runManagedDelivery({ limit: 50, discoveryLimit: 50 });
+  const now = sentTo(A).slice(before); return `${now.length} text(s): ${now.map(x => x.slice(0, 90)).join(' | ')}`;
+});
+await row('managed-approved', 'reminders at their due times (24h and 1h), each once', async () => {
+  const b = await strictRead('bookings', `${A.c.slug}/${booking.id}`), before = sentTo(A).length;
+  const start = clock; for (let i = 0; i < 6 * 24 * 5; i++) { clock += 10 * 60000; if (i % 6 === 0) { await store.atomicUpdate('messaging_activation', A.row.id, r => ({ value: { ...r, lastVerifiedAt: stamp() } })); await delivery.runManagedDelivery({ limit: 50, discoveryLimit: 50 }); } if (false) await delivery.runManagedDelivery({ limit: 50, discoveryLimit: 50 }); if (houston(clock) > b.date) break; }
+  const rem = sentTo(A).slice(before).filter(x => /reminder/i.test(x)); const jobs = (await deliveries(A)).filter(d => /reminder/.test(d.purpose)).map(d => `${d.purpose}:${d.state}:${d.reasonCode || ''}:${d.dueAt}`); const act = await strictRead('messaging_activation', A.row.id); clock = start;
+  if (!rem.length) throw new Error('reminder count 0; jobs=' + JSON.stringify(jobs) + ' booking=' + b.date + ' ' + b.window + ' consent/activation state=' + act?.state + ' lastVerifiedAt=' + act?.lastVerifiedAt);
+  assert.ok(rem.length >= 1 && rem.length <= 2, 'reminder count ' + rem.length + ' ' + JSON.stringify(rem));
+  const uniq = new Set(rem); assert.equal(uniq.size, rem.length, 'duplicate reminder');
+  return `${rem.length} reminder(s)`;
+});
+const words = [['HELP', caller, /for help contact/], ['AYUDA', caller, /para ayuda/], ['STOP', '+17135550601', null], ['START', '+17135550601', null], ['ALTO', '+17135550602', null]];
+for (const [w, from, re] of words) await row('managed-approved', w, async () => {
+  const before = outbound(A).filter(m => m.to === from).length, r = await text(A, w, from), added = outbound(A).filter(m => m.to === from).slice(before).map(m => m.body);
+  if (re) assert.match(r.twiml, re, w + ': ' + r.twiml); assert.ok(added.length === 0, w + ' sent API texts too: ' + JSON.stringify(added));
+  const consent = await (await import('../netlify/functions/lib/managed-consent.mjs')).managedSMSConsent(A.c, from);
+  return `twiml="${r.twiml.slice(0, 110)}" suppressed=${consent?.suppressed ?? consent?.state ?? JSON.stringify(consent)?.slice(0, 60)}`;
+});
+await row('managed-approved', 'text after ALTO gets no reply', async () => { const r = await text(A, 'Hola, una pregunta', '+17135550602'); const s = outbound(A).filter(m => m.to === '+17135550602'); assert.equal(s.length, 0, 'texted after ALTO'); assert.equal(r.twiml, ''); });
+await row('managed-approved', 'AI-limit: one honest reply + one owner request', async () => {
+  const B = await fixture('r3-limit'); await limited(async () => { await text(B, 'Anyone there?'); await text(B, 'Hello??'); });
+  const s = sentTo(B); assert.equal(s.length, 2, 'replies ' + s.length); assert.match(s[0], /^Automated assistant/); assert.doesNotMatch(s[1], /^Automated assistant/);
+  const leads = (await store.listJSON('leads', B.c.slug + '/')).filter(l => l.phone === caller); assert.equal(leads.length, 1);
+  assert.equal((await ownerEmailsFor(B)).length, 1, 'owner emails'); return s.map(x => x.replace(/\n/g, ' / ').slice(0, 100)).join(' || ');
+});
+await row('managed-approved', 'send error (network throw) then retry: exactly one delivered reply', async () => {
+  const B = await fixture('r3-throw'); throwTwilioSend = 1; const r = await text(B, 'Do you service tankless heaters?'); throwTwilioSend = 0;
+  for (let i = 0; i < 6; i++) { clock += 5 * 60000; await delivery.runManagedDelivery({ limit: 50, discoveryLimit: 50 }); }
+  const s = sentTo(B), job = (await deliveries(B)).find(d => d.channel === 'sms' && d.purpose === 'reply');
+  assert.ok(s.length <= 1, 'duplicate replies: ' + s.length);
+  return `delivered=${s.length}, job state=${job?.state} reason=${job?.reasonCode || ''} attempts=${job?.attempts ?? ''}`;
+});
+await row('managed-approved', 'send error, provider rejects (HTTP 4xx-like failed status)', async () => {
+  const B = await fixture('r3-fail'); const prev = sendStatus; sendStatus = 'failed'; await text(B, 'Can you come Friday?'); sendStatus = prev;
+  for (let i = 0; i < 4; i++) { clock += 5 * 60000; await delivery.runManagedDelivery({ limit: 50, discoveryLimit: 50 }); }
+  const job = (await deliveries(B)).find(d => d.channel === 'sms' && d.purpose === 'reply'), emails = await ownerEmailsFor(B);
+  return `job state=${job?.state} reason=${job?.reasonCode || ''}; owner email deliveries=${emails.length}`;
+});
+// (c) managed shop whose texting is not yet verified (no approved sender)
+const C = await fixture('r3-pending', { state: 'awaiting_test' });
+await row('managed-no-sender', 'customer text to an unverified number', async () => {
+  const r = await text(C, 'Can someone come look at my AC?'); const s = sentTo(C);
+  assert.equal(s.length, 0, 'texted from an unverified sender');
+  const leads = (await store.listJSON('leads', C.c.slug + '/')), em = await ownerEmailsFor(C), inb = r.row;
+  return `http=${r.status} twiml="${r.twiml}" inbound=${inb?.state || 'none'} leads=${leads.length} ownerEmails=${em.length}`;
+});
+await row('managed-no-sender', 'web booking: confirmation text held, owner told, portal not claiming a text', async () => {
+  const { bookVisit } = await import('../netlify/functions/lib/desk.mjs'); const c = await strictRead('clients', C.c.slug);
+  const b = await bookVisit(c, { customer_name: 'Ana', phone: '+17135550650', address: '1 Main', issue: 'AC', urgency: 'this_week', date: dayPlus(3), window: win, language: 'en', notes: '', unsure: '' }, { channel: 'web', contact: '+17135550650' });
+  for (let i = 0; i < 3; i++) await delivery.runManagedDelivery({ limit: 50, discoveryLimit: 50 });
+  const d = await deliveries(C), sms = d.filter(x => x.channel === 'sms'), em = d.filter(x => x.channel === 'email');
+  assert.equal(sentTo(C, '+17135550650').length, 0, 'texted');
+  return `booking=${!!b?.id} sms jobs=${sms.map(x => x.state + '/' + (x.reasonCode || '')).join(',') || 'none'} email jobs=${em.map(x => x.state).join(',')}`;
+});
+await row('all-managed', 'no shared-sender text; no duplicate outbound bodies; every outbound has a provider sid', async () => {
+  const o = allOutbound(); const k = {}; for (const m of o) { const key = m.to + '|' + m.body; k[key] = (k[key] || 0) + 1; }
+  const dups = Object.entries(k).filter(([, v]) => v > 1); assert.equal(dups.length, 0, 'duplicates: ' + JSON.stringify(dups).slice(0, 400));
+  const sentRows = (await store.listJSON('managed_deliveries', '')).filter(d => d.channel === 'sms' && ['sent', 'delivered'].includes(d.state)); for (const d of sentRows) assert.ok(messages.has(d.providerId), 'delivery marked sent with no provider message: ' + d.id);
+  return `outbound=${o.length}, sms deliveries sent/delivered=${sentRows.length}`;
+});
+const fails = matrix.filter(r => !r.pass);
+console.log(JSON.stringify({ blocked: report.blocked, matrix }, null, 1)); console.log(`managed-e2e: ${matrix.length - fails.length}/${matrix.length}`);
+if (jsonOut) writeFileSync(jsonOut, JSON.stringify({ at: new Date(NativeDate.now()).toISOString(), blocked: report.blocked, matrix }, null, 1));
+process.exit(fails.length || report.blocked.length ? 1 : 0);

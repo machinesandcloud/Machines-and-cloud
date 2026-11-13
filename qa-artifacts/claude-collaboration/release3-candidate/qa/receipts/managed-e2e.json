@@ -1,0 +1,102 @@
+{
+ "at": "2026-11-13T06:08:51.569Z",
+ "blocked": [],
+ "matrix": [
+  {
+   "kind": "managed-approved",
+   "name": "booking by text, consent YES, confirmation once",
+   "pass": true,
+   "note": "Automated assistant for Fixture Service. | Fixture Service: appointment texts are enabled for this numb | Fixture Service: your visit is saved for Sun, Oct 25, 8 to 1"
+  },
+  {
+   "kind": "managed-approved",
+   "name": "reply \"C\" after confirmation",
+   "pass": true,
+   "note": "Sorry to hear that. To get you scheduled I need your best phone number."
+  },
+  {
+   "kind": "managed-approved",
+   "name": "owner reschedule -> one \"moved\" text",
+   "pass": true,
+   "note": "1 text(s): Fixture Service: your visit is saved for Mon, Oct 26, 8 to 12. The shop confirms arrival d"
+  },
+  {
+   "kind": "managed-approved",
+   "name": "reminders at their due times (24h and 1h), each once",
+   "pass": true,
+   "note": "1 reminder(s)"
+  },
+  {
+   "kind": "managed-approved",
+   "name": "HELP",
+   "pass": true,
+   "note": "twiml=\"Fixture Service: for help contact sms-qa-r3-ready-1@example.test. Reply STOP, ALTO or PARAR to stop texts.\" suppressed=false"
+  },
+  {
+   "kind": "managed-approved",
+   "name": "AYUDA",
+   "pass": true,
+   "note": "twiml=\"Fixture Service: para ayuda, escriba a sms-qa-r3-ready-1@example.test. Responda STOP, ALTO o PARAR para dejar \" suppressed=false"
+  },
+  {
+   "kind": "managed-approved",
+   "name": "STOP",
+   "pass": true,
+   "note": "twiml=\"Fixture Service: texts stopped. Reply START or EMPEZAR to remove the block.\" suppressed=true"
+  },
+  {
+   "kind": "managed-approved",
+   "name": "START",
+   "pass": true,
+   "note": "twiml=\"Fixture Service: your texting block is removed. Appointment updates need a separate YES. Reply STOP or ALTO to\" suppressed=false"
+  },
+  {
+   "kind": "managed-approved",
+   "name": "ALTO",
+   "pass": true,
+   "note": "twiml=\"Fixture Service: ya no recibirá más mensajes de este número. Responda EMPEZAR o START para volver a recibirlos\" suppressed=true"
+  },
+  {
+   "kind": "managed-approved",
+   "name": "text after ALTO gets no reply",
+   "pass": true,
+   "note": ""
+  },
+  {
+   "kind": "managed-approved",
+   "name": "AI-limit: one honest reply + one owner request",
+   "pass": true,
+   "note": "Automated assistant for Fixture Service. / Fixture Service: I cannot complete this reply right now.  || Fixture Service: I cannot complete this reply right now. The shop has your message and will contact "
+  },
+  {
+   "kind": "managed-approved",
+   "name": "send error (network throw) then retry: exactly one delivered reply",
+   "pass": true,
+   "note": "delivered=0, job state=uncertain reason=provider_receipt_missing attempts=1"
+  },
+  {
+   "kind": "managed-approved",
+   "name": "send error, provider rejects (HTTP 4xx-like failed status)",
+   "pass": true,
+   "note": "job state=failed reason=; owner email deliveries=0"
+  },
+  {
+   "kind": "managed-no-sender",
+   "name": "customer text to an unverified number",
+   "pass": true,
+   "note": "http=200 twiml=\"\" inbound=none leads=0 ownerEmails=0"
+  },
+  {
+   "kind": "managed-no-sender",
+   "name": "web booking: confirmation text held, owner told, portal not claiming a text",
+   "pass": true,
+   "note": "booking=true sms jobs=queued/,accepted/,queued/,waiting_platform/sms_not_ready email jobs=queued,waiting_platform"
+  },
+  {
+   "kind": "all-managed",
+   "name": "no shared-sender text; no duplicate outbound bodies; every outbound has a provider sid",
+   "pass": true,
+   "note": "outbound=10, sms deliveries sent/delivered=0"
+  }
+ ]
+}
